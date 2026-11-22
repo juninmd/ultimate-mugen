@@ -63,7 +63,7 @@ impl App {
                 String::new(),
             ),
             Phase::Defeated => (
-                text::game_over().to_string(),
+                if run.can_continue() { text::knocked_out() } else { text::game_over() }.to_string(),
                 text::score_line(run.score),
                 if run.can_continue() {
                     text::credits_line(run.credits)
@@ -92,7 +92,7 @@ impl App {
         }
         let prompt = match run.phase {
             _ if deciding => "",
-            Phase::Defeated if run.can_continue() => text::continue_label(),
+            Phase::Defeated if run.can_continue() => text::continue_with_credit(),
             Phase::Defeated | Phase::Victory => text::quit_label(),
             _ => text::press_start(),
         };

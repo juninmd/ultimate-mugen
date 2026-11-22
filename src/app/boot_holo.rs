@@ -29,6 +29,14 @@ impl App {
             self.holo_mosaic_screen(&plan, shown, p, label);
             next_frame().await;
         }
+        let menu_label = tr3("Preparando o menu…", "Preparing the menu…", "Preparando el menú…");
+        for item in 0..MENU.len() {
+            self.menu_fighter_load(item, 1.0);
+            self.ui.begin();
+            self.menu_fighter_draw(item, 0.02, 0.0);
+            self.holo_mosaic_screen(&plan, plan.len(), 1.0, menu_label);
+            next_frame().await;
+        }
         self.ui.begin();
         self.holo_mosaic_screen(&plan, plan.len(), 1.0, tr3("Pronto!", "Ready!", "¡Listo!"));
         next_frame().await;

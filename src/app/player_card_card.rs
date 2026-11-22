@@ -138,12 +138,12 @@ impl App {
             self.ui.text(&format!("{fighter}  vs  {rival}"), RIGHT_X + 140.0, y + 23.0, 19.0, WHITE, Align::Left, false);
         }
 
-        self.ui.text(tr3("Medalhas", "Medals", "Medallas"), RIGHT_X, 626.0, 22.0, hex("#ffcc33"), Align::Left, true);
+        self.ui.text(tr3("Medalhas", "Medals", "Medallas"), RIGHT_X, 618.0, 22.0, hex("#ffcc33"), Align::Left, true);
         for (i, (medal, level)) in medals.iter().enumerate() {
             let x = RIGHT_X + i as f32 * 153.5;
-            self.ui.adapted_glass(x, 638.0, 146.0, 56.0, crate::tweaks::accent(0.6), 1.0);
-            self.ui.text(medal, x + 12.0, 660.0, 14.0, WHITE, Align::Left, true);
-            self.ui.adapted_level(x + 12.0, 668.0, 3, *level);
+            self.ui.adapted_glass(x, 628.0, 146.0, 56.0, crate::tweaks::accent(0.6), 1.0);
+            self.ui.text(medal, x + 12.0, 650.0, 14.0, WHITE, Align::Left, true);
+            self.ui.adapted_level(x + 12.0, 658.0, 3, *level);
         }
     }
 }

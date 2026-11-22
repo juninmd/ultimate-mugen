@@ -27,6 +27,7 @@ O motor já roda personagens MUGEN legados direto da pasta ou do zip. Migre para
 - **Agarrões e Wall Bounce**: `TargetBind` + `TargetLifeAdd` + `ChangeAnim2` viram `throw`; estados de P2 com `BackEdgeBodyDist` ativam `wallBounce: true` no `HitSpec`.
 - **Sons**: o `.snd` é extraído para `sprites/snd_{g}_{i}.wav` (inclusive sons de `abilities.charge` e `abilities.teleport`) e listado em `meta.json.sounds`; o motor carrega esses arquivos e toca `moves[].sounds` (`{at, snd:[g,i], fight?}`) no quadro indicado.
 - **Kits reutilizáveis**: para reduzir JSON em lutadores novos ou editados, use `"extends": ["core", "ki_fighter", "clone_arts", "aerial_rush"]` (`crates/native/src/kits/`).
+- **Schema**: o formato está em `docs/schema/umf-2.schema.json` (chaves desconhecidas são rejeitadas). Confira o pacote gerado com `node scripts/umf-schema.mjs <saida>/<id>.json`; o pacote Goku SSJ4 do `mugen-assets` passa. Mudou uma struct serde em `crates/native/src`? Atualize o schema no mesmo PR (`node --test scripts/umf-schema.test.mjs`).
 - **`--extra` e `--report`**: `--extra` mescla JSON por cima (incluindo `profile`, `intro`, `taunt`, `winQuote`, `rivals`); `--report` imprime o resumo de cobertura de features convertidas.
 
 ## Enriquecimento UME obrigatório (identidade, país, interações e storyboard)
@@ -67,7 +68,7 @@ Pegadinhas aprendidas (estudo de caso Goku SSJ4): nunca siga `ChangeState` para 
 2. **Inventário** do `.cmd`/`.cns`: comandos, `Statedef` de ataque (200-299, 400-499, 600-699, 1000+, 3000+), helpers de projétil, estados de arremesso, transformações.
 3. **Copiar um nativo** como base (`cp assets/chars/kaito.json assets/chars/<id>.json`) e trocar `id`, `name`, `series`, `author`, `color`.
 4. **Converter** pela tabela abaixo.
-5. **Validar**: `cargo test --release -p ume-engine --test native_abilities_and_forms` e os testes `native_*` do roster; abrir em Training com `F2`.
+5. **Validar**: `node scripts/umf-schema.mjs assets/chars/<id>.json`, `cargo test --release -p ume-engine --test native_abilities_and_forms` e os testes `native_*` do roster; abrir em Training com `F2`.
 6. Registrar o `id` em `assets/chars/index.json` e documentar em `docs/wiki/`.
 
 ## Tabela de mapeamento

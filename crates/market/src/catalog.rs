@@ -1,6 +1,5 @@
-use crate::safety::{file_name, file_stem, lower_ext, parent_dir, safe_rel_path, MAX_FILE_BYTES, MAX_ITEM_BYTES, MAX_ITEM_FILES, MAX_TREE_ENTRIES};
+use crate::{safety::{file_name, file_stem, lower_ext, parent_dir, safe_rel_path, MAX_FILE_BYTES, MAX_ITEM_BYTES, MAX_ITEM_FILES, MAX_TREE_ENTRIES}, sfx_filter::is_fighter_sfx};
 use std::collections::{HashMap, HashSet};
-
 pub use crate::model::{Catalog, FileRef, Item, Kind, Tree, TreeEntry};
 
 pub fn parse_tree(body: &str) -> Result<Tree, String> {
@@ -51,17 +50,6 @@ fn ancestors(path: &str) -> impl Iterator<Item = &str> {
 fn ignored_def(path: &str) -> bool {
     let stem = file_stem(path).to_ascii_lowercase();
     IGNORED_DEF_STEMS.contains(&stem.as_str())
-}
-
-fn is_fighter_sfx(path: &str, sprite_dirs: &HashSet<&str>) -> bool {
-    let stem = file_stem(path).to_ascii_lowercase();
-    let numbered = stem.strip_prefix("snd_").is_some_and(|r| !r.is_empty() && r.split('_').all(|n| !n.is_empty() && n.bytes().all(|b| b.is_ascii_digit())));
-    numbered || sprite_dirs.contains(parent_dir(path))
-}
-
-/// Installed music entries saved before sfx were excluded from the catalog.
-pub fn is_stale_fighter_sfx_music(kind: Kind, item_id: &str) -> bool {
-    kind == Kind::Music && is_fighter_sfx(item_id.strip_prefix("music:").unwrap_or(item_id), &HashSet::new())
 }
 
 fn make_item(kind: Kind, root: &str, name: String, files: Vec<FileRef>) -> Item {

@@ -163,7 +163,7 @@ impl App {
                 format!("#{}", idx + 1)
             };
             let foe = self.reg.chars.get(floor.foe_idx).map(|c| c.name.as_str()).unwrap_or("CPU");
-            let stage = self.reg.stages.get(floor.stage_idx).map(|s| s.name.as_str()).unwrap_or("");
+            let stage = self.reg.stages.get(floor.stage_idx).map(|s| crate::i18n::stage_names::shown(&s.name)).unwrap_or("");
             self.ui.text(&tag, rx + 36.0, y + 36.0, 20.0, if floor.is_boss { hex("#ffcc33") } else { WHITE }, Align::Left, true);
             self.ui.text(&foe.to_uppercase(), rx + 124.0, y + 34.0, 22.0, if cleared { hex("#8fe3a8") } else { WHITE }, Align::Left, true);
             self.ui.text(stage, rx + 124.0, y + 58.0, 14.0, hex("#a49cc0"), Align::Left, false);

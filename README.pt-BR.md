@@ -138,12 +138,25 @@ O **modo História** traz cinco extensões longas e roláveis das arenas (Brasil
 
 ## 🆕 Novidades
 
-- **Modo História:** cinco fases de ondas, capangas com traços próprios e um chefe por fase, com cutscenes e finais, além de caixotes e barris quebráveis, comida que recupera vida e fases bônus de destruir o carro. [Guia](docs/wiki/Story-Mode.md) · [Objetos de cenário](docs/wiki/pt-BR/Objetos-de-Cenario.md)
-- **Música e áudio:** uma trilha embutida por cenário, sons de golpe em níveis, música abaixando nos impactos e torcida no KO. [Áudio](docs/wiki/Audio.md)
-- **Atalhos de golpe:** ligue qualquer golpe da lista de pausa em `1`-`4` (gamepad `L1`/`L2`/`R1`/`R2`); `L3` + `R3` transforma e `R3` sozinho carrega ki. [Controles](docs/wiki/pt-BR/Configuracao.md#controles)
-- **Golpes mais ricos:** todo lutador nativo tem especiais EX, hyper nível 3, explosão de escape, forma ascendida com hyper próprio e versões aéreas dos especiais. [Kit compartilhado](docs/wiki/Characters.md#shared-toolkit)
-- **Atualização automática e releases:** cada merge no `master` publica uma release e a versão desktop avisa, pergunta e só então se atualiza. [Atualização automática](docs/wiki/pt-BR/Atualizacao-Automatica.md)
-- **Compatibilidade M.U.G.E.N:** correções achadas ao carregar personagens reais da comunidade (saídas de andar e defesa, provocações, intros, ações AIR duplicadas). [Decisões de compatibilidade](docs/wiki/pt-BR/Decisoes-de-Compatibilidade.md)
+- **Modos de jogo:** Arcade, História (com epílogo escrito por lutador), Versus CPU, 2 Jogadores, Treino, CPU vs CPU, Sobrevivência, Torre, Arena do Poder, times Sequência/Paralelo/Tag e rollback online. Desafios de Combo e Modo Foto funcionam dentro das lutas. [Modos de jogo](docs/wiki/pt-BR/Modos-de-Jogo.md) · [Desafios de Combo](docs/wiki/Combo-Trials.md) · [Modo Foto](docs/wiki/pt-BR/Modo-Foto.md)
+- **História:** cinco fases de ondas e chefes, depois chefe final e epílogos em PT/EN/ES. Cada lutador nativo tem seu país único. [Guia](docs/wiki/Story-Mode.md) · [Objetos de cenário](docs/wiki/pt-BR/Objetos-de-Cenario.md)
+- **Conversor MUGEN → UMF:** `tools/mugen2umf` é um conversor exato em Rust, com checagem de paridade golpe a golpe. Um único pacote serve a CLI (`mugen2umf <ferramenta>`) e um servidor MCP (`mugen2umf mcp`). [Guia UMF](docs/wiki/UMF-Character.md)
+- **Mercado GitHub:** instale personagens, cenários e músicas de qualquer repositório público, com visões de lista e grade, selos MUGEN e UMF, tipo personagem ou pacote, status desatualizado e instalar, atualizar e remover em lote. [Mercado](docs/wiki/pt-BR/Mercado.md)
+- **Importar M.U.G.E.N:** mosaico holográfico de todos os lutadores importados e ficha completa com retrato, atributos e lista de golpes. [Conteúdo M.U.G.E.N](docs/wiki/MUGEN-Content.md)
+- **Desktop em um arquivo só:** as releases embutem os pacotes de sprites dos lutadores nativos, então o executável roda sozinho. [Instalação](docs/wiki/Installation.md)
+- **Web e wiki:** a [versão web](https://juninmd.github.io/ultimate-mugen/) e a [wiki](https://juninmd.github.io/ultimate-mugen/wiki/) são publicadas a cada merge no `master`. Toda subtela tem botão **Voltar**, que ajuda também no celular.
+- **Também:** música por cenário, atalhos de golpe em `1`-`4`, especiais EX e hypers em todo lutador nativo e atualização automática no desktop. [Áudio](docs/wiki/Audio.md) · [Controles](docs/wiki/pt-BR/Configuracao.md#controles) · [Atualização automática](docs/wiki/pt-BR/Atualizacao-Automatica.md)
+
+<table>
+<tr>
+<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/market-view/acoes-market-grid.jpg" alt="Grade do Mercado GitHub com selos MUGEN e UMF"></td>
+<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/holo-gate/gate-import.png" alt="Mosaico holográfico dos lutadores importados"></td>
+</tr>
+<tr>
+<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/mugen2umf-exact/goku-ssj_sequence.png" alt="Sequência de golpes do Goku SSJ4 convertido pelo conversor exato"></td>
+<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/char-flags/depois-selecao.png" alt="Seleção com bandeira de país por lutador"></td>
+</tr>
+</table>
 
 ---
 

@@ -5,6 +5,8 @@ use crate::i18n::{fill, tr3};
 use crate::registry::{reason_counts, Quarantined};
 use crate::ui::*;
 
+mod tabs;
+
 pub(super) const LIST_ROWS: usize = 10;
 pub(super) const LIST_H: f32 = 44.0;
 pub(super) const TOP: f32 = 218.0;
@@ -55,12 +57,13 @@ impl App {
             self.catalog_list(&quarantined, page);
             (page, pages, quarantined.len())
         };
-        self.catalog_footer(view, page, pages, total);
+        let picked = self.catalog_tabs(view, total);
+        self.catalog_footer(page, pages);
 
         if self.c.pressed(nav::BACK) {
             return None;
         }
-        Some((view, page))
+        Some((picked, if picked == view { page } else { 0 }))
     }
 
     fn import_button_row(&mut self) {
@@ -124,14 +127,7 @@ impl App {
         }
     }
 
-    fn catalog_footer(&self, view: u8, page: usize, pages: usize, total: usize) {
-        let (gallery, quarantine) = (tr3("GALERIA", "GALLERY", "GALERÍA"), tr3("QUARENTENA", "QUARANTINE", "CUARENTENA"));
-        let tabs = if view == GALLERY {
-            format!("[{gallery}: {total}]   {}", quarantine.to_lowercase())
-        } else {
-            format!("{}   [{quarantine}: {total}]", gallery.to_lowercase())
-        };
-        self.ui.text(&tabs, 156.0, 656.0, 18.0, hex("#ffcc33"), Align::Left, true);
+    fn catalog_footer(&self, page: usize, pages: usize) {
         let nav_hint = fill(
             tr3("Página {p}/{n}   ·   SETAS navegam   ·   ENTER ficha   ·   F filtro   ·   TAB quarentena   ·   ESC voltar", "Page {p}/{n}   ·   ARROWS move   ·   ENTER sheet   ·   F filter   ·   TAB quarantine   ·   ESC back", "Página {p}/{n}   ·   FLECHAS mueven   ·   ENTER ficha   ·   F filtro   ·   TAB cuarentena   ·   ESC volver"),
             &[("p", &(page + 1).to_string()), ("n", &pages.to_string())],

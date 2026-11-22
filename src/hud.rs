@@ -13,6 +13,7 @@ mod elements; mod advantage; mod advantage_draw; mod announce_text; mod art; mod
 pub struct Hud {
     pub replay: bool,
     pub hidden: bool,
+    pub paused: bool,
     pub inputs: Vec<(u32, u16)>,
     life: life_bar::LifeFx,
     combo: [(i32, f32, i32, f32); 2],
@@ -29,6 +30,7 @@ impl Hud {
         Hud {
             replay: false,
             hidden: false,
+            paused: false,
             inputs: vec![],
             life: Default::default(),
             combo: [(0, 0.0, 0, 0.0); 2],
@@ -717,7 +719,7 @@ impl Hud {
             for (side, att) in roots
                 .iter()
                 .enumerate()
-                .take(if hide_combo { 0 } else { 2 })
+                .take(if hide_combo || self.paused { 0 } else { 2 })
             {
                 let def = roots[1 - side];
                 let c = &mut self.combo[side];
@@ -803,7 +805,7 @@ impl Hud {
                 }
             }
         }
-        if let Some(a) = &m.announce {
+        if let Some(a) = m.announce.as_ref().filter(|_| !self.paused) {
             let age = (a.total - a.time) as f32;
             let sc = if age < 8.0 { 2.0 - age / 8.0 } else { 1.0 };
             let al = (a.time as f32 / 12.0).min(1.0);
@@ -880,7 +882,7 @@ impl Hud {
             );
         }
         // face-off at the start of the first round: speech bubbles (side 0 speaks first, side 1 answers)
-        if m.round_state == 1 && m.round_no == 1 && m.intro_ticks > 0 && !m.training {
+        if m.round_state == 1 && m.round_no == 1 && m.intro_ticks > 0 && !m.training && !self.paused {
             let rt = m.round_time as f32;
             let lead: Vec<&Fighter> = (0..2)
                 .filter_map(|sd| m.roots().find(|f| f.side == sd))

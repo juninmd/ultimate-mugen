@@ -174,7 +174,7 @@ impl Vfx {
         }
         if !self.first_hit && m.round_state == 2 && !m.training {
             self.first_hit = true;
-            self.tag(x, y - 26.0, "FIRST ATTACK", [0.4, 0.9, 1.0]);
+            self.tag(x, y - 26.0, crate::i18n::tr3("PRIMEIRO GOLPE", "FIRST ATTACK", "PRIMER GOLPE"), [0.4, 0.9, 1.0]);
         }
         let mag = (damage / 90.0).clamp(0.2, 1.4);
         let col = if counter {
@@ -191,7 +191,7 @@ impl Vfx {
         );
         if counter {
             self.sfx.push("counter");
-            self.tag(x, y - 14.0, "COUNTER", [1.0, 0.45, 0.35]);
+            self.tag(x, y - 14.0, crate::i18n::tr3("CONTRA-ATAQUE", "COUNTER", "CONTRAATAQUE"), [1.0, 0.45, 0.35]);
             self.ring(x, y, 18.0, 0.2, 1.2, [1.0, 0.45, 0.35]);
             self.sheets.counter(x, y);
         }

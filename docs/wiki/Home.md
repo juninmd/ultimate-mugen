@@ -32,6 +32,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Rivalries](Rivalries.md) | Creators | Per-matchup round-start lines and attack bonus, declared in JSON |
 | [Replay Camera](Replay-Camera.md) | Players | Cinematic framing for replays: zooms on close fights, leans toward attacks |
 | [Photo Mode](Photo-Mode.md) | Players | Free camera, filters and clean PNG capture on a paused fight or replay |
+| [Combo Trials](Combo-Trials.md) | Players | Seven combo goals in training, saved per fighter |
 | [Match Mutators](Mutators.md) | Creators | Per-match rule changes; gravity is the first mutator |
 | [Rush Cancel](Rush-Cancel.md) | Players & Creators | Spend meter to cancel a connected move, Overdrive and the presentation |
 | [Combo Tiers](Combo-Tiers.md) | Players & Creators | Combo badges, energy notch, air dashes and bounces |

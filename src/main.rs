@@ -27,7 +27,7 @@ mod poly; mod profile; mod profile_tags;
 mod postfx;
 mod registry;
 mod render; mod power_arena;
-mod replays; mod photo;
+mod replays; mod photo; mod trials;
 mod route;
 mod screenpack;
 mod session;

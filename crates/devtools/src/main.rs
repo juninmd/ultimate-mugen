@@ -1,5 +1,5 @@
 use std::path::{Path, PathBuf};
-use ume_devtools::{sff_cook, ability_reel, audit_moves, audit_sprites, debug_fight, homologate, motion, mugen_census, pack, roster_audit, story_npcs, thumbnails};
+use ume_devtools::{sff_cook, ability_reel, audit_moves, audit_sprites, debug_fight, homologate, knockdown_rate, motion, mugen_census, pack, roster_audit, story_npcs, thumbnails};
 
 const USAGE: &str = "usage: ume-tools <command>\n\
   pack-sprites [out_root=web/dist] [--sprites dir]  pack assets/chars/sprites into web .pack files\n\
@@ -105,6 +105,14 @@ fn run(args: &[String]) -> Result<(), String> {
             } else {
                 print!("{}", debug_fight::format_text(&val));
             }
+        }
+        Some("knockdown-rate") => {
+            let frames = flag("--frames").map(|v| v.parse::<usize>().map_err(|e| e.to_string())).transpose()?.unwrap_or(5400);
+            let threshold = flag("--threshold").map(|v| v.parse::<f32>().map_err(|e| e.to_string())).transpose()?.unwrap_or(12.0);
+            let rule = knockdown_rate::parse_rule(&flag("--rule").unwrap_or_else(|| "off".into()), threshold)?;
+            let roster: Vec<String> = flag("--roster").ok_or("knockdown-rate needs --roster a,b,c")?.split(',').map(String::from).collect();
+            let val = knockdown_rate::run(&roster, frames, rule)?;
+            println!("{}", serde_json::to_string_pretty(&val).map_err(|e| e.to_string())?);
         }
         Some("gen-story-npcs") => {
             let written = story_npcs::generate(Path::new(positional.first().map(|s| s.as_str()).unwrap_or("assets/chars")))?;

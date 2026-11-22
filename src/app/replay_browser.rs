@@ -15,6 +15,7 @@ fn rules_of(r: StoredRules) -> Rules {
         life_percent: r.life_percent,
         single_round: r.single_round,
         classic_pushbox: r.classic_pushbox,
+        knockdown: r.knockdown,
         team_life_share: r.team_life_share,
         game_speed: r.game_speed,
     }
@@ -27,6 +28,7 @@ fn stored_rules(r: Rules) -> StoredRules {
         life_percent: r.life_percent,
         single_round: r.single_round,
         classic_pushbox: r.classic_pushbox,
+        knockdown: r.knockdown,
         team_life_share: r.team_life_share,
         game_speed: r.game_speed,
     }

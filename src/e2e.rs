@@ -110,8 +110,10 @@ mod web {
         );
         let import = format!("{{\"busy\":{},\"queued\":{}}}", crate::webimport::busy(), crate::webimport::queued_imports());
         let wasm_mb = core::arch::wasm32::memory_size(0) * 65536 / (1024 * 1024);
+        let st = ume_shell::quad::stats();
+        let gpu = format!("{{\"v\":{},\"dc\":{},\"up\":{},\"kb\":{},\"rf\":{:.3},\"if\":{:.3}}}", st.vertices, st.draw_calls, st.uploads, st.upload_kb, st.rgba_fill, st.index_fill);
         let json = format!(
-            "{{\"screen\":\"{}\",\"epilogue\":{epilogue},\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"roster\":{roster},\"import\":{import},\"wasm_mb\":{wasm_mb},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
+            "{{\"gpu\":{gpu},\"screen\":\"{}\",\"epilogue\":{epilogue},\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"roster\":{roster},\"import\":{import},\"wasm_mb\":{wasm_mb},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
             screen_name(&app.screen),
             app.mode == Mode::Story,
             over,

@@ -1764,7 +1764,7 @@ impl App {
             self.ui
                 .rect(px + pw - 82.0, py + 12.0, 70.0, 20.0, hex("#ffcc33"));
             self.ui.text(
-                "PRONTO",
+                crate::i18n::tr3("PRONTO", "READY", "LISTO"),
                 px + pw - 47.0,
                 py + 28.0,
                 14.0,

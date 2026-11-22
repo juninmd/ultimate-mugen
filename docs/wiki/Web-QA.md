@@ -48,4 +48,4 @@ Software GL is slow: keep `--jobs` at 1 or 2 locally. For a one-off page add `?d
 
 ## Visual tour
 
-`node scripts/web-tour.js web/dist <out>` walks title, menu, every utility screen, select, stages, VS, fight and pause with real keys and saves a numbered screenshot per step (`TOUR_MOBILE=1` uses a phone in landscape, `TOUR_LANG=pt-BR` sets the browser locale). It fails only on panics or a fight that never starts; the screenshots are for review and PR evidence.
+`node scripts/web-tour.js web/dist <out>` walks title, menu, every utility screen, select, stages, VS, fight and pause with real keys and saves a numbered screenshot per step (`TOUR_MOBILE=1` uses a phone in landscape, `TOUR_LANG=pt-BR` sets the browser locale). It fails on panics, navigation or browser errors, or a fight that never starts; the screenshots are for review and PR evidence.

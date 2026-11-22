@@ -19,7 +19,12 @@ const server = staticServer(dir, types);
   page.on('pageerror', e => problems.push(`pageerror ${e.message.slice(0, 200)}`));
   page.on('console', m => { if (/panicked|RuntimeError/.test(m.text())) problems.push(m.text().slice(0, 300)); });
   const t0 = Date.now();
-  const shot = async name => { await page.screenshot({ path: path.join(out, `${name}.png`) }); console.log('shot', name, `+${Date.now() - t0}ms`, await state()); };
+  const perf = () => page.evaluate(() => new Promise(done => {
+    const rows = []; let last = performance.now();
+    const step = n => requestAnimationFrame(t => { const g = JSON.parse(window.__ume_state || 'null')?.gpu || {}; rows.push([t - last, g.up || 0, g.kb || 0, g.dc || 0]); last = t; if (n) step(n - 1); else done(rows); });
+    step(30);
+  })).then(rows => { const ms = rows.map(r => r[0]).sort((a, b) => a - b); return `p50 ${ms[15].toFixed(0)}ms p95 ${ms[28].toFixed(0)}ms uploads ${rows.reduce((a, r) => a + r[1], 0)} kb ${rows.reduce((a, r) => a + r[2], 0)} dc ${Math.max(...rows.map(r => r[3]))}`; }).catch(() => '');
+  const shot = async name => { await page.screenshot({ path: path.join(out, `${name}.png`) }); console.log('shot', name, `+${Date.now() - t0}ms`, await state(), process.env.TOUR_PERF ? await perf() : ''); };
   const state = () => page.evaluate(() => { const s = JSON.parse(window.__ume_state || 'null'); return s ? s.screen : '-'; }).catch(() => '?');
   await page.goto(`http://127.0.0.1:${server.address().port}/index.html?e2e=1`);
   for (const ms of [400, 1500, 3000]) { await page.waitForTimeout(ms); await shot(`00-boot-${ms}`); }

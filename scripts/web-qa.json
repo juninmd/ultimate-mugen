@@ -6,7 +6,7 @@
     "web-frame-probe": "manual profiling tool, not a pass/fail check",
     "web-sprite-readiness": "no CLI entry for the wasm dist, covered by cargo tests",
     "web-story-playthrough": "long manual playthrough, not part of the PR gate",
-    "web-tour": "manual visual tour that screenshots every screen on desktop and phone for review"
+    "web-tour": "manual visual tour of title, menu, select, VS, fight and pause; run again with TOUR_MOBILE=1 for a phone"
   },
   "scenarios": [
     { "name": "web-flow", "shard": "ui", "script": "web-smoke.js", "args": ["{dist}"] },

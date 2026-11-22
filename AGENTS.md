@@ -25,6 +25,7 @@
 - Indexed sprites upload 1 byte per pixel; `PalFx` (mul/add/color/invert/hue) and palette swaps happen per vertex/in the shader, so `RemapPal` never bakes a new RGBA image.
 - Vertices are 40 bytes (positions and UVs as `f32`, PalFx multipliers packed as `unorm16`); indices switch to 16-bit while the frame stays under 65536 vertices, so a sprite quad costs 172 bytes instead of 248.
 - Atlas side is 4096 on desktop and 2048 on Android/iOS (80 MB versus 20 MB of VRAM); `UME_ATLAS=<side>` overrides it and the device limit always wins.
+- RGBA fighter frames are trimmed to their opaque bounds (`native/pixel_crop.rs`) and live in a transient atlas zone (bottom 70%, `Atlas::alloc_transient`) that clears alone, so a full zone never re-uploads UI/HUD art; shelves use bucketed heights so varied sprite sizes share rows. Measure with `scripts/web-atlas-probe.js`.
 - Draw calls are split by blend state (alpha, add, sub) and scissor; pipeline switches are the main CPU cost of the batch loop.
 - Vector shapes (`draw_convex`, circles, rings, ellipses, diagonal lines) carry a one-pixel alpha fringe built in `crates/render/src/canvas/shape.rs`; axis-aligned edges, `draw_triangle` and `draw_mesh` stay hard so mesh pieces never show seams. Draw a whole convex outline with `draw_convex` instead of two triangles.
 - Post-processing (bright, separable blur, copy, composite) runs only when effects are enabled and reuses its targets; HUD glass reuses a quarter-resolution blurred copy.

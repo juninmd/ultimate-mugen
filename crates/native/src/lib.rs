@@ -4,6 +4,7 @@ pub mod ability_spec;
 pub mod passive_spec;
 pub mod profile;
 mod abilities;
+mod pixel_crop;
 mod armor;
 mod element;
 mod requires;

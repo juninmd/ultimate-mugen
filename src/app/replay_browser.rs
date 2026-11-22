@@ -451,16 +451,16 @@ impl App {
         let mut action = None;
         for (i, (label, key)) in buttons.iter().enumerate() {
             let x = 156.0 + i as f32 * 216.0;
-            let hover = self.hover_rect(x, 668.0, 200.0, 44.0);
+            let hover = count > 0 && self.hover_rect(x, 668.0, 200.0, 44.0);
             self.ui.adapted_plate(x, 668.0, 200.0, 44.0, hover.then(|| crate::tweaks::accent(0.9)));
             self.ui
-                .text(label, x + 100.0, 690.0, 17.0, WHITE, Align::Center, true);
+                .text(label, x + 100.0, 690.0, 17.0, if count > 0 { WHITE } else { hex("#6a6484") }, Align::Center, true);
             self.ui.text(
                 key,
                 x + 100.0,
                 707.0,
                 13.0,
-                Color::new(1.0, 1.0, 1.0, 0.78),
+                Color::new(1.0, 1.0, 1.0, if count > 0 { 0.78 } else { 0.3 }),
                 Align::Center,
                 false,
             );

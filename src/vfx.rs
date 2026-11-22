@@ -153,6 +153,7 @@ pub struct Vfx {
     /// face-off camera push-in at the start of the first round (target is set by the session, eased in `update`)
     pub intro_target: f32,
     intro_zoom: f32,
+    pub photo_zoom: f32,
     /// cinematic super camera 0..1 (eased in while the super pause runs, eased out afterwards: build-up + follow-through)
     sz: f32,
     super_active: bool,
@@ -210,6 +211,7 @@ impl Vfx {
             super_owner: 0,
             intro_target: 0.0,
             intro_zoom: 0.0,
+            photo_zoom: 1.0,
             sz: 0.0,
             super_active: false,
             squash: vec![],
@@ -893,7 +895,7 @@ impl Vfx {
             0.0
         };
         let sup = self.sz * self.sz * (3.0 - 2.0 * self.sz) * 0.2;
-        let z = 1.0 + (self.punch + ko + sup + self.intro_zoom) * gain;
+        let z = (1.0 + (self.punch + ko + sup + self.intro_zoom) * gain) * self.photo_zoom;
         let mid = if self.sz > 0.01 {
             match m
                 .fighters

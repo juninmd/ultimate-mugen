@@ -2,6 +2,9 @@ use super::*;
 
 impl App {
     pub(super) async fn fight(&mut self, dt: f32) {
+        if self.photo.is_some() {
+            return self.photo_frame(dt);
+        }
         let replaying = self.replaying.is_some();
         let Some(s) = self.session.as_mut() else {
             self.screen = Screen::Menu { cur: 0 };
@@ -31,6 +34,11 @@ impl App {
             self.audio.sfx(if paused { "pause" } else { "select" });
         }
         s.paused = paused;
+        if paused && is_key_pressed(KeyCode::C) && crate::photo::allowed(s) {
+            self.photo = Some(crate::photo::Photo::new());
+            self.audio.sfx("select");
+            return;
+        }
         if replaying {
             if is_key_pressed(KeyCode::Key1) {
                 s.set_speed(1.0);
@@ -125,6 +133,7 @@ impl App {
             if !replaying {
                 self.pause_menu(accept_nav).await;
             }
+            self.photo_hint();
             return;
         }
         if let Some((w, t)) = s.over.map(|w| (w, s.over_timer)) {

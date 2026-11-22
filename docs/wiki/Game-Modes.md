@@ -134,5 +134,7 @@ The menu entry opens a setup screen before the fighter select: **your squad** (1
 - The camera follows your squad only, so far-away enemies do not stretch the zoom. Fighters outside the view are not drawn.
 - A **minimap** appears under the top HUD whenever the map is wider than the view: green and cyan dots are your squad, red dots the enemies, and the yellow frame is the camera. The HUD shows enemies left over the chosen total.
 
+- **Power elixir:** a glowing flask floats on the highest platform (marked in gold on the minimap). Whoever reaches it first, your fighter or any enemy, doubles their maximum life and refills it completely. It exists once per round and is given back when the next round starts. Code: `crates/engine/src/matchs/elixir.rs`, drawing in `src/power_arena_elixir.rs`.
+
 Code: simulation in `crates/engine/src/matchs/swarm.rs` (`Match::enable_swarm`, `swarm_step`), setup screen in `src/app/arena_setup.rs` and `arena_pick.rs`, minimap and tiled platforms in `src/power_arena.rs`. Evidence capture: `UME_SHOTS_ONLY=arena ultimate-mugen --shots <dir> --res 1280x720 --mute` also prints step and draw times, atlas fill and upload size (`UME_ARENA_SLOTS`, `UME_ARENA_POOL` and `UME_ARENA_TOTAL` override the profile).
 

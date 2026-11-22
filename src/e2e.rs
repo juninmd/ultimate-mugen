@@ -74,8 +74,8 @@ mod web {
             paused = session.paused;
             let m = &session.m;
             clock = format!(
-                "{{\"tick\":{},\"round\":{},\"round_state\":{},\"round_time\":{},\"zoom\":{:.3},\"winner\":{},\"arena\":{},\"arena_half\":{:.0},\"kills\":{},\"foes_total\":{},\"wins\":[{},{}]}}",
-                m.game_time, m.round_no, m.round_state, m.round_time, m.zoom, m.winner_side, m.power_arena, m.arena_half, m.swarm.as_ref().map_or(0, |s| s.kills), m.swarm.as_ref().map_or(0, |s| s.total), m.wins[0], m.wins[1]
+                "{{\"tick\":{},\"round\":{},\"round_state\":{},\"round_time\":{},\"zoom\":{:.3},\"winner\":{},\"arena\":{},\"arena_half\":{:.0},\"kills\":{},\"foes_total\":{},\"elixir_y\":{},\"elixir_taken\":{},\"wins\":[{},{}]}}",
+                m.game_time, m.round_no, m.round_state, m.round_time, m.zoom, m.winner_side, m.power_arena, m.arena_half, m.swarm.as_ref().map_or(0, |s| s.kills), m.swarm.as_ref().map_or(0, |s| s.total), m.elixir.as_ref().map_or(0.0, |e| e.y), m.elixir.as_ref().is_some_and(|e| e.taken()), m.wins[0], m.wins[1]
             );
             let o = &m.objects;
             objects = format!(

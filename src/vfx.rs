@@ -8,6 +8,7 @@ use crate::ui::Ui;
 use ume_engine::matchs::{Event, Match};
 
 mod awaken;
+mod elixir;
 mod crack;
 mod dash;
 #[cfg(test)]
@@ -570,6 +571,7 @@ impl Vfx {
                 }
             }
             Event::Transform { fighter } => self.on_transform(*fighter, m),
+            Event::Elixir { fighter } => self.on_elixir(*fighter, m),
             Event::Rush { fighter, guarded, .. } => self.on_rush(*fighter, *guarded, m),
             Event::Cinema { fighter, bars, slow, invert, lines, flash } => self.on_cinema_event(*fighter, *bars, *slow, *invert, *lines, *flash, m),
             Event::Fight => {

@@ -56,6 +56,7 @@ pub(crate) fn draw(g: &Gfx, battle: &Match, shx: f32, shy: f32) {
             }
         }
     });
+    crate::power_arena_elixir::draw(g, battle, shx, shy);
 }
 
 fn draw_platform(texture: Option<&Texture2D>, x: f32, y: f32, width: f32, depth: f32) {
@@ -99,6 +100,10 @@ pub(crate) fn minimap(ui: &Ui, battle: &Match, human: &[u32]) {
     let view_l = at(battle.camera.x - battle.view_w / 2.0);
     let view_r = at(battle.camera.x + battle.view_w / 2.0);
     ui.rect_lines(view_l, top, (view_r - view_l).max(3.0), MAP_H, 1.5, alpha(hex("#ffcc33"), 0.8));
+    if let Some(elixir) = battle.elixir.as_ref().filter(|e| !e.taken()) {
+        let blink = if (battle.game_time / 20) % 2 == 0 { 1.0 } else { 0.6 };
+        ui.rect(at(elixir.x) - 2.5, row(elixir.y) - 2.5, 5.0, 5.0, alpha(hex("#ffe27a"), blink));
+    }
     for fighter in battle.roots().filter(|f| f.alive && !f.destroyed) {
         let foe = fighter.side != 0;
         let you = human.contains(&fighter.id);

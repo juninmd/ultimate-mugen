@@ -21,6 +21,8 @@ async function run() {
     const foes = first.fighters.filter(f => f.side === 1).length;
     assert.equal(squad, 3);
     assert.ok(foes >= 8 && foes <= 12, `active enemies ${foes}`);
+    assert.equal(first.clock.elixir_y, -414, 'elixir waits on the highest platform');
+    assert.equal(first.clock.elixir_taken, false);
     await match.shot('start');
     await match.page.keyboard.down('ArrowRight');
     await until(() => { const s = JSON.parse(window.__ume_state || 'null'); return s?.clock?.tick >= 900; }, 90000);

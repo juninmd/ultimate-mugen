@@ -4,7 +4,7 @@ pub const ARENA_HALF_WIDTH: f32 = 554.0;
 pub const ENGINE_STATE_ARENA_EXIT: i32 = 19903;
 const ARENA_EXIT_DEPTH: f32 = 184.0;
 const ARENA_SPAWN_X: f32 = 112.0;
-const ARENA_ROOF_Y: f32 = -414.0;
+pub(super) const ARENA_ROOF_Y: f32 = -414.0;
 const CAMERA_HEADROOM: f32 = 134.0;
 const CAMERA_FLOOR_MARGIN: f32 = 34.0;
 pub const ARENA_PLATFORMS: [(f32, f32, f32); 40] = [
@@ -89,6 +89,7 @@ impl Match {
         for fighter in self.fighters.iter_mut().filter(|fighter| !fighter.is_helper) {
             fighter.pos.x += spawn_offsets[fighter.side.min(1)];
         }
+        self.place_elixir();
         self.update_camera();
     }
 

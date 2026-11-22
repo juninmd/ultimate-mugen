@@ -19,13 +19,10 @@ impl App {
             x = self.draw_chip(x, label, col);
         }
         if let Some(el) = profile.element.as_deref() {
-            let text = match profile.weakness.as_deref() {
-                Some(w) => format!("{} / -{}", el.to_uppercase(), w.to_uppercase()),
-                None => el.to_uppercase(),
-            };
+            let text = crate::profile_tags::element_chip(el, profile.weakness.as_deref());
             x = self.draw_chip(x, &text, accent);
         }
-        for tag in profile.tags.iter().take(crate::profile_tags::MAX_SHOWN) {
+        for tag in profile.tags.iter().filter(|tag| Some(tag.as_str()) != profile.element.as_deref()).take(crate::profile_tags::MAX_SHOWN) {
             let text = crate::profile_tags::label(tag);
             x = self.draw_chip(x, &text, accent);
         }

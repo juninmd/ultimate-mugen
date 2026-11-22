@@ -117,7 +117,7 @@ impl App {
         let ui = &self.ui;
         let (x, y, w, h) = (MODAL_X, MODAL_Y, MODAL_W, MODAL_H);
         ui.adapted_modal(x, y, w, h, VW, VH);
-        ui.text(tr3("Editar card", "Edit card", "Editar ficha"), x + 40.0, y + 52.0, 30.0, hex("#ffcc33"), Align::Left, true);
+        ui.text(tr3("Editar ficha", "Edit card", "Editar ficha"), x + 40.0, y + 52.0, 30.0, hex("#ffcc33"), Align::Left, true);
         let labels = [
             tr3("Nome", "Name", "Nombre"),
             tr3("Título", "Title", "Título"),

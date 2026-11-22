@@ -17,7 +17,7 @@ pub struct Page {
     pub text: String,
 }
 pub(self) fn pg(who: u8, text: impl Into<String>) -> Page {
-    Page { who, text: text.into() }
+    Page { who, text: crate::i18n::cutscene_lines::shown(&text.into()).to_string() }
 }
 
 pub fn script(kind: u8, hero: &str, hero_quote: &str, boss: &str, boss_line: &str) -> Vec<Page> {
@@ -156,10 +156,10 @@ impl App {
         self.ui.text(&format!("{}/{}", page + 1, script.len()), 1186.0, 38.0, 15.0, hex("#a49cc0"), Align::Right, true);
         let (name, col) = match cur.who {
             1 => (hero_name.to_uppercase(), hc),
-            2 if kind == 4 && page >= 4 => (format!("{} · ECLIPSE PRIMORDIAL", boss_name.to_uppercase()), bc),
-            2 if kind == 3 && page >= 3 => (format!("{} · ECLIPSE ABSOLUTO", boss_name.to_uppercase()), bc),
+            2 if kind == 4 && page >= 4 => (crate::i18n::cutscene_lines::fill("{boss} · ECLIPSE PRIMORDIAL", "", &boss_name.to_uppercase()), bc),
+            2 if kind == 3 && page >= 3 => (crate::i18n::cutscene_lines::fill("{boss} · ECLIPSE ABSOLUTO", "", &boss_name.to_uppercase()), bc),
             2 => (boss_name.to_uppercase(), bc),
-            _ => ("NARRADOR".to_string(), hex("#a49cc0")),
+            _ => (tr3("NARRADOR", "NARRATOR", "NARRADOR").to_string(), hex("#a49cc0")),
         };
         let box_y = 520.0;
         let panel = |x: f32, y: f32, w: f32, h: f32| -> Vec<Vec2> {

@@ -1,4 +1,5 @@
 use super::{pg, Page};
+use crate::i18n::cutscene_lines::{fill, shown};
 
 pub fn clean_id(id: &str) -> &str {
     id.trim_start_matches("umf:")
@@ -10,28 +11,28 @@ pub fn clean_id(id: &str) -> &str {
 pub fn chapter_title(kind: u8, hero_name: &str) -> (&'static str, String) {
     match kind {
         0 => (
-            "PRÓLOGO · CONVOCAÇÃO",
-            format!("O CAMINHO DE {}", hero_name.to_uppercase()),
+            shown("PRÓLOGO · CONVOCAÇÃO"),
+            fill("O CAMINHO DE {hero}", &hero_name.to_uppercase(), ""),
         ),
         1 => (
-            "ATO FINAL · SALÃO DO ECLIPSE",
-            "DIANTE DE MIKAZUKI OBORO".to_string(),
+            shown("ATO FINAL · SALÃO DO ECLIPSE"),
+            shown("DIANTE DE MIKAZUKI OBORO").to_string(),
         ),
         3 => (
-            "CLÍMAX · SELO QUEBRADO",
-            "DESPERTAR: ECLIPSE ABSOLUTO".to_string(),
+            shown("CLÍMAX · SELO QUEBRADO"),
+            shown("DESPERTAR: ECLIPSE ABSOLUTO").to_string(),
         ),
         4 => (
-            "CLÍMAX CÓSMICO · DUELO DAS ERAS",
-            "DESPERTAR: ECLIPSE PRIMORDIAL".to_string(),
+            shown("CLÍMAX CÓSMICO · DUELO DAS ERAS"),
+            shown("DESPERTAR: ECLIPSE PRIMORDIAL").to_string(),
         ),
         5 => (
-            "O GOLPE DECISIVO · A QUEDA DO ECLIPSE",
-            "A DERROTA DO SOBERANO DO VAZIO".to_string(),
+            shown("O GOLPE DECISIVO · A QUEDA DO ECLIPSE"),
+            shown("A DERROTA DO SOBERANO DO VAZIO").to_string(),
         ),
         _ => (
-            "EPÍLOGO · ALVORADA",
-            format!("A LENDA DE {}", hero_name.to_uppercase()),
+            shown("EPÍLOGO · ALVORADA"),
+            fill("A LENDA DE {hero}", &hero_name.to_uppercase(), ""),
         ),
     }
 }
@@ -112,7 +113,7 @@ pub fn opening_script(hero_id: &str, hero: &str) -> Vec<Page> {
         pg(0, lore),
         pg(
             0,
-            format!("Diante dos portões da arena, {hero} fecha os punhos e encara o horizonte."),
+            fill("Diante dos portões da arena, {hero} fecha os punhos e encara o horizonte.", hero, ""),
         ),
         pg(1, vow),
     ]
@@ -153,8 +154,8 @@ pub fn preboss_script(hero_id: &str, boss: &str, boss_line: &str) -> Vec<Page> {
         ),
         pg(
             2,
-            format!(
-                "Eu sou {boss}. Aquele que já contemplou mil finais para esta luta — e venceu em todos."
+            fill(
+                "Eu sou {boss}. Aquele que já contemplou mil finais para esta luta — e venceu em todos.", "", boss,
             ),
         ),
         pg(1, challenge),
@@ -188,8 +189,8 @@ pub fn awakening_script(hero_id: &str, hero: &str) -> Vec<Page> {
     vec![
         pg(
             0,
-            format!(
-                "Ajoelhado pela primeira vez em séculos, Mikazuki Oboro sorri enquanto o chão se despedaça diante de {hero}."
+            fill(
+                "Ajoelhado pela primeira vez em séculos, Mikazuki Oboro sorri enquanto o chão se despedaça diante de {hero}.", hero, "",
             ),
         ),
         pg(

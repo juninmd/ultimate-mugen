@@ -1,6 +1,6 @@
 # Smoke da partida na web
 
-`node scripts/web-match-smoke.js web/dist` joga partidas completas no Chromium headless (job `web-smoke` do CI, depois do build web) e falha se a partida travar.
+`node scripts/web-match-smoke.js web/dist` joga partidas completas no Chromium headless (job `web-qa` do CI, depois do build web) e falha se a partida travar.
 
 Cada cenário abre um deep link com `?e2e=1`, que publica `window.__ume_state` a cada frame (tela, `clock.tick`, round, vitórias, lutadores). As configurações entram via `localStorage` (rounds de 30 s, velocidade 1.15x, mudo).
 

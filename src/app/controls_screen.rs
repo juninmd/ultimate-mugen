@@ -129,7 +129,8 @@ impl App {
             crate::i18n::t("controls.none").to_string()
         } else {
             format!(
-                "Conectado: {}",
+                "{}: {}",
+                crate::i18n::tr3("Conectado", "Connected", "Conectado"),
                 pads.iter()
                     .map(|p| p.name.as_str())
                     .collect::<Vec<_>>()

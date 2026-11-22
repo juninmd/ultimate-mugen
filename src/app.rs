@@ -60,7 +60,7 @@ mod title_screen;
 use select_category::CATEGORY_COUNT;
 #[cfg(target_arch = "wasm32")]
 mod web_import;
-mod controls_screen; mod holo_loading; mod market_holo;
+mod controls_screen; mod holo_loading; mod market_holo; mod boot_holo;
 mod empty_art; mod menu_bgm;
 pub(crate) use keyedit::KeyEdit;
 
@@ -324,8 +324,7 @@ impl App {
         };
         Self::boot(&mut ui, 0.9, crate::i18n::tr3("Áudio…", "Audio…", "Audio…")).await;
         let audio = Audio::new(audio_on).await;
-        Self::boot(&mut ui, 1.0, crate::i18n::tr3("Pronto!", "Ready!", "¡Listo!")).await;
-        App {
+        let mut app = App {
             reg,
             market: crate::market::Market::open(),
             market_ui: market::MarketUi::default(),
@@ -402,7 +401,7 @@ impl App {
             pal_pick: 1,
             team_pal: vec![],
             updater: crate::update::Updater::start(&std::env::args().collect::<Vec<_>>()),
-        }
+        }; app.boot_mosaic().await; app
     }
 
     /// Re-rasterize art when the effective quality changes (resolution switch, fullscreen, setting change).

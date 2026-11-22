@@ -566,7 +566,7 @@ impl Vfx {
                     .is_some_and(|f| f.life >= f.life_max - 0.5)
                 {
                     self.sfx.push("perfect");
-                    self.banner("PERFECT!", crate::i18n::tr3("vitória sem sofrer dano", "flawless victory", "victoria sin recibir daño"), [1.0, 0.85, 0.2]);
+                    self.banner(crate::i18n::tr3("PERFEITO!", "PERFECT!", "¡PERFECTO!"), crate::i18n::tr3("vitória sem sofrer dano", "flawless victory", "victoria sin recibir daño"), [1.0, 0.85, 0.2]);
                 }
             }
             Event::Transform { fighter } => self.on_transform(*fighter, m),

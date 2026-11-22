@@ -106,3 +106,15 @@ fn total_is_capped() {
     let m = swarm_match(1, 2, 5000);
     assert_eq!(m.swarm.as_ref().unwrap().total, SWARM_MAX_TOTAL);
 }
+
+#[test]
+fn mass_knockout_respawns_every_slot_without_double_counting() {
+    let mut m = swarm_match(1, 16, 100);
+    knock_out(&mut m, 1, 16);
+    ticks(&mut m, 200);
+    let swarm = m.swarm.as_ref().unwrap();
+    assert_eq!(swarm.kills, 16);
+    assert_eq!(swarm.spawned, 32);
+    let alive = m.roots().filter(|f| f.side == 1 && f.alive && f.life > 0.0).count();
+    assert_eq!(alive, 16);
+}

@@ -17,7 +17,7 @@ mod ko;
 mod rush;
 mod shock;
 mod sheet;
-mod speed_lines; mod spark; mod stage_objects; mod story_juice; mod cinema; mod cutin;
+mod speed_lines; mod spark; mod stage_objects; mod story_juice; mod cinema; mod cutin; mod banner_stack;
 pub mod quality;
 pub use speed_lines::speed_lines;
 

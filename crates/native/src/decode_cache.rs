@@ -35,6 +35,16 @@ pub(super) fn png(root: &Path, name: &str, bytes: &Arc<Vec<u8>>) -> Option<Arc<D
     })
 }
 
+pub(super) fn thumbnail(root: &Path, name: &str, bytes: &Arc<Vec<u8>>, shrink: impl FnOnce(u32, u32, &[u8]) -> (u32, u32, Vec<u8>)) -> Option<Arc<Decoded>> {
+    static STORE: OnceLock<Mutex<HashMap<Key, Entry<Decoded>>>> = OnceLock::new();
+    cached(&STORE, root, name, bytes, |b| {
+        let dec = ume_formats::png::decode_png(b).ok()?;
+        let full = match dec.rgba { Some(ref rgba) => rgba.clone(), None => ume_formats::png::png_indexed_to_rgba(&dec) };
+        let (width, height, rgba) = shrink(dec.width, dec.height, &full);
+        Some(Decoded { width, height, rgba: Arc::new(rgba) })
+    })
+}
+
 pub(super) fn meta(root: &Path, bytes: &Arc<Vec<u8>>) -> Arc<Value> {
     static STORE: OnceLock<Mutex<HashMap<Key, Entry<Value>>>> = OnceLock::new();
     cached(&STORE, root, "meta.json", bytes, |b| serde_json::from_slice(b).ok()).unwrap_or_else(|| Arc::new(Value::Null))

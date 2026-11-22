@@ -44,7 +44,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
             let f = &mut m.fighters[i];
             let dv = if kind == "redlifeadd" && n_absolute(sc) && v < 0.0 { v } else if kind == "redlifeadd" && v < 0.0 { v / f.defence_mul } else { v };
             let base = if kind == "redlifeadd" { f.ikemen.red_life } else { 0.0 };
-            f.ikemen.red_life = (base + dv).clamp(f.life.max(0.0), f.life_max);
+            f.ikemen.red_life = crate::clamp::ordered(base + dv, f.life.max(0.0), f.life_max);
         }
         "dizzypointsset" | "dizzypointsadd" => {
             let v = n(m, "value", 0.0);

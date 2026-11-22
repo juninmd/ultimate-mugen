@@ -187,9 +187,9 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             let shear = n(m, "xshear", 0.0) as f32;
             let time = n(m, "time", 1.0) as i32;
             m.fighters[i].sprite_transform = Some((scale, angle, shear, time));
-        }        "powerset" => { let v = n(m, "value", 0.0) as f32; if let Some(r) = m.idx(m.fighters[i].root) { let f = &mut m.fighters[r]; f.power = v.clamp(0.0, f.power_max); } }
+        }        "powerset" => { let v = n(m, "value", 0.0) as f32; if let Some(r) = m.idx(m.fighters[i].root) { let f = &mut m.fighters[r]; f.power = crate::clamp::ordered(v, 0.0, f.power_max); } }
         "lifeadd" => { let (v, k, a) = (n(m, "value", 0.0) as f32, n(m, "kill", 1.0) != 0.0, n(m, "absolute", 0.0) != 0.0); life_add(m, i, v, k, a); }
-        "lifeset" => { let v = n(m, "value", 0.0) as f32; let f = &mut m.fighters[i]; f.life = v.clamp(0.0, f.life_max); }
+        "lifeset" => { let v = n(m, "value", 0.0) as f32; let f = &mut m.fighters[i]; f.life = crate::clamp::ordered(v, 0.0, f.life_max); }
         "targetlifeadd" => {
             let (v, k, a) = (n(m, "value", 0.0) as f32, n(m, "kill", 1.0) != 0.0, n(m, "absolute", 0.0) != 0.0);
             let mul = if a { 1.0 } else { m.fighters[i].attack_mul };
@@ -207,7 +207,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             }
         }
         "targetscoreadd" => { let v = n(m, "value", 0.0); for t in target_indices(m, i, sc).into_iter().flatten() { let root = m.fighters[t].root; if let Some(r) = m.idx(root) { let f = &mut m.fighters[r]; f.score = (f.score + v).max(0.0); f.score_total = (f.score_total + v).max(0.0); } } }
-        "targetredlifeadd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc).into_iter().flatten() { let f = &mut m.fighters[t]; f.ikemen.red_life = (f.ikemen.red_life + v).clamp(f.life, f.life_max); } }
+        "targetredlifeadd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc).into_iter().flatten() { let f = &mut m.fighters[t]; f.ikemen.red_life = crate::clamp::ordered(f.ikemen.red_life + v, f.life, f.life_max); } }
         "targetdizzypointsadd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc).into_iter().flatten() { let f = &mut m.fighters[t]; f.ikemen.dizzy_points = (f.ikemen.dizzy_points + v).clamp(0.0, f.ikemen.dizzy_max); } }
         "targetguardpointsadd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc).into_iter().flatten() { let f = &mut m.fighters[t]; f.ikemen.guard_points = (f.ikemen.guard_points + v).clamp(0.0, f.ikemen.guard_max); } }
         "scoreadd" => { let v = n(m, "value", 0.0); if let Some(r) = m.idx(m.fighters[i].root) { let f = &mut m.fighters[r]; f.score = (f.score + v).max(0.0); f.score_total = (f.score_total + v).max(0.0); } }

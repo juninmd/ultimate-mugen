@@ -12,6 +12,7 @@ pub mod element;
 pub mod diagnostics;
 pub mod lint;
 pub mod probe_def;
+pub mod clamp;
 mod watchdog;
 pub mod cns;
 pub mod zss;

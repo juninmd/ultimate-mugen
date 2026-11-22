@@ -16,7 +16,7 @@ fn scaled(points: f32, mul: f32) -> f32 {
 
 fn keep_red_life_between_life_and_max(m: &mut Match, i: usize) {
     let f = &mut m.fighters[i];
-    f.ikemen.red_life = if f.life <= 0.0 { 0.0 } else { f.ikemen.red_life.clamp(f.life, f.life_max) };
+    f.ikemen.red_life = if f.life <= 0.0 { 0.0 } else { crate::clamp::ordered(f.ikemen.red_life, f.life, f.life_max) };
 }
 
 pub fn apply_hit_points(m: &mut Match, d: usize, hd: &HitDefData, guarded: bool, mul: f32) {

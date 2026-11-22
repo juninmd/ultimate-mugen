@@ -47,7 +47,7 @@ impl Fighter {
             return;
         }
         let toward_viewer = (*bits & k::LANE_DOWN != 0) as i32 - (*bits & k::LANE_UP != 0) as i32;
-        self.lane = (self.lane + toward_viewer as f32 * LANE_SPEED).clamp(rules.far, rules.near);
+        self.lane = crate::clamp::ordered(self.lane + toward_viewer as f32 * LANE_SPEED, rules.far, rules.near);
     }
 }
 
@@ -118,7 +118,7 @@ impl Match {
         let center = self.lanes.target_x;
         let target_left = center - self.lanes.bound_span;
         let hero_target_x = self.stage.p1x;
-        let center_lane = 0.0f32.clamp(self.lanes.far, self.lanes.near);
+        let center_lane = crate::clamp::ordered(0.0, self.lanes.far, self.lanes.near);
         let next_left = (self.stage.bound_left + SCROLL_SPEED).min(target_left);
         let next_cam = (self.camera.x + SCROLL_SPEED).min(center);
         let mut hero_arrived = true;

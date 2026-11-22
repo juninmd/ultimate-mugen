@@ -32,7 +32,7 @@ impl App {
         self.reg.chars.iter().position(|c| !c.mugen && c.id.ends_with(id))
     }
 
-    fn menu_fighter_load(&mut self, item: usize, e: f32) {
+    pub(super) fn menu_fighter_load(&mut self, item: usize, e: f32) {
         let n = FEATURED.len();
         let wanted = [item, (item + 1) % n, (item + n - 1) % n];
         let count = if e >= 1.0 { 3 } else { 1 };
@@ -45,7 +45,7 @@ impl App {
         }
     }
 
-    fn menu_fighter_draw(&mut self, item: usize, alpha_k: f32, slide: f32) {
+    pub(super) fn menu_fighter_draw(&mut self, item: usize, alpha_k: f32, slide: f32) {
         if alpha_k <= 0.01 {
             return;
         }

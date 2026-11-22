@@ -2,12 +2,12 @@
 
 [English](../Game-Modes.md) · **Português (BR)**
 
-O menu principal oferece lutas individuais (Arcade, Versus CPU, 2 Jogadores, Treino, CPU vs CPU) e três modos de equipe. O tamanho da equipe é escolhido na seleção com `Q` / `E`.
+O menu principal oferece lutas individuais (Arcade, Versus CPU, 2 Jogadores, Treino, CPU vs CPU) e três modos de equipe. A seleção tem um chip de modo (`<` `>` ou `M`) que alterna Versus CPU, 2 Jogadores, CPU vs CPU e os modos de equipe; em modo de equipe, um chip de tamanho (`-` `+` ou `Q` / `E`) define o esquadrão. A versão web permite até 7 por lado; Android e iOS nativos limitam a 5 porque o atlas de sprites é 2048.
 
 | Modo | Lutadores em campo | O round acaba quando |
 |---|---|---|
 | Equipe · Sequência | 1 por lado, o próximo entra após um KO; o vencedor mantém a vida | um lado fica sem lutadores |
-| Equipe · Paralelo | a equipe inteira ao mesmo tempo (2 a 5); `Tab` passa o controle ao próximo | todos os membros de um lado caem |
+| Equipe · Paralelo | a equipe inteira ao mesmo tempo (2 a 7), cada lutador nasce em um ponto aleatório do cenário (com semente, então replays batem); `Tab` passa o controle ao próximo | todos os membros de um lado caem |
 | Equipe · Tag | 1 ativo + os demais em espera (2 ou 3 por lado) | todos os membros de um lado caem |
 
 ## Arcade / Modo História

@@ -49,7 +49,6 @@ pub(super) const ES: &[(&str, &str)] = &[
     ("select.p2", "JUGADOR 2: elige"),
     ("select.partner", "JUGADOR 2 (COMPAÑERO): elige"),
     ("select.opponent", "Elige al rival"),
-    ("select.team_hint", "Arma tu equipo · Q/E: tamaño"),
     ("select.coop_on", "COOP 2J: ACTIVADO [V]"),
     ("select.coop_off", "COOP 2J: DESACTIVADO [V]"),
     ("select.palette", "PALETA"),

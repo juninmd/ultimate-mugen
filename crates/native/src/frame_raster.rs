@@ -47,7 +47,8 @@ pub(super) fn sprite_of(render: FrameArt) -> Sprite {
 fn raster_frame(nc: &NativeChar, frame: &NativeFrame, with_images: bool, palette: Option<&Value>, variants: &VariantPalettes) -> FrameRaster {
     let base = render_frame(nc, frame, with_images, palette);
     let recolored = if frame.effect.is_some() { &[][..] } else { variants.0.as_slice() };
-    let variants = recolored.iter().map(|(group, palette)| (*group, render_frame(nc, frame, true, Some(palette)))).collect();
+    // Variants keep only image and placement (`sprite_of`), so box fitting is skipped.
+    let variants = recolored.iter().map(|(group, palette)| (*group, super::pixel::load_art(nc, frame, Some(palette), false).unwrap_or_else(|| render_frame(nc, frame, true, Some(palette))))).collect();
     FrameRaster { base, variants }
 }
 
@@ -96,6 +97,20 @@ mod tests {
         variants.assign(2, Value::from("first form"));
         assert_eq!(variants.0.iter().map(|(group, _)| *group).collect::<Vec<_>>(), vec![3, 2]);
         assert_eq!(variants.0[1].1, Value::from("first form"));
+    }
+
+    #[test]
+    fn image_only_variants_match_the_fully_fitted_sprite() {
+        let fighter: NativeChar = serde_json::from_str(include_str!("../../../assets/chars/kaito.json")).unwrap();
+        let frame: NativeFrame = serde_json::from_value(serde_json::json!({"pose": "punch1", "ticks": 1, "hit": {"part": "fist"}})).unwrap();
+        let mut variants = VariantPalettes(Vec::new());
+        variants.assign(2, fighter.palettes[0].clone());
+        let (_, fast) = raster_frame(&fighter, &frame, true, None, &variants).variants.remove(0);
+        let full = render_frame(&fighter, &frame, true, Some(&fighter.palettes[0]));
+        let (fast, full) = (sprite_of(fast), sprite_of(full));
+        let pixels = |s: &Sprite| s.image.as_ref().map(|i| (i.w, i.h, i.rgba.clone()));
+        assert_eq!(pixels(&fast), pixels(&full), "recolored pixels are unchanged");
+        assert_eq!((fast.width, fast.height, fast.axis_x, fast.axis_y, fast.scale), (full.width, full.height, full.axis_x, full.axis_y, full.scale));
     }
 
     #[test]

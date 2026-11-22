@@ -69,6 +69,7 @@ impl Match {
                 && !f.ikemen.standby
                 && f.alive
                 && f.life > 0.0
+                && (self.swarm.is_none() || f.side == 0)
                 && (f.pos.x - x).abs() <= REACH_X
                 && f.pos.y <= y + REACH_BELOW
                 && f.pos.y >= y - REACH_ABOVE

@@ -118,3 +118,23 @@ fn mass_knockout_respawns_every_slot_without_double_counting() {
     let alive = m.roots().filter(|f| f.side == 1 && f.alive && f.life > 0.0).count();
     assert_eq!(alive, 16);
 }
+
+#[test]
+fn horde_foes_cannot_steal_the_elixir_but_the_squad_can() {
+    let mut m = swarm_match(1, 3, 100);
+    let (x, y) = {
+        let e = m.elixir.as_ref().unwrap();
+        (e.x, e.y)
+    };
+    let foe = m.roots().position(|f| f.side == 1).unwrap();
+    let foe = m.roots().nth(foe).unwrap().id;
+    let idx = m.fighters.iter().position(|f| f.id == foe).unwrap();
+    m.fighters[idx].pos.x = x;
+    m.fighters[idx].pos.y = y;
+    ticks(&mut m, 2);
+    assert!(!m.elixir.as_ref().unwrap().taken());
+    m.fighters[0].pos.x = x;
+    m.fighters[0].pos.y = y;
+    ticks(&mut m, 2);
+    assert!(m.elixir.as_ref().unwrap().taken());
+}

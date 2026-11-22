@@ -6,6 +6,7 @@ use std::sync::{Arc, Mutex};
 const MAGIC: &[u8; 4] = b"UMEP";
 const VERSION: u8 = 2;
 const MAX_PACKS: usize = 64;
+pub(crate) const MAX_PACK_BYTES: usize = 64 << 20;
 
 pub struct SpritePack {
     pub character: String,
@@ -18,7 +19,7 @@ impl SpritePack {
     pub(super) fn file(&self, name: &str) -> Option<Arc<Vec<u8>>> { self.files.get(name).cloned() }
 
     pub fn parse(bytes: &[u8]) -> Result<Self, String> {
-        if bytes.len() > 16 << 20 { return Err("sprite pack: larger than 16 MiB".into()); }
+        if bytes.len() > MAX_PACK_BYTES { return Err(format!("sprite pack: {} MiB exceeds the {} MiB limit", bytes.len() >> 20, MAX_PACK_BYTES >> 20)); }
         if bytes.len() < 11 || &bytes[0..4] != MAGIC { return Err("sprite pack: bad header".into()); }
         if bytes[4] != VERSION { return Err(format!("sprite pack: unsupported version {}", bytes[4])); }
         let id_len = u16::from_le_bytes(bytes[5..7].try_into().unwrap()) as usize;

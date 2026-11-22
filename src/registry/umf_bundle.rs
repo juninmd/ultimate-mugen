@@ -41,7 +41,10 @@ impl Registry {
             });
             match result {
                 Ok(_) => added.push(key),
-                Err(error) => eprintln!("umf bundle {key}: {error}"),
+                Err(error) => {
+                    eprintln!("umf bundle {key}: {error}");
+                    self.import_errors.push(format!("{key}: {error}"));
+                }
             }
         }
         added
@@ -76,5 +79,20 @@ mod tests {
         assert!(!is_umf_fighter(r#"{"format":"umf-kit/1","id":"x"}"#));
         assert!(!is_umf_fighter(r#"{"hello":1}"#));
         assert!(!is_umf_fighter("not json"));
+    }
+
+    #[test]
+    fn real_goku_ssj4_bundle_registers_when_the_assets_repo_is_present() {
+        let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../mugen-assets/umf/Goku_SSJ4_UMF");
+        let Ok(json) = std::fs::read(dir.join("goku_ssj4_umf.json")) else { return };
+        let mut vfs = Vfs::new();
+        vfs.insert("g/goku_ssj4_umf.json".into(), json);
+        for entry in std::fs::read_dir(dir.join("sprites")).unwrap().flatten() {
+            vfs.insert(format!("g/sprites/{}", entry.file_name().to_string_lossy()), std::fs::read(entry.path()).unwrap());
+        }
+        let mut registry = Registry::new();
+        let added = registry.add_umf_bundles(&vfs);
+        assert_eq!(added.len(), 1, "{:?}", registry.import_errors);
+        assert!(registry.import_errors.is_empty());
     }
 }

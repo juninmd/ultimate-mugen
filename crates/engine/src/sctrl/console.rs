@@ -17,7 +17,7 @@ pub struct ConsoleLog {
 }
 
 impl ConsoleLog {
-    pub fn lines(&self) -> impl Iterator<Item = &String> { self.lines.iter() }
+    pub fn lines(&self) -> impl DoubleEndedIterator<Item = &String> { self.lines.iter() }
 
     pub fn dropped(&self) -> u32 { self.dropped }
 

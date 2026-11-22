@@ -13,10 +13,9 @@ fn fighter_portrait(g: &mut Gfx, f: &Fighter) -> Option<(SpriteTex, Color)> {
     {
         return Some((tex, WHITE));
     }
-    f.def
-        .portrait
-        .as_ref()
-        .map(|img| (SpriteTex::Rgba(g.texture(img, false)), WHITE))
+    f.def.portrait_pick().map(|(sp, img, _full)| {
+        (SpriteTex::Rgba(g.texture(&img, sp.scale >= 0.99)), WHITE)
+    })
 }
 
 impl Vfx {

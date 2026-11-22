@@ -69,7 +69,7 @@ impl App {
                 ui.rect(bx, mid - s / 2.0, s, s, fade(hex(CYAN), a));
                 ui.text(&(slot + 1).to_string(), bx + s / 2.0, mid + 7.0 * f, 20.0 * f, fade(hex("#06202a"), a), Align::Center, true);
             }
-            let name = truncate_to(&mv.name, cols.name_w, &|s| ui.measure(s, 20.0 * f, false));
+            let name = truncate_to(crate::i18n::fighter_lines::shown(&mv.name), cols.name_w, &|s| ui.measure(s, 20.0 * f, false));
             ui.text(&name, l.x + cols.name_x, mid + 7.0 * f, 20.0 * f, fade(hex(INK), a), Align::Left, false);
             let base = 28.0 * f.min(1.15);
             let size = fit_input_size(&mv.input, cols.input_w, base, 13.0, &|c, s| self.button_width(c, s));

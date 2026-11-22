@@ -48,7 +48,7 @@ impl App {
             }
         }
         let ui = &self.ui;
-        let name = mv.name.as_str();
+        let name = crate::i18n::fighter_lines::shown(&mv.name);
         ui.text(name, card.x + 18.0, card.bottom() - 40.0 * f, 18.0 * f, fade(hex(INK), a), Align::Left, false);
         let known = anim.is_some();
         let Some(cost) = cost_label(mv).or_else(|| known.then(|| crate::i18n::tr3("SEM CUSTO", "FREE", "GRATIS").to_string())) else { return };

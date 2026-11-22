@@ -131,31 +131,35 @@ pub fn draw<P: Fn(f32, f32) -> Vec2, T: Fn(&str, f32, f32, f32, Color, Align, bo
     if !ENABLED.load(Ordering::Relaxed) {
         return;
     }
+    let tab = crate::session::debug_ctrl::tab();
+    super::debug_bars::draw_toolbar(p, text, s, w, m);
     for (slot, x) in [(0usize, MARGIN), (1usize, w - PANEL_W - MARGIN)] {
-        let Some(fighter) = m.fighters.get(slot) else {
+        let rows = super::debug_tabs::tab_rows(m, slot, tab);
+        if rows.is_empty() {
             continue;
-        };
-        let rows = lines(&snapshot(fighter));
+        }
         let corner = p(x, TOP);
         draw_rectangle(
             corner.x,
             corner.y,
             PANEL_W * s,
             (rows.len() as f32 * LINE_H + MARGIN) * s,
-            Color::new(0.02, 0.02, 0.06, 0.62),
+            Color::new(0.02, 0.02, 0.06, 0.72),
         );
         for (i, row) in rows.iter().enumerate() {
             text(
                 row,
                 x + 3.0,
                 TOP + 3.0 + i as f32 * LINE_H,
-                4.4,
+                4.2,
                 hex("#7ff0ff"),
                 Align::Left,
                 false,
             );
         }
     }
+    let h = w * (ume_engine::matchs::BASE_H / ume_engine::matchs::BASE_W);
+    super::debug_bars::draw_console_drawer(p, text, s, w, h, m, tab);
 }
 
 #[cfg(test)]

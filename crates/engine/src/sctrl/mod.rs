@@ -32,6 +32,8 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
         "finishdone" => m.finish_done(),
         "zoom" => camera::zoom(m, i, sc),
         "camera" => camera::camera(m, i, sc),
+        "cinema" => camera::cinema(m, i, sc),
+        "slowmo" => camera::slowmo(m, i, sc),
         "groundleveloffset" => camera::ground_level_offset(m, i, sc),
         "depth" | "depthbound" => camera::unsupported_depth(m, sc),
         "pause" => pause::pause(m, i, sc),

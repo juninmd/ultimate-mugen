@@ -5,7 +5,7 @@ use crate::hud::Hud;
 use crate::render::{Gfx, MatchRenderer};
 #[path = "session/kaito.rs"] mod kaito;
 #[path = "session/tension.rs"] mod tension;
-mod shortcut; pub mod dummy; pub mod dummy_tape; pub mod dummy_learn;
+mod shortcut; pub mod debug_ctrl; pub mod dummy; pub mod dummy_tape; pub mod dummy_learn;
 use crate::stages::Stage;
 use crate::ui::Ui;
 use crate::vfx::Vfx;
@@ -636,10 +636,10 @@ impl Session {
 
     /// Advance in real time (fixed step).
     pub fn update(&mut self, dt: f32, c: &mut Controls, audio: &mut Audio) {
-        if self.paused {
+        if self.paused || (self.r.debug && debug_ctrl::frozen()) {
             return;
         }
-        self.vfx.update(dt);
+        self.vfx.update(dt * if self.r.debug { debug_ctrl::speed_mul() } else { 1.0 });
         // face-off camera push-in
         self.vfx.intro_target = if self.m.round_state == 1
             && self.m.round_no == 1
@@ -650,7 +650,7 @@ impl Session {
         } else {
             0.0
         };
-        self.acc += dt.min(0.1) * self.vfx.time_scale() * self.speed;
+        self.acc += dt.min(0.1) * self.vfx.time_scale() * self.speed * if self.r.debug { debug_ctrl::speed_mul() } else { 1.0 };
         let step = 1.0 / 60.0;
         let mut n = 0;
         while self.acc >= step - 1e-4 && n < 5 {
@@ -687,8 +687,7 @@ impl Session {
         };
         self.vfx.draw_cinema_bars(ui);
         let cpu = self.cpu_ids();
-        self.hud
-            .draw(ui, g, &self.m, ui.t, self.team.as_ref(), &human, &cpu);
-        self.vfx.draw_banners(ui);
+        self.hud.draw(ui, g, &self.m, ui.t, self.team.as_ref(), &human, &cpu);
+        self.vfx.draw_cutin(ui, g, &self.m); self.vfx.draw_banners(ui);
     }
 }

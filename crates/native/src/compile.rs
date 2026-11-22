@@ -165,6 +165,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         let freeze = if super::ultimate::is(&m.id) { super::ultimate::FREEZE } else { 55 };
         cns += &super::move_fx::super_pause_cns(m, sid, freeze);
         cns += &super::move_fx::move_fx_cns(m, sid, &anim_no);
+        cns += &super::cinematic::move_cns(m, sid, &anim_no);
         if let Some(inv) = m.invuln { cns += &format!("[State {sid}, inv]\ntype = NotHitBy\ntrigger1 = AnimElemNo(0) = [{}, {}]\nvalue = SCA\ntime = 1\n\n", inv[0], inv[1]); }
         if let Some(tp) = &m.teleport { for step in tp.to_vec() { cns += &super::move_fx::teleport_cns(&step, sid); } }
         cns += &super::blocks::states(m, sid, &anim_no);

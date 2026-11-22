@@ -1,14 +1,15 @@
 use std::path::{Path, PathBuf};
-use ume_devtools::{ability_reel, audit_moves, audit_sprites, homologate, motion, mugen_census, pack, roster_audit, story_npcs, thumbnails};
+use ume_devtools::{ability_reel, audit_moves, audit_sprites, debug_fight, homologate, motion, mugen_census, pack, roster_audit, story_npcs, thumbnails};
 
 const USAGE: &str = "usage: ume-tools <command>\n\
   pack-sprites [out_root=web/dist] [--sprites dir]  pack assets/chars/sprites into web .pack files\n\
   stage-thumbs [stages=assets/stages]    write 240x135 thumbnails to <stages>/thumbs\n\
   audit-moves [dir=assets/chars] [--json] static roster audit (inputs, cancels, throws, hit boxes)\n\
   audit-sprites --out <report.json> [--root <repo>]  native PNG inventory\n\
+  debug-fight <char1> [char2] [--frames N] [--only-moves] [--json]  inspect frame data, triggers, clipboard and console trace\n\
   gen-story-npcs [chars=assets/chars]    regenerate assets/chars/npc_*.json (overwrites them)\n\
   mugen-census <zip-or-dir>...           count states, controllers, commands and actions of M.U.G.E.N packages\n\
-  roster-audit [--chars dir] [--stages dir] [--out dir] [--limit N] [--fights N] [--only text] [--no-fights] [--fail-over severity]  severity report for every character and stage
+  roster-audit [--chars dir] [--stages dir] [--out dir] [--limit N] [--fights N] [--only text] [--no-fights] [--fail-over severity]  severity report for every character and stage\n\
   homologate <dir=.> [--run] [--out report.md]  PASS/WARN/FAIL per character zip or folder; --run also loads the engine and ticks a fight\n\
   ability-reel <frames_dir> <out_dir> [width=448] [colors=64] [fps=14] [--no-normals]  captioned GIF per fighter (needs ffmpeg)\n\
   motion-descriptor --character f --sprites dir --animation name --out file  sprite-gen asset descriptor\n\
@@ -87,6 +88,17 @@ fn run(args: &[String]) -> Result<(), String> {
             let report = audit_sprites::inspect(Path::new(&flag("--root").unwrap_or_else(|| ".".into())))?;
             std::fs::write(&out, serde_json::to_string_pretty(&report).map_err(|e| e.to_string())? + "\n").map_err(|e| format!("{out}: {e}"))?;
             audit_sprites::summary_lines(&report).iter().for_each(|l| println!("{l}"));
+        }
+        Some("debug-fight") => {
+            let Some(p1) = positional.first() else { return Err(USAGE.to_string()) };
+            let frames = flag("--frames").map(|v| v.parse::<usize>().map_err(|e| e.to_string())).transpose()?.unwrap_or(180);
+            let opt = debug_fight::DebugOptions { p1: (*p1).clone(), p2: positional.get(1).map(|s| (*s).clone()), frames, only_moves: args.iter().any(|a| a == "--only-moves") };
+            let val = debug_fight::run_debug(&opt)?;
+            if args.iter().any(|a| a == "--json") {
+                println!("{}", serde_json::to_string_pretty(&val).map_err(|e| e.to_string())?);
+            } else {
+                print!("{}", debug_fight::format_text(&val));
+            }
         }
         Some("gen-story-npcs") => {
             let written = story_npcs::generate(Path::new(positional.first().map(|s| s.as_str()).unwrap_or("assets/chars")))?;

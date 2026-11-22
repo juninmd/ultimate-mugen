@@ -32,6 +32,10 @@ impl MapStore {
     pub fn len(&self) -> usize { self.entries.len() }
 
     pub fn is_empty(&self) -> bool { self.entries.is_empty() }
+
+    pub fn iter(&self) -> impl Iterator<Item = (&str, f32)> {
+        self.entries.iter().map(|(k, v)| (k.as_str(), *v))
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]

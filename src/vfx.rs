@@ -17,7 +17,7 @@ mod ko;
 mod rush;
 mod shock;
 mod sheet;
-mod speed_lines; mod spark; mod stage_objects; mod story_juice;
+mod speed_lines; mod spark; mod stage_objects; mod story_juice; mod cinema; mod cutin;
 pub mod quality;
 pub use speed_lines::speed_lines;
 
@@ -169,6 +169,7 @@ pub struct Vfx {
     pre_mt: Vec<char>,
     rng: u32,
     tick: u32,
+    pub cinema: cinema::CinemaDirector,
 }
 
 const MAX_FLOATS: usize = 6;
@@ -221,6 +222,7 @@ impl Vfx {
             pre_mt: vec![],
             rng: 0x9e37_79b9,
             tick: 0,
+            cinema: cinema::CinemaDirector::default(),
         }
     }
     fn r(&mut self) -> f32 {
@@ -553,6 +555,7 @@ impl Vfx {
                 self.vig = 0.8;
                 self.lines = 0.8;
                 self.lines_col = [1.0, 0.35, 0.3];
+                self.on_dramatic_ko(*loser_side, m);
                 let w = 1 - loser_side;
                 if m.roots()
                     .find(|f| f.side == w)
@@ -564,6 +567,7 @@ impl Vfx {
             }
             Event::Transform { fighter } => self.on_transform(*fighter, m),
             Event::Rush { fighter, guarded, .. } => self.on_rush(*fighter, *guarded, m),
+            Event::Cinema { fighter, bars, slow, invert, lines, flash } => self.on_cinema_event(*fighter, *bars, *slow, *invert, *lines, *flash, m),
             Event::Fight => {
                 if let Some(b) = m.roots().find(|f| f.def.boss) {
                     if b.form >= 3 {
@@ -594,6 +598,7 @@ impl Vfx {
                 self.slow_t = 0.0;
                 self.ko_t = 0.0;
                 self.first_hit = false;
+                self.cinema.reset();
             }
             _ => {}
         }
@@ -686,6 +691,7 @@ impl Vfx {
             self.meter[side] = lv;
         }
         self.super_active = m.pause.as_ref().is_some_and(|p| p.is_super);
+        self.cinema.tick_match(m);
         self.overdrive_embers(m);
         // awakened fighters burn with rising embers and crackling arcs; defeats get their own beat
         for f in m.fighters.iter().filter(|f| !f.is_helper) {
@@ -822,6 +828,7 @@ impl Vfx {
             (0.0, 2.2)
         };
         self.sz += (target - self.sz) * (rate * dt).min(1.0);
+        self.cinema.update(dt, self.super_active, self.ko_t);
         self.invert_t = (self.invert_t - dt).max(0.0);
         self.flash_clock += dt;
         self.intro_zoom += (self.intro_target - self.intro_zoom) * (2.5 * dt).min(1.0);
@@ -881,7 +888,7 @@ impl Vfx {
         };
         let ko = if self.ko_t > 0.0 {
             let e = (self.ko_t.min(1.0)).powf(0.6);
-            e * 0.28
+            e * if self.cinema.dramatic { 0.36 } else { 0.28 }
         } else {
             0.0
         };
@@ -897,6 +904,8 @@ impl Vfx {
                 Some((x, y, _)) => (lerp(mid.0, x, self.sz), lerp(mid.1, y, self.sz)),
                 None => mid,
             }
+        } else if self.cinema.focus_bias > 0.01 {
+            (lerp(mid.0, self.cinema.focus_x, self.cinema.focus_bias), lerp(mid.1, self.cinema.focus_y, self.cinema.focus_bias))
         } else {
             mid
         };
@@ -1271,11 +1280,7 @@ impl Vfx {
 
     /// Big banner texts (COUNTER!, PERFECT!, SUPER ARTS…), slammed in with overshoot.
     pub fn draw_cinema_bars(&self, ui: &Ui) {
-        if self.sz > 0.02 {
-            let h = 26.0 * self.sz * self.sz * (3.0 - 2.0 * self.sz);
-            ui.rect(0.0, 0.0, 1280.0, h, Color::new(0.0, 0.0, 0.0, 0.92));
-            ui.rect(0.0, 720.0 - h, 1280.0, h, Color::new(0.0, 0.0, 0.0, 0.92));
-        }
+        self.cinema.draw_bars(ui);
     }
 
     pub fn draw_banners(&self, ui: &Ui) {

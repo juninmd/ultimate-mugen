@@ -225,6 +225,7 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `flash` | `{ "at", "time", "color", "under", "superMove" }` (object or list) | Screen flash / background darken (`EnvColor`) |
 | `superPause` | `{ "at", "time", "pos", "anim", "darken" }` | Customizes the super freeze |
 | `followUp` | `{ "to": "move_id", "on": "hit" \| "contact" \| "end", "at" }` | Hit-confirm transition into a cinematic follow-up move |
+| `cinematic` | `{ "letterbox", "hideUi", "freeze", "title", "camera", "cuts", "finishSlow" }` | Multi-beat movie direction (`Zoom`, `Camera`, `EnvColor`, `EnvShake`, `Cinema`, `SlowMo`, `AssertSpecial(NoBarDisplay)`) |
 | `voice` | `1000, 0` | Character sound group and index played at move start, when that sample is bundled |
 | `airPhysics` | `true` | Keeps air physics |
 | `cancels` | list of move ids | This move may be cancelled **into** those moves on contact (hit, guard or projectile contact). Declaring it replaces the automatic gatling out of this move |
@@ -316,9 +317,15 @@ Every Ikemen GO / M.U.G.E.N expressive pattern works declaratively inside a sing
 |---|---|---|
 | `helpers.stand` | Manual `Helper(keyctrl=1)` + `BindToParent` + `HitOverride` | Independent hitbox/hurtbox Stand fighting alongside parent (`input` or `triggerMove`), toggle summon/recall, optional meter `drain`, `lifeTransfer` to parent via `ModifyPlayer` |
 | `helpers.clones` | Manual AI clone `Helper`s | *Kage Bunshin* autonomous clones (`count`, `maxActive`, `duration`, `walkSpeed`, `attackRange`, `oneHitPoof`), chase + random AI attack selection, camera freedom (`ScreenBound movecamera = 0, 0`) |
-| `moves[].throw` (cinematic) | Custom `TargetState` + `ChangeAnim2` choreography | `p2Anim` (`ChangeAnim2`), `cameraFree`, `camera` (`zoom`, `time`, `lag`, `freeze`), beat-by-beat `steps[]` (`at`, `bind`, `p2Anim`, `p2State`, `damage`, `shake`, `facing`, `launch`), auto `!GetHitVar(IsBound)` failsafe |
+| `moves[].throw` (cinematic) | Custom `TargetState` + `ChangeAnim2` choreography | `p2Anim` (`ChangeAnim2`), `cameraFree`, `camera` (`zoom`, `pos`, `delta`, `delay`, `bound`, `time`, `lag`, `freeze`, `hideUi`, `bars`), beat-by-beat `steps[]` (`at`, `bind`, `anim`, `p2Anim`, `p2State`, `damage`, `shake`, `facing`, `launch`, `camera`, `flash`, `sound`, `slowmo`, `invert`), auto `!GetHitVar(IsBound)` failsafe |
+| `moves[].cinematic` | Movie direction on attacks & supers | `letterbox`, `hideUi`, `freeze`, `title`, `camera`, `cuts[]` (keyframes for zoom/pan, flash, shake, `slowmo`, `invert`, `bars`, `lines`, `darken`, `text`) and `finishSlow`; emits `Zoom`, `Cinema`, `SlowMo`, `AssertSpecial`, `EnvColor` & anime Cut-In |
 | `bossRules` | UI-breaking `[StateDef -4]` `AssertSpecial` / `Text` / `ModifyPlayer` | `hideHud`, `hideLifeBar`, `hidePowerBar`, `hideTimer`, `freezeTimer`, continuous or triggered HUD `texts[]`, `modifyPlayer[]` (self or `"enemy"`), `phases[]` (`lifeBelowRatio`, `when`, `once`, `attackMul`, `defenceMul`) |
 | `scripts` | Raw `.zss` / `.cns` files (`[StateDef -4]`, `map()`) | Inline `zss` and/or `cns` strings (supports `[StateDef -4]` running even during `SuperPause`, `map(k) := v`, `teamMap(k) := v`), custom `commands[]`, and `@anim(name)` / `@move(id)` macro expansion |
+
+### In-game and CLI Debug Tool
+
+- **In-game (`F2`)**: renders translucent-filled `Clsn1`/`Clsn2` boxes, amber pushbox, pivot crosshairs, velocity vectors, `helper`/`target` link tethers, stage bounds, top toolbar, and a **4-tab** inspector (`F4`: `Overview` / `Vars & Maps` / `Clipboard & HitDef` / `Console & Engine`); `F5` freezes simulation; `F6` or `.` advances `+1 frame`; `F7` cycles speed (`1x`/`0.5x`/`0.25x`/`0.1x`); `F8` cycles box layers.
+- **CLI**: `cargo run --release -p ume-devtools --bin ume-tools -- debug-fight <char1> [char2] [--frames N] [--only-moves] [--json]` prints per-move frame data (`startup`, `active`, `recovery`, reach), `clipboard`, `console`, warnings, and cinematic events.
 
 ## Air abilities (every special and super)
 

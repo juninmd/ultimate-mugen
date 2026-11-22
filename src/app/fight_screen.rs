@@ -14,7 +14,9 @@ impl App {
         if self.c.pressed(nav::AUX) {
             s.r.debug = !s.r.debug;
             self.debug_boxes = s.r.debug; crate::hud::debug_panel::set(s.r.debug);
+            if !s.r.debug { crate::session::debug_ctrl::reset(); }
         }
+        crate::session::debug_ctrl::handle_fight_keys(s, replaying, &mut self.c, &mut self.audio);
         let pause_btn = if replaying {
             is_key_pressed(KeyCode::Space) || self.c.pressed(nav::START)
         } else {

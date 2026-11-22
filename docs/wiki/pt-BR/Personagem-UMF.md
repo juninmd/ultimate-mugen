@@ -295,9 +295,15 @@ Qualquer animação em `anims` aceita `"id": 8801` para fixar um número de aç�
 |---|---|---|
 | `helpers.stand` | `Helper(keyctrl=1)` + `BindToParent` + `HitOverride` manuais | Stand estilo JoJo com hitbox/hurtbox independente, comandos próprios (`input`) ou sincronizados (`triggerMove`), evocação/recolhimento, dreno de barra (`drain`) e transferência de dano (`lifeTransfer`) via `ModifyPlayer` |
 | `helpers.clones` | Helpers autônomos de IA | Clones *Kage Bunshin* com IA própria (`count`, `maxActive`, `duration`, `walkSpeed`, `attackRange`, `oneHitPoof`), perseguição, ataques aleatórios e liberdade de câmera (`ScreenBound movecamera = 0, 0`) |
-| `moves[].throw` (cinemático) | `TargetState` + `ChangeAnim2` multi-etapa | `p2Anim` (`ChangeAnim2`), `cameraFree`, `camera` (`zoom`, `time`, `lag`, `freeze`), coreografia em `steps[]` (`at`, `bind`, `p2Anim`, `p2State`, `damage`, `shake`, `facing`, `launch`) e proteção automática `!GetHitVar(IsBound)` |
+| `moves[].throw` (cinemático) | `TargetState` + `ChangeAnim2` multi-etapa | `p2Anim` (`ChangeAnim2`), `cameraFree`, `camera` (`zoom`, `pos`, `delta`, `delay`, `bound`, `time`, `lag`, `freeze`, `hideUi`, `bars`), coreografia em `steps[]` (`at`, `bind`, `anim`, `p2Anim`, `p2State`, `damage`, `shake`, `facing`, `launch`, `camera`, `flash`, `sound`, `slowmo`, `invert`) e proteção `!GetHitVar(IsBound)` |
+| `moves[].cinematic` | Direção cinematográfica em golpes/supers | `letterbox`, `hideUi`, `freeze`, `title`, `camera`, `cuts[]` (keyframes com zoom/pan, flash, shake, `slowmo`, `invert`, `bars`, `lines`, `darken`, `text`) e `finishSlow`; gera `Zoom`, `Cinema`, `SlowMo`, `AssertSpecial`, `EnvColor` e Cut-In anime |
 | `bossRules` | Quebra de UI em `[StateDef -4]` via `AssertSpecial` / `Text` / `ModifyPlayer` | `hideHud`, `hideLifeBar`, `hidePowerBar`, `hideTimer`, `freezeTimer`, `texts[]`, `modifyPlayer[]` (`"enemy"` ou próprio chefe), `phases[]` (`lifeBelowRatio`, `when`, `once`, `attackMul`, `defenceMul`) |
 | `scripts` | Arquivos `.zss` / `.cns` com `[StateDef -4]` e `map()` | Strings inline `zss` e `cns` (suporta `[StateDef -4]` rodando até durante `SuperPause`, `map(k) := v`, `teamMap(k) := v`), `commands[]` customizados e expansão `@anim(nome)` / `@move(id)` |
+
+### Ferramenta de Debug in-game e CLI
+
+- **In-game (`F2`)**: ativa hitboxes/hurtboxes com preenchimento translúcido, pushbox âmbar, eixo/pivô, vetor de velocidade, linhas de vínculo (`helper`/`target`), barra superior e painel com **4 abas**: `F4` alterna `Overview` / `Vars & Maps` / `Clipboard & HitDef` (`DisplayToClipboard`) / `Console & Engine` (`PrintToConsole` e avisos); `F5` congela a simulação; `F6` ou `.` avança `+1 frame`; `F7` alterna velocidade (`1x`/`0.5x`/`0.25x`/`0.1x`); `F8` alterna camadas de caixas.
+- **CLI**: `cargo run --release -p ume-devtools --bin ume-tools -- debug-fight <char1> [char2] [--frames N] [--only-moves] [--json]` inspeciona frame data (`startup`, `active`, `recovery`, alcance), `clipboard`, `console` e eventos cinematográficos.
 
 ## Sprites pixel art (opcional)
 

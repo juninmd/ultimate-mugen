@@ -12,6 +12,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
 use ume_engine::palette::{BlendMode, PalParams};
 
+mod debug;
 mod layers;
 mod mugen_layers;
 mod rim;
@@ -205,10 +206,10 @@ impl MatchRenderer {
             sky: Default::default(),
         }
     }
-    fn sx(m: &Match, x: f32) -> f32 {
+    pub(super) fn sx(m: &Match, x: f32) -> f32 {
         x - m.camera.x + m.view_w / 2.0
     }
-    fn sy(m: &Match, y: f32) -> f32 {
+    pub(super) fn sy(m: &Match, y: f32) -> f32 {
         y - m.camera.y + m.stage.zoffset
     }
 
@@ -1104,39 +1105,6 @@ impl MatchRenderer {
     }
 
     fn draw_debug(&self, g: &Gfx, m: &Match) {
-        let s = g.view_scale;
-        let bx = |b: &[f32; 4], c: Color| {
-            draw_rectangle_lines(
-                g.ox + Self::sx(m, b[0]) * s,
-                g.oy + Self::sy(m, b[1]) * s,
-                (b[2] - b[0]) * s,
-                (b[3] - b[1]) * s,
-                2.0,
-                c,
-            )
-        };
-        for f in &m.fighters {
-            for b in f.boxes(2) {
-                bx(&b, Color::new(0.2, 0.6, 1.0, 1.0));
-            }
-            for b in f.boxes(1) {
-                bx(&b, RED);
-            }
-            draw_text(
-                &format!(
-                    "{} {}{} a{} t{}",
-                    f.state_no, f.state_type, f.move_type, f.anim_no, f.state_time
-                ),
-                g.ox + (Self::sx(m, f.pos.x) - 20.0) * s,
-                g.oy + (Self::sy(m, f.pos.y) + 10.0) * s,
-                4.0 * s,
-                YELLOW,
-            );
-        }
-        for p in &m.projectiles {
-            for b in Match::proj_boxes(p, 1) {
-                bx(&b, ORANGE);
-            }
-        }
+        self.draw_debug_world(g, m);
     }
 }

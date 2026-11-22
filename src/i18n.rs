@@ -7,6 +7,7 @@ use std::sync::Mutex;
 mod catalog;
 mod es_catalog;
 mod es_phrases;
+pub mod cutscene_lines;
 pub mod fighter_lines;
 pub mod stage_names;
 pub mod system;

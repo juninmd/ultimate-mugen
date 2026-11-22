@@ -37,7 +37,7 @@ mod results_stats;
 mod select_category;
 mod select_grid;
 mod select_roster; mod select_cursor; mod select_scroll;
-mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile; mod select_tags; mod select_view; mod text_fit; mod select_marks; mod select_author;
+mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_team_chips; mod select_chips; mod select_profile; mod select_tags; mod select_view; mod text_fit; mod select_marks; mod select_author;
 mod versus; mod versus_compare; mod vs_epic; mod vs_emblem;
 mod menu_view; mod menu_icons;
 mod menu_focus;
@@ -92,7 +92,7 @@ pub struct Replay {
 }
 
 const VIEW_ROWS: usize = 4;
-const NUMS: [&str; 5] = ["1", "2", "3", "4", "5"];
+const NUMS: [&str; 7] = ["1", "2", "3", "4", "5", "6", "7"];
 
 fn opaque_box(d: &CharDef, key: (i32, i32), s: &ume_engine::chardef::Sprite) -> (f32, f32, f32, f32) {
     let dims = s.image.as_ref().map(|im| (im.w as usize, im.h as usize)).or_else(|| d.indexed.get(&key).map(|ix| (ix.w as usize, ix.h as usize)));
@@ -906,12 +906,10 @@ impl App {
         crate::screen_art::ScreenArt::Select.background(&self.ui);
         if self.mode.is_team() {
             if is_key_pressed(KeyCode::E) {
-                self.team_n = (self.team_n + 1).min(if self.mode == Mode::TeamTag { 3 } else { 5 });
-                self.audio.sfx("select");
+                self.adjust_team_n(1);
             }
             if is_key_pressed(KeyCode::Q) {
-                self.team_n = (self.team_n - 1).max(2).max(self.team_pick.len() + 1);
-                self.audio.sfx("select");
+                self.adjust_team_n(-1);
             }
         }
         if self.names_up.len() != self.reg.chars.len() {
@@ -1004,7 +1002,7 @@ impl App {
             true,
         );
         let hint = if team_mode {
-            crate::i18n::t("select.team_hint")
+            ""
         } else if picking == 0 {
             crate::i18n::t("select.p1")
         } else if two {
@@ -1023,7 +1021,7 @@ impl App {
             Align::Right,
             false,
         );
-        if self.select_chips() { return; }
+        if self.select_chips() || self.select_team_chips() { return; }
 
         let focus = cur[picking];
         if self.sel_last[picking] != focus {
@@ -1211,7 +1209,7 @@ impl App {
             if let Some(n) = self.team_pick.iter().position(|&t| t == i) {
                 self.ui.rect(cx, cy, 20.0, 18.0, hex("#ffcc33"));
                 self.ui.text(
-                    NUMS[n.min(4)],
+                    NUMS[n.min(6)],
                     cx + 10.0,
                     cy + 14.0,
                     14.0,
@@ -1318,10 +1316,10 @@ impl App {
                             .rect(x, y, sw, 46.0, alpha(rgb(self.reg.chars[i].color), 0.5));
                         self.portrait_fit(i, x + 2.0, y + 2.0, 42.0, 42.0);
                         self.ui.text(
-                            clip(self.names_up[i].split_whitespace().next().unwrap_or(""), 7),
+                            clip(self.names_up[i].split_whitespace().next().unwrap_or(""), if n > 5 { 5 } else { 7 }),
                             x + 46.0,
                             y + 28.0,
-                            if n > 4 { 11.0 } else { 13.0 },
+                            if n > 5 { 10.0 } else if n > 4 { 11.0 } else { 13.0 },
                             WHITE,
                             Align::Left,
                             true,
@@ -1340,7 +1338,7 @@ impl App {
                             self.ui.rect_lines(x, y, sw, 46.0, 2.0, hex("#ffcc33"));
                         }
                         self.ui.text(
-                            NUMS[k.min(4)],
+                            NUMS[k.min(6)],
                             x + sw / 2.0,
                             y + 31.0,
                             20.0,

@@ -59,7 +59,6 @@ catalog! {
     "select.p2" => "PLAYER 2: choose", "JOGADOR 2: escolha";
     "select.partner" => "PLAYER 2 (PARTNER): choose", "JOGADOR 2 (PARCEIRO): escolha";
     "select.opponent" => "Choose the opponent", "Escolha o oponente";
-    "select.team_hint" => "Build your team · Q/E: size", "Monte sua equipe · Q/E: tamanho";
     "select.coop_on" => "CO-OP 2P: ON [V]", "CO-OP 2P: LIGADO [V]";
     "select.coop_off" => "CO-OP 2P: OFF [V]", "CO-OP 2P: DESLIGADO [V]";
     "select.palette" => "PALETTE", "PALETA";

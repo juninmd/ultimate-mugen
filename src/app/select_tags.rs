@@ -9,6 +9,9 @@ const CHIP_X: f32 = 340.0;
 
 impl App {
     pub(crate) fn draw_select_tags(&self, profile: &ume_native::CharProfile, accent: Color) {
+        if self.mode.is_team() {
+            return;
+        }
         let mut x = CHIP_X;
         if let Some((label, rgb)) = profile
             .alignment

@@ -2,12 +2,12 @@
 
 **English** · [Português (BR)](pt-BR/Modos-de-Jogo.md)
 
-The main menu offers single fights (Arcade, Versus CPU, 2 Players, Training, CPU vs CPU) and three team modes. Team size is chosen on the select screen with `Q` / `E`.
+The main menu offers single fights (Arcade, Versus CPU, 2 Players, Training, CPU vs CPU) and three team modes. The select screen has a mode chip (`<` `>` or `M`) that cycles Versus CPU, 2 Players, CPU vs CPU and the team modes; in a team mode a size chip (`-` `+` or `Q` / `E`) picks the squad. The web build allows up to 7 per side; native Android and iOS cap at 5 because their sprite atlas is 2048.
 
 | Mode | Fighters in play | Round ends when |
 |---|---|---|
 | Team · Sequence | 1 per side, the next teammate enters after a KO; the winner keeps its life | one side runs out of fighters |
-| Team · Parallel | the whole team at once (2 to 5); `Tab` hands your controller to the next teammate | every member of a side is KO'd |
+| Team · Parallel | the whole team at once (2 to 7), each fighter spawning at a random spot of the stage (seeded, so replays match); `Tab` hands your controller to the next teammate | every member of a side is KO'd |
 | Team · Tag | 1 active + the rest on standby (2 or 3 per side) | every member of a side is KO'd |
 
 ## Arcade / Story Mode

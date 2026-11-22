@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod knockdown; pub use knockdown::{KnockdownRule, KnockdownScope, DEFAULT_KNOCKDOWN_PRESET, KNOCKDOWN_PRESETS}; mod minus4; mod priority; mod types; mod unleash; mod walk;
+mod spawn; mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod knockdown; pub use knockdown::{KnockdownRule, KnockdownScope, DEFAULT_KNOCKDOWN_PRESET, KNOCKDOWN_PRESETS}; mod minus4; mod priority; mod types; mod unleash; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -515,19 +515,19 @@ impl Match {
         self.zoom_request = None;
         if let Some(bg) = self.bg.as_mut() { bg.reset(); }
         let mut slot = [0usize; 2];
-        let team_n = [self.fighters.iter().filter(|f| !f.is_helper && f.side == 0).count(), self.fighters.iter().filter(|f| !f.is_helper && f.side != 0).count()];
+        let team_n = [self.fighters.iter().filter(|f| !f.is_helper && f.side == 0).count(), self.fighters.iter().filter(|f| !f.is_helper && f.side != 0).count()]; let spawns = self.random_spawns(team_n);
         for i in 0..self.fighters.len() {
             if self.fighters[i].is_helper { continue; }
             {
                 let p1x = self.stage.p1x; let p2x = self.stage.p2x; let first = self.round_no == 1;
                 let f = &mut self.fighters[i];
-                let k = { let s = f.side.min(1); slot[s] += 1; (slot[s] - 1) as f32 };
+                let rn = slot[0] + slot[1]; let k = { let s = f.side.min(1); slot[s] += 1; (slot[s] - 1) as f32 };
                 f.destroyed = false;
                 let gap = if team_n[f.side.min(1)] <= 2 { 52.0 } else { 130.0 / (team_n[f.side.min(1)] - 1) as f32 };
                 f.pos = V2 { x: if f.side == 0 { p1x - gap * k } else { p2x + gap * k }, y: 0.0 };
                 f.vel = V2::default();
                 f.ground_level = 0.0;
-                f.facing = if f.side == 0 { 1.0 } else { -1.0 };
+                f.facing = if f.side == 0 { 1.0 } else { -1.0 }; if let Some(&(x, face)) = spawns.as_ref().map(|v| &v[rn]) { f.pos.x = x; f.facing = face; }
                 f.life = f.life_max; f.alive = true;
                 f.revert_form(); f.reset_passive_for_round(); f.reset_potential();
                 if first { f.power = 0.0; }

@@ -1,5 +1,6 @@
+mod added;
 mod evidence;
-mod sim;
+pub(crate) mod sim;
 mod structural;
 
 use crate::routes::Route;
@@ -8,6 +9,7 @@ use std::fmt::Write as _;
 use std::sync::Arc;
 use ume_engine::chardef::CharDef;
 
+pub use added::AddedMove;
 pub use evidence::evidence;
 pub use sim::{Outcome, TICKS};
 
@@ -34,9 +36,10 @@ pub struct Parity {
     pub identical: bool,
     pub sections: Vec<SectionParity>,
     pub moves: Vec<MoveParity>,
+    pub added: Vec<AddedMove>,
 }
 
-pub fn parity(name: &str, orig: &Arc<CharDef>, umf: &Arc<CharDef>, routes: &[Route]) -> Parity {
+pub fn parity(name: &str, orig: &Arc<CharDef>, umf: &Arc<CharDef>, full: &Arc<CharDef>, routes: &[Route]) -> Parity {
     let sections: Vec<SectionParity> = structural::structural(orig, umf)
         .into_iter()
         .map(|(name, s)| SectionParity { name, compared: s.compared, differ: s.differ.len(), examples: s.differ.into_iter().take(5).collect() })
@@ -50,7 +53,7 @@ pub fn parity(name: &str, orig: &Arc<CharDef>, umf: &Arc<CharDef>, routes: &[Rou
         })
         .collect();
     let identical = sections.iter().all(|s| s.differ == 0) && moves.iter().all(|m| m.identical);
-    Parity { name: name.into(), identical, sections, moves }
+    Parity { name: name.into(), identical, sections, moves, added: added::added(umf, full) }
 }
 
 impl Parity {
@@ -78,6 +81,7 @@ impl Parity {
                 let _ = write!(md, "\n### {} (tick {t})\n\n```\noriginal {a}\numf      {b}\n```\n", m.route.command);
             }
         }
+        added::markdown(&self.added, &mut md);
         md
     }
 }

@@ -25,9 +25,9 @@ fn run_parity(src: &source::Source, out: &Path) -> Result<parity::Parity, String
     let sources = ume_engine::loader::read_mugen_sources(&src.vfs, &src.def)?;
     let orig = Arc::new(ume_engine::loader::assemble_mugen_char(sources.clone(), 1, true));
     let loaded = bundle::load(out)?;
-    let umf = Arc::new(bundle::compile(&loaded, 1, true)?);
+    let (base, full) = (Arc::new(bundle::compile_base(&loaded, 1, true)?), Arc::new(bundle::compile(&loaded, 1, true)?));
     let routes = routes::routes(&sources, &orig.commands);
-    let report = parity::parity(&loaded.fighter.name, &orig, &umf, &routes);
+    let report = parity::parity(&loaded.fighter.name, &orig, &base, &full, &routes);
     let dir = loaded.json_path.parent().unwrap_or(Path::new("."));
     std::fs::write(dir.join("parity.md"), report.markdown()).map_err(|e| e.to_string())?;
     std::fs::write(dir.join("routes.json"), serde_json::to_string_pretty(&routes).unwrap_or_default()).map_err(|e| e.to_string())?;

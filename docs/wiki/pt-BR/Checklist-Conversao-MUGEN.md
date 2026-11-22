@@ -14,7 +14,7 @@
 | Paletas | paletas do SFF (`sffpal_<k>.png`) e `pal1.act`..`pal12.act`: troca de paleta e `RemapPal`/`PalFX` veem as mesmas cores |
 | Sons | cada entrada do `.snd` como `snd_g_i.wav` |
 | Campos só do UMF | `profile` (país, nacionalidade, origem, bio, título, estilo de luta, afiliação em en/pt/es), `series`, falas, `rivals`: `profile_facts` junta os fatos, a skill escreve, `set_profile` valida |
-| Melhorias | `--extra`: nomes dos golpes (`mugen.names`), `mugenRoutes` para estados que o `.cmd` deixou sem comando, golpes novos em `scripts` (CNS/ZSS) |
+| Melhorias | `--extra`: nomes dos golpes (`mugen.names`), `mugenRoutes` para estados que o `.cmd` deixou sem comando, golpes novos em `scripts` (CNS/ZSS) ou como `moves` UMF nativos com `anim` igual ao número de uma action M.U.G.E.N |
 
 ## Prova
 

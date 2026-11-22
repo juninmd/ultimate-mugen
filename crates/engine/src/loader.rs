@@ -1,419 +1,106 @@
 //! Build a CharDef from a MUGEN character inside a VFS.
-use crate::chardef::{
-    default_constants, CharDef, ImageData, IndexedSprite, MoveInfo, Source, Sprite,
-};
-use crate::cns::{parse_cmd, parse_constants, parse_states, scale_default_constants};
-use crate::commands::parse_command;
-use std::collections::{HashMap, HashSet};
-use std::sync::Arc;
-use ume_formats::{act::decode_act, air::parse_air};
+use crate::chardef::CharDef;
+use std::collections::HashMap;
+use ume_formats::air::parse_air;
 use ume_formats::ini::{find_section, parse_ini_no_lines, unquote_str};
-use ume_formats::sff::{decode_sff, sprite_to_rgba};
 use ume_formats::snd::decode_snd;
 use ume_formats::vfs::{norm_path, resolve, text, Vfs};
 
+mod assemble;
 mod format;
+mod movelist;
 mod portrait;
 mod sff_cache;
 #[cfg(target_arch = "wasm32")] mod sff_slice;
+mod sources;
+mod sprites;
 mod stats;
+#[cfg(test)]
 use format::local_size;
-pub use {portrait::load_mugen_portrait, stats::load_mugen_stats};
+pub use {assemble::assemble_mugen_char, portrait::load_mugen_portrait, sources::{MugenSources, MugenText}, stats::load_mugen_stats};
 
-pub fn load_mugen_char(
-    vfs: &Vfs,
-    def_path: &str,
-    pal_no: i32,
-    with_images: bool,
-) -> Result<CharDef, String> {
+pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool) -> Result<CharDef, String> {
     let def_path = norm_path(def_path);
-    let base = def_path
-        .rsplit_once('/')
-        .map(|(b, _)| b.to_string())
-        .unwrap_or_default();
+    let src = read_mugen_sources(vfs, &def_path)?;
+    let d = assemble_mugen_char(src, pal_no, with_images);
+    report_diagnostics(&d, &def_path);
+    Ok(d)
+}
+
+fn info_text(info: Option<&ume_formats::ini::Section>, key: &str) -> Option<String> {
+    info.and_then(|s| s.get(key)).map(|v| unquote_str(v).to_string())
+}
+
+pub fn read_mugen_sources(vfs: &Vfs, def_path: &str) -> Result<MugenSources, String> {
+    let def_path = norm_path(def_path);
+    let base = def_path.rsplit_once('/').map(|(b, _)| b.to_string()).unwrap_or_default();
     let dt = text(vfs.get(&def_path).ok_or("def not found")?);
     let secs = parse_ini_no_lines(&dt);
     let info = find_section(&secs, "info");
     let files = find_section(&secs, "files");
     let fget = |k: &str| files.and_then(|s| s.get(k));
-    let name = info
-        .and_then(|s| s.get("name"))
-        .map(unquote_str)
-        .filter(|s| !s.is_empty())
-        .map(|s| s.to_string())
-        .unwrap_or_else(|| def_path.clone());
-    let display = info
-        .and_then(|s| s.get("displayname"))
-        .map(unquote_str)
-        .filter(|s| !s.is_empty())
-        .map(|s| s.to_string())
-        .unwrap_or_else(|| name.clone());
-    let author = info
-        .and_then(|s| s.get("author"))
-        .map(unquote_str)
-        .unwrap_or_default()
-        .to_string();
-    let (local_w, local_h) = local_size(info.and_then(|s| s.get("localcoord")));
-
-    let mut constants = default_constants();
-    let mut provided = HashSet::new();
-    let mut states = HashMap::new();
-    let mut spans = crate::diagnostics::SourceSpans::default();
-
-    let sprite_buf = fget("sprite").and_then(|p| resolve(vfs, &base, p));
-    let anim_buf = fget("anim").and_then(|p| resolve(vfs, &base, p));
-    let snd_buf = fget("sound").and_then(|p| resolve(vfs, &base, p));
-
-    // `stcommon` (normalmente common1.cns) traz os estados comuns E, em varios chars de
-    // fullgames, o mapeamento comando -> ChangeState do [Statedef -1]. Sem ele o lutador
-    // carrega e anda, mas nunca ataca. A resolucao segue o M.U.G.E.N.: pasta do char,
-    // depois raiz do pacote e `data/<arquivo>`, entao fullgames que trazem o proprio
-    // common em subpasta continuam com o -1 deles.
-    let common_name = unquote_str(fget("stcommon").unwrap_or_default());
-    if !common_name.is_empty() && !common_name.contains("..") {
-        if let Some(b) = resolve(vfs, &base, &common_name) {
-            spans.track(&common_name, || {
-                crate::zss::parse_state_file(&common_name, &text(b), &mut states, false)
-            });
-        }
-    }
+    let read = |name: &str| resolve(vfs, &base, name).map(text).unwrap_or_default();
+    let name = info_text(info, "name").filter(|s| !s.is_empty()).unwrap_or_else(|| def_path.clone());
+    let display_name = info_text(info, "displayname").filter(|s| !s.is_empty()).unwrap_or_else(|| name.clone());
+    let common_name = unquote_str(fget("stcommon").unwrap_or_default()).to_string();
+    let stcommon = (!common_name.is_empty() && !common_name.contains(".."))
+        .then(|| resolve(vfs, &base, &common_name).map(|b| sources::MugenText::new(common_name.clone(), text(b))))
+        .flatten();
     let cns_name = fget("cns").unwrap_or_default();
-    let cns_text = crate::perf::time("cns:read", || fget("cns").and_then(|c| resolve(vfs, &base, c)).map(text).unwrap_or_default());
-    parse_constants(&cns_text, &mut constants, &mut provided);
-    scale_default_constants(&mut constants, &provided, local_w as f64 / 320.0);
-    crate::perf::time("cns:parse", || spans.track(cns_name, || parse_states(&cns_text, &mut states, true)));
+    let cns_text = crate::perf::time("cns:read", || fget("cns").map(&read).unwrap_or_default());
+    let mut st = vec![];
     for k in ["st", "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7", "st8", "st9"] {
         let Some(fname) = fget(k) else { continue };
         if norm_path(unquote_str(fname)) == norm_path(unquote_str(cns_name)) {
             continue;
         }
         if let Some(b) = resolve(vfs, &base, fname) {
-            spans.track(fname, || {
-                crate::zss::parse_state_file(fname, &text(b), &mut states, true)
-            });
+            st.push(sources::MugenText::new(fname, text(b)));
         }
     }
     let cmd_name = fget("cmd").unwrap_or_default();
-    let cmd_text = fget("cmd")
-        .and_then(|c| resolve(vfs, &base, c))
-        .map(text)
-        .unwrap_or_default();
-    let (mut commands, cmd_states) =
-        spans.track(cmd_name, || parse_cmd(&cmd_text));
-    for (id, sd) in cmd_states {
-        if id < 0 && states.contains_key(&id) {
-            if let Some(s) = states.get_mut(&id) {
-                s.controllers.extend(sd.controllers)
-            }
-        } else {
-            states.insert(id, sd);
-        }
-    }
-    for (n, c) in [
-        ("holdfwd", "/$F"),
-        ("holdback", "/$B"),
-        ("holdup", "/$U"),
-        ("holddown", "/$D"),
-    ] {
-        if !commands.iter().any(|x| x.name == n) {
-            commands.push(parse_command(n, c, 1, 1));
-        }
-    }
-    let (sff_opt, anims, sounds) = {
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            std::thread::scope(|sc| {
-                let h_sff = sc.spawn(move || {
-                    sprite_buf.map(|buf| crate::perf::time("sff:decode", || sff_cache::decode_cached(&buf, &std::collections::HashSet::new())))
-                });
-                let h_anim = sc.spawn(move || {
-                    crate::perf::time("air:parse", || {
-                        anim_buf.map(|b| parse_air(&text(b))).unwrap_or_default()
-                    })
-                });
-                let h_snd = sc.spawn(move || {
-                    crate::perf::time("snd:decode", || snd_buf.map(|b| decode_snd(&b)).unwrap_or_default())
-                });
-                (
-                    h_sff.join().unwrap(),
-                    h_anim.join().unwrap(),
-                    h_snd.join().unwrap(),
-                )
-            })
-        }
-        #[cfg(target_arch = "wasm32")]
-        {
-            // Animations first (cheap text) so the SFF decoder can skip the sprites nobody draws.
-            let anims = crate::perf::time("air:parse", || {
-                anim_buf.map(|b| parse_air(&text(b))).unwrap_or_default()
-            });
-            let sff = sprite_buf.map(|buf| crate::perf::time("sff:decode", || sff_slice::decode_for_anims(&buf, &anims)));
-            let sounds = crate::perf::time("snd:decode", || {
-                snd_buf.map(|b| decode_snd(&b)).unwrap_or_default()
-            });
-            (sff, anims, sounds)
-        }
-    };
+    let cmd_text = fget("cmd").map(&read).unwrap_or_default();
+    let sprite_buf = fget("sprite").and_then(|p| resolve(vfs, &base, p));
+    let anim_buf = fget("anim").and_then(|p| resolve(vfs, &base, p));
+    let snd_buf = fget("sound").and_then(|p| resolve(vfs, &base, p));
+    let (sff, anims, sounds) = decode_binaries(sprite_buf, anim_buf, snd_buf);
+    let pal_files = (1..=12).map(|k| fget(&format!("pal{k}")).and_then(|p| resolve(vfs, &base, p)).map(|b| b.to_vec())).collect();
+    Ok(MugenSources {
+        id: format!("mugen:{def_path}"),
+        author: info_text(info, "author").unwrap_or_default(),
+        localcoord: info.and_then(|s| s.get("localcoord")).map(str::to_string),
+        mugen_version: info.and_then(|s| s.get("mugenversion")).map(str::to_string),
+        name,
+        display_name,
+        stcommon,
+        cns: sources::MugenText::new(cns_name, cns_text),
+        st,
+        cmd: sources::MugenText::new(cmd_name, cmd_text),
+        sff: sff.transpose()?,
+        anims,
+        sounds,
+        pal_files,
+    })
+}
 
-    let mut sprites = HashMap::new();
-    let mut palettes = HashMap::new();
-    let mut indexed = HashMap::new();
-    if let Some(sff) = match sff_opt {
-        Some(res) => Some(res?),
-        None => None,
-    } {
-        sprites.reserve(sff.sprites.len());
-        indexed.reserve(sff.sprites.len());
-        let mut counts: HashMap<i32, usize> = HashMap::with_capacity(sff.palettes.len().max(8));
-        for s in &sff.sprites {
-            if s.group != 9000 {
-                *counts.entry(s.palette_index).or_default() += 1;
-            }
-        }
-        let target = counts
-            .iter()
-            .max_by_key(|(_, n)| **n)
-            .map(|(k, _)| *k)
-            .unwrap_or(-1);
-        let mut over: Option<Vec<u8>> = None;
-        let mut pal_kbuf = [0u8; 16];
-        let pal_k = {
-            use std::io::Write;
-            let mut cur = std::io::Cursor::new(&mut pal_kbuf[..]);
-            let _ = write!(cur, "pal{pal_no}");
-            let pos = cur.position() as usize;
-            std::str::from_utf8(&pal_kbuf[..pos]).unwrap_or("")
-        };
-        if sff.version == 1 {
-            if let Some(a) = fget(pal_k).and_then(|p| resolve(vfs, &base, p)) {
-                if a.len() >= 768 {
-                    over = Some(decode_act(&a));
-                }
-            }
-        } else if pal_no != 1 {
-            if let Some(p) = sff
-                .palettes
-                .iter()
-                .find(|p| p.group == 1 && p.index == pal_no)
-            {
-                over = Some(p.data.to_vec());
-            } else if let Some(a) =
-                fget(pal_k).and_then(|p| resolve(vfs, &base, p))
-            {
-                if a.len() >= 768 {
-                    over = Some(decode_act(&a));
-                }
-            }
-        }
-        // v1 sprites without an embedded PCX palette rely on the character's own palette (the .act / first SFF palette)
-        let fallback: Option<Vec<u8>> = over
-            .clone()
-            .or_else(|| {
-                fget("pal1")
-                    .and_then(|p| resolve(vfs, &base, p))
-                    .filter(|a| a.len() >= 768)
-                    .map(|a| decode_act(&a))
-            })
-            .or_else(|| sff.palettes.first().map(|p| p.data.to_vec()));
-        let overrides_palette = |s: &ume_formats::sff::DecodedSprite|
-            over.is_some() && s.group != 9000 && s.palette_index == target;
-        let shared_key = |s: &ume_formats::sff::DecodedSprite| -> (i32, i32) {
-            if sff.version == 1 {
-                return if overrides_palette(s) || s.palette_index == target || s.palette.is_none() {
-                    (1, 1)
-                } else {
-                    (-1, s.palette_index)
-                };
-            }
-            sff.palettes
-                .get(s.palette_index.max(0) as usize)
-                .map(|p| (p.group, p.index))
-                .unwrap_or((1, 1))
-        };
-        if with_images {
-            for (k, p) in sff.palettes.iter().enumerate() {
-                palettes.insert(
-                    if sff.version == 1 {
-                        (-1, k as i32)
-                    } else {
-                        (p.group, p.index)
-                    },
-                    p.data.clone(),
-                );
-            }
-            const PAL_KEYS: [&str; 12] = [
-                "pal1", "pal2", "pal3", "pal4", "pal5", "pal6",
-                "pal7", "pal8", "pal9", "pal10", "pal11", "pal12",
-            ];
-            for (i, &key) in PAL_KEYS.iter().enumerate() {
-                let k = (i + 1) as i32;
-                if palettes.contains_key(&(1, k)) {
-                    continue;
-                }
-                if let Some(a) = fget(key)
-                    .and_then(|p| resolve(vfs, &base, p))
-                    .filter(|a| a.len() >= 768)
-                {
-                    palettes.insert((1, k), Arc::new(decode_act(&a)));
-                }
-            }
-            let selected = over
-                .clone()
-                .or_else(|| fallback.clone())
-                .or_else(|| palettes.get(&(1, 1)).map(|p| p.to_vec()));
-            if let Some(sel) = selected {
-                palettes.insert(
-                    if sff.version == 1 {
-                        (1, 1)
-                    } else {
-                        sff.palettes
-                            .get(target.max(0) as usize)
-                            .map(|p| (p.group, p.index))
-                            .unwrap_or((1, 1))
-                    },
-                    Arc::new(sel),
-                );
-            }
-        }
-        let mut seen = std::collections::HashSet::with_capacity(sff.sprites.len());
-        let unique: Vec<&ume_formats::sff::DecodedSprite> = sff
-            .sprites
-            .iter()
-            .filter(|s| seen.insert((s.group, s.index)))
-            .collect();
-        let pal_of = |s: &ume_formats::sff::DecodedSprite| -> Option<&[u8]> {
-            let paletteless = s.palette.is_none() && s.rgba.is_none();
-            if paletteless {
-                fallback.as_deref()
-            } else if overrides_palette(s) {
-                over.as_deref()
-            } else {
-                None
-            }
-        };
-        let (over_arc, fallback_arc) = (over.clone().map(Arc::new), fallback.clone().map(Arc::new));
-        let draw_palette = |s: &ume_formats::sff::DecodedSprite| -> Option<Arc<Vec<u8>>> {
-            let paletteless = s.palette.is_none() && s.rgba.is_none();
-            if paletteless {
-                fallback_arc.clone()
-            } else if overrides_palette(s) {
-                over_arc.clone()
-            } else {
-                s.palette.clone()
-            }
-        };
-        let pixels_id = |s: &ume_formats::sff::DecodedSprite| {
-            s.indexed
-                .as_ref()
-                .map(|p| Arc::as_ptr(p) as usize)
-                .or_else(|| s.rgba.as_ref().map(|p| Arc::as_ptr(p) as usize))
-        };
-        let mut owners: HashMap<(usize, usize, u32, u32), usize> = HashMap::new();
-        let mut owner_of = Vec::with_capacity(unique.len());
-        for (i, s) in unique.iter().enumerate() {
-            let shared = pixels_id(s).map(|px| {
-                (
-                    px,
-                    pal_of(s)
-                        .or(s.palette.as_deref().map(|v| v.as_slice()))
-                        .map_or(0, |p| p.as_ptr() as usize),
-                    s.width,
-                    s.height,
-                )
-            });
-            owner_of.push(match shared {
-                Some(k) => *owners.entry(k).or_insert(i),
-                None => i,
-            });
-        }
-        let renders: Vec<usize> = (0..unique.len()).filter(|&i| with_images && owner_of[i] == i && unique[i].width > 0 && unique[i].height > 0 && (unique[i].indexed.is_none() || unique[i].group == 9000)).collect();
-        let images = crate::perf::time("sff:rgba", || ume_formats::par::map(&renders, |&i| ImageData::new(unique[i].width, unique[i].height, sprite_to_rgba(unique[i], pal_of(unique[i])))));
-        let image_of: HashMap<usize, Arc<ImageData>> = renders.into_iter().zip(images).collect();
-        for (i, s) in unique.iter().enumerate() {
-            let key = (s.group, s.index);
-            if let (true, Some(px)) = (with_images, s.indexed.as_ref()) {
-                indexed.insert(
-                    key,
-                    IndexedSprite::new(
-                        s.width,
-                        s.height,
-                        px.clone(),
-                        shared_key(s),
-                        draw_palette(s),
-                    ),
-                );
-            }
-            let image = if with_images && s.width > 0 && s.height > 0 {
-                image_of.get(&owner_of[i]).cloned()
-            } else {
-                None
-            };
-            sprites.insert(
-                key,
-                Sprite {
-                    image,
-                    width: s.width as f32,
-                    height: s.height as f32,
-                    axis_x: s.axis_x as f32,
-                    axis_y: s.axis_y as f32,
-                    scale: 1.0,
-                },
-            );
-        }
-    }
-    // move list for the pause screen: every author-defined command with its input (internal hold/recovery helpers left out)
-    let mut movelist: Vec<MoveInfo> = Vec::with_capacity(commands.len().min(64));
-    for c in commands.iter().filter(|c| !c.raw.is_empty()) {
-        let single = !c.raw.contains(',') && !c.raw.contains('+');
-        if single {
-            continue;
-        }
-        let b = c.name.as_bytes();
-        let is_hold = b.len() >= 4 && b[..4].eq_ignore_ascii_case(b"hold");
-        let is_rec = b.len() >= 8 && b[..8].eq_ignore_ascii_case(b"recovery");
-        if is_hold || is_rec || movelist.iter().any(|m| m.command == c.name) {
-            continue;
-        }
-        movelist.push(MoveInfo { name: c.name.replace('_', " "), input: c.raw.clone(), command: c.name.clone(), cost: crate::move_cost::cost_of(&states, &c.name), drain: false, forms: u32::MAX, state: -1 });
-    }
-    let ai_commands = commands
-        .iter()
-        .filter(|c| {
-            let b = c.name.as_bytes();
-            let is_hold = b.len() >= 4 && b[..4].eq_ignore_ascii_case(b"hold");
-            let is_rec = b.len() >= 8 && b[..8].eq_ignore_ascii_case(b"recovery");
-            let is_dir = ["fwd", "back", "up", "down", "ff", "bb"]
-                .iter()
-                .any(|d| d.eq_ignore_ascii_case(&c.name));
-            !is_hold && !is_rec && !is_dir
-        })
-        .map(|c| c.name.clone())
-        .collect();
-    let mut d = CharDef::empty(&format!("mugen:{def_path}"));
-    d.name = name;
-    d.display_name = display;
-    d.author = author;
-    d.source = Source::Mugen;
-    d.local_w = local_w;
-    d.local_h = local_h;
-    d.mugen_version = crate::chardef::parse_mugen_version(info.and_then(|s| s.get("mugenversion")));
-    d.constants = constants;
-    d.refresh_sizes();
-    d.portrait = sprites.get(&(9000, 0)).cloned();
-    d.sprites = sprites;
-    d.anims = anims;
-    d.commands = commands;
-    d.states = states;
-    d.sounds = sounds;
-    d.ai_commands = ai_commands;
-    d.movelist = movelist;
-    d.series = "M.U.G.E.N".into();
-    d.palettes = palettes;
-    d.indexed = indexed;
-    d.source_spans = spans;
-    report_diagnostics(&d, &def_path);
-    let _ = Arc::new(0);
-    Ok(d)
+type Binaries = (Option<Result<ume_formats::sff::DecodedSff, String>>, HashMap<i32, crate::chardef::Animation>, HashMap<(i32, i32), Vec<u8>>);
+
+#[cfg(not(target_arch = "wasm32"))]
+fn decode_binaries(sprite_buf: Option<impl AsRef<[u8]> + Send>, anim_buf: Option<impl AsRef<[u8]> + Send>, snd_buf: Option<impl AsRef<[u8]> + Send>) -> Binaries {
+    std::thread::scope(|sc| {
+        let h_sff = sc.spawn(move || sprite_buf.map(|buf| crate::perf::time("sff:decode", || sff_cache::decode_cached(buf.as_ref(), &std::collections::HashSet::new()))));
+        let h_anim = sc.spawn(move || crate::perf::time("air:parse", || anim_buf.map(|b| parse_air(&text(b.as_ref()))).unwrap_or_default()));
+        let h_snd = sc.spawn(move || crate::perf::time("snd:decode", || snd_buf.map(|b| decode_snd(b.as_ref())).unwrap_or_default()));
+        (h_sff.join().unwrap(), h_anim.join().unwrap(), h_snd.join().unwrap())
+    })
+}
+
+#[cfg(target_arch = "wasm32")]
+fn decode_binaries(sprite_buf: Option<impl AsRef<[u8]>>, anim_buf: Option<impl AsRef<[u8]>>, snd_buf: Option<impl AsRef<[u8]>>) -> Binaries {
+    let anims = crate::perf::time("air:parse", || anim_buf.map(|b| parse_air(&text(b.as_ref()))).unwrap_or_default());
+    let sff = sprite_buf.map(|buf| crate::perf::time("sff:decode", || sff_slice::decode_for_anims(buf.as_ref(), &anims)));
+    let sounds = crate::perf::time("snd:decode", || snd_buf.map(|b| decode_snd(b.as_ref())).unwrap_or_default());
+    (sff, anims, sounds)
 }
 
 fn report_diagnostics(d: &CharDef, def_path: &str) {

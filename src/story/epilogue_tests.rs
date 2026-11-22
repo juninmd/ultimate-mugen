@@ -83,3 +83,33 @@ fn the_final_boss_swaps_when_the_player_is_the_kingpin() {
     assert_eq!(final_boss("kaito"), "valdric");
     assert_eq!(final_boss("valdric"), "kaito");
 }
+
+#[test]
+fn mugen_fighters_get_an_invented_epilogue_with_their_name() {
+    let table = merged(None);
+    let tale = pick_named(&table, "mugen:goku-ssj4", "Goku SSJ4").unwrap();
+    assert_ne!(Some(tale.as_ref()), table.get(FALLBACK));
+    for lang in LANGS {
+        let beats = tale.beats(lang);
+        assert!(beats.iter().any(|beat| beat.text.contains("Goku SSJ4")), "{lang}");
+        assert!(beats.iter().all(|beat| !beat.text.contains("{name}")), "{lang}");
+    }
+}
+
+#[test]
+fn the_invented_epilogue_is_stable_and_varies_across_fighters() {
+    let table = merged(None);
+    let scene_of = |id: &str| pick_named(&table, id, "X").unwrap().scene.clone();
+    assert_eq!(scene_of("mugen:ryu"), scene_of("mugen:ryu"));
+    let scenes: std::collections::BTreeSet<String> = (0..40)
+        .map(|n| scene_of(&format!("mugen:fighter{n}")))
+        .collect();
+    assert!(scenes.len() >= 4, "{scenes:?}");
+}
+
+#[test]
+fn own_epilogues_win_over_invented_ones_and_nameless_fighters_use_the_fallback() {
+    let table = merged(None);
+    assert_eq!(pick_named(&table, "umf:kaito", "Other").unwrap().as_ref(), table.get("kaito").unwrap());
+    assert_eq!(pick_named(&table, "mystery", "").unwrap().as_ref(), table.get(FALLBACK).unwrap());
+}

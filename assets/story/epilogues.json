@@ -108,9 +108,9 @@
     },
     "pages": [
       {
-        "en": "Akio ran all the way back to Osaka and burst into the Starfall Dojo before breakfast, still wrapped in bandages.",
-        "pt": "Akio correu até Osaka e invadiu o Dojo da Queda Estelar antes do café da manhã, ainda coberto de ataduras.",
-        "es": "Akio corrió hasta Osaka e irrumpió en el Dojo de la Caída Estelar antes del desayuno, todavía cubierto de vendas."
+        "en": "Akio ran all the way back to Mérida and burst into the Starfall Dojo before breakfast, still wrapped in bandages.",
+        "pt": "Akio correu até Mérida e invadiu o Dojo da Queda Estelar antes do café da manhã, ainda coberto de ataduras.",
+        "es": "Akio corrió hasta Mérida e irrumpió en el Dojo de la Caída Estelar antes del desayuno, todavía cubierto de vendas."
       },
       {
         "en": "The students asked what the kingpin was like. He only laughed and tightened their white belts: class starts now.",
@@ -353,9 +353,9 @@
         "es": "Kaname envainó la katana espiritual y se inclinó ante la azotea vacía. Un juicio termina cuando la hoja está limpia."
       },
       {
-        "en": "Snow was falling over Hokkaido when he returned. He swept the shrine steps, as on any other morning.",
-        "pt": "Nevava em Hokkaido quando ele voltou. Varreu os degraus do santuário, como em qualquer outra manhã.",
-        "es": "Nevaba en Hokkaido cuando regresó. Barrió los escalones del santuario, como cualquier otra mañana."
+        "en": "Snow was falling over the Swiss Alps when he returned. He swept the shrine steps, as on any other morning.",
+        "pt": "Nevava nos Alpes Suíços quando ele voltou. Varreu os degraus do santuário, como em qualquer outra manhã.",
+        "es": "Nevaba en los Alpes suizos cuando regresó. Barrió los escalones del santuario, como cualquier otra mañana."
       }
     ]
   },
@@ -476,6 +476,186 @@
         "en": "Back under Seoul he shelved one new volume in the Twilight Library: the night his friends were safe.",
         "pt": "De volta ao subsolo de Seul, guardou um novo volume na Biblioteca do Crepúsculo: a noite em que seus amigos ficaram a salvo.",
         "es": "De vuelta bajo Seúl, guardó un nuevo volumen en la Biblioteca del Crepúsculo: la noche en que sus amigos estuvieron a salvo."
+      }
+    ]
+  },
+  "*:tale1": {
+    "scene": "neon",
+    "title": {
+      "en": "The Last Neon Light",
+      "pt": "A Última Luz de Neon",
+      "es": "La Última Luz de Neón"
+    },
+    "boss": {
+      "en": "Impossible. Nobody climbs this tower alone and walks back down.",
+      "pt": "Impossível. Ninguém sobe esta torre sozinho e volta a descer.",
+      "es": "Imposible. Nadie sube esta torre solo y vuelve a bajar."
+    },
+    "reply": {
+      "en": "I did not climb alone. I carry everyone who stood up before.",
+      "pt": "Não subi só. Carrego todos que se levantaram antes.",
+      "es": "No subí solo. Llevo conmigo a todos los que se levantaron antes."
+    },
+    "pages": [
+      {
+        "en": "The neon signs flickered out one by one, and for the first time the street lit itself with morning.",
+        "pt": "Os letreiros de neon se apagaram um a um, e pela primeira vez a rua se acendeu com a manhã.",
+        "es": "Los letreros de neón se apagaron uno a uno, y por primera vez la calle se encendió con la mañana."
+      },
+      {
+        "en": "{name} left no name on the tower. The city painted one on the wall anyway.",
+        "pt": "{name} não deixou nome na torre. A cidade pintou um no muro mesmo assim.",
+        "es": "{name} no dejó nombre en la torre. La ciudad pintó uno en el muro de todos modos."
+      }
+    ]
+  },
+  "*:tale2": {
+    "scene": "plains",
+    "title": {
+      "en": "Road Without an End",
+      "pt": "Estrada sem Fim",
+      "es": "Camino sin Fin"
+    },
+    "boss": {
+      "en": "You fight like someone with nothing left to lose.",
+      "pt": "Você luta como quem não tem mais nada a perder.",
+      "es": "Peleas como quien no tiene nada más que perder."
+    },
+    "reply": {
+      "en": "Wrong. I have a long road ahead, and that is worth everything.",
+      "pt": "Errado. Tenho uma longa estrada pela frente, e isso vale tudo.",
+      "es": "Te equivocas. Tengo un largo camino por delante, y eso lo vale todo."
+    },
+    "pages": [
+      {
+        "en": "Dawn found {name} on the edge of the rooftop, bandages drying in the wind.",
+        "pt": "A aurora encontrou {name} à beira da cobertura, com as ataduras secando ao vento.",
+        "es": "El amanecer encontró a {name} al borde de la azotea, con las vendas secándose al viento."
+      },
+      {
+        "en": "Then {name} stood, shouldered the pack and walked toward the plains. Somewhere out there, another bout was waiting.",
+        "pt": "Então {name} se levantou, pôs a mochila nas costas e seguiu para as planícies. Em algum lugar, outra luta esperava.",
+        "es": "Entonces {name} se levantó, se echó la mochila al hombro y caminó hacia las llanuras. En algún lugar, otra pelea esperaba."
+      }
+    ]
+  },
+  "*:tale3": {
+    "scene": "dojo",
+    "title": {
+      "en": "The Empty Dojo",
+      "pt": "O Dojo Vazio",
+      "es": "El Dojo Vacío"
+    },
+    "boss": {
+      "en": "Strength like that is not born in a day. Who trained you?",
+      "pt": "Uma força assim não nasce em um dia. Quem treinou você?",
+      "es": "Una fuerza así no nace en un día. ¿Quién te entrenó?"
+    },
+    "reply": {
+      "en": "Everyone I ever lost to. I just never forgot the lesson.",
+      "pt": "Todos para quem já perdi. Só nunca esqueci a lição.",
+      "es": "Todos aquellos ante quienes perdí. Solo nunca olvidé la lección."
+    },
+    "pages": [
+      {
+        "en": "{name} returned to a dojo that had been silent for years and opened every window.",
+        "pt": "{name} voltou a um dojo que estava em silêncio há anos e abriu todas as janelas.",
+        "es": "{name} volvió a un dojo que llevaba años en silencio y abrió todas las ventanas."
+      },
+      {
+        "en": "By evening, three children were bowing at the door. The first class began with a single stance.",
+        "pt": "Ao anoitecer, três crianças faziam reverência à porta. A primeira aula começou com uma única postura.",
+        "es": "Al anochecer, tres niños hacían una reverencia en la puerta. La primera clase empezó con una sola postura."
+      }
+    ]
+  },
+  "*:tale4": {
+    "scene": "volcano",
+    "title": {
+      "en": "Ashes and Embers",
+      "pt": "Cinzas e Brasas",
+      "es": "Cenizas y Brasas"
+    },
+    "boss": {
+      "en": "The fire in you is still burning. Will it consume you too?",
+      "pt": "O fogo em você ainda queima. Vai consumir você também?",
+      "es": "El fuego en ti sigue ardiendo. ¿Te consumirá a ti también?"
+    },
+    "reply": {
+      "en": "Not if I decide what it burns. Today it burned your throne.",
+      "pt": "Não se eu decidir o que ele queima. Hoje queimou o seu trono.",
+      "es": "No si yo decido qué quema. Hoy quemó tu trono."
+    },
+    "pages": [
+      {
+        "en": "The tower's crown cooled to ash, and {name} carried one ember down the stairs in a closed fist.",
+        "pt": "A coroa da torre esfriou em cinzas, e {name} desceu as escadas com uma brasa na mão fechada.",
+        "es": "La corona de la torre se enfrió en cenizas, y {name} bajó las escaleras con una brasa en el puño cerrado."
+      },
+      {
+        "en": "At the foot of the volcano, {name} opened the hand and lit the first fire of a village that had gone cold.",
+        "pt": "Ao pé do vulcão, {name} abriu a mão e acendeu o primeiro fogo de uma vila que havia esfriado.",
+        "es": "Al pie del volcán, {name} abrió la mano y encendió el primer fuego de una aldea que se había enfriado."
+      }
+    ]
+  },
+  "*:tale5": {
+    "scene": "lighthouse_alexandria",
+    "title": {
+      "en": "The Lighthouse Keeper",
+      "pt": "O Guardião do Farol",
+      "es": "El Guardián del Faro"
+    },
+    "boss": {
+      "en": "Why fight for strangers? They will forget you by morning.",
+      "pt": "Por que lutar por desconhecidos? Eles esquecem você até de manhã.",
+      "es": "¿Por qué pelear por desconocidos? Te olvidarán por la mañana."
+    },
+    "reply": {
+      "en": "A lighthouse does not ask to be remembered. I only keep the light on.",
+      "pt": "Um farol não pede para ser lembrado. Eu só mantenho a luz acesa.",
+      "es": "Un faro no pide ser recordado. Yo solo mantengo la luz encendida."
+    },
+    "pages": [
+      {
+        "en": "Ships that had circled the harbor for months finally found the shore, guided by a beam that had been dark too long.",
+        "pt": "Navios que rondavam o porto há meses enfim encontraram a costa, guiados por um facho que ficou apagado por tempo demais.",
+        "es": "Los barcos que llevaban meses rondando el puerto por fin hallaron la costa, guiados por un haz que estuvo apagado demasiado tiempo."
+      },
+      {
+        "en": "{name} watched the sea from the top of the tower until the last sail was safe, then smiled and began the long walk home.",
+        "pt": "{name} vigiou o mar do alto da torre até a última vela estar a salvo, depois sorriu e começou a longa caminhada para casa.",
+        "es": "{name} vigiló el mar desde lo alto de la torre hasta que la última vela estuvo a salvo, luego sonrió y empezó el largo camino a casa."
+      }
+    ]
+  },
+  "*:tale6": {
+    "scene": "great_wall",
+    "title": {
+      "en": "Beyond the Wall",
+      "pt": "Além da Muralha",
+      "es": "Más Allá de la Muralla"
+    },
+    "boss": {
+      "en": "Walls fall and empires fade. What will you leave behind?",
+      "pt": "Muralhas caem e impérios se desfazem. O que você vai deixar para trás?",
+      "es": "Las murallas caen y los imperios se desvanecen. ¿Qué dejarás tú?"
+    },
+    "reply": {
+      "en": "A door. I leave a door that stays open.",
+      "pt": "Uma porta. Deixo uma porta que continua aberta.",
+      "es": "Una puerta. Dejo una puerta que sigue abierta."
+    },
+    "pages": [
+      {
+        "en": "The gatekeepers lowered their spears when {name} reached the old wall at dusk, and the heavy gate swung open.",
+        "pt": "Os guardas baixaram as lanças quando {name} chegou à velha muralha ao entardecer, e o pesado portão se abriu.",
+        "es": "Los guardias bajaron las lanzas cuando {name} llegó a la vieja muralla al anochecer, y la pesada puerta se abrió."
+      },
+      {
+        "en": "Beyond it, the market lanterns were already lit. {name} walked in, and nobody asked where the fighter came from.",
+        "pt": "Do outro lado, as lanternas do mercado já estavam acesas. {name} entrou, e ninguém perguntou de onde o lutador vinha.",
+        "es": "Más allá, los faroles del mercado ya estaban encendidos. {name} entró, y nadie preguntó de dónde venía el luchador."
       }
     ]
   },

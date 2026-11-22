@@ -30,7 +30,9 @@ Beating the final boss plays an epilogue before the `STORY COMPLETE` card. Every
 
 The scenery is the illustration of an existing stage with a slow pan, drifting light motes, letterbox bars, a fade when the scene changes and text typed letter by letter. `OK` reveals the line and then advances, `ESC` skips to the final card.
 
-Texts live in `assets/story/epilogues.json`, keyed by fighter id; `*` is the fallback used by fighters with no entry (imported or custom ones):
+The fighter on screen plays its own animations: the walk cycle (`20`) carries it into the home scene, the taunt (`195`) or win pose (`181`) plays while it answers, and the win pose closes the story. Animations a fighter does not have fall back to the next one in the chain and finally to idle (`src/story/epilogue_pose.rs`).
+
+Texts live in `assets/story/epilogues.json`, keyed by fighter id. A fighter with no entry (imported M.U.G.E.N characters or custom ones) gets an invented epilogue: one of the `*:tale1` to `*:tale6` templates, picked by a stable hash of the fighter id, with `{name}` replaced by the fighter's display name. `*` stays as the last resort when the name is empty:
 
 ```json
 {

@@ -15,6 +15,8 @@ pub struct SpritePack {
 }
 
 impl SpritePack {
+    pub(super) fn file(&self, name: &str) -> Option<Arc<Vec<u8>>> { self.files.get(name).cloned() }
+
     pub fn parse(bytes: &[u8]) -> Result<Self, String> {
         if bytes.len() > 16 << 20 { return Err("sprite pack: larger than 16 MiB".into()); }
         if bytes.len() < 11 || &bytes[0..4] != MAGIC { return Err("sprite pack: bad header".into()); }
@@ -47,7 +49,7 @@ impl SpritePack {
 
 pub(super) fn read_sprite(root: &Path, name: &str) -> Option<Arc<Vec<u8>>> {
     let packed = root.file_name().and_then(|character| character.to_str()).and_then(|character| read(character, name));
-    let bytes = packed.or_else(|| std::fs::read(root.join(name)).ok().map(Arc::new))?;
+    let bytes = packed.or_else(|| super::embedded::read(root.file_name()?.to_str()?, name)).or_else(|| std::fs::read(root.join(name)).ok().map(Arc::new))?;
     if let Some(seen) = TRACE.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).as_mut() {
         seen.insert(name.to_string());
     }

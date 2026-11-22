@@ -33,6 +33,8 @@ pub mod finish;
 pub mod camera;
 pub mod scene_triggers;
 pub mod common;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod snapshot;
 pub mod ai;
 pub mod fx;
 pub mod ikemen;

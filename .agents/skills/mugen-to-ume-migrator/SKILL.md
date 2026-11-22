@@ -12,48 +12,46 @@ O motor já roda personagens MUGEN legados direto da pasta ou do zip. Migre para
 
 ## Conversor automático (recomendado)
 
-Todo o código de migração vive em um pacote só, `tools/mugen2umf/` (Python 3 + `Pillow`), usado como CLI ou servidor MCP:
+Todo o código de migração é Rust e vive em uma pasta só, `tools/mugen2umf/` (crate `mugen2umf`), usado como CLI ou servidor MCP (`.mcp.json`):
 
 ```
-python3 tools/mugen2umf convert <pasta-mugen> <saida> --id <id> --name "<Nome>" [--extra extra.json]
-python3 tools/mugen2umf inspect <pasta-mugen>      # resumo do pacote (antes era mugen-dissector)
-python3 tools/mugen2umf hitdefs <arquivo.cns|.st>  # HitDefs dos normais
-python3 tools/mugen2umf coverage <saida>           # relê o coverage.md
-python3 tools/mugen2umf validate <saida>/<id>.json # schema umf-2
-python3 tools/mugen2umf mcp                        # mesmas 5 ferramentas via MCP (stdio), ver .mcp.json
+cargo run --release -p mugen2umf -- convert <pasta-ou-zip> <saida> <id> [--name "<Nome>"] [--extra extra.json]
+cargo run --release -p mugen2umf -- inspect <pasta-ou-zip>        # arquivos, SFF, comandos, estados, controladores, rotas, suporte do motor
+cargo run --release -p mugen2umf -- hitdefs <pasta-ou-zip>        # todas as HitDefs por estado
+cargo run --release -p mugen2umf -- parity <pasta-ou-zip> <saida> # golpe a golpe, tick a tick
+cargo run --release -p mugen2umf -- validate <saida>              # carrega e compila como o jogo
+cargo run --release -p mugen2umf -- profile_facts <pasta-ou-zip>  # fatos do pacote + campos UMF a preencher
+cargo run --release -p mugen2umf -- set_profile <saida> '{"series":"...","profile":{...}}'
+cargo run --release -p mugen2umf -- mcp                           # as mesmas ferramentas via MCP (stdio)
 ```
 
-`convert` gera `<id>.json` + `sprites/` + `coverage.md` + `routes.json` (estado original de cada golpe, usado pelo teste de paridade). Testes: `python3 -m unittest discover -s tools/mugen2umf/tests -t tools`.
+Testes: `cargo test --release -p mugen2umf` (converte o Kung Fu Man de `assets/mugen/elecbyte.zip` e exige paridade total).
 
-- **Sprites**: todo `(grupo, índice)` do SFF vira `sprites/s{g}_{i}.png` sem reamostragem; `meta.json` guarda `axisX/axisY` do SFF e `refHeight` = altura do idle.
-- **Escala 1:1**: `stats.height` = `refHeight` (escala = 100/refHeight × height/100 = 1). Nunca use 100 nem outro valor, senão o lutador fica maior e borrado.
-- **Caixas**: `Clsn1` vira `hit.box` (união das caixas), `Clsn2` vira `hurt` por quadro, e `art.style.boxes = "exact"` desliga o recorte automático pela máscara do sprite.
-- **Golpes e cancelamentos**: lidos do `Statedef -1` (`ChangeState` + `command`). Grupos `stateno = X` + `movecontact`/`movehit` viram `cancels: [...]`. Um grupo `triggerN` com `ctrl = 0` ou que só serve a outro estado é ignorado, e comandos só de segurar (`/x`) também. `statetype` define `when`, e `power >= N` define `cost`. `command` é comparado sem diferenciar caixa (`SPECIAL 1` no `.cmd` e `"special 1"` no gatilho); sem isso o pacote perde quase todos os especiais.
-- **Habilidades automáticas (`abilities.py`)**: detecta estados de voo (direcionais `holdfwd/back/up/down` → `abilities.fly` com `upAnim/downAnim/fwdAnim/backAnim`), carga de ki (`PowerAdd > 0` com loop → `abilities.charge` com `auraColor/shake/sound`) e teleporte para trás do oponente só quando usa `p2dist` (`abilities.teleport`, aceita input de movimento como `~B, D, B, x` com `at` sincronizado no quadro do `PosAdd` e encerramento em `AnimTime = 0`), removendo-os da lista de ataques para evitar travamentos (`ctrl = 0`).
-- **Cadeias e hit-confirm (`followUp`)**: `ChangeState` incondicional é seguido até 12 estados (`seq<estado>`) sem entrar em estados consumidos de voo/carga. Quando há transição condicional (`MoveHit = 1` / `MoveContact = 1`), o conversor divide em golpe de follow-up e emite `followUp: { to, on: "hit" | "contact" | "hitNow" }`, evitando cinemáticas no whiff. Os `at` são deslocados.
-- **HitDef/Projectile/VelSet/PosAdd p2dist/PlaySnd** viram `hits`, `projectile`, `moves`, `teleport` e `sounds` no quadro certo (`AnimElem`, ou `Time` convertido em quadro).
-- **FX, cinemática e teleportes multi-etapa**: `Explod` → `explods[]` (incluindo anims e sprites no pacote), `AfterImage` → `afterimage`, `EnvShake` → `shake`, `EnvColor` → `flash`, `SuperPause` → `superPause`, `NotHitBy` → `invuln`, e todos os `PosAdd` deduplicados da sequência → `teleport` único ou lista `[step1, step2]` (ex.: Super Genki Dama sobe `[-200, -100]`, lança e retorna `[125, 100]`). Golpes com teleporte que terminam com `Pos Y < 0` saem automaticamente para o estado aéreo `50` (`ctrl = 1`) em vez de flutuar travados no estado `0`.
-- **Super**: só com `SuperPause`, `poweradd <= -1000` ou custo ≥ 1000. Número de estado ≥ 3000 não basta, porque teleportes vivem lá.
-- **Feixes de Ki (`Projectile`)**: preserva `projhits` (`hits`), `projmisstime` (`missTime`), `hitflag`, `guardDamage`, `pausetime`, `hitSound`, `accel`, `knockback` e `launch`.
-- **Agarrões e Wall Bounce**: `TargetBind` + `TargetLifeAdd` + `ChangeAnim2` viram `throw`; estados de P2 com `BackEdgeBodyDist` ativam `wallBounce: true` no `HitSpec`.
-- **Sons**: o `.snd` inteiro é extraído para `sprites/snd_{g}_{i}.wav` e listado em `meta.json.sounds`; o motor carrega esses arquivos e toca `moves[].sounds` (`{at, snd:[g,i], fight?}`) no quadro indicado.
-- **Intro, provocação e estados especiais (`scripts.py`)**: estados 170-199 (intro, vitória, provocação) e o que eles chamam viram `scripts.cns` verbatim com `@anim(nome)`; o motor entra no `Statedef 190` próprio no início do round, então texto/balão de entrada e sons saem iguais. Comandos do `Statedef -1` usados nesses estados viram `umf_<nome>`; provocação no Start sai para `x+y` (Taunt), porque Start/R é a carga de ki.
-- **Carga de ki (`charge.py`)**: segure **R** (Start). Mantém anim de início, loop e fim (`startAnim`, `anim`, `endAnim`), `startSound` e `sound` nos quadros originais (`soundAt`). Estado 3920 (loop) e 3921 (fim).
-- **Golpes de voo e rotas (`routes.py`)**: grupos com `ctrl` ganham; grupos que só disparam do estado de voo viram `when: "fly"` (começa e volta para 3900 sem cair); grupos só de cancel são ignorados. Normais de chão (200-240) não são mais trocados por golpes de voo.
-- **Cadeias (`chain.py`)**: até 12 estados por cadeia; `time = N` repete/corta o loop até N ticks; saída por pouso vira `landAt` (anima o pouso no lugar, sem cair no estado 52). `HitDef p1stateno` vira `followUp on: "hitNow"`. Sem limite de 6 hits; `Clsn1Default` lido; `fall.recover = 0` vira `recover: false`.
-- **Movimento e paleta (`motion.py`)**: `VelMul` e `VelAdd` com gatilho contínuo (`Time >= 0`, `1`) viram `velMul`/`velAdd` `{from, to, x, y}` no trecho do estado na cadeia; `PosFreeze` vira `posFreeze {from, to}`; `PosSet` e `PalFX` com `Time = N`/`AnimElem = N` viram `posSet {at, x, y}` e `palFx {at, time, add, mul, sinAdd, color, invertAll}`. `velAdd` em y é a gravidade própria do estado (Statedef sem `physics` é N no MUGEN), então o compilador desliga a gravidade nativa nesse trecho. Gatilho condicional sai como descartado no `coverage.md`.
-- **Comandos repetidos**: estado cujo comando já é tomado por outro grupo anterior fica como `shadowed` (também nunca dispara no MUGEN). Follow-ups saem com `input: ""` e não aparecem na lista de golpes.
-- **`coverage.md`**: o conversor grava em `<saida>/coverage.md` o destino de cada `Statedef` (golpe, habilidade, script, comum do motor, shadowed, código morto, parcial ou NOT MIGRATED), contagem de sprites/sons e controladores descartados. Zero `NOT MIGRATED` é a meta; leia os parciais.
-- **Paridade com evidência**: `UME_CHAR_DIR=<pasta-mugen> UME_TEST_UMF_JSON=<saida>/<id>.json UME_EVIDENCE_DIR=<dir> cargo test --release -p ume-engine --test umf_parity_evidence -- --nocapture` roda original vs UMF (intro, carga, Genki Dama, teleporte, meteoro, kamehameha) e grava `parity.md` + PNG lado a lado. Os sprites do UMF são lidos de `assets/chars/sprites/<id>` (link simbólico local, nunca commitar).
-- **Kits reutilizáveis**: para reduzir JSON em lutadores novos ou editados, use `"extends": ["core", "ki_fighter", "clone_arts", "aerial_rush"]` (`crates/native/src/kits/`).
-- **Schema**: o formato está em `docs/schema/umf-2.schema.json` (chaves desconhecidas são rejeitadas). Confira o pacote gerado com `node scripts/umf-schema.mjs <saida>/<id>.json`; o pacote Goku SSJ4 do `mugen-assets` passa. Mudou uma struct serde em `crates/native/src`? Atualize o schema no mesmo PR (`node --test scripts/umf-schema.test.mjs`).
-- **Helpers e estados globais**: `Helper` com `stateno` numérico vira `spawn: [{at, state, id, name, pos, postype, facing, ownPal, superMoveTime, pauseMoveTime}]`; o estado do helper e tudo o que ele chama (`ChangeState`, `HitOverride`, `HitDef p1stateno/p2stateno`) vão para `scripts.cns` verbatim renumerados a partir de 70000. `Statedef -2` e `-3` também passam verbatim. Gatilhos `Parent,StateNo = N`/`StateNo = N` que apontam para um golpe convertido viram `@move(id)`; os do inimigo (`p2stateno`, `enemynear,stateno`) ficam como estão.
-- **Rekka, segurar e soltar**: `ChangeState` com `command` dentro de um golpe vira golpe filho `{pai}_{nome}` com `rekka {after, window, contact}`, ou `followUp on: "command"` (segurar, `/x`) e `on: "release"` (soltar); flags de buffer (`VarSet` com `command` e depois `var(K)`) viram comando com buffer 30.
-- **Condição de estado**: controlador cujos gatilhos só valem no ar (`StateType = A`) sai do golpe de chão e vice-versa (projéteis, sons e helpers duplicados chão/ar).
-- **`hitsound = S g,i`**: som do próprio lutador vira `hitSound` + `ownSound: true` (sem o `S` é o banco comum).
-- **Paleta SFF v1**: em pacotes `mugenversion = 1.x` um sprite com paleta compartilhada usa a paleta do sprite anterior (fundos de super, efeitos), e só a cadeia da paleta do personagem recebe o `.act`; WinMUGEN mantém a regra antiga (todo compartilhado usa o `.act`).
-- **`--extra`**: mescla JSON por cima. Golpe com `id` já existente só troca os campos que lista (renomear, ajustar dano); `id` novo é somado. `abilities`, `profile`, `helpers`, `passives` e `scripts` são mesclados por chave. `mugenRoutes: [{state, id, input, when?, cost?}]` destrava estados que o `.cmd` deixou comentados (ex.: o hyper S.H.I.E.L.D. da Black Widow).
-- **Paridade por golpe**: `UME_CHAR_DIR=<pasta-mugen> UME_TEST_UMF_JSON=<saida>/<id>.json UME_EVIDENCE_DIR=<dir> UME_EVIDENCE_MOVES=a,b UME_EVIDENCE_EXTRA=novo1,novo2 cargo test --release -p ume-engine --test umf_route_parity -- --nocapture` força cada estado original e o golpe UMF correspondente (via `routes.json`), compara sons e dano e grava `route_parity.md` + PNGs; golpes só do UMF precisam causar dano. Falha abaixo de 70 % de golpes com os mesmos sons.
+### Modo exato: comportamento 100% idêntico
+
+A migração não reinterpreta mais os estados como golpes UMF (era isso que perdia comportamento: Black Widow e Goku SSJ4). O bundle guarda o personagem original e o motor carrega pelo mesmo código de um personagem M.U.G.E.N (`ume_engine::loader::assemble_mugen_char`):
+
+- `<id>.json` → bloco `mugen`: `[Info]` original, `cns`, `st*`, `stcommon` e `cmd` verbatim (texto), e `anims` = cada action do AIR em JSON (sprite, offset, ticks, flip, blend/alpha, escala, ângulo, Clsn1/Clsn2 completos, loopstart).
+- `sprites/` → cada sprite do SFF como PNG indexado (índices e paleta exatos, tRNS completo; true color vira RGBA), as paletas do SFF (`sffpal_<k>.bin`), os `.act` de `pal1..pal12` (troca de paleta igual ao MUGEN), todos os sons (`snd_g_i.wav`) e `meta.json` (eixos, tamanhos, paleta de cada sprite, ordem do SFF).
+- `art.type = "mugen"`, `anims: {}` e `moves: []`: os golpes vêm do próprio CNS.
+- Saídas extras: `parity.md` (relatório), `routes.json` (comando → estado) e `report.md` (inspeção + diagnóstico do motor).
+
+`parity` joga cada comando do `Statedef -1` pelo input real no original e no UMF (150 ticks, mesma luta) e compara, a cada tick, estado, animação, quadro, posição, velocidade, controle, vida, poder, helpers e sons; e compara os dados (estados, comandos, constantes, animações, sprites, paletas, sons). Meta: **IDENTICAL**. Diferença aqui é bug do conversor ou do formato, nunca "aceitável".
+
+O que o motor ainda não suporta do MUGEN aparece no `report.md` (diagnóstico) e afeta original e UMF igualmente; corrija no motor, não no conversor.
+
+### Melhorias UMF por cima (`--extra`)
+
+- Metadados e campos exclusivos do UMF: `name`, `series`, `author`, `description`, `color`, `intro`, `taunt`, `winQuote`, `rivals`, `profile` (ver abaixo).
+- `moves: [{id, name}]` sem `anim` só renomeia o golpe na lista (`mugen.names`, chave = nome do comando).
+- `mugenRoutes: [{state, id, input, name?, when?, cost?}]` destrava estados que o `.cmd` deixou sem comando (ex.: hyper S.H.I.E.L.D. da Black Widow) via `scripts`.
+- `scripts.cns`/`scripts.zss`/`scripts.commands`: golpes novos escritos em CNS/ZSS, com `@anim(<número>)`, somados depois do original (o `Statedef -1` novo roda depois do original).
+
+### Campos exclusivos do UMF preenchidos pela skill
+
+1. `profile_facts <pacote>` devolve o `[Info]` do `.def`, readmes/notas do pacote e a lista de campos.
+2. A skill (o modelo) escreve `series`, `description`, falas e `profile` (`country` ISO, `nationality`, `origin`, `bio`, `title`, `fightingStyle`, `affiliation` em `en`, `pt` e `es`, `element`, `alignment`, `tags`) fiel ao personagem.
+3. `set_profile <saida> '<json>'` valida (serde do jogo) e grava. Nada é inventado pelo código: o código junta fatos, o modelo redige.
 
 ## Enriquecimento UME obrigatório (identidade, país, interações e storyboard)
 
@@ -135,7 +133,7 @@ Pegadinhas aprendidas (estudo de caso Goku SSJ4): nunca siga `ChangeState` para 
 
 ## O que não migra
 
-Lua/ZSS arbitrário, helpers com lógica própria, `Statedef -2/-3` customizados e estados de IA: recrie como `passives`, `forms` ou deixe o personagem em formato legado. Nunca copie nomes de arquivo de terceiros ou arte; crie poses novas ou reuse as `anims` existentes do nativo.
+No modo exato tudo migra (estados, helpers, `Statedef -2/-3`, ZSS, IA, paletas, sons). O limite é o motor: o que ele não suporta do MUGEN aparece no `report.md` e vale igual para o original. A tabela acima serve só para recriar um lutador à mão como UMF nativo (`moves`/`anims`).
 
 ## Regras do repositório
 

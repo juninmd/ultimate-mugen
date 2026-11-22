@@ -1500,7 +1500,7 @@
       "accent": "#8ae070"
     }
   ],
-  "country": "Japão",
+  "country": "Suíça",
   "stage": "spirit",
   "passives": {"meterRegen":0.5,"stacks":{"defenceGain":0.03,"damageGain":0.02,"maxStacks":5,"decayTicks":360,"resetOnRound":true,"specials":true,"supers":true}},
   "abilities": {
@@ -1567,8 +1567,8 @@
   },
   "speed": 1.08,
   "profile": {
-    "country": "JP",
-    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
+    "country": "CH",
+    "nationality": {"en":"Swiss","pt":"Suíço","es":"Suizo"},
     "origin": {"en":"Winter Moon Shrine","pt":"Santuário da Lua de Inverno","es":"Santuario de la Luna Invernal"},
     "title": {"en":"White Haori Frost Guardian","pt":"Guardião do Haori Branco","es":"Guardián del Haori Blanco"},
     "fightingStyle": {"en":"Fuyutsuki Ice Iaido","pt":"Iaido Glacial Fuyutsuki","es":"Iaido Glacial Fuyutsuki"},

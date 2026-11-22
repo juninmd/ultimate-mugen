@@ -67,7 +67,10 @@ jobs:
       - if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev pkg-config
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+      - name: Pack native fighter sprites into the executable
+        run: cargo run --release --locked -q -p ume-devtools -- pack-sprites "$RUNNER_TEMP/sprites"
       - run: cargo build --release --locked
+        env: { UME_SPRITE_PACKS: "${{ runner.temp }}/sprites/assets/chars/sprites" }
       - name: Stamped version must equal the planned tag
         run: |
           got="$(target/release/${{ matrix.exe }} --version)"

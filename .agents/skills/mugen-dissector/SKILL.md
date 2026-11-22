@@ -19,8 +19,8 @@ Conhecimento consolidado de Aizen TYBW, Gogeta SSJ4, Goku SSJ GT e Goku SSJ4. As
 
 ## Fluxo
 
-1. `python3 tools/mugen2umf inspect <pasta>`: formato e contagem de sprites, sons, ações AIR, caixas Clsn, comandos, `Statedef` e controllers por tipo.
-2. `python3 tools/mugen2umf hitdefs <arquivo.cns>`: HitDef dos estados 200, 210, 230, 400, 410, 600, 610 (dano, pausa, hit time, juggle, power).
+1. `cargo run --release -p mugen2umf -- inspect <pasta-ou-zip>`: formato e contagem de sprites, sons, ações AIR, caixas Clsn, comandos, `Statedef` e controllers por tipo.
+2. `cargo run --release -p mugen2umf -- hitdefs <pasta-ou-zip>`: todas as HitDef por estado (attr, dano, animtype, hitflag, guardflag, pausa, velocidades, p1/p2stateno).
 3. Ler o `.cmd` (`[Statedef -1]`) para ver o roteamento: quais triggers extras cancelam (`movehit`, `numhelper`, `power >=`).
 4. Ler os estados de especiais e supers e classificar pelo padrão (projétil, rush, agarrão, clone, teleporte, forma, contra-ataque) usando a tabela "Tipos de golpe" da dissecação.
 5. Mapear cada padrão para dados UMF com a tabela da receita e montar anims só com poses que existem em `assets/chars/sprites/<id>/`.

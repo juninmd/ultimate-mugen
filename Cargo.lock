@@ -1483,6 +1483,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "mugen2umf"
+version = "0.3.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tiny-skia",
+ "ume-engine",
+ "ume-formats",
+ "ume-native",
+]
+
+[[package]]
 name = "multiversion_no_op"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -64,22 +64,22 @@ The warriors of the Convergence are divided into three distinct philosophical ca
 
 ### 1. The Convergence Protectors (Heroes)
 Dedicated to mending the Astral Loom, closing the dimensional fissures, and protecting innocent mortals from annihilation:
-- **Kaito Arashi** (Australia): Wandering righteous karateka seeking balance through the storm.
+- **Kaito Arashi** (Japan): Wandering righteous karateka seeking balance through the storm.
 - **Daichi Ginrou** (Mongolia): Free-spirited mountain warrior whose golden spirit protects the vulnerable.
-- **Akio Hoshi** (Japan): Impetuous star-striker whose fiery heart never backs down from tyranny.
+- **Akio Hoshi** (Mexico): Impetuous star-striker whose fiery heart never backs down from tyranny.
 - **Lian Feng** (China): Jade Lantern Grandmaster maintaining the ancient cosmic harmony.
 - **Bruno "Bulldozer" Volk** (Brazil): Heavyweight people's champion defending his hometown with thunderous fists.
-- **Jin Kazaguruma** (Japan): Swift messenger of freedom fighting to preserve peace in the hidden valleys.
+- **Jin Kazaguruma** (Jamaica): Swift messenger of freedom fighting to preserve peace in the hidden valleys.
 - **Haruki Sumi** (South Korea): Gentle archivist and scholar enduring the burden of sealed apocalyptic titans.
 
 ### 2. The Solitary Exiles & Free Rogues (Anti-Heroes / Neutrals)
 Warriors driven by personal codes, vendettas, sovereign restoration, or existential self-discovery:
-- **Shion Kurogane** (Japan): Tragic swordsman bearing the crushing guilt of an exiled moon clan.
-- **Suzume Kagerou** (Japan): Vengeful shadow kunoichi hunting the masterminds who massacred her people.
+- **Shion Kurogane** (Egypt): Tragic swordsman bearing the crushing guilt of an exiled moon clan.
+- **Suzume Kagerou** (Vietnam): Vengeful shadow kunoichi hunting the masterminds who massacred her people.
 - **VX-9 Volta** (USA / Neo-Metropolis): Escaped military android seeking the philosophical meaning of the soul.
 - **Captain Marlow Reyes** (Spain / Caribbean Sky): Swashbuckling sky pirate raiding tyrants and seeking mythic loot.
 - **Sylene Vashti** (Norway / Borealia): Displaced glacial princess determined to reclaim her usurped frozen kingdom.
-- **Kaname Fuyutsuki** (Japan): Impartial frost samurai judge executing divine severance without emotional hesitation.
+- **Kaname Fuyutsuki** (Switzerland): Impartial frost samurai judge executing divine severance without emotional hesitation.
 
 ### 3. The Harbingers of Eclipse & Tyranny (Villains)
 Entities seeking universal subjugation, demonic awakening, or reality erasure:

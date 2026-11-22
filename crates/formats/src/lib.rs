@@ -25,6 +25,7 @@ pub mod num;
 pub mod par;
 pub mod pcx;
 pub mod png;
+pub mod png_encode;
 mod png_unfilter;
 pub mod perf;
 pub mod sff;

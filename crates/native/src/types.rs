@@ -206,7 +206,7 @@ pub struct NativeChar {
     #[serde(default)] pub npc: bool,
     #[serde(default, rename = "spriteSet")] pub sprite_set: Option<String>,
     /// animation speed multiplier (> 1 = every timed frame is shorter: faster moves, startup and recovery)
-    #[serde(default)] pub speed: Option<f32>,
+    #[serde(default)] pub speed: Option<f32>, #[serde(default, skip_serializing_if = "Option::is_none")] pub mugen: Option<super::exact::MugenSpec>,
 }
 
 impl NativeChar {

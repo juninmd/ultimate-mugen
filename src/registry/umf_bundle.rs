@@ -15,7 +15,7 @@ fn sprite_files(vfs: &Vfs, dir: &str) -> Vec<(String, Vec<u8>)> {
     vfs.iter()
         .filter_map(|(key, file)| {
             let name = key.strip_prefix(&prefix)?;
-            (!name.contains('/') && (name.ends_with(".png") || name.ends_with(".wav") || name == "meta.json")).then(|| (name.to_string(), file.to_vec()))
+            (!name.contains('/') && (name.ends_with(".png") || name.ends_with(".wav") || name.ends_with(".act") || name == "meta.json")).then(|| (name.to_string(), file.to_vec()))
         })
         .collect()
 }

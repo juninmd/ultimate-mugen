@@ -88,6 +88,9 @@
       fatal.classList.add('on');
       fatalButton.focus();
     };
+    // The wasm build aborts on the first Rust panic; the hook in src/panic_report.rs hands the message here so the
+    // overlay names the real cause instead of "ran out of memory or hit an internal error".
+    window.ume_panic = (text) => showFatal(new Error(text), `${tx.fatal} (${text})`);
     let ume;
     try {
 ume = await import('./ultimate-mugen.js?v=__BUILD__');

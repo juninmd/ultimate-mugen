@@ -13,6 +13,7 @@ mod market; mod open_link;
 mod import_button;
 mod loading_tips;
 mod match_stats;
+mod panic_report;
 #[cfg(not(target_arch = "wasm32"))]
 mod native_import;
 mod menu_art;
@@ -53,11 +54,8 @@ mod vfx;
 mod voice;
 #[cfg(test)]
 mod vfx_camera_tests;
-
 use crate::gfx::*;
-
 type WindowConf = ume_shell::Config;
-
 fn conf() -> WindowConf {
     // window size: saved setting, overridable with `--res 3840x2160`, `--4k`, `--fullscreen`
     let args: Vec<String> = std::env::args().collect();
@@ -222,6 +220,8 @@ async fn game() {
     #[cfg(target_arch = "wasm32")]
     web_input::install_panic_hook();
     init_perf();
+    crate::panic_report::install();
+    crate::panic_report::debug_trigger();
     let shots = args.iter().position(|a| a == "--shots").and_then(|i| args.get(i + 1)).cloned();
     #[cfg(target_arch = "wasm32")]
     let touch_dev = web_input::is_touch();

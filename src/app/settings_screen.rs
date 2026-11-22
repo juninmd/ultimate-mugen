@@ -7,6 +7,7 @@ use crate::settings::{
 
 mod touch_settings;
 mod pixel_controls;
+mod row_scroll;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 enum Act {
@@ -541,9 +542,14 @@ impl App {
 
         let mut act_now: Option<(Act, i32, bool)> = focused_row.map(|i| (rows[i].act, dir_v, ok));
         let (x, w, h) = (88.0, VW - 176.0, 54.0);
-        let mut y = 156.0;
+        let mut y = row_scroll::TOP - row_scroll::offset(rows.len(), focused_row, h + 8.0);
         let mut new_cur = cur;
+        let scrolls = row_scroll::offset(rows.len(), Some(rows.len().saturating_sub(1)), h + 8.0) > 0.0;
         for (i, r) in rows.iter().enumerate() {
+            if !row_scroll::visible(y, h) {
+                y += h + 8.0;
+                continue;
+            }
             let f = focused_row == Some(i);
             let interactive = r.act != Act::Info;
             if interactive {
@@ -601,7 +607,14 @@ impl App {
                 interactive,
                 f,
             );
-            y += (h + 8.0).min(504.0 / rows.len() as f32);
+            y += h + 8.0;
+        }
+        if scrolls {
+            let total = rows.len() as f32 * (h + 8.0) - 8.0;
+            let off = row_scroll::offset(rows.len(), focused_row, h + 8.0);
+            let bar_h = row_scroll::VIEW_H * row_scroll::VIEW_H / total;
+            self.ui.rect(x + w + 10.0, row_scroll::TOP, 4.0, row_scroll::VIEW_H, Color::new(1.0, 1.0, 1.0, 0.1));
+            self.ui.rect(x + w + 10.0, row_scroll::TOP + (row_scroll::VIEW_H - bar_h) * off / (total - row_scroll::VIEW_H), 4.0, bar_h, hex("#ffcc33"));
         }
 
         if tab == 5 {

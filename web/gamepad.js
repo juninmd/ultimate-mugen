@@ -21,6 +21,13 @@
   for (const type of ['pointerup', 'pointercancel']) {
     window.addEventListener(type, (e) => touchPointers.delete(e.pointerId), true);
   }
+  const grabTouch = (e) => {
+    if (e.pointerType !== 'touch' || e.target.id !== 'glcanvas') return;
+    try { e.target.setPointerCapture(e.pointerId); } catch (err) {}
+  };
+  window.addEventListener('pointerdown', grabTouch, true);
+  const stopPan = (e) => { if (e.target.id === 'glcanvas' && e.cancelable) e.preventDefault(); };
+  for (const type of ['touchstart', 'touchmove']) window.addEventListener(type, stopPan, { capture: true, passive: false });
   function pointerUp(source = cursor) {
     const init = { bubbles: true, cancelable: true, button: 0, buttons: 0, pointerId: source.pointerId ?? 1, pointerType: source.pointerType ?? 'mouse', isPrimary: source.isPrimary ?? true, clientX: source.clientX ?? cursor.x, clientY: source.clientY ?? cursor.y };
     const e = typeof PointerEvent === 'function' ? new PointerEvent('pointerup', init) : new MouseEvent('pointerup', init);

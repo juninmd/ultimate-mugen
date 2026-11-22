@@ -27,6 +27,35 @@
 
 ---
 
+## Por que o Ultimate MUGEN existe
+
+Um lutador criado há anos ainda pode ter lugar em um elenco novo. O Ultimate MUGEN é um motor de luta 2D de código aberto, escrito em Rust para dar continuidade ao trabalho da comunidade e facilitar a criação de lutadores originais. O M.U.G.E.N da Elecbyte e o Ikemen GO inspiraram o projeto.
+
+A engine carrega personagens e cenários clássicos do M.U.G.E.N, e o elenco de pixel art do jogo mostra o que dá para criar com o UMF. Os dois tipos de lutador usam a mesma simulação de combate. Dá para colocar um personagem da comunidade e um lutador nativo na mesma partida.
+
+### O que muda na nova engine
+
+| Decisão de projeto | O que muda na prática |
+|---|---|
+| **Simulação de combate fixa a 60 Hz** | Golpes, colisões e comandos avançam em ticks independentes da renderização. Com a mesma configuração de partida e as mesmas entradas, a engine pode reproduzir uma luta ou recalcular os últimos ticks durante o rollback. |
+| **Renderizador feito para sprites indexados** | Sprites clássicos podem usar um byte por pixel para guardar o índice da cor. A GPU consulta a paleta na hora de desenhar, então trocar de paleta pode reaproveitar os mesmos pixels do sprite. |
+| **Carregamento que respeita o tempo de cada quadro** | No desktop, threads de trabalho cuidam da decodificação fora da thread principal. No navegador, a importação de ZIP divide o trabalho entre quadros para manter o progresso visível e permitir o cancelamento. |
+| **Dois caminhos para criar lutadores** | O carregador clássico lê os arquivos do M.U.G.E.N. O compilador UMF transforma a definição declarativa do lutador em comandos, animações e estados para o mesmo motor de combate. |
+
+[Arquitetura da engine](docs/wiki/pt-BR/Engine.md) · [Decisões de compatibilidade](docs/wiki/pt-BR/Decisoes-de-Compatibilidade.md) · [Replays e jogo em rede](docs/wiki/pt-BR/Replays-Rede.md)
+
+### UMF, o formato nativo de lutadores
+
+O UMF (*Ultimate Mugen Format*) reúne atributos, tempos de animação e regras de combate em uma definição JSON. Os sprites em pixel art podem ficar em arquivos PNG separados. A definição diz qual comando aciona um golpe, qual animação ele usa, quando acerta e quais golpes podem vir em seguida.
+
+Por exemplo, o **Snap Jab** de Kaito usa o comando `x` e a animação `jab`. O acerto fica ativo no segundo quadro da animação e causa 28 pontos de dano base. O golpe declara por ID continuações como **Reverse Punch** e **Gale Fist**. O mesmo formato pode descrever custos de energia, projéteis, armadura, habilidades passivas e transformações.
+
+O UMF 2 também permite herdar definições com `extends` e reaproveitar golpes individuais com `use`. Um kit compartilhado pode fornecer golpes, poses, animações e atributos a vários lutadores.
+
+[Crie um lutador UMF](docs/wiki/pt-BR/Personagem-UMF.md) · [Definição do Kaito](assets/chars/kaito.json) · [Habilidades passivas](docs/wiki/pt-BR/Passivos.md)
+
+---
+
 ## ✨ Em resumo
 
 <table>

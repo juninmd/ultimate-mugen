@@ -514,7 +514,7 @@
     "powerUp": {"frames":["powerup0*3","powerup01*3","powerup1*6","powerup2*6"],"loop":0},
     "idle": {"frames":["idle0*10","idle1*8","idle2*10","idle3*8"]},
     "turn": {"frames":["turn*3","turn*3"]},
-    "walk": {"frames":["walk0*6","walk1*6","walk2*6","walk3*6","walk4*6","walk5*6"]},
+    "walk": {"frames":["walk0*7","walk1*7","walk2*7","walk3*7","walk4*7","walk5*7"]},
     "walkBack": {"frames":["walk5*7","walk4*7","walk3*7","walk2*7","walk1*7","walk0*7"]},
     "crouchStart": {"frames":["crouch0*3","crouch*2"]},
     "crouch": {"frames":["crouch*14","crouch1*14"]},

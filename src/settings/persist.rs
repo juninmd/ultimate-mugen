@@ -20,7 +20,11 @@ impl Settings {
             let (k, v) = (k.trim(), v.trim());
             match k {
                 "fullscreen" => s.fullscreen = v == "1",
-                "res" => s.res = pick(v, 1, RESOLUTIONS.len() - 1),
+                "res" => s.res = pick(v, 1, 4) + 4,
+                "res_px" => {
+                    let (w, h) = parse_window(v);
+                    s.res = RESOLUTIONS.iter().position(|r| (r.0, r.1) == (w, h)).unwrap_or(DEFAULT_RES);
+                }
                 "quality" => s.quality = pick(v, 0, QUALITY.len() - 1),
                 "fps" => s.fps = v == "1",
                 "fx" => s.fx = pick(v, 2, 2),
@@ -66,8 +70,8 @@ impl Settings {
 
     pub fn to_text(&self) -> String {
         let mut t = format!(
-            "version={}\nfullscreen={}\nres={}\nquality={}\nfps={}\nfx={}\nimpact_lv={}\nkeep_aspect={}\nfilter={}\nwindow={}x{}\nvsync={}\nfps_cap={}\nmaster={}\nmusic={}\nsfx={}\nvoice={}\nmute={}\ndifficulty={}\nround_time={}\nrounds={}\nlife={}\nsingle_round={}\nclassic_pushbox={}\nknockdown={}\nteam_lifeshare={}\ngamespeed={}\nsurvival_recovery={}\nsurvival_best={}\npal1={}\npal2={}\nlang={}\ngrid={}\nsort={}\nauto_update={}\nshow_boxes={}\nstory_enabled={}\n",
-            FORMAT_VERSION, self.fullscreen as i32, self.res, self.quality, self.fps as i32, self.fx, self.impact, self.keep_aspect as i32, if self.linear { "linear" } else { "nearest" }, self.window.0, self.window.1, self.vsync as i32, self.fps_cap, self.master, self.music, self.sfx, self.voice, self.mute as i32,
+            "version={}\nfullscreen={}\nres_px={}\nquality={}\nfps={}\nfx={}\nimpact_lv={}\nkeep_aspect={}\nfilter={}\nwindow={}x{}\nvsync={}\nfps_cap={}\nmaster={}\nmusic={}\nsfx={}\nvoice={}\nmute={}\ndifficulty={}\nround_time={}\nrounds={}\nlife={}\nsingle_round={}\nclassic_pushbox={}\nknockdown={}\nteam_lifeshare={}\ngamespeed={}\nsurvival_recovery={}\nsurvival_best={}\npal1={}\npal2={}\nlang={}\ngrid={}\nsort={}\nauto_update={}\nshow_boxes={}\nstory_enabled={}\n",
+            FORMAT_VERSION, self.fullscreen as i32, self.res_text(), self.quality, self.fps as i32, self.fx, self.impact, self.keep_aspect as i32, if self.linear { "linear" } else { "nearest" }, self.window.0, self.window.1, self.vsync as i32, self.fps_cap, self.master, self.music, self.sfx, self.voice, self.mute as i32,
             self.difficulty, self.round_time, self.rounds, self.life, self.single_round as i32, self.classic_pushbox as i32, self.knockdown, self.team_life_share as i32, self.game_speed, self.survival_recovery, self.survival_best, self.pal1, self.pal2, self.lang.code(), self.grid, self.sort, self.auto_update as i32, self.show_boxes as i32, self.story_enabled as i32,
         );
         t.push_str(&self.lite.to_text());

@@ -477,3 +477,9 @@ Ajustes, aba DESEMPENHO: uma predefinição (Alta, Média, Baixa, Mínima ou Per
 - Medir: `UME_PRESET=0..3 UME_TOUR=perf` no desktop ou a luta `?e2e=1&modo=watch` no Chromium.
 
 Medido na máquina de nuvem com renderização por software (1280x720): desktop 28,7 ms (Alta) para 15,8 ms (Mínima); web 10,5 fps (Alta) para 21,8 fps (Mínima).
+
+### Resoluções baixas de janela
+
+Ajustes, aba VÍDEO (desktop): a resolução da janela agora começa em 640x360, depois 854x480, 960x540, 1024x576, 1280x720 até 5K. O cfg guarda `res_px=LxA` e arquivos antigos (`res=<índice>`) são migrados. Escolher uma resolução limpa o tamanho de janela salvo. Na web e no celular use a Escala de renderização (até 25%).
+
+Desktop com renderização por software: 1280x720 31,5 ms, 854x480 15,1 ms, 640x360 10,5 ms por quadro.

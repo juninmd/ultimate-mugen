@@ -8,6 +8,15 @@ impl Settings {
         let (w, h, _) = RESOLUTIONS[self.res.min(RESOLUTIONS.len() - 1)];
         (w, h)
     }
+    pub fn step_resolution(&mut self, step: i32) {
+        self.res = (self.res as i32 + step).rem_euclid(RESOLUTIONS.len() as i32) as usize;
+        self.fullscreen = false;
+        self.window = (0, 0);
+    }
+    pub fn res_text(&self) -> String {
+        let (w, h, _) = RESOLUTIONS[self.res.min(RESOLUTIONS.len() - 1)];
+        format!("{w}x{h}")
+    }
     pub fn apply_window(&self) {
         set_fullscreen(self.fullscreen);
         #[cfg(not(target_arch = "wasm32"))]

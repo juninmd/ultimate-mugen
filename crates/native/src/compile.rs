@@ -19,6 +19,9 @@ pub const STANDARD_ANIMS: &[(&str, i32)] = &[
     ("taunt", 195), ("powerUp", 196), ("defeat1", 197), ("defeat2", 198), ("defeat3", 199), ("defeat4", 200),
 ];
 
+const BOSS_SPEED: f32 = 1.25;
+const PACE_LOCKED: [i32; 4] = [0, 11, 20, 21];
+
 /// Full compile (all animations).
 pub fn compile_native(nc: &NativeChar, pal_no: i32, with_images: bool) -> CharDef { compile_native_with(nc, pal_no, with_images, None) }
 /// Fast compile for menus (select grid, VS screen): rasterizes only idle + win animations (~10x cheaper than the full set).
@@ -87,7 +90,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
             let hurt = match &fr.hurt { Some(Value::String(s)) if s == "none" => vec![], Some(v @ Value::Array(_)) => serde_json::from_value(v.clone()).unwrap_or(entry.1.clone()), _ => entry.1.clone() };
             let hit = entry.2.clone();
             frames.push(AnimFrame {
-                group: entry.0 .0, index: entry.0 .1, x: fr.offset.map(|o| o[0]).unwrap_or(0.0), y: fr.offset.map(|o| o[1]).unwrap_or(0.0), time: if fr.ticks > 0 && nc.speed.is_some_and(|k| k > 1.0) { ((fr.ticks as f32 / nc.speed.unwrap_or(1.0)).round() as i32).max(1) } else { fr.ticks },
+                group: entry.0 .0, index: entry.0 .1, x: fr.offset.map(|o| o[0]).unwrap_or(0.0), y: fr.offset.map(|o| o[1]).unwrap_or(0.0), time: if fr.ticks > 0 && nc.speed.is_some_and(|k| k > 1.0 && (k > BOSS_SPEED || !PACE_LOCKED.contains(&no))) { ((fr.ticks as f32 / nc.speed.unwrap_or(1.0)).round() as i32).max(1) } else { fr.ticks },
                 flip_h: false, flip_v: false, blend: if fr.effect.as_ref().is_some_and(|effect| effect.get("type").and_then(Value::as_str) != Some("dragon")) { Blend::Add } else { Blend::None }, alpha: None, xscale: 1.0, yscale: 1.0, angle: 0.0,
                 clsn2: if fr.effect.is_some() { hit.clone() } else { hurt }, clsn1: hit,
             });

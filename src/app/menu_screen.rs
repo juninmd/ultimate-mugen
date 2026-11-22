@@ -91,6 +91,14 @@ impl App {
             self.menu_icon(ICON_OF[i], x + off + 38.0, y + h * 0.5, label_color);
             ui.text(&label, x + off + 70.0, y + h * 0.72, menu_focus::mix(22.0, 24.0, lit), label_color, Align::Left, true);
         }
+        if cur_v <= 4 {
+            for i in 0..8 {
+                let x = VW - crate::ui_tokens::MARGIN - 8.0 * 26.0 + 3.0 + i as f32 * 26.0;
+                if self.clicked_rect(x, 82.0, 26.0, 36.0) {
+                    self.ai_level = i + 1;
+                }
+            }
+        }
         self.menu_info(cur_v, accent);
         self.screen = Screen::Menu { cur: cur_v };
         if self.c.pressed(nav::BACK) {

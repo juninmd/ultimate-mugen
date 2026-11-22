@@ -53,12 +53,21 @@ const MIN_CHANGE = 0.004;
   const menu = await shot('01-menu');
   await expectChange('tap on the title opens the menu', title, menu);
 
+  const r = Math.min(44, Math.max(20, H * 0.075)), gap = r * 2.1, bx = W - r * 1.4 - gap * 2, by = H - r * 2.3;
+  const backButton = [bx + 2 * gap, by - gap];
+  const k = Math.min(W / 1280, H / 720), at = (vx, vy) => [(W - 1280 * k) / 2 + vx * k, (H - 720 * k) / 2 + vy * k];
+  await tap(...at(330, 196 + 9 * (456 / 13) + 16));
+  const card = await shot('02-player-card');
+  await expectChange('tapping Player Card, under the nav pad, opens it', menu, card);
+  await tap(...backButton);
+  const menuAgain = await shot('02b-menu-again');
+  await expectChange('BACK returns from Player Card to the menu', card, menuAgain);
+
   await tap(W * 0.195, H * 0.438, 120);
   const select = await shot('02-select');
-  await expectChange('tapping a menu item opens its screen', menu, select);
+  await expectChange('tapping a menu item opens its screen', menuAgain, select);
 
-  const back = [W - Math.min(44, Math.max(20, H * 0.075)) * 1.4 - Math.min(44, Math.max(20, H * 0.075)) * 2.1, H * 0.62];
-  await tap(back[0] + Math.min(44, H * 0.075) * 2.1, back[1] - 12);
+  await tap(...backButton);
   const afterBack = await shot('03-back');
   await expectChange('the BACK pad button leaves the screen', select, afterBack);
 
@@ -72,7 +81,6 @@ const MIN_CHANGE = 0.004;
   for (let attempt = 0; attempt < 4; attempt++) await key('Enter', 500);
   await wait(8000);
 
-  const r = Math.min(44, Math.max(20, H * 0.075)), gap = r * 2.1, bx = W - r * 1.4 - gap * 2, by = H - r * 2.3;
   const pause = [W / 2, H * 0.19];
   await tap(pause[0], pause[1]);
   const paused = await shot('04-paused');

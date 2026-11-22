@@ -1,6 +1,7 @@
 use super::nav;
 use super::touch_layout;
 use super::touch_style;
+use crate::app::Screen;
 use crate::gfx::*;
 
 const ARROWS: [(&str, u32, Vec2); 4] = [
@@ -13,6 +14,7 @@ const ARROWS: [(&str, u32, Vec2); 4] = [
 #[derive(Default)]
 pub struct TouchNav {
     pub active: bool,
+    arrows: bool,
     held: u32,
     pending: u32,
     touch_seen: bool,
@@ -26,11 +28,12 @@ struct Button {
     color: Color,
 }
 
-fn buttons() -> Vec<Button> {
+fn buttons(arrows: bool) -> Vec<Button> {
     let lay = touch_layout::compute();
     let r = lay.stick_radius * 0.5;
     let mut out: Vec<Button> = ARROWS
         .iter()
+        .filter(|_| arrows)
         .map(|(label, bit, dir)| Button {
             bit: *bit,
             center: lay.stick + *dir * r * 1.7,
@@ -65,6 +68,11 @@ impl TouchNav {
         self.held
     }
 
+    pub fn set_screen(&mut self, screen: &Screen) {
+        self.active = !matches!(screen, Screen::Fight);
+        self.arrows = !matches!(screen, Screen::Menu { .. });
+    }
+
     pub fn press(&mut self, bit: u32) {
         self.pending |= bit;
     }
@@ -85,7 +93,7 @@ impl TouchNav {
         if touched.is_empty() && !self.touch_seen && is_mouse_button_down(MouseButton::Left) {
             points.push((mouse_position().into(), is_mouse_button_pressed(MouseButton::Left)));
         }
-        let pad = buttons();
+        let pad = buttons(self.arrows);
         let mut swallow = false;
         for (p, started) in points {
             for b in pad.iter().filter(|b| hit(b, p)) {
@@ -104,7 +112,7 @@ impl TouchNav {
         }
         let opacity = crate::tweaks::current().touch_opacity;
         ume_shell::alpha_scale::with(opacity, || {
-            for b in buttons() {
+            for b in buttons(self.arrows) {
                 touch_style::draw_button(b.center, b.radius, b.label, b.color, self.held & b.bit != 0);
             }
         });

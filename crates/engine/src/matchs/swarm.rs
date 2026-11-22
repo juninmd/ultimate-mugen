@@ -94,8 +94,7 @@ impl Match {
             return;
         }
         let live = self.round_state == 2;
-        let mut respawn = [usize::MAX; 8];
-        let mut due = 0;
+        let mut respawn: Vec<usize> = Vec::new();
         if let Some(swarm) = self.swarm.as_mut() {
             for slot in swarm.slots.iter_mut() {
                 let down = !self.fighters[slot.fighter].alive || self.fighters[slot.fighter].life <= 0.0;
@@ -113,14 +112,11 @@ impl Match {
                 } else if swarm.spawned < swarm.total {
                     swarm.spawned += 1;
                     slot.counted = false;
-                    if due < respawn.len() {
-                        respawn[due] = slot.fighter;
-                        due += 1;
-                    }
+                    respawn.push(slot.fighter);
                 }
             }
         }
-        for &i in &respawn[..due] {
+        for i in respawn {
             let (x, y) = self.spawn_point();
             self.place_foe(i, x, y);
         }

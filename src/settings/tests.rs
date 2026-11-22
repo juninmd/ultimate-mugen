@@ -55,7 +55,7 @@ fn watch_ignores_fullscreen_and_minimised_windows() {
 fn version_one_files_load_with_new_defaults() {
     let s = Settings::from_text("fullscreen=1\nres=3\nquality=2\nfps=1\nfx=1\nimpact_lv=0\n");
     assert!(s.fullscreen && s.fps);
-    assert_eq!((s.res, s.quality, s.fx, s.impact), (3, 2, 1, 0));
+    assert_eq!((s.res, s.quality, s.fx, s.impact), (7, 2, 1, 0));
     assert_eq!(
         (s.vsync, s.master, s.rounds, s.lang),
         (true, 8, 1, crate::i18n::Lang::En)
@@ -90,7 +90,7 @@ fn garbage_is_clamped() {
     let s = Settings::from_text("master=99\nres=abc\nlife=42\ndifficulty=0\nrounds=-1\n");
     assert_eq!(
         (s.master, s.res, s.life, s.difficulty, s.rounds),
-        (VOLUME_STEPS, 1, LIFE_PERCENT.len() - 1, 1, 1)
+        (VOLUME_STEPS, DEFAULT_RES, LIFE_PERCENT.len() - 1, 1, 1)
     );
 }
 
@@ -152,4 +152,26 @@ fn grid_preset_survives_a_save_and_load() {
     let back = Settings::from_text(&s.to_text());
     assert_eq!(back.grid, 2);
     assert_eq!(Settings::default().grid, 1);
+}
+
+#[test]
+fn legacy_res_index_maps_to_the_same_size_and_new_sizes_round_trip() {
+    let legacy = Settings::from_text("res=0\n");
+    assert_eq!(RESOLUTIONS[legacy.res].0, 1280);
+    let legacy_4k = Settings::from_text("res=3\n");
+    assert_eq!(RESOLUTIONS[legacy_4k.res].0, 3840);
+    let mut s = Settings::default();
+    s.res = 0;
+    assert_eq!(Settings::from_text(&s.to_text()).res, 0);
+}
+
+#[test]
+fn choosing_a_resolution_drops_the_saved_window_and_fullscreen() {
+    let mut s = Settings { window: (1000, 700), fullscreen: true, ..Settings::default() };
+    s.step_resolution(-1);
+    assert_eq!(s.window_size(), (1280, 720));
+    assert!(!s.fullscreen);
+    s.res = 0;
+    s.step_resolution(-1);
+    assert_eq!(s.res, RESOLUTIONS.len() - 1);
 }

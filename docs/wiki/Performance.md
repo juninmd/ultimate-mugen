@@ -472,7 +472,7 @@ Settings, tab PERFORMANCE: one preset (High, Medium, Low, Minimum, or Custom onc
 
 | Option | High | Medium | Low | Minimum |
 |---|---|---|---|---|
-| Render scale (fight scene, HUD stays sharp) | 100% | 100% | 75% | 50% |
+| Render scale (fight scene, HUD stays sharp; also 35% and 25% by hand) | 100% | 100% | 75% | 50% |
 | Post-processing (`fx`) | High | Medium | Off | Off |
 | Particles and effects | Full | Reduced | Reduced | Minimal |
 | After image, glass HUD, animated backdrop, CRT | on | on (CRT off) | off | off |
@@ -491,3 +491,9 @@ Measured on the 4-core cloud machine with software rendering (lavapipe for deskt
 | Medium | 28.9 ms | 11.5 |
 | Low | 19.5 ms | 18.7 |
 | Minimum | 15.8 ms | 21.8 |
+
+### Low window resolutions
+
+Settings, VIDEO tab (desktop): window resolution now starts at 640x360, then 854x480, 960x540, 1024x576, 1280x720 and up to 5K. The cfg stores `res_px=WxH`; old `res=<index>` files are migrated to the same size. Picking a resolution clears the remembered window size so the choice always applies. On web and mobile the window follows the page, so use Render scale (down to 25%) instead.
+
+Desktop, software rendering, perf tour (Kaito vs Shion): 1280x720 31.5 ms, 854x480 15.1 ms, 640x360 10.5 ms per frame.

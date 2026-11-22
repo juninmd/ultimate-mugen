@@ -6,7 +6,7 @@ pub async fn run(ctx: &mut Ctx, app: &mut App) {
     let cards = [
         ("menu", Screen::Menu { cur: 0 }),
         ("settings", Screen::Settings { tab: 0, cur: 0, from_fight: false }),
-        ("settings-performance", Screen::Settings { tab: 6, cur: 0, from_fight: false }),
+        ("settings-performance", Screen::Settings { tab: 6, cur: 1, from_fight: false }),
         ("controls", Screen::Controls),
         ("mugen-import", Screen::Mugen { view: 0, page: 0 }),
         ("market", Screen::Market),

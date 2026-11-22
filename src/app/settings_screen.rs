@@ -117,8 +117,8 @@ impl App {
                         tr("Resolução da janela", "Window resolution"),
                         RESOLUTIONS[s.res.min(RESOLUTIONS.len() - 1)].2,
                         tr(
-                            "Até 5K · a imagem escala para qualquer tamanho",
-                            "Up to 5K · the picture scales to any size",
+                            "De 640×360 até 5K · a imagem escala para qualquer tamanho",
+                            "From 640×360 up to 5K · the picture scales to any size",
                         ),
                     ));
                 }
@@ -406,10 +406,7 @@ impl App {
         match act {
             Act::Lite(a) if go => lite_rows::adjust(s, a, step),
             Act::Fullscreen if go => s.fullscreen = !s.fullscreen,
-            Act::Res if go => {
-                s.res = cycle(s.res, step, RESOLUTIONS.len());
-                s.fullscreen = false;
-            }
+            Act::Res if go => s.step_resolution(step),
             Act::Quality if go => s.quality = cycle(s.quality, step, QUALITY.len()),
             Act::Fx if go => s.fx = cycle(s.fx, step, FX_LEVELS.len()),
             Act::Impact if go => s.impact = cycle(s.impact, step, IMPACT.len()),

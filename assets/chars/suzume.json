@@ -1392,5 +1392,6 @@
     "weakness": "wind",
     "alignment": "anti-hero",
     "tags": ["kunoichi","teleport","super-speed","mixup"]
-  }
+  },
+  "helpers": {"clones":{"name":"Kagerou Shadow Clone","input":"~D, DB, B, y+b","cost":500,"count":1,"maxActive":2,"duration":260,"walkSpeed":3.6,"attackRange":68,"oneHitPoof":true}}
 }

@@ -41,7 +41,7 @@ fn every_declared_matchup_bonus_stays_in_range() {
 
 #[test]
 fn fighters_without_rivals_are_unchanged() {
-    let d = def("jin");
+    let d = def("npc_brute");
     assert!(d.rivals.is_empty());
     assert_eq!(d.rivals.attack_against("kaito"), 1.0);
 }

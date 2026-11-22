@@ -67,3 +67,20 @@ fn wrap_keeps_a_word_longer_than_the_line() {
     let lines = wrap("abcdefghijkl mn", 5.0, |s| s.chars().count() as f32);
     assert_eq!(lines, ["abcdefghijkl", "mn"]);
 }
+
+#[test]
+fn profile_query_matches_alignment_element_weakness_and_country() {
+    let p: CharProfile = serde_json::from_str(
+        r#"{"country":"jp","element":"fire","weakness":"water","alignment":"villain","origin":{"en":"Kyoto"},"tags":["rushdown"]}"#,
+    )
+    .unwrap();
+    assert!(matches_query(&p, "fire"));
+    assert!(matches_query(&p, "water"));
+    assert!(matches_query(&p, "villain"));
+    assert!(matches_query(&p, "kyoto"));
+    assert!(matches_query(&p, "rushdown"));
+    assert!(!matches_query(&p, "ice"));
+    assert!(alignment_label("hero").is_some());
+    assert!(alignment_label("anti-hero").is_some());
+    assert!(alignment_label("unknown").is_none());
+}

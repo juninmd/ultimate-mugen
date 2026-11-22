@@ -154,6 +154,9 @@ pub(crate) fn parse_sprite(name: &str) -> EggSprite {
         "ramen_bowl" => EggSprite::RamenBowl,
         "crossed_blades" => EggSprite::CrossedBlades,
         "eclipse_moon" => EggSprite::EclipseMoon,
+        "sakura_petals" => EggSprite::SakuraPetals,
+        "hollow_mask" => EggSprite::HollowMask,
+        "reiatsu_badge" => EggSprite::ReiatsuBadge,
         _ => EggSprite::None,
     }
 }
@@ -182,6 +185,8 @@ pub(crate) fn parse_sfx(name: &str) -> &'static str {
         "easter_parrot" => "easter_parrot",
         "easter_wonder" => "easter_wonder",
         "easter_banter" => "easter_banter",
+        "easter_bankai" => "easter_bankai",
+        "easter_shunpo" => "easter_shunpo",
         _ => "",
     }
 }

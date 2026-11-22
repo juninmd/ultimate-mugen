@@ -1194,7 +1194,7 @@
       "sounds": [{"at":2,"snd":[200,2]}]
     }
   ],
-  "country": "Austrália",
+  "country": "Japão",
   "stage": "dojo",
   "awakeningPalette": {"hair":"#f6c83e"},
   "passives": {
@@ -1268,9 +1268,9 @@
   },
   "speed": 1.1,
   "profile": {
-    "country": "AU",
-    "nationality": {"en":"Australian","pt":"Australiano","es":"Australiano"},
-    "origin": {"en":"Storm Road, Tasmania","pt":"Estrada da Tempestade, Tasmânia","es":"Camino de la Tormenta, Tasmania"},
+    "country": "JP",
+    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
+    "origin": {"en":"Storm Road, Izu","pt":"Estrada da Tempestade, Izu","es":"Camino de la Tormenta, Izu"},
     "title": {"en":"Wandering Eye of the Storm","pt":"Andarilho do Olho da Tempestade","es":"Errante del Ojo de la Tormenta"},
     "fightingStyle": {"en":"Arashi Storm Karate","pt":"Karatê da Tempestade Arashi","es":"Karate de la Tormenta Arashi"},
     "affiliation": {"en":"Storm Road Wanderers","pt":"Andarilhos da Estrada da Tempestade","es":"Errantes del Camino de la Tormenta"},

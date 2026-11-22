@@ -1295,7 +1295,7 @@
       "sounds": [{"at":2,"snd":[200,3]}]
     }
   ],
-  "country": "Japão",
+  "country": "Vietnã",
   "stage": "bamboo",
   "abilities": {
     "fly": {"speed":4.5,"cost":50,"input":"a+b","anim":"jumpTop"},
@@ -1377,8 +1377,8 @@
     }
   },
   "profile": {
-    "country": "JP",
-    "nationality": {"en":"Japanese","pt":"Japonesa","es":"Japonesa"},
+    "country": "VN",
+    "nationality": {"en":"Vietnamese","pt":"Vietnamita","es":"Vietnamita"},
     "origin": {"en":"Fallen Kagerou Village","pt":"Vila Extinta Kagerou","es":"Aldea Extinta Kagerou"},
     "title": {"en":"Phantom Kunoichi of Kagerou","pt":"Kunoichi Fantasma de Kagerou","es":"Kunoichi Fantasma de Kagerou"},
     "fightingStyle": {"en":"Kagerou Shadow Assassination","pt":"Ninjutsu Sombrio Kagerou","es":"Ninjutsu Sombrío Kagerou"},

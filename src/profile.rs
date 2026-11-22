@@ -4,6 +4,8 @@ use std::sync::OnceLock;
 use ume_native::CharProfile;
 
 #[cfg(test)]
+mod country_tests;
+#[cfg(test)]
 mod tests;
 mod wrap;
 

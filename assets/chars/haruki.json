@@ -1118,9 +1118,9 @@
   },
   "speed": 1.1,
   "profile": {
-    "country": "JP",
-    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
-    "origin": {"en":"Inkwell Archive, Nara","pt":"Arquivo do Tinteiro, Nara","es":"Archivo del Tintero, Nara"},
+    "country": "KR",
+    "nationality": {"en":"South Korean","pt":"Sul-coreano","es":"Surcoreano"},
+    "origin": {"en":"Inkwell Archive, Gyeongju","pt":"Arquivo do Tinteiro, Gyeongju","es":"Archivo del Tintero, Gyeongju"},
     "title": {"en":"Inkblade Scholar","pt":"Estudioso da Lâmina de Tinta","es":"Erudito de la Hoja de Tinta"},
     "fightingStyle": {"en":"Calligraphy Barrier Arts","pt":"Artes de Barreira Caligráfica","es":"Artes de Barrera Caligráfica"},
     "affiliation": {"en":"Keepers of the Written Word","pt":"Guardiões da Palavra Escrita","es":"Guardianes de la Palabra Escrita"},

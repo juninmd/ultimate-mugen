@@ -1,6 +1,7 @@
 use super::Shape;
 use super::Shape::{Disc, Half, Poly, Rect, Star};
 
+mod africa;
 mod americas_europe;
 mod asia_pacific;
 mod fictional;
@@ -35,8 +36,9 @@ pub(super) const fn poly(points: &'static [[f32; 2]], color: u32) -> Shape {
 
 type Table = &'static [(&'static str, &'static [Shape])];
 
-const TABLES: [Table; 3] = [
+const TABLES: [Table; 4] = [
     asia_pacific::FLAGS,
+    africa::FLAGS,
     americas_europe::FLAGS,
     fictional::FLAGS,
 ];

@@ -1357,7 +1357,7 @@
       "sounds": [{"at":2,"snd":[200,3]}]
     }
   ],
-  "country": "Japão",
+  "country": "Egito",
   "stage": "bamboo",
   "passives": {"meterRegen":0.45,"enrageTime":{"maxMultiplier":1.25,"startSeconds":18,"rampSeconds":45,"exponent":1},"rage":{"maxMultiplier":1.5,"exponent":1,"startRatio":0.5,"fullRatio":0.05}},
   "abilities": {
@@ -1421,8 +1421,8 @@
   },
   "speed": 1.15,
   "profile": {
-    "country": "JP",
-    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
+    "country": "EG",
+    "nationality": {"en":"Egyptian","pt":"Egípcio","es":"Egipcio"},
     "origin": {"en":"Black Moon Valley","pt":"Vale da Lua Negra","es":"Valle de la Luna Negra"},
     "title": {"en":"Silent Black-Cloaked Exile","pt":"Exilado da Lua Negra","es":"Exiliado de la Luna Negra"},
     "fightingStyle": {"en":"Kurogane Eclipse Kenjutsu","pt":"Kenjutsu do Eclipse Kurogane","es":"Kenjutsu del Eclipse Kurogane"},

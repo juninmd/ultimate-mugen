@@ -62,13 +62,13 @@ O Ultimate MUGEN inclui um sistema de Easter Eggs puramente de apresentação (`
 47. **Akio Empolgado (<30% de vida)**: Otimismo do Dojo Queda Estelar com ícone de ramen fumegante.
 48. **Desculpas do Haruki**: O arquivista gentil pede desculpas no meio da luta após um combo de 5+ acertos.
 49. **Marlow vs Valdric**: O pirata dos céus provoca o príncipe sobre sua coroa imperial.
-50. **Kaito vs Jin**: Corrida contra o vento entre os Penhascos de Izu e o Vale de Kiso.
+50. **Kaito vs Jin**: Corrida contra o vento entre os Penhascos de Izu e as Montanhas Azuis.
 51. **Shion vs Kaname**: Lâmina de meteorito contra a katana espiritual (`crossed_blades`).
 52. **Lian na Grande Muralha**: A grã-mestra da Lanterna de Jade defende a Grande Muralha.
 53. **Bruno vs Daichi**: Choque de gigantes entre o Ringue de Ferro e o Lobo de Altai.
 54. **Garan na Cratera Vulcânica**: O Portão de Cinzas se abre onde os 99 monges o selaram.
 55. **Valdric vs Oboro**: Duas coroas, um trono — Império Rubro contra Eclipse Escarlate.
-56. **Suzume vs Jin**: Duelo de velocidade entre Iga e o Vale do Vento.
+56. **Suzume vs Jin**: Duelo de velocidade entre Huế e o Vale do Vento.
 57. **Volta vs Haruki**: O androide pergunta ao arquivista o que torna um coração corajoso.
 58. **Akio vs Kaito**: Rivalidade clássica — "Quem perder paga o ramen!"
 59. **Papagaio do Marlow**: O imediato do *El Viento Salado* cruza a tela em Supers ou combos de 6+ acertos.

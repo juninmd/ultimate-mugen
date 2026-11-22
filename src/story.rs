@@ -2,6 +2,7 @@ pub mod beats;
 pub mod choice;
 pub mod epilogue;
 pub mod epilogue_music;
+pub mod epilogue_pose;
 pub mod objects;
 pub mod objects_art;
 pub mod objects_textures;

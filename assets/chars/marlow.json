@@ -1338,8 +1338,8 @@
     }
   },
   "profile": {
-    "country": "PH",
-    "nationality": {"en":"Filipino","pt":"Filipino","es":"Filipino"},
+    "country": "ES",
+    "nationality": {"en":"Spanish","pt":"Espanhol","es":"Español"},
     "origin": {"en":"Azure Horizon Fleet","pt":"Frota Horizonte Azul","es":"Flota Horizonte Azul"},
     "title": {"en":"Sky & Sea Corsair Captain","pt":"Capitão dos Mares e Céus","es":"Capitán de los Mares y Cielos"},
     "fightingStyle": {"en":"Tidal Cutlass & Mirage Clones","pt":"Sabre das Marés e Clones de Miragem","es":"Sable de Mareas y Clones de Espejismo"},

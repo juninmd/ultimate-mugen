@@ -64,22 +64,22 @@ Os combatentes da Convergência dividem-se em três grandes posturas filosófica
 
 ### 1. Os Protetores da Convergência (Heróis)
 Guerreiros honrados empenhados em restaurar a Trama Astral, fechar as fendas dimensionais e defender vidas inocentes da tirania e da destruição:
-- **Kaito Arashi** (Austrália): Karateca andarilho justo em busca de equilíbrio e evolução interior através da tempestade.
+- **Kaito Arashi** (Japão): Karateca andarilho justo em busca de equilíbrio e evolução interior através da tempestade.
 - **Daichi Ginrou** (Mongólia): Guerreiro selvagem dos picos gelados cuja aura dourada protege os mais vulneráveis.
-- **Akio Hoshi** (Japão): Jovem prodígio da luz estelar cuja impetuosidade e coragem jamais se curvam diante da tirania.
+- **Akio Hoshi** (México): Jovem prodígio da luz estelar cuja impetuosidade e coragem jamais se curvam diante da tirania.
 - **Lian Feng** (China): Grã-mestra da Lanterna de Jade dedicada à preservação do equilíbrio cósmico.
 - **Bruno "Bulldozer" Volk** (Brasil): Campeão invicto dos ringues, gigante gentil que luta pelo futuro de seu povo e de sua cidade natal.
-- **Jin Kazaguruma** (Japão): Shinobi veloz e bem-humorado que age como mensageiro da liberdade entre as vilas ocultas.
+- **Jin Kazaguruma** (Jamaica): Shinobi veloz e bem-humorado que age como mensageiro da liberdade entre as vilas ocultas.
 - **Haruki Sumi** (Coreia do Sul): Bibliotecário erudito e guardião pacífico que suporta o terrível fardo de selos titânicos.
 
 ### 2. Os Renegados, Exilados & Espadachins Livres (Anti-Heróis / Força Neutra)
 Guerreiros guiados por códigos de honra próprios, vinganças ancestrais, busca pela própria alma ou restauração de reinos perdidos:
-- **Shion Kurogane** (Japão): Exilado melancólico que carrega o luto de seu clã lunar e caça as sombras que maculam a noite.
-- **Suzume Kagerou** (Japão): Kunoichi sobrevivente que ataca na escuridão para exterminar os mandantes do massacre de seu clã.
+- **Shion Kurogane** (Egito): Exilado melancólico que carrega o luto de seu clã lunar e caça as sombras que maculam a noite.
+- **Suzume Kagerou** (Vietnã): Kunoichi sobrevivente que ataca na escuridão para exterminar os mandantes do massacre de seu clã.
 - **VX-9 Volta** (EUA / Neo-Metrópole): Androide de combate desertor que desafia seus programadores em busca do significado de possuir um coração.
 - **Capitão Marlow Reyes** (Espanha / Céus do Caribe): Corsário aéreo carismático que saqueia impérios tiranos em busca de mapas arcanos e glória.
 - **Sylene Vashti** (Noruega / Borealia Ártica): Princesa exilada do reino do gelo empenhada em reconquistar seu trono das mãos de cultistas das cinzas.
-- **Kaname Fuyutsuki** (Japão): Juiz estóico do Santuário das Neves cuja katana congela a hesitação e pune a corrupção sem piedade.
+- **Kaname Fuyutsuki** (Suíça): Juiz estóico do Santuário das Neves cuja katana congela a hesitação e pune a corrupção sem piedade.
 
 ### 3. Os Emissários do Eclipse & Conquista (Inimigos / Vilões)
 Forças malignas empenhadas na aniquilação da realidade, no retorno de demônios ancestrais ou na dominação militar tirânica:

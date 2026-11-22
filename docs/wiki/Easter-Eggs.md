@@ -62,8 +62,8 @@ Ultimate MUGEN includes a presentation-only in-fight Easter Egg system (`src/eas
 47. **Akio Fired Up (<30% HP)**: Starfall Dojo optimism kicks in with a steaming ramen badge.
 48. **Haruki's Apology**: Gentle archivist apologizes mid-fight after landing a 5+ hit combo.
 49. **Marlow vs Valdric**: Sky pirate playfully eyes the Red Star Empire's crown.
-50. **Kaito vs Jin**: Wind-runner rivalry between Izu Cliffs and Wind Valley.
-51. **Shion vs Kaname**: Meteorite blade meets Hokkaido's spirit katana (`crossed_blades`).
+50. **Kaito vs Jin**: Wind-runner rivalry between Izu Cliffs and the Blue Mountains.
+51. **Shion vs Kaname**: Meteorite blade meets the Alpine spirit katana (`crossed_blades`).
 52. **Lian on Great Wall**: Jade Lantern grandmaster defending the Great Wall.
 53. **Bruno vs Daichi**: Heavyweight grappler showdown — Iron Ring vs Altai Wolf.
 54. **Garan on Volcanic Crater**: The Ashen Gate opens where 99 monks sealed him.

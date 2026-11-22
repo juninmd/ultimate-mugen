@@ -10,8 +10,8 @@
     "tags": ["rushdown", "storm-caller"]
   },
   "shion": {
-    "country": "jp",
-    "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+    "country": "eg",
+    "nationality": { "en": "Egyptian", "pt": "Egípcio", "es": "Egipcio" },
     "bio": {
       "en": "Once the champion of the Kurogane clan, Shion was banished for refusing to spill innocent blood under the pale moon. He hunts the creatures of the Eclipse with a meteorite blade no one else can lift.",
       "pt": "Antigo campeão do clã Kurogane, Shion foi banido por se recusar a derramar sangue inocente sob a lua pálida. Caça as criaturas do Eclipse com uma lâmina de meteorito que ninguém mais consegue erguer.",
@@ -20,22 +20,22 @@
     "tags": ["counter", "power"]
   },
   "akio": {
-    "country": "jp",
-    "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+    "country": "mx",
+    "nationality": { "en": "Mexican", "pt": "Mexicano", "es": "Mexicano" },
     "bio": {
-      "en": "Akio grew up in the Starfall Dojo of Osaka, built on the rim of an ancient crater. Loud, stubborn and endlessly optimistic, he burns brighter the closer he gets to losing.",
-      "pt": "Akio cresceu no Dojo da Queda Estelar, em Osaka, erguido na borda de uma cratera ancestral. Barulhento, teimoso e otimista sem limites, brilha mais forte quanto mais perto fica da derrota.",
-      "es": "Akio creció en el Dojo de la Caída Estelar, en Osaka, levantado al borde de un cráter ancestral. Ruidoso, terco y optimista sin límites, brilla con más fuerza cuanto más cerca está de perder."
+      "en": "Akio grew up in the Starfall Dojo of Mérida, built on the rim of an ancient crater. Loud, stubborn and endlessly optimistic, he burns brighter the closer he gets to losing.",
+      "pt": "Akio cresceu no Dojo da Queda Estelar, em Mérida, erguido na borda de uma cratera ancestral. Barulhento, teimoso e otimista sem limites, brilha mais forte quanto mais perto fica da derrota.",
+      "es": "Akio creció en el Dojo de la Caída Estelar, en Mérida, levantado al borde de un cráter ancestral. Ruidoso, terco y optimista sin límites, brilla con más fuerza cuanto más cerca está de perder."
     },
     "tags": ["rushdown", "aerial"]
   },
   "suzume": {
-    "country": "jp",
-    "nationality": { "en": "Japanese", "pt": "Japonesa", "es": "Japonesa" },
+    "country": "vn",
+    "nationality": { "en": "Vietnamese", "pt": "Vietnamita", "es": "Vietnamita" },
     "bio": {
-      "en": "The last of the Kagerou clan of Iga, wiped out in a single night by Oboro's shadows. Suzume fights for no trophy: she is looking for the thread that ties him to the mortal world, to cut it.",
-      "pt": "A última do clã Kagerou, de Iga, exterminado em uma única noite pelas sombras de Oboro. Suzume não luta por troféus: procura o fio que o prende ao mundo mortal, para cortá-lo.",
-      "es": "La última del clan Kagerou, de Iga, exterminado en una sola noche por las sombras de Oboro. Suzume no lucha por trofeos: busca el hilo que lo ata al mundo mortal, para cortarlo."
+      "en": "The last of the Kagerou clan of Huế, wiped out in a single night by Oboro's shadows. Suzume fights for no trophy: she is looking for the thread that ties him to the mortal world, to cut it.",
+      "pt": "A última do clã Kagerou, de Huế, exterminado em uma única noite pelas sombras de Oboro. Suzume não luta por troféus: procura o fio que o prende ao mundo mortal, para cortá-lo.",
+      "es": "La última del clan Kagerou, de Huế, exterminado en una sola noche por las sombras de Oboro. Suzume no lucha por trofeos: busca el hilo que lo ata al mundo mortal, para cortarlo."
     },
     "tags": ["trapper", "zoner"]
   },
@@ -100,22 +100,22 @@
     "tags": ["counter", "balanced"]
   },
   "kaname": {
-    "country": "jp",
-    "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+    "country": "ch",
+    "nationality": { "en": "Swiss", "pt": "Suíço", "es": "Suizo" },
     "bio": {
-      "en": "Guardian of the Sanctuary of Everlasting Snows on the peaks of Hokkaido. Kaname treats every duel as a solemn judgment and draws his spirit katana only against those who break the order of the worlds.",
-      "pt": "Guardião do Santuário das Neves Eternas, nos picos de Hokkaido. Kaname trata cada duelo como um julgamento solene e só desembainha sua katana espiritual contra quem viola a ordem dos mundos.",
-      "es": "Guardián del Santuario de las Nieves Eternas, en las cumbres de Hokkaido. Kaname trata cada duelo como un juicio solemne y solo desenvaina su katana espiritual contra quien viola el orden de los mundos."
+      "en": "Guardian of the Sanctuary of Everlasting Snows on the peaks of the Swiss Alps. Kaname treats every duel as a solemn judgment and draws his spirit katana only against those who break the order of the worlds.",
+      "pt": "Guardião do Santuário das Neves Eternas, nos picos dos Alpes Suíços. Kaname trata cada duelo como um julgamento solene e só desembainha sua katana espiritual contra quem viola a ordem dos mundos.",
+      "es": "Guardián del Santuario de las Nieves Eternas, en las cumbres de los Alpes suizos. Kaname trata cada duelo como un juicio solemne y solo desenvaina su katana espiritual contra quien viola el orden de los mundos."
     },
     "tags": ["counter", "trapper"]
   },
   "jin": {
-    "country": "jp",
-    "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+    "country": "jm",
+    "nationality": { "en": "Jamaican", "pt": "Jamaicano", "es": "Jamaicano" },
     "bio": {
-      "en": "Courier and scout of the Wind Valley Village, in the Kiso Valley. Playful and impossibly fast, Jin swore to protect the villagers whose homes were uprooted by the rift.",
-      "pt": "Mensageiro e batedor da Vila do Vale do Vento, no Vale de Kiso. Brincalhão e absurdamente veloz, Jin jurou proteger os aldeões que perderam suas casas para a fenda.",
-      "es": "Mensajero y explorador de la Aldea del Valle del Viento, en el Valle de Kiso. Juguetón y absurdamente veloz, Jin juró proteger a los aldeanos que perdieron sus casas por la grieta."
+      "en": "Courier and scout of the Wind Valley Village, in the Blue Mountains. Playful and impossibly fast, Jin swore to protect the villagers whose homes were uprooted by the rift.",
+      "pt": "Mensageiro e batedor da Vila do Vale do Vento, nas Montanhas Azuis. Brincalhão e absurdamente veloz, Jin jurou proteger os aldeões que perderam suas casas para a fenda.",
+      "es": "Mensajero y explorador de la Aldea del Valle del Viento, en las Montañas Azules. Juguetón y absurdamente veloz, Jin juró proteger a los aldeanos que perdieron sus casas por la grieta."
     },
     "tags": ["aerial", "trapper"]
   },
@@ -160,8 +160,8 @@
     "tags": ["trapper", "counter"]
   },
   "npc_brute": {
-    "country": "br",
-    "nationality": { "en": "Brazilian", "pt": "Brasileiro", "es": "Brasileño" },
+    "country": "ng",
+    "nationality": { "en": "Nigerian", "pt": "Nigeriano", "es": "Nigeriano" },
     "bio": {
       "en": "A former dock loader who found out the gang pays better than the port. He takes a punch to give a bigger one and never learned any other plan.",
       "pt": "Um ex-estivador que descobriu que a gangue paga melhor que o porto. Leva um soco para dar outro maior e nunca aprendeu outro plano.",

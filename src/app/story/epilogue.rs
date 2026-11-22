@@ -1,7 +1,9 @@
 use crate::app::{App, Screen};
 use crate::controls::nav;
 use crate::gfx::*;
+use crate::story::epilogue::Epilogue;
 use crate::story::{epilogue, epilogue_music};
+use std::borrow::Cow;
 use crate::story::{Phase, StoryRun};
 
 const INPUT_DELAY: f32 = 0.25;
@@ -13,7 +15,7 @@ impl App {
             return false;
         }
         let player = self.player_char_id();
-        let Some(script) = epilogue::of_with(&player, run.mercy) else {
+        let Some(script) = self.epilogue_script(&player, run.mercy) else {
             return false;
         };
         let beats = script.beats(crate::profile::lang());
@@ -21,7 +23,7 @@ impl App {
             return false;
         }
         let boss = self.story_char(epilogue::final_boss(&player));
-        let revealed = self.draw_story_epilogue(script, &beats, run.epilogue, t, boss);
+        let revealed = self.draw_story_epilogue(&script, &beats, run.epilogue, t, boss);
         if self.skip_chip() || self.c.pressed(nav::BACK | nav::START) || is_key_pressed(KeyCode::Escape) {
             self.story_epilogue_goto(beats.len() + 1);
             return true;
@@ -45,7 +47,7 @@ impl App {
             return;
         }
         let player = self.player_char_id();
-        let Some(script) = epilogue::of_with(&player, run.mercy) else {
+        let Some(script) = self.epilogue_script(&player, run.mercy) else {
             return;
         };
         if run.epilogue == 0 {
@@ -56,6 +58,11 @@ impl App {
         } else if run.epilogue > script.beats(crate::profile::lang()).len() {
             self.audio.stop_music();
         }
+    }
+
+    fn epilogue_script(&self, player: &str, mercy: Option<bool>) -> Option<Cow<'static, Epilogue>> {
+        let name = self.reg.chars.get(self.sel.0).map_or("", |entry| entry.name.as_str());
+        epilogue::of_named(player, name, mercy)
     }
 
     pub(crate) fn story_epilogue_page(&self) -> Option<usize> {
@@ -80,6 +87,7 @@ impl App {
         run.won_fight(0, 1.0);
         self.mode = crate::app::Mode::Story;
         self.sel.0 = hero;
+        let _ = self.reg.chars[hero].load(1);
         self.session = None;
         self.story = Some(run);
         self.story_epilogue_goto(page);

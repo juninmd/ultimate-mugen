@@ -1366,8 +1366,8 @@
     "charge": {"auraColor":[30,95,45],"shake":true}
   },
   "profile": {
-    "country": "JP",
-    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
+    "country": "MN",
+    "nationality": {"en":"Mongolian","pt":"Mongol","es":"Mongol"},
     "origin": {"en":"Silver Wolf Peaks","pt":"Picos do Lobo Prateado","es":"Picos del Lobo Plateado"},
     "title": {"en":"Silver Wolf of the Peaks","pt":"Lobo Prateado das Montanhas","es":"Lobo Plateado de las Montañas"},
     "fightingStyle": {"en":"Wild Mountain Karate","pt":"Karatê Selvagem da Montanha","es":"Karate Salvaje de la Montaña"},

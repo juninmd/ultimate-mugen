@@ -8,7 +8,7 @@ pub(super) fn life_add(m: &mut Match, t: usize, v: f32, kill: bool, absolute: bo
     if !kill && nl < 1.0 && f.life > 0.0 {
         nl = 1.0;
     }
-    f.life = nl.clamp(0.0, f.life_max);
+    f.life = crate::clamp::ordered(nl, 0.0, f.life_max);
     if f.life <= 0.0 {
         f.alive = false;
         f.ghv.fall = true;

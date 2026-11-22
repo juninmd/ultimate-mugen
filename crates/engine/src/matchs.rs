@@ -497,8 +497,8 @@ impl Match {
     }
     pub(crate) fn refresh_stage_camera(&mut self) {
         self.apply_zoom();
-        self.camera.x = self.camera.x.clamp(self.stage.bound_left, self.stage.bound_right);
-        self.camera.y = self.camera.y.clamp(self.stage.bound_high, self.stage.bound_low);
+        self.camera.x = crate::clamp::ordered(self.camera.x, self.stage.bound_left, self.stage.bound_right);
+        self.camera.y = crate::clamp::ordered(self.camera.y, self.stage.bound_high, self.stage.bound_low);
     }
     pub(crate) fn apply_zoom(&mut self) {
         self.view_w = BASE_W * self.zoom; self.view_h = BASE_H * self.zoom;
@@ -909,13 +909,13 @@ impl Match {
         if !any_y { highest = 0.0; }
         let natural = if self.zoom_max > 1.0 {
             let need = if !live { self.zoom_min } else { (hi - lo + 150.0) / BASE_W };
-            need.clamp(self.zoom_min, self.zoom_max)
+            crate::clamp::ordered(need, self.zoom_min, self.zoom_max)
         } else { self.zoom_min };
         let (offset, bound) = self.step_zoom(natural);
         let half = self.view_w / 2.0; let t = self.stage.tension.clamp(0.0, half);
         let (lo, hi) = ((maxx - half + t).max(self.stage.bound_left), (minx + half - t).min(self.stage.bound_right));
         let held = if lo <= hi { self.camera.x.clamp(lo, hi) } else { self.camera.x };
-        let target = if bound { (held + offset.x).clamp(self.stage.bound_left, self.stage.bound_right) } else { held.clamp(self.stage.bound_left, self.stage.bound_right) + offset.x };
+        let target = if bound { crate::clamp::ordered(held + offset.x, self.stage.bound_left, self.stage.bound_right) } else { crate::clamp::ordered(held, self.stage.bound_left, self.stage.bound_right) + offset.x };
         self.camera.x += (target - self.camera.x) * 0.5;
         let cam = &self.stage.camera;
         let top = self.effective_bound_high();

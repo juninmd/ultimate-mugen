@@ -75,7 +75,7 @@ pub asserts: u64,
 impl Fighter {
     pub fn new(id: u32, def: Arc<CharDef>, side: usize, player_no: usize) -> Self {
         let lscl = 320.0 / if def.local_w > 0.0 { def.local_w } else { 320.0 };
-        let life = def.c("data.life", 1000.0) as f32;
+        let life = (def.c("data.life", 1000.0) as f32).max(1.0);
         Fighter {
             id, st_def: def.clone(), anim_def: def.clone(), side, player_no, is_helper: false, helper_id: 0, helper_player: false, helper_projectile: false, own_projectile: false, own_clsn_scale: false, size_overrides: vec![], key_ctrl: false,
             parent: None, root: id, destroyed: false, pal_no: 1, ai_level: 0,
@@ -248,7 +248,7 @@ impl Fighter {
     }
     pub fn height_top(&self) -> f32 { self.height_override.map(|h| h.0).unwrap_or_else(|| self.c("size.height", 60.0) * self.lscl) }
     pub fn height_bottom(&self) -> f32 { self.height_override.map(|h| h.1).unwrap_or(0.0) }
-    pub fn add_power_local(&mut self, v: f32) { self.power = (self.power + v).clamp(0.0, self.power_max); }
+    pub fn add_power_local(&mut self, v: f32) { self.power = crate::clamp::ordered(self.power + v, 0.0, self.power_max); }
 
     pub fn fill_boxes(&self, kind: u8, out: &mut Vec<Box4>) {
         out.clear();

@@ -2,9 +2,9 @@ import unittest
 
 from PIL import Image
 
-from mugen_parse import contain_axis
-from mugen_moves import build_move, frame_at
-from mugen_routes import convert_input, routes
+from mugen2umf.parse import contain_axis
+from mugen2umf.moves import build_move, frame_at
+from mugen2umf.routes import convert_input, routes
 
 
 def ctrl(kind, **body):

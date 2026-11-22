@@ -14,6 +14,7 @@ class Sprite:
         self.pal_index = 0
         self.pal = None
         self.same_pal = False
+        self.root = self
 
 
 def _pcx_decode(buf):
@@ -130,7 +131,7 @@ class SFF:
         if raw[:11] != b"ElecbyteSpr":
             raise ValueError("not an SFF file")
         self.version = raw[15]
-        self.sprites, self.palettes = [], []
+        self.sprites, self.palettes, self.legacy_shared = [], [], True
         (self._read_v1 if self.version == 1 else self._read_v2)(raw)
         self.index = {}
         for s in self.sprites:
@@ -152,6 +153,8 @@ class SFF:
                 s.data = raw[off + 32: off + 32 + ln]
                 own = _pcx_decode_pal(s.data)
                 s.pal = prev_pal if (same and prev_pal) else (own or prev_pal)
+            if same and self.sprites:
+                s.root = self.sprites[-1].root
             prev_pal = s.pal
             self.sprites.append(s)
             if nxt == 0:

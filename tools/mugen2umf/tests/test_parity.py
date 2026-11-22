@@ -2,12 +2,12 @@ import os
 import tempfile
 import unittest
 
-from mugen_chain import segment
-from mugen_charge import charge_spec
-from mugen_motion import motion
-from mugen_parse import read_states
-from mugen_routes import routes
-from mugen_scripts import passthrough
+from mugen2umf.chain import segment
+from mugen2umf.charge import charge_spec
+from mugen2umf.motion import motion
+from mugen2umf.parse import read_states
+from mugen2umf.routes import routes
+from mugen2umf.scripts import passthrough
 
 
 def ctrl(kind, **body):

@@ -43,7 +43,7 @@ pub struct HitSpec {
     #[serde(default)] pub hitflag: Option<String>,
     #[serde(default)] pub pausetime: Option<[i32; 2]>,
     #[serde(default)] pub cornerpush: Option<f32>,
-    #[serde(default, rename = "hitSound")] pub hit_sound: Option<[i32; 2]>,
+    #[serde(default, rename = "hitSound")] pub hit_sound: Option<[i32; 2]>, #[serde(default, rename = "ownSound")] pub own_sound: bool,
     #[serde(default, rename = "guardSound")] pub guard_sound: Option<[i32; 2]>,
     #[serde(default, rename = "sparkPos")] pub spark_pos: Option<[f32; 2]>,
     #[serde(default, rename = "groundBounce")] pub ground_bounce: Option<bool>,
@@ -70,7 +70,7 @@ pub struct ProjectileSpec {
     #[serde(default)] pub stun: Option<i32>,
     #[serde(default, rename = "missTime")] pub miss_time: Option<i32>, #[serde(default)] pub recover: Option<bool>,
     #[serde(default, rename = "guardDamage")] pub guard_damage: Option<f32>,
-    #[serde(default, rename = "hitSound")] pub hit_sound: Option<[i32; 2]>,
+    #[serde(default, rename = "hitSound")] pub hit_sound: Option<[i32; 2]>, #[serde(default, rename = "ownSound")] pub own_sound: bool,
     #[serde(default)] pub pausetime: Option<[i32; 2]>,
     #[serde(default)] pub hitflag: Option<String>,
     #[serde(default)] pub shake: Option<i32>,
@@ -160,7 +160,7 @@ pub struct NativeMove {
     #[serde(default)] pub vfx: Vec<super::blocks::VfxSpec>,
     #[serde(default)] pub quake: Vec<super::blocks::QuakeSpec>,
     #[serde(default, rename = "velMul")] pub vel_mul: Vec<super::move_motion::VelRange>, #[serde(default, rename = "velAdd")] pub vel_add: Vec<super::move_motion::VelRange>, #[serde(default, rename = "posFreeze")] pub pos_freeze: Vec<super::move_motion::FrameRange>,
-    #[serde(default, rename = "posSet")] pub pos_set: Vec<super::move_motion::PosSetSpec>, #[serde(default, rename = "palFx")] pub pal_fx: Vec<super::move_motion::PalFxSpec>,
+    #[serde(default, rename = "posSet")] pub pos_set: Vec<super::move_motion::PosSetSpec>, #[serde(default, rename = "palFx")] pub pal_fx: Vec<super::move_motion::PalFxSpec>, #[serde(default)] pub spawn: Vec<super::move_spawn::SpawnSpec>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

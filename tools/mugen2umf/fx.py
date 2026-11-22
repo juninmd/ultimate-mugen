@@ -1,4 +1,4 @@
-from mugen_parse import nums
+from .parse import nums
 
 
 def extract_fx(ctrls, actions, anim_name_fn, frames):

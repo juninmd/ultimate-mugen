@@ -1,19 +1,17 @@
-"""Convert a M.U.G.E.N character folder into a umf/2 bundle: <id>.json plus sprites/ (poses, meta.json, sounds)."""
-import argparse
 import json
 import os
 import re
-import sys
 from collections import Counter
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from mugen_abilities import is_fly_state, detect_abilities, detect_cancels
-from mugen_moves import STANDARD, anim_name, build_move
-from mugen_routes import convert_input, routes
-from mugen_coverage import coverage
-from mugen_scripts import passthrough
-from mugen_parse import contain_axis, nums, png_bytes, read_air, read_commands, read_def, read_snd, read_states, sections, read_text, sprite_image
-from sff_decode import SFF, read_act
+from .branches import expand
+from .abilities import is_fly_state, detect_abilities, detect_cancels
+from .moves import STANDARD, anim_name, build_move
+from .routes import convert_input, routes
+from .coverage import coverage
+from .scripts import helper_closure, passthrough
+from .spawns import attach, seeds as spawn_seeds
+from .parse import contain_axis, nums, png_bytes, read_air, read_commands, read_def, read_snd, read_states, sections, read_text, sprite_image
+from .sff import SFF, read_act
 
 ACTIVE_PART = {"kick": "footF"}
 
@@ -59,13 +57,16 @@ def stats_from(c, height):
 def convert(src, out, fighter_id, name, extra):
     d = read_def(src)
     sff = SFF(open(d["sprite"], "rb").read())
+    sff.legacy_shared = not d["info"].get("mugenversion", "").strip().startswith("1")
     pal = read_act(open(d["pal"], "rb").read()) if d["pal"] and sff.version == 1 else None
     actions = read_air(d["anim"])
     commands = read_commands(d["cmd"])
     states = read_states([d["cmd"]] + d["cns"])
     cmd_ctrls = states.get(-1, {"ctrl": []})["ctrl"]
     fly_states = [sid for sid, st in states.items() if is_fly_state(st)]
-    raw_routes = [(v, lb, convert_input(tx), wh, co) for v, lb, tx, wh, co in routes(cmd_ctrls, commands, fly_states)]
+    add = json.load(open(extra, encoding="utf-8")) if extra else {}
+    unlocked = [(r["state"], r["id"], r["input"], r.get("when", "stand"), r.get("cost", 0)) for r in add.pop("mugenRoutes", [])]
+    raw_routes = unlocked + [(v, lb, convert_input(tx), wh, co) for v, lb, tx, wh, co in routes(cmd_ctrls, commands, fly_states)]
     abilities, consumed, ab_anims = detect_abilities(states, raw_routes, actions, anim_name)
     shadowed = set()
     moves, wanted, seen, state_to_id = [], [n for n in STANDARD if n in actions] + ab_anims, set(), {}
@@ -82,28 +83,21 @@ def convert(src, out, fighter_id, name, extra):
             moves.append(move)
             state_to_id.setdefault(value, move_id)
             wanted += [a for a in anims if a in actions]
-    for move in list(moves):
-        fu = move.pop("_followUpState", None)
-        if not fu:
-            continue
-        fu_state, fu_on = fu
-        fu_id = f"{move['id']}_followup"
-        fu_move, fu_anims = build_move(fu_state, states, actions, fu_id, "", move.get("when", "stand"), 0, skip=consumed)
-        if fu_move:
-            fu_move.pop("_followUpState", None)
-            fu_move["kind"] = move["kind"]
-            fu_move.pop("cost", None)
-            move["followUp"] = {"to": fu_id, "on": fu_on}
-            moves.append(fu_move)
-            wanted += [a for a in fu_anims if a in actions]
+    branch_anims, branch_commands = expand(moves, states, actions, commands, consumed, state_to_id)
+    wanted += [a for a in branch_anims if a in actions]
     cancels = detect_cancels(cmd_ctrls, state_to_id)
     dropped = Counter(k for move in moves for k in move.pop("_dropped", []))
     for move in moves:
         if move["id"] in cancels:
             move["cancels"] = cancels[move["id"]]
-    scripts, script_anims = passthrough(states, commands, actions, anim_name, set(state_to_id) | consumed)
+    remap = helper_closure(spawn_seeds(moves), states)
+    dropped.update(attach(moves, remap))
+    scripts, script_anims = passthrough(states, commands, actions, anim_name, set(state_to_id) | consumed, remap, {s: m for s, m in state_to_id.items() if m in {mv['id'] for mv in moves}})
     wanted += script_anims
-    hit_anims = {m["anim"] for m in moves} | {p["anim"] for m in moves for p in ([m["projectile"]] if isinstance(m.get("projectile"), dict) else m.get("projectile", []))}
+    if branch_commands:
+        scripts = scripts or {}
+        scripts["commands"] = scripts.get("commands", []) + branch_commands
+    hit_anims = {m["anim"] for m in moves} | {anim_name(a) for a in script_anims} | {p["anim"] for m in moves for p in ([m["projectile"]] if isinstance(m.get("projectile"), dict) else m.get("projectile", []))}
     no_loop = {"intro", "taunt"} | {m["anim"] for m in moves}
     anims = {}
     for number in dict.fromkeys(wanted):
@@ -158,9 +152,10 @@ def convert(src, out, fighter_id, name, extra):
         fighter["abilities"] = abilities
     if scripts:
         fighter["scripts"] = scripts
-    if extra:
-        add = json.load(open(extra, encoding="utf-8"))
-        fighter["moves"] += add.pop("moves", [])
+    if add:
+        known = {m["id"]: m for m in fighter["moves"]}
+        for extra in add.pop("moves", []):
+            known[extra["id"]].update(extra) if extra["id"] in known else fighter["moves"].append(extra)
         fighter["anims"].update(add.pop("anims", {}))
         if isinstance(add.get("scripts"), dict) and fighter.get("scripts"):
             mine, theirs = fighter["scripts"], add.pop("scripts")
@@ -171,15 +166,20 @@ def convert(src, out, fighter_id, name, extra):
                 fighter[key] = {**fighter[key], **add.pop(key)}
         fighter.update(add)
     json.dump(fighter, open(os.path.join(out, f"{fighter_id}.json"), "w", encoding="utf-8"), ensure_ascii=False)
+    by_id = {m["id"]: m for m in moves}
+    pairs = [{"id": mid, "state": sid, "when": by_id[mid].get("when", "stand"), "listed": bool(by_id[mid].get("input"))} for sid, mid in state_to_id.items() if mid in by_id]
+    json.dump(pairs, open(os.path.join(out, "routes.json"), "w", encoding="utf-8"), indent=1)
     sprite_files = sum(1 for g, i in sff.index if os.path.exists(os.path.join(out, "sprites", f"s{g}_{i}.png")))
-    report = coverage(states, commands, actions, sff, bank, state_to_id, consumed, (scripts or {}).get("cns"), fighter, sprite_files, shadowed, dropped)
+    report = coverage(states, commands, actions, sff, bank, state_to_id, consumed, set(remap) | {int(x) for x in re.findall(r"\[Statedef (\d+)\]", (scripts or {}).get("cns") or "")}, fighter, sprite_files, shadowed, dropped)
     open(os.path.join(out, "coverage.md"), "w", encoding="utf-8").write(report)
     return fighter
 
 
-def print_report(f):
+def feature_counts(f):
     ms = f["moves"]
-    counts = {
+    return {
+        "moves": len(ms),
+        "anims": len(f["anims"]),
         "abilities": sorted((f.get("abilities") or {}).keys()),
         "explods": sum(len(m.get("explods", [])) for m in ms),
         "afterimages": sum(1 for m in ms if "afterimage" in m),
@@ -191,20 +191,5 @@ def print_report(f):
         "cancels": sum(1 for m in ms if "cancels" in m),
         "wallBounces": sum(1 for m in ms for h in m.get("hits", []) if h.get("wallBounce")),
         "projectiles": sum(1 for m in ms if "projectile" in m),
+        "motion": sum(1 for m in ms for k in ("velMul", "velAdd", "posFreeze", "posSet", "palFx") if k in m),
     }
-    print("report:", json.dumps(counts, ensure_ascii=False))
-
-
-if __name__ == "__main__":
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("src")
-    ap.add_argument("out")
-    ap.add_argument("--id", required=True)
-    ap.add_argument("--name", required=True)
-    ap.add_argument("--extra", help="json merged on top: extra moves, anims, abilities, helpers, profile, intro/taunt/winQuote")
-    ap.add_argument("--report", action="store_true", help="print conversion feature coverage summary")
-    a = ap.parse_args()
-    f = convert(a.src, a.out, a.id, a.name, a.extra)
-    print(f"{a.id}: {len(f['moves'])} moves, {len(f['anims'])} anims, height {f['stats']['height']}")
-    if a.report:
-        print_report(f)

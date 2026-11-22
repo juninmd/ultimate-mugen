@@ -1,6 +1,6 @@
 import re
 
-from mugen_parse import nums
+from .parse import nums
 
 
 def convert_input(text):
@@ -9,6 +9,11 @@ def convert_input(text):
         direction = parts[0].lstrip("/$~")
         return f"{direction}+{parts[1].lstrip('/$')}"
     return ", ".join(p.replace("/", "").replace("$", "") if not re.match(r"~\d+\$", p) else p for p in parts)
+
+
+def _hold_dir(variants):
+    m = re.fullmatch(r"/\$?([FBUD])", variants[0].strip()) if len(variants) == 1 else None
+    return m.group(1) if m else None
 
 
 def trigger_groups(ctrl):
@@ -43,12 +48,19 @@ def routes(cmd_states, commands, fly_states=()):
         text, mode = _pick_group(trigger_groups(ctrl), fly_states)
         if text is None:
             continue
-        names = re.findall(r'command\s*=\s*"([^"]+)"', text)
-        hold_only = all(re.fullmatch(r"/\$?\w+", c.strip()) for c in commands.get(names[0], ["x"])) if names else False
-        if not names or hold_only or names[0] not in commands:
+        names = [n for n in re.findall(r'command\s*=\s*"([^"]+)"', text) if n in commands]
+        holds = [_hold_dir(commands[n]) for n in names if _hold_dir(commands[n])]
+        names = [n for n in names if not _hold_dir(commands[n])]
+        if not names or all(re.fullmatch(r"/\$?\w+", c.strip()) for c in commands[names[0]]):
             continue
         state_type = re.search(r"statetype\s*=\s*([sca])", text)
         when = mode or {"a": "air", "c": "crouch"}.get(state_type.group(1) if state_type else "s", "stand")
+        if "D" in holds and not state_type:
+            when = "crouch"
+        cmd_input = commands[names[0]][0]
+        lead = next((h for h in holds if h in "FBU"), None)
+        if lead and when != "crouch" and "," not in cmd_input:
+            cmd_input = f"{lead}+{cmd_input}"
         cost = int(max([float(x) for x in re.findall(r"power\s*>=?\s*(\d+)", text)] or [0]))
-        out.append((value, names[0], commands[names[0]][0], when, cost))
+        out.append((value, names[0], cmd_input, when, cost))
     return out

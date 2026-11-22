@@ -1,6 +1,6 @@
 import re
 
-from mugen_parse import nums
+from .parse import nums
 
 
 AIRBORNE_TICKS = 240

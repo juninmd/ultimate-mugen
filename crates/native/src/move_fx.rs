@@ -142,6 +142,7 @@ pub(super) fn move_fx_cns(m: &NativeMove, sid: i32, anim_no: &HashMap<String, i3
         }
     }
     out += &super::move_motion::motion_cns(m, sid);
+    out += &super::move_spawn::spawn_cns(m, sid);
     out
 }
 
@@ -150,13 +151,17 @@ pub(super) fn follow_up_cns(m: &NativeMove, sid: i32, target_sid: Option<i32>) -
         return String::new();
     };
     let on = fu.on.as_deref().unwrap_or("hit");
+    let held = fu.command.as_deref().unwrap_or("");
     let cond = match on {
-        "contact" => "MoveContact > 0",
-        "end" => "1",
-        "hitNow" => "MoveHit = 1",
-        _ => "MoveHit > 0",
+        "contact" => "MoveContact > 0".to_string(),
+        "end" => "1".to_string(),
+        "hitNow" => "MoveHit = 1".to_string(),
+        "command" if !held.is_empty() => format!("command = \"{held}\""),
+        "release" if !held.is_empty() => format!("(command != \"{held}\" || AnimTime = 0)"),
+        "command" | "release" => return String::new(),
+        _ => "MoveHit > 0".to_string(),
     };
-    let timing = if on == "hitNow" {
+    let timing = if on == "hitNow" || on == "release" || on == "command" && fu.at.is_none() {
         "1".to_string()
     } else {
         fu.at.filter(|a| *a > 0).map(|a| format!("AnimElem = {a}")).unwrap_or_else(|| "AnimTime = 0".to_string())

@@ -1,6 +1,6 @@
 # Dissecação de quatro lutadores M.U.G.E.N
 
-Estudo somente leitura de quatro pacotes públicos, abertos arquivo por arquivo com `.agents/skills/mugen-dissector/scripts/dissect.py`: Aizen TYBW (Fighter Factory Ultimate, SFF v2), Gogeta SSJ4 (Pocket_Danyell e Sarevok), Goku SSJ GT (Yamcha Z) e Goku SSJ4 (_Vision). Os pacotes são arquivos de terceiros: nada deles é commitado, só o que aprendemos. Estudos relacionados: [Estudo de código M.U.G.E.N](MUGEN-Code-Study.md) e [Estudo de lutadores](Fighter-Study.md).
+Estudo somente leitura de quatro pacotes públicos, abertos arquivo por arquivo com `tools/mugen2umf`: Aizen TYBW (Fighter Factory Ultimate, SFF v2), Gogeta SSJ4 (Pocket_Danyell e Sarevok), Goku SSJ GT (Yamcha Z) e Goku SSJ4 (_Vision). Os pacotes são arquivos de terceiros: nada deles é commitado, só o que aprendemos. Estudos relacionados: [Estudo de código M.U.G.E.N](MUGEN-Code-Study.md) e [Estudo de lutadores](Fighter-Study.md).
 
 ## Tamanho de cada pacote
 

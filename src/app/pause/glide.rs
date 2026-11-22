@@ -32,8 +32,8 @@ pub(super) fn highlight(ui: &Ui, r: Rect, cut: f32, a: f32) {
     );
 }
 
-pub(super) fn cost_colors(cost: &str) -> (Color, Color) {
-    if cost.contains("BAR") {
+pub(super) fn cost_colors(bar: bool) -> (Color, Color) {
+    if bar {
         (crate::ui::hex("#ffcc33"), Color::new(1.0, 0.8, 0.2, 0.2))
     } else {
         (crate::ui::hex("#5ee8ff"), Color::new(0.37, 0.91, 1.0, 0.16))

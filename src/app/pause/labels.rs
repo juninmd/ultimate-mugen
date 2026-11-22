@@ -3,15 +3,23 @@ use crate::gamepad::PadKind;
 use ume_engine::chardef::MoveInfo;
 
 pub fn cost_label(mv: &MoveInfo) -> Option<String> {
+    cost_text(mv, crate::i18n::tr3("BARRA", "BAR", "BARRA"), crate::i18n::tr3("BARRAS", "BARS", "BARRAS"))
+}
+
+pub fn is_bar_cost(mv: &MoveInfo) -> bool {
+    !mv.drain && mv.cost >= 1000.0 && mv.cost % 1000.0 == 0.0
+}
+
+fn cost_text(mv: &MoveInfo, bar: &str, bars: &str) -> Option<String> {
     if mv.cost <= 0.0 {
         return None;
     }
     Some(if mv.drain {
         format!("{:.0}/s PWR", mv.cost)
-    } else if mv.cost >= 1000.0 && mv.cost % 1000.0 == 0.0 {
+    } else if is_bar_cost(mv) {
         match (mv.cost / 1000.0) as i32 {
-            1 => "1 BAR".to_string(),
-            b => format!("{b} BARS"),
+            1 => format!("1 {bar}"),
+            b => format!("{b} {bars}"),
         }
     } else {
         format!("{:.0} PWR", mv.cost)
@@ -50,11 +58,13 @@ mod tests {
 
     #[test]
     fn cost_labels() {
-        assert_eq!(cost_label(&mv(0.0, false)), None);
-        assert_eq!(cost_label(&mv(1000.0, false)).as_deref(), Some("1 BAR"));
-        assert_eq!(cost_label(&mv(3000.0, false)).as_deref(), Some("3 BARS"));
-        assert_eq!(cost_label(&mv(250.0, false)).as_deref(), Some("250 PWR"));
-        assert_eq!(cost_label(&mv(40.0, true)).as_deref(), Some("40/s PWR"));
+        let text = |cost, drain| cost_text(&mv(cost, drain), "BAR", "BARS");
+        assert_eq!(text(0.0, false), None);
+        assert_eq!(text(1000.0, false).as_deref(), Some("1 BAR"));
+        assert_eq!(text(3000.0, false).as_deref(), Some("3 BARS"));
+        assert_eq!(text(250.0, false).as_deref(), Some("250 PWR"));
+        assert_eq!(text(40.0, true).as_deref(), Some("40/s PWR"));
+        assert!(is_bar_cost(&mv(2000.0, false)) && !is_bar_cost(&mv(2000.0, true)) && !is_bar_cost(&mv(250.0, false)));
     }
 
     #[test]

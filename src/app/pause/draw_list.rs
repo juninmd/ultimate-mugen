@@ -77,7 +77,7 @@ impl App {
             if let Some(cost) = cost_label(mv) {
                 let tw = ui.measure(&cost, 15.0 * f, true) + 22.0;
                 let pr = super::layout::Rect::new(l.x + cols.cost_right - tw, mid - 14.0 * f, tw, 28.0 * f);
-                let (ink, wash) = super::glide::cost_colors(&cost);
+                let (ink, wash) = super::glide::cost_colors(super::labels::is_bar_cost(mv));
                 pill(ui, pr, 14.0 * f, fade(wash, a), fade(Color::new(0.0, 0.0, 0.0, 0.35), a), Some(fade(ink, 0.8 * a)));
                 ui.text(&cost, pr.x + tw / 2.0, mid + 5.5 * f, 15.0 * f, fade(ink, a), Align::Center, true);
             }
@@ -160,11 +160,11 @@ impl App {
         use crate::i18n::{t, tr};
         match act {
             Action::Continue => (t("pause.continue").to_string(), tr("Voltar para a luta", "Back to the fight")),
-            Action::Restart => (t("pause.restart").to_string(), tr("Recomeca a partida do zero", "Start the match over")),
-            Action::Change => (t("pause.change").to_string(), tr("Volta para a selecao de personagens", "Back to character select")),
+            Action::Restart => (t("pause.restart").to_string(), tr("Recomeça a partida do zero", "Start the match over")),
+            Action::Change => (t("pause.change").to_string(), tr("Volta para a seleção de personagens", "Back to character select")),
             Action::Dummy => (t("pause.dummy").to_string(), tr("Parado, agachado, pulando ou defendendo", "Standing, crouching, jumping or guarding")),
-            Action::Hitboxes => (t("pause.hitboxes").to_string(), tr("Mostra caixas de dano e colisao", "Show hit and hurt boxes")),
-            Action::Settings => (t("pause.settings").to_string(), tr("Video, audio e controles", "Video, audio and controls")),
+            Action::Hitboxes => (t("pause.hitboxes").to_string(), tr("Mostra caixas de dano e colisão", "Show hit and hurt boxes")),
+            Action::Settings => (t("pause.settings").to_string(), tr("Vídeo, áudio e controles", "Video, audio and controls")),
             Action::MainMenu => (t("pause.menu").to_string(), tr("Sai da luta atual", "Leave the current match")),
         }
     }

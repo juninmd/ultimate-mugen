@@ -95,7 +95,7 @@ Um só código com **wgpu + winit**: Vulkan, Metal, DX12, GLES e WebGL2. Windows
 <td valign="top">
 
 ### 🎮 Gostoso de jogar
-Teclado, toque, Xbox, DualShock 4 e DualSense com **vibração e lightbar**. Arcade, Versus, Treino, Sequência 3v3 e Paralelo até **5v5**.
+Teclado, toque, Xbox, DualShock 4 e DualSense com **vibração e lightbar**. Arcade, Versus, Treino, Sequência 3v3 e Paralelo até **7v7**.
 
 </td>
 </tr>
@@ -138,7 +138,7 @@ O **modo História** traz cinco extensões longas e roláveis das arenas (Brasil
 
 ## 🆕 Novidades
 
-- **Modos de jogo:** Arcade, História (com epílogo escrito por lutador), Versus CPU, 2 Jogadores, Treino, CPU vs CPU, Sobrevivência, Torre, Arena do Poder, times Sequência/Paralelo/Tag e rollback online. Desafios de Combo e Modo Foto funcionam dentro das lutas. [Modos de jogo](docs/wiki/pt-BR/Modos-de-Jogo.md) · [Desafios de Combo](docs/wiki/Combo-Trials.md) · [Modo Foto](docs/wiki/pt-BR/Modo-Foto.md)
+- **Modos de jogo:** Arcade, História (com epílogo escrito por lutador), Versus CPU, 2 Jogadores, Treino, CPU vs CPU, Sobrevivência, Torre, Arena do Poder, times Sequência/Paralelo/Tag (até 7v7, com posições iniciais aleatórias por semente; 5v5 no Android e iOS) e rollback online. Desafios de Combo e Modo Foto funcionam dentro das lutas. [Modos de jogo](docs/wiki/pt-BR/Modos-de-Jogo.md) · [Desafios de Combo](docs/wiki/Combo-Trials.md) · [Modo Foto](docs/wiki/pt-BR/Modo-Foto.md)
 - **História:** cinco fases de ondas e chefes, depois chefe final e epílogos em PT/EN/ES. Cada lutador nativo tem seu país único. [Guia](docs/wiki/Story-Mode.md) · [Objetos de cenário](docs/wiki/pt-BR/Objetos-de-Cenario.md)
 - **Conversor MUGEN → UMF:** `tools/mugen2umf` é um conversor exato em Rust, com checagem de paridade golpe a golpe. Um único pacote serve a CLI (`mugen2umf <ferramenta>`) e um servidor MCP (`mugen2umf mcp`). [Guia UMF](docs/wiki/UMF-Character.md)
 - **Mercado GitHub:** instale personagens, cenários e músicas de qualquer repositório público, com visões de lista e grade, selos MUGEN e UMF, tipo personagem ou pacote, status desatualizado e instalar, atualizar e remover em lote. [Mercado](docs/wiki/pt-BR/Mercado.md)

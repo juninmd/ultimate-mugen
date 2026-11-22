@@ -9,6 +9,8 @@ To download content from a GitHub repository instead, see the [GitHub marketplac
 
 Use Main menu › **Import M.U.G.E.N** (the only import button; on the web it opens the browser picker, on desktop the system file dialog) or drag the `.zip` onto the web window. Imports are idempotent: the same archive, or the same fighter or stage found again under another path, name or letter case, is registered only once (identity is a hash of the normalized `.def` plus its sprite file). Packs saved in the browser from older versions are deduplicated automatically on the next load.
 
+The screen shows a holographic mosaic of every imported fighter (`F` also lists the native roster). Arrows, gamepad or touch move the cursor, Enter or a click opens the character sheet: portrait, author, series, source `.def`, version, palette count, nationality and bio when known, stat gauges, and the full move list with input and energy cost (Left/Right switch fighter, Esc returns). Up from the first row focuses the import button. Capture with `UME_SHOTS_ONLY=mugenroster` (`UME_ROSTER_ZIPS=a.zip:b.zip` imports packs first).
+
 A web import shows a full-screen loading overlay from the moment the files are selected until the last archive is registered. Archives are read, decompressed and registered **one per frame**, with at most two raw packs waiting in wasm memory; a batch of large packs no longer runs in one frozen frame. The same overlay appears on startup while the packs persisted in IndexedDB are restored, one at a time.
 
 Hundreds of characters are registered without decoding everything; only the item under the cursor is loaded, and an LRU cache bounds memory.

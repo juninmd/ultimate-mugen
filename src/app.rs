@@ -60,7 +60,7 @@ mod title_screen;
 use select_category::CATEGORY_COUNT;
 #[cfg(target_arch = "wasm32")]
 mod web_import;
-mod controls_screen; mod holo_loading; mod market_holo; mod boot_holo;
+mod mugen_roster; mod mugen_roster_nav; mod mugen_sheet; mod mugen_sheet_moves; mod controls_screen; mod holo_loading; mod market_holo; mod boot_holo;
 mod empty_art; mod menu_bgm;
 pub(crate) use keyedit::KeyEdit;
 

@@ -13,6 +13,14 @@ Instale personagens, cenários e músicas direto de qualquer repositório públi
 
 Tudo fica salvo localmente: a lista de repositórios, os itens instalados e o estado de ativação continuam lá na próxima abertura.
 
+## Navegação: lista, grade, formatos e itens desatualizados
+
+- **Lista e grade.** O seletor **Lista / Grade** (`V`, ou o botão auxiliar do controle) alterna entre a lista densa e uma grade de cards com retrato, e a escolha é lembrada. Nas duas, toque ou clique marca o item e arrastar rola a tela (bom para toque); a roda do mouse, `PageUp`/`PageDown` e as setas também rolam.
+- **Selos MUGEN e UMF.** Todo personagem, cenário e pacote mostra o formato. Um pacote é UMF quando o caminho ou o nome diz (pasta `umf/`, `*_UMF.zip`); o resto é MUGEN. O mesmo lutador pode existir nos dois formatos: eles nunca são unidos, cada variante tem seu selo, estado e download, e as variantes de um lutador ficam lado a lado (`Goku_SS4` e `Goku_SSJ4_UMF` contam como o mesmo lutador).
+- **Itens desatualizados.** Um item instalado cuja versão no repositório (hash dos caminhos e shas, veja acima) difere da instalada recebe **DESATUALIZADO** e uma borda laranja. A listagem baixa de novo automaticamente, e **Instalar** faz isso na hora.
+- **Filtros.** Tipo (`F`), formato Todos/MUGEN/UMF (`J`) e **Desatualizados** (`P`) combinam com as abas Explorar/Instalados (`Tab`).
+- **Retratos.** Os cards mostram a imagem de prévia do item: um PNG em uma pasta `previews/`, `portraits/` ou `thumbs/` com o mesmo nome do item (`previews/umf/Goku_SSJ4_UMF.png` para `umf/Goku_SSJ4_UMF.zip`). Só os cards visíveis são baixados (3 por vez, do `raw.githubusercontent.com`), reduzidos para no máximo 240 px de largura, mantidos num cache em memória de 48 retratos e, no desktop, em disco junto da listagem, por sha do blob. Itens sem prévia mostram as iniciais.
+
 ## Repositórios sugeridos
 
 | Repositório | Personagens | Stages | Músicas | Packs |

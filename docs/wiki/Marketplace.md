@@ -13,6 +13,14 @@ Install characters, stages and music straight from any public GitHub repository.
 
 Everything is stored locally, so the repository list, the installed items and their on/off state are still there next time.
 
+## Browsing: list, grid, formats and outdated items
+
+- **List and grid.** The **Lista / Grade** switch (`V`, or the gamepad aux button) toggles a dense list and a grid of cards with a portrait, and is remembered. In both, a tap or click marks an item and dragging scrolls (touch friendly); the mouse wheel, `PageUp`/`PageDown` and the arrow keys scroll too.
+- **MUGEN and UMF badges.** Every character, stage and pack shows its format. A pack is UMF when its path or name says so (`umf/` folder, `*_UMF.zip`); everything else is MUGEN. The same fighter can exist in both formats: they are never merged, each variant keeps its own badge, state and download, and variants of one fighter are sorted next to each other (`Goku_SS4` and `Goku_SSJ4_UMF` count as one fighter).
+- **Outdated items.** An installed item whose repository version (hash of file paths and shas, see above) differs from the one installed is marked **DESATUALIZADO** and outlined in orange. The listing then re-downloads it automatically, and **Instalar** does it on demand.
+- **Filters.** Type (`F`), format Todos/MUGEN/UMF (`J`) and **Desatualizados** (`P`) combine with the Explorar/Instalados tabs (`Tab`).
+- **Portraits.** Cards show the preview image of the item: a PNG in a `previews/`, `portraits/` or `thumbs/` folder with the same name as the item (`previews/umf/Goku_SSJ4_UMF.png` for `umf/Goku_SSJ4_UMF.zip`). Only visible cards are fetched (3 at a time, from `raw.githubusercontent.com`), downscaled to at most 240 px wide, kept in an in-memory cache of 48 portraits and, on desktop, on disk next to the listing by blob sha. Items without a preview show their initials.
+
 ## Suggested repositories
 
 | Repository | Characters | Stages | Music | Packs |

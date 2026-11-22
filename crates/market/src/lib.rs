@@ -4,11 +4,13 @@ pub mod client;
 pub mod model;
 pub mod ops;
 pub mod persist;
+pub mod portrait_cache;
 pub mod refs;
 pub mod repo;
 pub mod safety;
 pub mod state;
 pub mod version;
+pub mod view;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub mod native;

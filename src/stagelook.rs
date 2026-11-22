@@ -80,6 +80,7 @@ fn name(kind: StageKind) -> &'static str {
         StageKind::Plains => "plains",
         StageKind::Spirit => "spirit",
         StageKind::Volcano => "volcano",
+        StageKind::Arena => "arena",
         StageKind::Custom => "custom",
     }
 }
@@ -96,6 +97,7 @@ fn current_kind() -> StageKind {
         StageKind::Plains,
         StageKind::Spirit,
         StageKind::Volcano,
+        StageKind::Arena,
         StageKind::Custom,
     ]
     .get(CURRENT.load(Ordering::Relaxed) as usize)

@@ -28,11 +28,22 @@ impl Gfx {
         w: f32,
         h: f32,
     ) {
-        let frame = frames.get(crate::stages::looping::frame_index(time, frames.len()));
-        if span <= 0.0 {
-            return self.draw_wide_image(frame.unwrap_or(image), x, y, w, h);
+        let (idx_a, idx_b, mix) = crate::stages::looping::loop_sample(time, frames.len());
+        let frame_a = frames.get(idx_a);
+        let frame_b = frames.get(idx_b);
+        if let Some(upcoming) = frames.get((idx_b + 1) % frames.len().max(1)) {
+            let _ = self.texture(upcoming, true);
         }
-        let (Some(frame), Some(layout)) = (frame, backdrop(image)) else {
+        if span <= 0.0 {
+            self.draw_wide_image(frame_a.unwrap_or(image), x, y, w, h);
+            if mix > 0.01 && idx_a != idx_b {
+                if let Some(next) = frame_b {
+                    self.draw_wide_image_alpha(next, x, y, w, h, mix);
+                }
+            }
+            return;
+        }
+        let (Some(frame), Some(layout)) = (frame_a, backdrop(image)) else {
             return self.draw_wide_image(image, x, y, w, h);
         };
         let texture = self.texture(frame, true);
@@ -44,39 +55,49 @@ impl Gfx {
             texel: frame.w as f32 / SEGMENT,
             source_h: frame.h as f32,
         };
-        let mut at = 0.0;
-        while at < STRIP {
-            let end = (at + GRADE_STEP).min(STRIP);
-            stamp(&texture, &layout, &target, (at, end), at, false, 1.0);
-            at = end;
-        }
-        for seam in 1..SEGMENTS {
-            let seam = seam as f32 * SEGMENT;
-            let mut offset = 0.0;
-            while offset < SEAM_BAND {
-                let step = SEAM_STEP.min(SEAM_BAND - offset);
-                let (near, far) = (offset, offset + step);
-                let mid = offset + step * 0.5;
-                stamp(
-                    &texture,
-                    &layout,
-                    &target,
-                    (seam + near, seam + far),
-                    seam - far,
-                    true,
-                    seam_mix(-mid),
-                );
-                stamp(
-                    &texture,
-                    &layout,
-                    &target,
-                    (seam - far, seam - near),
-                    seam + near,
-                    true,
-                    1.0 - seam_mix(mid),
-                );
-                offset += step;
+        draw_story_pass(&texture, &layout, &target, 1.0);
+        if mix > 0.01 && idx_a != idx_b {
+            if let Some(next) = frame_b {
+                let next_tex = self.texture(next, true);
+                draw_story_pass(&next_tex, &layout, &target, mix);
             }
+        }
+    }
+}
+
+fn draw_story_pass(texture: &Texture2D, layout: &Backdrop, target: &Target, alpha: f32) {
+    let mut at = 0.0;
+    while at < STRIP {
+        let end = (at + GRADE_STEP).min(STRIP);
+        stamp(texture, layout, target, (at, end), at, false, alpha);
+        at = end;
+    }
+    for seam in 1..SEGMENTS {
+        let seam = seam as f32 * SEGMENT;
+        let mut offset = 0.0;
+        while offset < SEAM_BAND {
+            let step = SEAM_STEP.min(SEAM_BAND - offset);
+            let (near, far) = (offset, offset + step);
+            let mid = offset + step * 0.5;
+            stamp(
+                texture,
+                layout,
+                target,
+                (seam + near, seam + far),
+                seam - far,
+                true,
+                seam_mix(-mid) * alpha,
+            );
+            stamp(
+                texture,
+                layout,
+                target,
+                (seam - far, seam - near),
+                seam + near,
+                true,
+                (1.0 - seam_mix(mid)) * alpha,
+            );
+            offset += step;
         }
     }
 }

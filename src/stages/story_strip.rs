@@ -68,7 +68,7 @@ pub fn illustration_layout(span: f32, aspect: f32, h: f32, view_w: f32, camera_x
     let x = if span > 0.0 {
         ((view_w - w) * 0.5 - camera_x * w / span).clamp(view_w - w, 0.0)
     } else {
-        ((view_w - w) * 0.5 - camera_x * 0.12 * zoom).clamp(view_w - w, 0.0)
+        ((view_w - w) * 0.5 - camera_x * 0.21 * zoom).clamp(view_w - w, 0.0)
     };
     (h, w, x)
 }

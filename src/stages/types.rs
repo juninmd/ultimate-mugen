@@ -40,6 +40,7 @@ pub enum StageKind {
     Plains,
     Spirit,
     Volcano,
+    Arena,
     #[default]
     Custom,
 }

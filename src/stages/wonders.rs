@@ -80,7 +80,7 @@ fn entry(id: &'static str, name: &'static str, music: u32, thumb: [[u8; 3]; 3]) 
         id: id.into(),
         name: name.into(),
         thumb,
-        build: Box::new(move || illustrated(id, name, music, StageKind::Custom)),
+        build: Box::new(move || illustrated(id, name, music, StageKind::Arena)),
     }
 }
 

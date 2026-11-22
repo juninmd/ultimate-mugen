@@ -74,6 +74,12 @@ objects = [
 
 Confira com o tour de evidências: `UME_TOUR=storyobjects` e `UME_TOUR=storyloop` (veja [Objetos de cenário](Objetos-de-Cenario.md)).
 
+### Loops contínuos, tamanho e interatividade dos cenários embutidos
+
+- **Loop contínuo a 60 FPS:** os cenários animados embutidos (`assets/stages/animation/<id>/00.png..07-mid.png`) são decodificados em paralelo (`ume_formats::par::map`) e fazem cross-fade suave entre quadros consecutivos em um ciclo fechado de 96 ticks (`loop_sample`), eliminando saltos no retorno do último quadro para o quadro `0`.
+- **Arenas ampliadas:** os cenários embutidos agora cobrem de `bound_left = -680` a `bound_right = 680` (`bound_high = -140`, `zoom_out = 0.62`, `zoom_in = 1.05`) com paralaxe panorâmica `0.21` em `illustration_layout`.
+- **Piso reativo e objetos interativos:** todos os 21 cenários ilustrados (incluindo `brazil` e as 14 Maravilhas do Mundo via `StageKind::Arena`) renderizam rachaduras, marcas de impacto, ondas e destroços do `StageReact`. Em lutas Versus/Arcade, `src/stages/interactive.rs` posiciona caixas destrutíveis e barris explosivos (`ObjectEvent::Blast`) nas alas externas (`|x| >= 220`, mantendo o centro da arena limpo); lutadores arremessados contra objetos os destroem e ambos os lados podem coletar itens (`any_collector = true`). Use `UME_STAGE_PROPS=0` para desativar os objetos de arena.
+
 ## 3. O que precisa de código
 
 Estas coisas não podem ser feitas só com arquivos hoje. Cada uma é uma lacuna do formato, não erro nos seus arquivos:

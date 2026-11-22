@@ -29,6 +29,7 @@ mod dojo_front;
 mod dojo_lantern;
 mod spirit_charm;
 mod spirit_front;
+mod illustrated;
 #[cfg(test)]
 mod tests;
 pub use primitives::*;

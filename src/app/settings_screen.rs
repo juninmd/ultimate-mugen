@@ -656,10 +656,6 @@ impl App {
             }
         }
 
-        let back = self.clicked_rect(56.0, 668.0, 150.0, 40.0);
-        let hot = self.hover_rect(56.0, 668.0, 150.0, 40.0);
-        self.ui
-            .adapted_button(56.0, 668.0, 150.0, 40.0, tr("Voltar", "Back"), hot);
         let note = if from_fight {
             tr(
                 "Em luta: regras de jogabilidade valem na próxima luta",
@@ -703,7 +699,7 @@ impl App {
             self.settings_back = Some((tab, from_fight));
             return;
         }
-        if back || self.c.pressed(nav::BACK) {
+        if self.c.pressed(nav::BACK) {
             self.screen = if from_fight {
                 Screen::Fight
             } else {

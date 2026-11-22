@@ -105,7 +105,7 @@ impl App {
     pub(super) fn achievements_tab(&mut self) {
         let list = achievements(&self.player);
         for (i, a) in list.iter().enumerate() {
-            let y = LIST_TOP + i as f32 * 96.0;
+            let y = LIST_TOP + i as f32 * 90.0;
             self.ui.adapted_row(40.0, y, 1200.0, 84.0, true);
             self.ui.text(a.title, 66.0, y + 36.0, 26.0, hex("#ffcc33"), Align::Left, true);
             self.ui.text(a.goal, 66.0, y + 66.0, 18.0, hex("#a49cc0"), Align::Left, false);

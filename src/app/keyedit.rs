@@ -130,7 +130,7 @@ impl App {
                 false,
             );
         }
-        self.ui.text(crate::i18n::tr3("Cima/Baixo: ação · Esq/Dir: jogador · Enter ou clique: trocar tecla · Del: restaurar padrão do jogador · Esc: voltar", "Up/Down: action · Left/Right: player · Enter or click: rebind key · Del: reset player defaults · Esc: back", "Arriba/Abajo: acción · Izq/Der: jugador · Enter o clic: cambiar tecla · Supr: restaurar jugador · Esc: volver"), 40.0, 690.0, 18.0, hex("#a49cc0"), Align::Left, false);
+        self.ui.text(crate::i18n::tr3("Cima/Baixo: ação · Esq/Dir: jogador · Enter ou clique: trocar tecla · Del: restaurar padrão do jogador · Esc: voltar", "Up/Down: action · Left/Right: player · Enter or click: rebind key · Del: reset player defaults · Esc: back", "Arriba/Abajo: acción · Izq/Der: jugador · Enter o clic: cambiar tecla · Supr: restaurar jugador · Esc: volver"), 40.0, 648.0, 18.0, hex("#a49cc0"), Align::Left, false);
         if !close {
             self.key_edit = Some(ed);
         }

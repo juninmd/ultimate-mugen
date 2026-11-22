@@ -131,11 +131,11 @@ impl App {
         } else {
             format!("{}   [{quarantine}: {total}]", gallery.to_lowercase())
         };
-        self.ui.text(&tabs, 40.0, 656.0, 18.0, hex("#ffcc33"), Align::Left, true);
+        self.ui.text(&tabs, 156.0, 656.0, 18.0, hex("#ffcc33"), Align::Left, true);
         let nav_hint = fill(
             tr3("Página {p}/{n}   ·   TAB alterna   ·   ESQ/DIR páginas   ·   ESC voltar", "Page {p}/{n}   ·   TAB switches   ·   LEFT/RIGHT pages   ·   ESC back", "Página {p}/{n}   ·   TAB alterna   ·   IZQ/DER páginas   ·   ESC volver"),
             &[("p", &(page + 1).to_string()), ("n", &pages.to_string())],
         );
-        self.ui.text(&nav_hint, 40.0, 686.0, 15.0, hex("#8a8fa6"), Align::Left, false);
+        self.ui.text(&nav_hint, 156.0, 686.0, 15.0, hex("#8a8fa6"), Align::Left, false);
     }
 }

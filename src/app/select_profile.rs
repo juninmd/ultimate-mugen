@@ -4,6 +4,7 @@ use std::cell::RefCell;
 const STRIP_Y: f32 = 653.5;
 const STRIP_H: f32 = 50.0;
 const EDGE: f32 = 40.0;
+const LEFT_EDGE: f32 = 156.0;
 const FLAG_Y: f32 = 661.0;
 const FLAG_W: f32 = 54.0;
 const LABEL_Y: f32 = 673.0;
@@ -97,8 +98,8 @@ impl App {
             alpha(accent, 0.0),
         );
         self.ui.rect(0.0, STRIP_Y, 4.0, STRIP_H, accent);
-        let has_flag = self.ui.flag(&profile.country, EDGE, FLAG_Y, FLAG_W, 1.0);
-        let label_x = if has_flag { EDGE + FLAG_W + 12.0 } else { EDGE };
+        let has_flag = self.ui.flag(&profile.country, LEFT_EDGE, FLAG_Y, FLAG_W, 1.0);
+        let label_x = if has_flag { LEFT_EDGE + FLAG_W + 12.0 } else { LEFT_EDGE };
         let label = crate::profile::nationality_label().to_uppercase();
         self.ui.text(
             &label,

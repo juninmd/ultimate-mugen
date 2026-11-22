@@ -260,7 +260,7 @@ Para copiar features de um pacote M.U.G.E.N em um nativo, siga `docs/wiki/pt-BR/
 
 ## Paridade com um lutador M.U.G.E.N
 
-Quando o UMF vem de um pacote MUGEN (via `mugen2umf.py`, skill `mugen-to-ume-migrator`):
+Quando o UMF vem de um pacote MUGEN (via `tools/mugen2umf`, skill `mugen-to-ume-migrator`):
 
 - `stats.height` igual a `meta.json.refHeight` mantém o tamanho e a nitidez do original (1 px = 1 unidade).
 - `art.style.boxes: "exact"` usa `hit.box` e `hurt` como escritos (Clsn1/Clsn2), sem recorte automático.

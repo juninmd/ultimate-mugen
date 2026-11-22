@@ -1,7 +1,7 @@
 import re
 
-from mugen_charge import charge_spec
-from mugen_parse import nums
+from .charge import charge_spec
+from .parse import nums
 
 
 def _trigs(ctrl):

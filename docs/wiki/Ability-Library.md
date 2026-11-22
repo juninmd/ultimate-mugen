@@ -55,7 +55,7 @@ Always override `anim` (and `projectile.anim`) with the fighter's own animations
 
 ## Converter
 
-`mugen2umf.py` maps `Explod` to `vfx` and `EnvShake` to `quake` (at most 3 and 2 per move), and matches `command` names case-insensitively, which MUGEN does and many packs rely on (`SPECIAL 1` in the `.cmd`, `"special 1"` in the trigger). Before that fix a pack with such names kept only its normals: Goku SS4 went from 5 to 15 moves.
+`tools/mugen2umf` maps `Explod` to `vfx` and `EnvShake` to `quake` (at most 3 and 2 per move), and matches `command` names case-insensitively, which MUGEN does and many packs rely on (`SPECIAL 1` in the `.cmd`, `"special 1"` in the trigger). Before that fix a pack with such names kept only its normals: Goku SS4 went from 5 to 15 moves.
 
 ## Rules of thumb
 

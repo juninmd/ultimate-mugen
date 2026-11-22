@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
 import collections
 import glob
 import os
 import re
 import struct
-import sys
 
 HITDEF_KEYS = [
     "damage", "pausetime", "guardflag", "ground.hittime", "ground.velocity",
@@ -118,43 +116,25 @@ def hitdef_rows(path, wanted=NORMAL_STATES):
 
 
 def summary(folder):
+    lines = []
     for path in files(folder, "sff"):
-        print("SFF", os.path.basename(path), sff_summary(path))
+        lines.append(f"SFF {os.path.basename(path)} {sff_summary(path)}")
     for path in files(folder, "snd"):
-        print("SND", os.path.basename(path), snd_summary(path))
+        lines.append(f"SND {os.path.basename(path)} {snd_summary(path)}")
     for path in files(folder, "air"):
         info = air_summary(path)
         ids = info.pop("ids")
-        print("AIR", os.path.basename(path), info)
-        print("  action ids:", ",".join(ids))
+        lines += [f"AIR {os.path.basename(path)} {info}", "  action ids: " + ",".join(ids)]
     for path in files(folder, "cmd"):
         commands = cmd_summary(path)
-        print("CMD", os.path.basename(path), len(commands), "commands")
-        for name, motion in commands:
-            print("  ", name, "=", motion)
-    for path in files(folder, "cns"):
+        lines.append(f"CMD {os.path.basename(path)} {len(commands)} commands")
+        lines += [f"   {name} = {motion}" for name, motion in commands]
+    for path in files(folder, "cns") + files(folder, "st"):
         info = cns_summary(path)
-        print("CNS", os.path.basename(path), len(info["statedefs"]), "statedefs",
-              sum(info["controllers"].values()), "controllers")
-        print("  ", dict(info["controllers"].most_common(30)))
-        print("   states:", ",".join(info["statedefs"]))
+        lines.append(f"CNS {os.path.basename(path)} {len(info['statedefs'])} statedefs {sum(info['controllers'].values())} controllers")
+        lines += [f"   {dict(info['controllers'].most_common(30))}", "   states: " + ",".join(info["statedefs"])]
+    return "\n".join(lines)
 
 
 def hitdefs(path):
-    for number, values in hitdef_rows(path):
-        print(number, values)
-
-
-def main(argv):
-    if len(argv) == 3 and argv[1] == "summary":
-        summary(argv[2])
-    elif len(argv) == 3 and argv[1] == "hitdefs":
-        hitdefs(argv[2])
-    else:
-        print("usage: dissect.py summary <char_dir> | hitdefs <file.cns>")
-        return 2
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    return "\n".join(f"{number} {values}" for number, values in hitdef_rows(path))

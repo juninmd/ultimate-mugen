@@ -1,11 +1,16 @@
 import re
 from collections import Counter
 
-from mugen_chain import chain
+from .chain import chain, state_anim
+
+
+def state_anim_missing(state, actions):
+    anim = state_anim(state)
+    return anim if anim is not None and anim >= 0 and anim not in actions else None
 
 MAPPED = {"hitdef", "projectile", "velset", "veladd", "playsnd", "explod", "afterimage", "afterimagetime", "envshake", "envcolor",
           "superpause", "nothitby", "posadd", "turn", "changestate", "changeanim", "targetbind", "targetlifeadd", "targetstate",
-          "changeanim2", "ctrlset", "poweradd", "null", "velmul", "posfreeze", "posset", "palfx"}
+          "changeanim2", "ctrlset", "poweradd", "null", "helper", "velmul", "posfreeze", "posset", "palfx"}
 ENGINE_COMMON = set(range(0, 170)) | set(range(5000, 5300)) | {5500, 5900}
 
 
@@ -24,8 +29,8 @@ def _parents(states):
     out = {}
     for sid, st in states.items():
         for c in st["ctrl"]:
-            for key in ("value", "p1stateno", "p2stateno"):
-                if key == "value" and c["type"] not in ("changestate", "selfstate", "targetstate"):
+            for key in ("value", "p1stateno", "p2stateno", "stateno"):
+                if key == "stateno" and c["type"] != "helper" or key == "value" and c["type"] not in ("changestate", "selfstate", "targetstate"):
                     continue
                 m = re.match(r"\s*(\d+)\s*$", c["body"].get(key, ""))
                 if m and int(m.group(1)) != sid:
@@ -33,9 +38,8 @@ def _parents(states):
     return out
 
 
-def coverage(states, commands, actions, sff, bank, state_to_id, consumed, scripts_cns, fighter, sprite_files, shadowed=frozenset(), dropped=None):
+def coverage(states, commands, actions, sff, bank, state_to_id, consumed, script_ids, fighter, sprite_files, shadowed=frozenset(), dropped=None):
     owner = _move_states(state_to_id, states, actions, consumed)
-    script_ids = {int(x) for x in re.findall(r"\[Statedef (\d+)\]", scripts_cns or "")}
     parents = _parents(states)
     rows, lost, kinds = [], Counter(dropped or {}), {}
     for sid in sorted(s for s in states if s >= 0):
@@ -47,7 +51,7 @@ def coverage(states, commands, actions, sff, bank, state_to_id, consumed, script
         elif sid in consumed:
             kind = "ability"
         elif sid in script_ids:
-            kind = "script (verbatim CNS)"
+            kind = "helper (verbatim CNS, spawned by a move)" if parents.get(sid, ("",))[0] == "stateno" else "script (verbatim CNS)"
         elif sid in ENGINE_COMMON:
             kind = "engine common state"
         elif sid in shadowed:
@@ -60,6 +64,8 @@ def coverage(states, commands, actions, sff, bank, state_to_id, consumed, script
             kind = "partial: throw states replaced by the UMF `throw` block"
         elif parents[sid][1] in consumed:
             kind = "ability (approximated by the native ability)"
+        elif state_anim_missing(states[sid], actions):
+            kind = f"broken in the original: animation {state_anim_missing(states[sid], actions)} is missing from the .air"
         else:
             via, src = parents[sid]
             label = owner.get(src) or ("script" if src in script_ids else "ability" if src in consumed else str(src))

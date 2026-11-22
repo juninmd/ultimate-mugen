@@ -1,6 +1,6 @@
 import re
 
-from mugen_parse import nums
+from .parse import nums
 
 
 def _trigs(ctrl):

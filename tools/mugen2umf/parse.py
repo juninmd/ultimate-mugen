@@ -36,16 +36,25 @@ def nums(text, default=()):
     return values + list(default[len(values):])
 
 
+def _char_def(folder):
+    defs = sorted(f for f in os.listdir(folder) if f.lower().endswith(".def"))
+    parsed = [(f, {name.lower(): body for name, body, _ in sections(read_text(os.path.join(folder, f)))}) for f in defs]
+    chars = [(f, get) for f, get in parsed if get.get("files", {}).get("sprite") and get.get("files", {}).get("cmd")]
+    if not chars:
+        raise ValueError(f"no character .def with [Files] sprite and cmd in {folder}")
+    base = os.path.basename(os.path.normpath(folder)).lower()
+    return next((get for f, get in chars if f[:-4].lower() == base), chars[0][1])
+
+
 def read_def(folder):
-    defs = [f for f in os.listdir(folder) if f.lower().endswith(".def")]
-    secs = sections(read_text(os.path.join(folder, defs[0])))
-    get = {name.lower(): body for name, body, _ in secs}
+    get = _char_def(folder)
     files = get.get("files", {})
     listing = {f.lower(): f for f in os.listdir(folder)}
     path = lambda key: os.path.join(folder, listing.get(files[key].strip('"').lower(), files[key].strip('"'))) if files.get(key) else None
-    cns = [path(k) for k in ("cns", "st", "st1", "st2", "st3", "st4") if path(k)]
+    st_keys = sorted((k for k in files if re.fullmatch(r"st\d*", k)), key=lambda k: int(k[2:] or -1))
+    cns = [path(k) for k in ["cns"] + st_keys if path(k)]
     return {"info": get.get("info", {}), "cmd": path("cmd"), "cns": list(dict.fromkeys(cns)), "sprite": path("sprite"),
-            "anim": path("anim"), "sound": path("sound"), "pal": path("pal1")}
+            "anim": path("anim"), "sound": path("sound"), "pal": path("pal1"), "stcommon": path("stcommon")}
 
 
 def read_air(path):
@@ -141,11 +150,17 @@ def read_snd(path):
     return sounds
 
 
+def _shares_act(sff, s, pal):
+    if sff.legacy_shared or s.root.pal is None:
+        return True
+    return sum(s.root.pal[k:k + 3] == pal[k:k + 3] for k in range(0, 768, 3)) >= 250
+
+
 def sprite_image(sff, pal, g, i):
     s = sff.index.get((g, i))
     if s is None:
         return None, None
-    p = pal if (pal is not None and (s.same_pal or s is sff.sprites[0])) else None
+    p = pal if pal is not None and (s is sff.sprites[0] or (s.same_pal and _shares_act(sff, s, pal))) else None
     return sff.rgba(s, p), s.axis
 
 

@@ -246,7 +246,8 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `posFreeze` | `[{ "from", "to" }]` | Pins the fighter between those elements (`PosFreeze`) |
 | `posSet` | `[{ "at", "x", "y" }]` | Sets the absolute position on an element (`PosSet`) |
 | `palFx` | `[{ "at", "time", "add", "mul", "sinAdd", "color", "invertAll" }]` | Colour flash on the fighter (`PalFX`) |
-| `followUp` | `{ "to": "move_id", "on": "hit" \| "contact" \| "end", "at" }` | Hit-confirm transition into a cinematic follow-up move |
+| `followUp` | `{ "to": "move_id", "on": "hit" \| "contact" \| "hitNow" \| "end" \| "command" \| "release", "command", "at" }` | Transition into a follow-up move: on hit-confirm, at the end, while `command` is held (`command`) or once it is released (`release`) |
+| `spawn` | `[{ "at", "state", "id", "name", "pos", "postype", "facing", "ownPal", "superMoveTime", "pauseMoveTime" }]` | Spawns a helper running a `scripts.cns` state (`Helper`) on animation element `at` |
 | `cinematic` | `{ "letterbox", "hideUi", "freeze", "title", "camera", "cuts", "finishSlow" }` | Multi-beat movie direction (`Zoom`, `Camera`, `EnvColor`, `EnvShake`, `Cinema`, `SlowMo`, `AssertSpecial(NoBarDisplay)`) |
 | `voice` | `1000, 0` | Character sound group and index played at move start, when that sample is bundled |
 | `airPhysics` | `true` | Keeps air physics |
@@ -304,6 +305,8 @@ Validate with `cargo test --release --test native_roster_lab -- --nocapture` (ev
 ### Elements and stun
 
 `hits[]` and `projectile` accept `element` (`fire`, `ice`, `lightning`, `earth`, `wind`, `water`) and `stun` (extra hit-stun ticks). The compiler adds the element's hit-stun and shake and tints the victim for a moment (`PalFX`): `ice` freezes longest (+16), `lightning` shocks (+22 and a 8-tick shake), `fire` burns red, `earth` shakes the screen, `wind` and `water` add a short tint. `stun` stacks on top and adds a 5-tick shake when none is set. Unknown elements are ignored.
+
+`hits[]` and `projectile` also accept `ownSound: true`: `hitSound` then plays from the fighter's own sound bank (`S` prefix in M.U.G.E.N) instead of the common fight bank.
 
 ### Command syntax
 
@@ -391,7 +394,7 @@ A zip (or a `mugen/` folder) that holds one UMF `.json` next to a `sprites/` fol
 
 ### M.U.G.E.N parity
 
-`.agents/skills/mugen-to-ume-migrator/scripts/mugen2umf.py` converts a M.U.G.E.N folder into such a pack. It keeps the original look and feel with three fields:
+`tools/mugen2umf` converts a M.U.G.E.N folder into such a pack. It keeps the original look and feel with three fields:
 
 - `stats.height` equal to `meta.json` `refHeight` draws the sprites 1:1, at the original size.
 - `art.style.boxes: "exact"` uses `hit.box` (Clsn1) and per-frame `hurt` (Clsn2) as written, with no automatic trim.

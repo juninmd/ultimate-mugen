@@ -1,7 +1,7 @@
 import re
 
-from mugen_chain import triggers
-from mugen_parse import nums
+from .chain import triggers
+from .parse import nums
 
 KINDS = ("velmul", "posfreeze", "posset", "palfx")
 ALWAYS = re.compile(r"^\s*(1|time\s*>=\s*0|animtime\s*<=\s*0)\s*$")

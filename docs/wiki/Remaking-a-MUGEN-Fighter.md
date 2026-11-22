@@ -4,7 +4,7 @@ Recipe used for the Captain Marlow Reyes rebuild, based on the [dissection of fo
 
 ## Steps
 
-1. Dissect the pack: `python3 -I .agents/skills/mugen-dissector/scripts/dissect.py summary <dir>` for files, commands, states and controller counts, then `... hitdefs <file.cns>` for the normal attack table.
+1. Dissect the pack: `python3 tools/mugen2umf inspect <dir>` for files, commands, states and controller counts, then `... hitdefs <file.cns>` for the normal attack table.
 2. List the features, not the code: normals and chains, one projectile per button, anti-air, throw, counter, teleport, helper or clone, form or power mode, supers. Each one has a row in the mapping below.
 3. Pick the frames: only poses with a PNG in `assets/chars/sprites/<id>/` (`ls` the folder, check `meta.json`). A frame given as an inline joint pose object is procedural art and is not allowed in anims.
 4. Write the anims as lists of `{pose, ticks, hit?}` with the tick counts from the dissection table, then the moves that use them. `at` is the one-based frame that carries the hit, projectile or velocity.

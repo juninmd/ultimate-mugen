@@ -39,11 +39,13 @@ pub struct MarketState {
     pub repos: Vec<RepoRecord>,
     pub installed: Vec<Installed>,
     pub token: Option<String>,
+    #[serde(default)]
+    pub grid_view: bool,
 }
 
 impl Default for MarketState {
     fn default() -> Self {
-        MarketState { version: VERSION, repos: vec![], installed: vec![], token: None }
+        MarketState { version: VERSION, repos: vec![], installed: vec![], token: None, grid_view: false }
     }
 }
 
@@ -146,7 +148,9 @@ mod tests {
         s.add_repo(RepoRef::parse("a/b").unwrap());
         s.upsert_installed(entry("a/b", "char:x", true));
         s.token = Some("t".into());
+        s.grid_view = true;
         assert_eq!(MarketState::from_json(&s.to_json()), s);
+        assert!(!MarketState::from_json(br#"{"version":1,"repos":[],"installed":[],"token":null}"#).grid_view);
         assert_eq!(MarketState::from_json(b"garbage"), MarketState::default());
         assert_eq!(MarketState::from_json(br#"{"version":99,"repos":[],"installed":[],"token":null}"#), MarketState::default());
     }

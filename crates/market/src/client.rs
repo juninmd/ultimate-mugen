@@ -8,6 +8,7 @@ pub struct Request {
     pub etag: Option<String>,
     pub token: Option<String>,
     pub max_bytes: u64,
+    pub range: Option<(u64, u64)>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -64,6 +65,7 @@ pub fn tree_request(repo: &RepoRef, etag: Option<&str>, token: Option<&str>) -> 
         etag: etag.map(str::to_string),
         token: token.map(str::to_string),
         max_bytes: MAX_TREE_BODY_BYTES,
+        range: None,
     }
 }
 
@@ -73,6 +75,21 @@ pub fn file_request(repo: &RepoRef, path: &str, sha: &str, max_bytes: u64) -> Re
         etag: None,
         token: None,
         max_bytes: max_bytes.min(MAX_FILE_BYTES),
+        range: None,
+    }
+}
+
+pub fn range_request(repo: &RepoRef, path: &str, sha: &str, start: u64, end: u64) -> Request {
+    Request { range: Some((start, end)), max_bytes: (end - start + 1).min(MAX_FILE_BYTES), ..file_request(repo, path, sha, MAX_FILE_BYTES) }
+}
+
+pub fn interpret_range(resp: &Response, start: u64, end: u64) -> Result<Vec<u8>, MarketError> {
+    let want = (end - start + 1) as usize;
+    match resp.status {
+        206 if resp.body.len() == want => Ok(resp.body.clone()),
+        200 if resp.body.len() > end as usize => Ok(resp.body[start as usize..=end as usize].to_vec()),
+        206 | 200 => Err(MarketError::Invalid("unexpected range body".into())),
+        _ => Err(status_error(resp)),
     }
 }
 
@@ -153,7 +170,7 @@ mod tests {
         assert_eq!(f.url, "https://raw.githubusercontent.com/a/b/dev/chars/My%20Char/a%23b.def");
         assert!(f.token.is_none());
         assert!(check_request(&f).is_ok());
-        assert!(check_request(&Request { url: "https://evil.example/x".into(), etag: None, token: None, max_bytes: 1 }).is_err());
+        assert!(check_request(&Request { url: "https://evil.example/x".into(), etag: None, token: None, max_bytes: 1, range: None }).is_err());
     }
 
     #[test]
@@ -185,6 +202,17 @@ mod tests {
             other => panic!("{other:?}"),
         }
         assert!(matches!(interpret_tree(&Response { status: 200, body: b"nope".to_vec(), ..Default::default() }), Err(MarketError::Invalid(_))));
+    }
+
+    #[test]
+    fn range_requests_accept_partial_content_or_slice_a_full_body() {
+        let r = range_request(&repo(), "a.zip", "ab", 10, 13);
+        assert_eq!((r.range, r.max_bytes), (Some((10, 13)), 4));
+        assert_eq!(interpret_range(&Response { status: 206, body: vec![1, 2, 3, 4], ..Default::default() }, 10, 13), Ok(vec![1, 2, 3, 4]));
+        let full = Response { status: 200, body: (0..20).collect(), ..Default::default() };
+        assert_eq!(interpret_range(&full, 10, 13), Ok(vec![10, 11, 12, 13]));
+        assert!(interpret_range(&Response { status: 206, body: vec![1], ..Default::default() }, 10, 13).is_err());
+        assert_eq!(interpret_range(&resp(404), 0, 1), Err(MarketError::NotFound));
     }
 
     #[test]

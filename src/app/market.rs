@@ -1,69 +1,20 @@
 use super::*;
 use super::market_text::mt;
 use crate::market::{ask_text, typing_supported, SUGGESTED};
-use std::collections::HashSet;
 use ume_market::Kind;
 
-#[derive(Clone, Copy, PartialEq)]
-pub enum View {
-    Browse,
-    Installed,
-}
-
-#[derive(Clone, Copy, PartialEq)]
-pub enum Pane {
-    Repos,
-    Items,
-}
-
-pub struct TextEntry {
-    pub token: bool,
-    pub buf: String,
-    pub suggestion: usize,
-}
-
-pub struct MarketUi {
-    pub view: View,
-    pub pane: Pane,
-    pub repo: usize,
-    pub repo_scroll: usize,
-    pub cur: usize,
-    pub scroll: usize,
-    pub filter: Option<Kind>,
-    pub marked: HashSet<(String, String)>,
-    pub entry: Option<TextEntry>,
-    pub backspace_hold: f32,
-    pub opened: bool,
-}
-
-impl Default for MarketUi {
-    fn default() -> Self {
-        MarketUi {
-            view: View::Browse,
-            pane: Pane::Items,
-            repo: 0,
-            repo_scroll: 0,
-            cur: 0,
-            scroll: 0,
-            filter: None,
-            marked: HashSet::new(),
-            entry: None,
-            backspace_hold: 0.0,
-            opened: false,
-        }
-    }
-}
-
-#[derive(Clone)]
-struct Row {
-    repo_key: String,
-    id: String,
-    kind: Kind,
-    name: String,
-    bytes: u64,
-    installable: bool,
-    installed: Option<bool>,
-}
+mod actions;
+mod badges;
+mod confirm;
+mod grid;
+mod items;
+mod list;
+mod portrait_tex;
+mod rows;
+mod toolbar;
+mod ui_state;
+pub use ui_state::*;
+use rows::Row;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 enum Act {
@@ -81,9 +32,17 @@ enum Act {
     RemoveRepo,
     Back,
     StopDownloads,
+    SetFormat(Option<ume_market::view::Format>),
+    ToggleOutdated,
+    ToggleLayout,
+    ToggleMissing,
+    InstallAll,
+    UpdateAll,
+    AskRemoveAll,
+    ConfirmRemove,
+    CancelRemove,
 }
 
-const ROWS: usize = 12;
 const REPO_ROWS: usize = 9;
 const FILTERS: [(Option<Kind>, &str); 5] = [
     (None, "Tudo"),
@@ -153,94 +112,22 @@ impl App {
             .marked
             .insert((repo_key.to_string(), id.to_string()));
     }
+    pub(crate) fn market_ui_filter(&mut self, format: Option<ume_market::view::Format>, outdated_only: bool) {
+        self.market_ui.format = format;
+        self.market_ui.outdated_only = outdated_only;
+        self.market_ui.cur = 0;
+        self.market_ui.scroll = 0;
+    }
+    fn market_remove(&mut self, pairs: Vec<(String, String)>) {
+        for (a, b) in &pairs {
+            self.market.uninstall(a, b);
+        }
+        self.market.notice = format!("{} item(ns) removido(s) deste aparelho.", pairs.len());
+        self.market_ui.marked.clear();
+    }
     pub(crate) fn market_ui_view_installed(&mut self) {
         self.market_ui.view = View::Installed;
         self.market_ui.cur = 0;
-    }
-
-    fn market_rows(&mut self) -> Vec<Row> {
-        let filter = self.market_ui.filter;
-        let keep = |k: Kind| filter.is_none_or(|f| f == k);
-        match self.market_ui.view {
-            View::Installed => self
-                .market
-                .state
-                .installed
-                .iter()
-                .filter(|i| keep(i.kind))
-                .map(|i| Row {
-                    repo_key: i.repo_key.clone(),
-                    id: i.item_id.clone(),
-                    kind: i.kind,
-                    name: i.name.clone(),
-                    bytes: i.bytes,
-                    installable: true,
-                    installed: Some(i.active),
-                })
-                .collect(),
-            View::Browse => {
-                let Some(key) = self
-                    .market
-                    .state
-                    .repos
-                    .get(self.market_ui.repo)
-                    .map(|r| r.key.clone())
-                else {
-                    return vec![];
-                };
-                self.market.catalog(&key);
-                let installed: std::collections::HashMap<&str, bool> = self
-                    .market
-                    .state
-                    .installed
-                    .iter()
-                    .filter(|i| i.repo_key == key)
-                    .map(|i| (i.item_id.as_str(), i.active))
-                    .collect();
-                let Some(cat) = self.market.catalog_cached(&key) else {
-                    return vec![];
-                };
-                cat.items
-                    .iter()
-                    .filter(|i| keep(i.kind))
-                    .map(|i| Row {
-                        repo_key: key.clone(),
-                        id: i.id.clone(),
-                        kind: i.kind,
-                        name: i.name.clone(),
-                        bytes: i.bytes,
-                        installable: i.installable,
-                        installed: installed.get(i.id.as_str()).copied(),
-                    })
-                    .collect()
-            }
-        }
-    }
-
-    fn market_button(&self, x: f32, y: f32, w: f32, label: &str, key: &str, accent: Color) -> bool {
-        let hover = self.hover_rect(x, y, w, 48.0);
-        self.ui.adapted_plate(x, y, w, 48.0, Some(alpha(accent, if hover { 0.9 } else { 0.55 })));
-        self.ui.text(
-            label,
-            x + w / 2.0,
-            y + 25.0,
-            19.0,
-            WHITE,
-            Align::Center,
-            true,
-        );
-        if !key.is_empty() {
-            self.ui.text(
-                key,
-                x + w / 2.0,
-                y + 42.0,
-                12.0,
-                Color::new(1.0, 1.0, 1.0, 0.7),
-                Align::Center,
-                false,
-            );
-        }
-        self.clicked_rect(x, y, w, 48.0)
     }
 
     fn market_entry_modal(&mut self) {
@@ -357,6 +244,7 @@ impl App {
                 "OK",
                 "Enter",
                 hex("#2ecc71"),
+                true,
             );
         let cancel = is_key_pressed(KeyCode::Escape)
             || self.market_button(
@@ -366,6 +254,7 @@ impl App {
                 mt("Cancelar"),
                 "Esc",
                 hex("#ff4d6d"),
+                true,
             );
         if ok {
             let text = if e.buf.trim().is_empty() && !e.token {
@@ -463,7 +352,7 @@ impl App {
                 }
             }
         }
-        let modal = self.market_ui.entry.is_some();
+        let modal = self.market_ui.entry.is_some() || self.market_ui.confirm.is_some();
         let n_repos = self.market.state.repos.len();
         self.market_ui.repo = self.market_ui.repo.min(n_repos.saturating_sub(1));
         let rows = self.market_rows();
@@ -616,6 +505,7 @@ impl App {
                 acts.push(Act::ToggleView);
             }
         }
+        self.market_toolbar(rx, ry, rw, modal, &mut acts);
         for (i, (f, label)) in FILTERS.iter().map(|(f, l)| (f, mt(l))).enumerate() {
             let x = rx + 330.0 + i as f32 * 100.0;
             let on = self.market_ui.filter == *f;
@@ -635,136 +525,14 @@ impl App {
                 self.market_ui.scroll = 0;
             }
         }
-        if self.market_ui.cur < self.market_ui.scroll {
-            self.market_ui.scroll = self.market_ui.cur;
-        }
-        if self.market_ui.cur >= self.market_ui.scroll + ROWS {
-            self.market_ui.scroll = self.market_ui.cur + 1 - ROWS;
-        }
-        let wheel = mouse_wheel().1;
-        if !modal && wheel != 0.0 && self.hover_rect(rx, ry, rw, 484.0) {
-            self.market_ui.scroll = (self.market_ui.scroll as i64 - wheel.signum() as i64 * 3)
-                .clamp(0, total.saturating_sub(ROWS) as i64)
-                as usize;
-        }
-        let cur_repo = self
-            .market
-            .state
-            .repos
-            .get(self.market_ui.repo)
-            .map(|r| r.key.clone());
-        let listing_now = cur_repo
-            .as_ref()
-            .is_some_and(|k| self.market.listing.contains(k));
-        if total == 0 {
+        let cur_repo = self.market.state.repos.get(self.market_ui.repo).map(|r| r.key.clone());
+        let listing_now = cur_repo.as_ref().is_some_and(|k| self.market.listing.contains(k));
+        if total == 0 && self.market_ui.unfiltered > 0 {
+            self.ui.text(mt("Nenhum item com estes filtros. F, J e P limpam os filtros."), rx + rw / 2.0, ry + 220.0, 20.0, WHITE, Align::Center, false);
+        } else if total == 0 {
             self.market_empty_state(browse, cur_repo.is_some(), listing_now, rx, ry, rw);
         }
-        let installing = self.market.current_name();
-        for (vi, row) in rows
-            .iter()
-            .enumerate()
-            .skip(self.market_ui.scroll)
-            .take(ROWS)
-        {
-            let y = ry + 52.0 + (vi - self.market_ui.scroll) as f32 * 34.0;
-            let focused = vi == self.market_ui.cur && self.market_ui.pane == Pane::Items;
-            let hov = self.hover_rect(rx + 8.0, y, rw - 16.0, 32.0);
-            if hov && mouse_delta_position().length() > 0.0 && !modal {
-                self.market_ui.cur = vi;
-            }
-            if focused {
-                self.ui.adapted_highlight(("mkt.item.x", "mkt.item.y"), rx + 8.0, y, rw - 16.0, 32.0);
-            } else if vi % 2 == 0 {
-                self.ui.adapted_row(rx + 8.0, y, rw - 16.0, 32.0, false);
-            }
-            let marked = self
-                .market_ui
-                .marked
-                .contains(&(row.repo_key.clone(), row.id.clone()));
-            self.ui
-                .rect_lines(rx + 20.0, y + 6.0, 20.0, 20.0, 2.0, WHITE);
-            if marked {
-                self.ui
-                    .rect(rx + 24.0, y + 10.0, 12.0, 12.0, hex("#6dff9e"));
-            }
-            self.ui.rect(
-                rx + 52.0,
-                y + 8.0,
-                96.0,
-                18.0,
-                alpha(kind_color(row.kind), 0.35),
-            );
-            self.ui.text(
-                kind_label(row.kind),
-                rx + 100.0,
-                y + 22.0,
-                12.0,
-                WHITE,
-                Align::Center,
-                true,
-            );
-            self.ui.text(
-                &short(&row.name, 44),
-                rx + 162.0,
-                y + 23.0,
-                19.0,
-                WHITE,
-                Align::Left,
-                false,
-            );
-            self.ui.text(
-                &fmt_bytes(row.bytes),
-                rx + 620.0,
-                y + 23.0,
-                16.0,
-                hex("#a49cc0"),
-                Align::Right,
-                false,
-            );
-            let (label, col) = match row.installed {
-                _ if installing.as_deref() == Some(row.name.as_str()) && self.market.busy() => {
-                    (mt("baixando…"), hex("#22e8ff"))
-                }
-                Some(true) => (mt("ATIVO"), hex("#6dff9e")),
-                Some(false) => (mt("instalado"), hex("#ffcc33")),
-                None if !row.installable => (mt("grande demais"), hex("#ff4d6d")),
-                None => ("", WHITE),
-            };
-            self.ui.text(
-                label,
-                rx + rw - 28.0,
-                y + 23.0,
-                16.0,
-                col,
-                Align::Right,
-                true,
-            );
-            if !modal && self.clicked_rect(rx + 8.0, y, rw - 16.0, 32.0) {
-                self.market_ui.cur = vi;
-                self.market_ui.pane = Pane::Items;
-                let k = (row.repo_key.clone(), row.id.clone());
-                if !self.market_ui.marked.remove(&k) {
-                    self.market_ui.marked.insert(k);
-                }
-            }
-        }
-        if total > ROWS {
-            let frac = self.market_ui.scroll as f32 / (total - ROWS) as f32;
-            self.ui.rect(
-                rx + rw - 6.0,
-                ry + 52.0,
-                4.0,
-                ROWS as f32 * 34.0,
-                Color::new(1.0, 1.0, 1.0, 0.08),
-            );
-            self.ui.rect(
-                rx + rw - 6.0,
-                ry + 52.0 + frac * (ROWS as f32 * 34.0 - 40.0),
-                4.0,
-                40.0,
-                hex("#ffcc33"),
-            );
-        }
+        self.market_items(&rows, rx, ry, rw, modal);
 
         self.market_holo_overlay(rx, ry, rw);
         let (px, py) = (rx, ry + 492.0);
@@ -818,6 +586,8 @@ impl App {
                 Align::Left,
                 false,
             );
+        } else if let Some(line) = self.market_contents_line(&rows) {
+            self.ui.text(&short(&line, 110), px, py + 20.0, 16.0, hex("#c9c3dd"), Align::Left, false);
         } else {
             self.ui.text(
                 &crate::i18n::fill(
@@ -833,31 +603,22 @@ impl App {
             );
         }
         let by = 640.0;
-        let mut x = rx;
-        let buttons: [(&str, &str, Color, Act); 7] = [
-            (mt("Todos"), "M", hex("#5865f2"), Act::MarkAll),
-            (mt("Nenhum"), "N", hex("#5865f2"), Act::ClearMarks),
-            (mt("Instalar"), "I", hex("#2ecc71"), Act::Install),
-            (mt("Ativar"), "E", hex("#22b8cf"), Act::Enable),
-            (mt("Desativar"), "O", hex("#f59f00"), Act::Disable),
-            (mt("Remover"), "X", hex("#ff4d6d"), Act::Remove),
-            (mt("Atualizar"), "R", hex("#8a2be2"), Act::Refresh),
-        ];
-        for (label, key, col, act) in buttons {
-            let w = 114.0;
-            if self.market_button(x, by, w, label, key, col) && !modal {
-                acts.push(act);
-            }
-            x += w + 8.0;
-        }
+        self.market_action_bar(&rows, rx, rw, modal, &mut acts);
         self.market_links(rows.get(self.market_ui.cur).map(|r| (r.repo_key.clone(), r.id.clone())), modal);
-        self.ui.text(mt("U adicionar · T token · Tab explorar/instalados · F filtro · Espaço marca · Enter/Start aplica"), 156.0, 702.0, 15.0, hex("#a79fc4"), Align::Left, false);
+        for (k, line) in [mt("U adicionar · T token · Tab abas · F tipo"), mt("J formato · P desatualizados · K não instalados"), mt("V lista/grade · Espaço marca · Enter aplica")].into_iter().enumerate() {
+            self.ui.text(line, 40.0, 606.0 + k as f32 * 16.0, 13.0, hex("#a79fc4"), Align::Left, false);
+        }
 
         self.market_entry_modal();
+        self.market_confirm_modal(&mut acts);
         if !modal {
+            let geo = self.market_geo();
+            let last = total.saturating_sub(1);
             if self.c.pressed(nav::DOWN) {
                 if self.market_ui.pane == Pane::Items {
-                    self.market_ui.cur = (self.market_ui.cur + 1).min(total.saturating_sub(1));
+                    let next = self.market_ui.cur + geo.cols;
+                    let line_end = (self.market_ui.cur / geo.cols + 1) * geo.cols;
+                    self.market_ui.cur = if next <= last { next } else if line_end <= last { last } else { self.market_ui.cur };
                 } else if n_repos > 0 {
                     self.market_ui.repo = (self.market_ui.repo + 1).min(n_repos - 1);
                     self.market_ui.cur = 0;
@@ -866,7 +627,7 @@ impl App {
             }
             if self.c.pressed(nav::UP) {
                 if self.market_ui.pane == Pane::Items {
-                    self.market_ui.cur = self.market_ui.cur.saturating_sub(1);
+                    self.market_ui.cur = self.market_ui.cur.saturating_sub(geo.cols);
                 } else {
                     self.market_ui.repo = self.market_ui.repo.saturating_sub(1);
                     self.market_ui.cur = 0;
@@ -874,16 +635,24 @@ impl App {
                 }
             }
             if is_key_pressed(KeyCode::PageDown) {
-                self.market_ui.cur = (self.market_ui.cur + ROWS).min(total.saturating_sub(1));
+                self.market_ui.cur = (self.market_ui.cur + geo.vis * geo.cols).min(last);
             }
             if is_key_pressed(KeyCode::PageUp) {
-                self.market_ui.cur = self.market_ui.cur.saturating_sub(ROWS);
+                self.market_ui.cur = self.market_ui.cur.saturating_sub(geo.vis * geo.cols);
             }
+            let in_grid_row = geo.cols > 1 && self.market_ui.pane == Pane::Items;
             if self.c.pressed(nav::LEFT) {
-                self.market_ui.pane = Pane::Repos;
-                self.market_ui.view = View::Browse;
+                if in_grid_row && self.market_ui.cur % geo.cols > 0 {
+                    self.market_ui.cur -= 1;
+                } else {
+                    self.market_ui.pane = Pane::Repos;
+                    self.market_ui.view = View::Browse;
+                }
             }
             if self.c.pressed(nav::RIGHT) {
+                if in_grid_row && self.market_ui.cur % geo.cols < geo.cols - 1 && self.market_ui.cur < last {
+                    self.market_ui.cur += 1;
+                }
                 self.market_ui.pane = Pane::Items;
             }
             if self.c.pressed(nav::OK) {
@@ -917,6 +686,20 @@ impl App {
             }
             if is_key_pressed(KeyCode::F) {
                 acts.push(Act::CycleFilter);
+            }
+            if is_key_pressed(KeyCode::J) {
+                acts.push(Act::SetFormat(ume_market::view::next_format(self.market_ui.format)));
+            }
+            if is_key_pressed(KeyCode::P) {
+                acts.push(Act::ToggleOutdated);
+            }
+            for (code, act) in [(KeyCode::K, Act::ToggleMissing), (KeyCode::Z, Act::InstallAll), (KeyCode::Y, Act::UpdateAll), (KeyCode::B, Act::AskRemoveAll)] {
+                if is_key_pressed(code) {
+                    acts.push(act);
+                }
+            }
+            if is_key_pressed(KeyCode::V) || self.c.pressed(nav::AUX) {
+                acts.push(Act::ToggleLayout);
             }
             if is_key_pressed(KeyCode::M) {
                 acts.push(Act::MarkAll);
@@ -1004,6 +787,22 @@ impl App {
                     self.market_ui.cur = 0;
                     self.market_ui.scroll = 0;
                 }
+                Act::SetFormat(f) => {
+                    self.market_ui.format = f;
+                    self.market_ui.cur = 0;
+                    self.market_ui.scroll = 0;
+                }
+                Act::ToggleOutdated => {
+                    self.market_ui.outdated_only = !self.market_ui.outdated_only;
+                    self.market_ui.cur = 0;
+                    self.market_ui.scroll = 0;
+                }
+                Act::ToggleLayout => {
+                    self.market.state.grid_view = !self.market.state.grid_view;
+                    self.market.save_state();
+                    self.market_ui.cur = 0;
+                    self.market_ui.scroll = 0;
+                }
                 Act::MarkAll => {
                     for r in &rows {
                         self.market_ui
@@ -1047,18 +846,41 @@ impl App {
                         if on { mt("ativado(s)") } else { mt("desativado(s)") }
                     );
                 }
-                Act::Remove => {
-                    let pairs: Vec<(String, String)> = targets
-                        .iter()
-                        .filter(|r| r.installed.is_some())
-                        .map(|r| (r.repo_key.clone(), r.id.clone()))
-                        .collect();
-                    for (a, b) in &pairs {
-                        self.market.uninstall(a, b);
+                Act::Remove | Act::AskRemoveAll => {
+                    let source = if act == Act::Remove { &targets } else { &rows };
+                    let pairs: Vec<(String, String)> = source.iter().filter(|r| r.installed.is_some()).map(Row::pair).collect();
+                    if pairs.len() > 1 {
+                        self.market_ui.confirm = Some(pairs);
+                    } else {
+                        self.market_remove(pairs);
                     }
-                    self.market.notice =
-                        format!("{} item(ns) removido(s) deste aparelho.", pairs.len());
-                    self.market_ui.marked.clear();
+                }
+                Act::ConfirmRemove => {
+                    let pairs = self.market_ui.confirm.take().unwrap_or_default();
+                    self.market_remove(pairs);
+                }
+                Act::CancelRemove => self.market_ui.confirm = None,
+                Act::ToggleMissing => {
+                    self.market_ui.missing_only = !self.market_ui.missing_only;
+                    self.market_ui.cur = 0;
+                    self.market_ui.scroll = 0;
+                }
+                Act::InstallAll => {
+                    self.audio.sfx("purchase");
+                    let ids: Vec<String> = rows.iter().filter(|r| r.installed.is_none() && r.installable).map(|r| r.id.clone()).collect();
+                    let n = cur_repo.as_ref().map_or(0, |k| self.market.queue_install(k, &ids));
+                    self.market.notice = format!("{n} {}", mt("item(ns) na fila de download."));
+                }
+                Act::UpdateAll => {
+                    self.audio.sfx("purchase");
+                    let mut keys: Vec<&str> = rows.iter().filter(|r| r.outdated).map(|r| r.repo_key.as_str()).collect();
+                    keys.dedup();
+                    let mut n = 0;
+                    for key in keys {
+                        let ids: Vec<String> = rows.iter().filter(|r| r.outdated && r.repo_key == key).map(|r| r.id.clone()).collect();
+                        n += self.market.queue_install(key, &ids);
+                    }
+                    self.market.notice = format!("{n} {}", mt("item(ns) na fila de download."));
                 }
                 Act::RemoveRepo => {
                     if let Some(k) = cur_repo.clone() {

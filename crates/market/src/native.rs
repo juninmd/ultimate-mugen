@@ -6,8 +6,7 @@ use crate::persist::Persist;
 use crate::repo::RepoRef;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
-use std::sync::Mutex;
-use std::time::Duration;
+use std::{sync::Mutex, time::Duration};
 
 const MAX_REDIRECTS: usize = 3;
 const ATTEMPTS: usize = 3;
@@ -52,6 +51,7 @@ impl UreqTransport {
                 call = call.header("Authorization", &format!("Bearer {t}"));
             }
         }
+        if let (Some((a, b)), false) = (req.range, url.starts_with("https://api.github.com/")) { call = call.header("Range", &format!("bytes={a}-{b}")); }
         let mut resp = call.call().map_err(|e| MarketError::Network(e.to_string()))?;
         let status = resp.status().as_u16();
         let rate = match (header(&resp, "x-ratelimit-remaining").and_then(|v| v.parse().ok()), header(&resp, "x-ratelimit-reset").and_then(|v| v.parse().ok())) {
@@ -59,7 +59,7 @@ impl UreqTransport {
             _ => None,
         };
         let out = Response { status, etag: header(&resp, "etag"), body: Vec::new(), rate, retry_after_secs: header(&resp, "retry-after").and_then(|v| v.parse().ok()), location: header(&resp, "location") };
-        if status != 200 {
+        if status != 200 && status != 206 {
             return Ok(out);
         }
         let body = resp.body_mut().with_config().limit(req.max_bytes).read_to_vec().map_err(|e| match e {

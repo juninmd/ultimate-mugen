@@ -133,7 +133,7 @@ impl Vfx {
             self.sheets.guard(x, y, if big { 70.0 } else { 48.0 }, frost_at);
             if df.ikemen.guard_break || df.state_no == 5400 { self.sheets.guard_break(x, y); }
             self.trauma = (self.trauma + if big { 0.09 } else { 0.05 }).min(1.0);
-            self.tag(x, y - 14.0, "GUARD", [0.55, 0.8, 1.0]);
+            self.tag(x, y - 14.0, crate::i18n::tr3("DEFESA", "GUARD", "GUARDIA"), [0.55, 0.8, 1.0]);
             return;
         }
         let counter = self.pre_mt.get(defender).copied() == Some('A');

@@ -179,12 +179,12 @@ impl Vfx {
         self.vig = 1.0;
         let title = if super_recent {
             crate::i18n::tr3(
-                "FINALIZACAO DRAMATICA!",
+                "FINALIZAÇÃO DRAMÁTICA!",
                 "DRAMATIC FINISH!",
-                "FINAL DRAMATICO!",
+                "¡FINAL DRAMÁTICO!",
             )
         } else {
-            crate::i18n::tr3("GOLPE DECISIVO!", "CLIMAX FINISH!", "GOLPE DECISIVO!")
+            crate::i18n::tr3("GOLPE DECISIVO!", "CLIMAX FINISH!", "¡GOLPE DECISIVO!")
         };
         let winner_name = m
             .roots()

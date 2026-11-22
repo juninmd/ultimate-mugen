@@ -404,6 +404,10 @@ A zip (or a `mugen/` folder) that holds one UMF `.json` next to a `sprites/` fol
 
 The engine builds the fighter from these with the same code as a M.U.G.E.N character (`ume_engine::loader::assemble_mugen_char`), so states, commands, constants, animations, palettes and sounds are the same. UMF fields (`profile`, `series`, quotes, `rivals`, `scripts`) are layered on top. `mugen2umf parity` proves it move by move.
 
+Native `moves` work on top of an exact fighter: each `anim` (and projectile `anim`) names a M.U.G.E.N action number (`"anim": "3000"`), and the moves compile like those of a native fighter, with commands `m_<id>`, chains, throws, projectiles and air variants. Their states live in a block of 100000 numbers above the highest original state, and their `Statedef -1` routes run before the original ones, so original states are never replaced. `parity` compares the exact part without them and lists them under "Added by UMF", played from their real input.
+
+SFF v1 palettes follow M.U.G.E.N: in a shared-palette SFF (header palette type 1), a sprite flagged "same palette" uses the character palette (the selected `.act`), never the private palette of the sprite before it (usually the 9000 portrait). Individual-palette SFFs still inherit from the previous sprite.
+
 ## Fighter element
 
 The optional top-level `element` field accepts `fire`, `ice`, `lightning`, `water`, `earth`, `wind` or `neutral`. The fight HUD shows the assigned element beside the fighter portrait, with a localized text fallback. This metadata has no effect on damage or match rules.

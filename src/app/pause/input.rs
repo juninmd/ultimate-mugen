@@ -118,8 +118,8 @@ impl App {
             self.c.shortcuts.save();
             self.audio.sfx("select");
             let (index, text) = match bound {
-                Bound::Set(i) => (i, format!("{} -> {}", mv.name, i + 1)),
-                Bound::Cleared(i) => (i, format!("{} x {}", mv.name, i + 1)),
+                Bound::Set(i) => (i, format!("{} -> {}", crate::i18n::fighter_lines::shown(&mv.name), i + 1)),
+                Bound::Cleared(i) => (i, format!("{} x {}", crate::i18n::fighter_lines::shown(&mv.name), i + 1)),
             };
             self.pause.flash[index] = 1.0;
             self.pause.toast = Some((text, 2.2));

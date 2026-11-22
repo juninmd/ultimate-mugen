@@ -35,7 +35,7 @@ impl App {
 
         crate::screen_art::ScreenArt::Workshop.background(&self.ui);
         self.ui.adapted_header(
-            tr3("CONTROLES DE TOQUE", "TOUCH CONTROLS", "CONTROLES TÁCTILES"),
+            crate::i18n::tr("CONFIGURAÇÕES", "SETTINGS"),
             &format!("Ultimate MUGEN  v{}", crate::update::VERSION),
             VW,
         );
@@ -170,10 +170,9 @@ impl App {
                 "Los cambios se aplican en el combate actual",
             )
         } else {
-            tr3(
-                "Esq/Dir: alterar · Enter: confirmar · Esc: voltar",
-                "Left/Right: change · Enter: confirm · Esc: back",
-                "Izq./Der.: cambiar · Enter: confirmar · Esc: volver",
+            crate::i18n::tr(
+                "Cima/Baixo: navegar · Esq/Dir: alterar · Enter: confirmar · Esc: voltar",
+                "Up/Down: navigate · Left/Right: change · Enter: confirm · Esc: back",
             )
         };
         self.ui.text(

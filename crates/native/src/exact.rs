@@ -1,8 +1,10 @@
 mod anims;
+mod overlay;
 mod pack;
 mod spec;
 
 pub use anims::{export_anims, import_anims};
+pub use overlay::{overlay_block, overlay_moves};
 pub use pack::{decode_pack, encode_pack, PackMeta, META};
 pub use spec::{ExactAnim, ExactFrame, MugenFile, MugenSpec};
 
@@ -70,7 +72,13 @@ pub fn compile_exact(nc: &NativeChar, spec: &MugenSpec, pal_no: i32, with_images
 pub fn compile_exact_with(nc: &NativeChar, spec: &MugenSpec, read: Reader, pal_no: i32, with_images: bool, only: Option<&[i32]>) -> CharDef {
     let mut d = assemble_mugen_char(sources(nc, spec, read, with_images, only), pal_no, with_images);
     let anim_no: HashMap<String, i32> = spec.anims.keys().map(|id| (id.to_string(), *id)).collect();
-    super::scripts::compile_scripts(nc.scripts.as_ref(), &anim_no, &HashMap::new(), &mut d.states);
+    let move_states = overlay_moves(nc, &anim_no, &mut d);
+    let routes_before = d.states.get(&-1).map_or(0, |s| s.controllers.len());
+    super::scripts::compile_scripts(nc.scripts.as_ref(), &anim_no, &move_states, &mut d.states);
+    if let Some(routes) = d.states.get_mut(&-1) {
+        let added = routes.controllers.len().saturating_sub(routes_before);
+        routes.controllers.rotate_right(added);
+    }
     super::scripts::script_commands(nc.scripts.as_ref(), &mut d.commands, &mut d.movelist);
     rename_moves(&mut d, spec);
     d.source = Source::Mugen;

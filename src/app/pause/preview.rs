@@ -28,7 +28,7 @@ impl App {
         glass(&self.ui, card, 14.0, [0.1, 0.2, 0.5], a);
         let ui = &self.ui;
         let heading = fade(hex(MUTED), a);
-        ui.text(crate::i18n::tr3("PREVIA", "PREVIEW", "VISTA PREVIA"), card.x + 18.0, card.y + 26.0 * f, 14.0 * f, heading, Align::Left, true);
+        ui.text(crate::i18n::tr3("PRÉVIA", "PREVIEW", "VISTA PREVIA"), card.x + 18.0, card.y + 26.0 * f, 14.0 * f, heading, Align::Left, true);
         let Some(mv) = mv else { return };
         let idx = self.pause.move_cur;
         if self.pause.preview.0 != idx {
@@ -48,13 +48,13 @@ impl App {
             }
         }
         let ui = &self.ui;
-        let name = mv.name.as_str();
+        let name = crate::i18n::fighter_lines::shown(&mv.name);
         ui.text(name, card.x + 18.0, card.bottom() - 40.0 * f, 18.0 * f, fade(hex(INK), a), Align::Left, false);
         let known = anim.is_some();
         let Some(cost) = cost_label(mv).or_else(|| known.then(|| crate::i18n::tr3("SEM CUSTO", "FREE", "GRATIS").to_string())) else { return };
         let tw = ui.measure(&cost, 15.0 * f, true) + 22.0;
         let pr = Rect::new(card.x + 18.0, card.bottom() - 32.0 * f, tw, 24.0 * f);
-        let (ink, wash) = super::glide::cost_colors(&cost);
+        let (ink, wash) = super::glide::cost_colors(super::labels::is_bar_cost(mv));
         pill(ui, pr, 12.0, fade(wash, a), fade(Color::new(0.0, 0.0, 0.0, 0.35), a), Some(fade(ink, 0.8 * a)));
         ui.text(&cost, pr.x + tw / 2.0, pr.y + 17.0 * f, 15.0 * f, fade(ink, a), Align::Center, true);
     }

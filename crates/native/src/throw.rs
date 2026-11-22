@@ -4,6 +4,8 @@ use std::collections::HashMap;
 
 const VICTIM_STATE_BASE: i32 = 3800;
 const STEP_STATE_BASE: i32 = 18000;
+pub(crate) const OVERLAY_BLOCK: i32 = 100_000;
+fn block_of(sid: i32) -> i32 { sid / OVERLAY_BLOCK * OVERLAY_BLOCK }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ThrowCameraSpec {
@@ -65,15 +67,15 @@ pub struct ThrowStepSpec {
 }
 
 pub fn is_victim_state(state_no: i32) -> bool {
-    (VICTIM_STATE_BASE..VICTIM_STATE_BASE + 150).contains(&state_no)
+    (VICTIM_STATE_BASE..VICTIM_STATE_BASE + 150).contains(&(state_no % OVERLAY_BLOCK))
 }
 
 pub(super) fn victim_state(sid: i32) -> i32 {
-    VICTIM_STATE_BASE + (sid % 100) + if sid >= 3000 { 50 } else { 0 }
+    block_of(sid) + VICTIM_STATE_BASE + (sid % 100) + if sid % OVERLAY_BLOCK >= 3000 { 50 } else { 0 }
 }
 
 fn step_state_id(sid: i32, idx: usize) -> i32 {
-    STEP_STATE_BASE + (sid % 1000) * 10 + idx as i32
+    block_of(sid) + STEP_STATE_BASE + (sid % 1000) * 10 + idx as i32
 }
 
 fn victim_statedef(

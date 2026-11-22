@@ -95,7 +95,7 @@ True 4K, bloom, chromatic aberration, cinematic supers, particles, floor reflect
 <td valign="top">
 
 ### 🎮 Great to play
-Keyboard, touch, Xbox, DualShock 4 and DualSense with **rumble and lightbars**. Arcade, Versus, Training, Sequence 3v3 and Parallel up to **5v5**.
+Keyboard, touch, Xbox, DualShock 4 and DualSense with **rumble and lightbars**. Arcade, Versus, Training, Sequence 3v3 and Parallel up to **7v7**.
 
 </td>
 </tr>
@@ -138,7 +138,7 @@ The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set pe
 
 ## 🆕 What's new
 
-- **Game modes:** Arcade, Story (with a written epilogue per fighter), Versus CPU, 2 Players, Training, CPU vs CPU, Survival, Tower, Power Arena, Sequence/Parallel/Tag teams and online rollback. Combo Trials and Photo Mode work inside fights. [Game modes](docs/wiki/Game-Modes.md) · [Combo Trials](docs/wiki/Combo-Trials.md) · [Photo Mode](docs/wiki/Photo-Mode.md)
+- **Game modes:** Arcade, Story (with a written epilogue per fighter), Versus CPU, 2 Players, Training, CPU vs CPU, Survival, Tower, Power Arena, Sequence/Parallel/Tag teams (up to 7v7, with seeded random spawns; 5v5 on Android and iOS) and online rollback. Combo Trials and Photo Mode work inside fights. [Game modes](docs/wiki/Game-Modes.md) · [Combo Trials](docs/wiki/Combo-Trials.md) · [Photo Mode](docs/wiki/Photo-Mode.md)
 - **Story:** five stages of waves and bosses, then a final boss and epilogues in EN/PT/ES. Every native fighter has its own unique country. [Guide](docs/wiki/Story-Mode.md) · [Stage objects](docs/wiki/Stage-Objects.md)
 - **MUGEN → UMF converter:** `tools/mugen2umf` is an exact converter in Rust with move-by-move parity checks. One package serves a CLI (`mugen2umf <tool>`) and an MCP server (`mugen2umf mcp`). [UMF guide](docs/wiki/UMF-Character.md)
 - **Mercado GitHub:** install characters, stages and music from any public repository, with list/grid views, MUGEN and UMF badges, a character-vs-pack kind, an outdated status and batch install, update and remove. [Marketplace](docs/wiki/Marketplace.md)

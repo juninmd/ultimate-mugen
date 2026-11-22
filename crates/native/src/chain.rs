@@ -26,12 +26,15 @@ fn strength_of(m: &NativeMove) -> u8 {
 }
 
 impl ChainPlan {
-    pub(super) fn new<'a>(moves: impl Iterator<Item = &'a NativeMove>) -> Self {
+    #[cfg(test)]
+    pub(super) fn new<'a>(moves: impl Iterator<Item = &'a NativeMove>) -> Self { Self::at(moves, 0) }
+
+    pub(super) fn at<'a>(moves: impl Iterator<Item = &'a NativeMove>, block: i32) -> Self {
         let mut next: HashMap<u8, i32> = HashMap::new();
         let entries = moves.map(|m| {
             let lane = lane_of(m);
             let base = match lane { Lane::Ground => 200, Lane::Crouch => 400, Lane::Air => 600, Lane::Special => 1000, Lane::Super => 3000 };
-            let counter = next.entry(lane as u8).or_insert(base);
+            let counter = next.entry(lane as u8).or_insert(block + base);
             let sid = *counter;
             *counter += 1;
             Entry { id: m.id.clone(), sid, strength: strength_of(m), lane, explicit: m.cancels.is_some(), targets: m.cancels.clone().unwrap_or_default(), projectiles: m.projectile.as_ref().map_or(0, |p| p.to_vec().len() as i32), air: m.when.as_deref() == Some("air") }
@@ -59,8 +62,10 @@ impl ChainPlan {
     /// Air specials may also start from the launcher states that explicitly cancel into them (uppercut -> dive).
     pub(super) fn air_entry_states(&self, index: usize) -> String {
         if !self.entries[index].air { return String::new(); }
-        self.sources(index).iter().filter(|s| (1000..3000).contains(*s) || (200..600).contains(*s)).map(|s| format!(" || stateno = {s}")).collect()
+        self.sources(index).iter().filter(|s| matches!(self.lane_at(**s), Some(Lane::Special | Lane::Ground | Lane::Crouch))).map(|s| format!(" || stateno = {s}")).collect()
     }
+
+    fn lane_at(&self, sid: i32) -> Option<Lane> { self.entries.iter().find(|e| e.sid == sid).map(|e| e.lane) }
 
     fn contact_clause(&self, sid: i32) -> String {
         let projectiles = self.entries.iter().find(|e| e.sid == sid).map_or(0, |e| e.projectiles);
@@ -82,7 +87,7 @@ trigger2 = time > 2 && ({})", self.after_contact(&sources)) }
             Lane::Special => {
                 let mut out = String::from("
 trigger2 = movecontact && stateno = [200, 699]");
-                let specials: Vec<i32> = sources.iter().copied().filter(|s| (1000..3000).contains(s)).collect();
+                let specials: Vec<i32> = sources.iter().copied().filter(|s| self.lane_at(*s) == Some(Lane::Special)).collect();
                 if !specials.is_empty() { out += &format!("
 trigger3 = time > 6 && ({})", self.after_contact(&specials)); }
                 out

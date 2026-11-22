@@ -25,9 +25,9 @@ fn run_parity(src: &source::Source, out: &Path) -> Result<parity::Parity, String
     let sources = ume_engine::loader::read_mugen_sources(&src.vfs, &src.def)?;
     let orig = Arc::new(ume_engine::loader::assemble_mugen_char(sources.clone(), 1, true));
     let loaded = bundle::load(out)?;
-    let umf = Arc::new(bundle::compile(&loaded, 1, true)?);
+    let (base, full) = (Arc::new(bundle::compile_base(&loaded, 1, true)?), Arc::new(bundle::compile(&loaded, 1, true)?));
     let routes = routes::routes(&sources, &orig.commands);
-    let report = parity::parity(&loaded.fighter.name, &orig, &umf, &routes);
+    let report = parity::parity(&loaded.fighter.name, &orig, &base, &full, &routes);
     let dir = loaded.json_path.parent().unwrap_or(Path::new("."));
     std::fs::write(dir.join("parity.md"), report.markdown()).map_err(|e| e.to_string())?;
     std::fs::write(dir.join("routes.json"), serde_json::to_string_pretty(&routes).unwrap_or_default()).map_err(|e| e.to_string())?;
@@ -69,13 +69,14 @@ fn evidence_tool(a: &Args) -> Result<String, String> {
     } else {
         picked.retain(|m| wanted.contains(&m.route.command.to_ascii_lowercase()));
     }
-    let routes: Vec<routes::Route> = picked.iter().map(|m| m.route.clone()).collect();
+    let mut routes: Vec<routes::Route> = picked.iter().map(|m| m.route.clone()).collect();
+    routes.extend(report.added.iter().filter(|m| m.reached && (wanted.is_empty() || wanted.contains(&m.route.command.to_ascii_lowercase()))).map(|m| m.route.clone()));
     let sources = ume_engine::loader::read_mugen_sources(&src.vfs, &src.def)?;
     let orig = Arc::new(ume_engine::loader::assemble_mugen_char(sources, 1, true));
     let umf = Arc::new(bundle::compile(&bundle::load(out)?, 1, true)?);
     let dir = bundle::find_json(out)?.with_file_name("evidence");
     let written = parity::evidence(&orig, &umf, &routes, &dir)?;
-    Ok(format!("{}\n{} sheets (top row original, bottom row UMF):\n{}", report.summary(), written.len(), written.iter().map(|p| p.display().to_string()).collect::<Vec<_>>().join("\n")))
+    Ok(format!("{}\n{} sheets (top row original, bottom row UMF; added_* = UMF-only moves):\n{}", report.summary(), written.len(), written.iter().map(|p| p.display().to_string()).collect::<Vec<_>>().join("\n")))
 }
 
 fn validate_tool(a: &Args) -> Result<String, String> {

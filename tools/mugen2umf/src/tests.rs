@@ -28,7 +28,7 @@ fn kung_fu_man_migrates_with_identical_data_and_moves() {
     let umf = Arc::new(bundle::compile(&bundle::load(&out).unwrap(), 1, true).unwrap());
     let routes = routes::routes(&sources, &orig.commands);
     assert!(routes.len() >= 10, "kfm exposes its specials and supers through Statedef -1, got {}", routes.len());
-    let report = parity::parity("kfm", &orig, &umf, &routes);
+    let report = parity::parity("kfm", &orig, &umf, &umf, &routes);
     assert!(report.identical, "{}", report.markdown());
     assert!(report.moves.iter().any(|m| m.original.damage > 0.0), "at least one played move must hit the dummy");
     let _ = std::fs::remove_dir_all(&out);
@@ -82,4 +82,47 @@ fn mcp_lists_every_tool_with_a_schema() {
     let bad = mcp::handle(&json!({"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "inspect", "arguments": {"nope": "x"}}})).unwrap();
     assert_eq!(bad["result"]["isError"], Value::Bool(true));
     assert!(mcp::handle(&json!({"jsonrpc": "2.0", "method": "notifications/initialized"})).is_none());
+}
+
+#[test]
+fn umf_moves_layer_on_top_of_the_exact_fighter() {
+    let src = kfm();
+    let mut b = convert::convert(&src, "kfm_moves", None).unwrap();
+    extra::apply(&mut b.json, &json!({
+        "moves": [{"id": "dragon_palm", "name": "Dragon Palm", "input": "~D, U, x", "kind": "special", "anim": "1000", "hits": [{"at": 2, "damage": 77}]}],
+    })).unwrap();
+    let out = temp("kfm-moves");
+    convert::write(&b, &out, "kfm_moves").unwrap();
+    let sources = ume_engine::loader::read_mugen_sources(&src.vfs, &src.def).unwrap();
+    let orig = Arc::new(ume_engine::loader::assemble_mugen_char(sources.clone(), 1, true));
+    let umf = Arc::new(bundle::compile(&bundle::load(&out).unwrap(), 1, true).unwrap());
+    let block = ume_native::exact::overlay_block(&orig);
+    let added = umf.movelist.iter().find(|m| m.command == "m_dragon_palm").expect("UMF move listed");
+    assert!(added.state >= block, "UMF move state {} must live above every MUGEN state", added.state);
+    let route = routes::Route { command: added.command.clone(), input: added.input.clone(), state: added.state, when: "stand", cost: 0 };
+    let played = parity::sim::run(&umf, &route).outcome;
+    assert!(played.states.contains(&added.state), "real input reaches the UMF move: {:?}", played.states);
+    assert!(played.damage >= 77.0, "UMF move hits the dummy, damage {}", played.damage);
+    let base = Arc::new(bundle::compile_base(&bundle::load(&out).unwrap(), 1, true).unwrap());
+    let report = parity::parity("kfm", &orig, &base, &umf, &routes::routes(&sources, &orig.commands));
+    assert!(report.identical, "the exact part stays identical under the overlay:\n{}", report.markdown());
+    assert!(report.added.iter().any(|m| m.route.command == "m_dragon_palm" && m.reached), "{}", report.markdown());
+    let with_overlay = parity::parity("kfm", &orig, &umf, &umf, &routes::routes(&sources, &orig.commands));
+    assert!(with_overlay.moves.iter().all(|m| m.identical), "original moves play the same with the overlay loaded:\n{}", with_overlay.markdown());
+    let _ = std::fs::remove_dir_all(&out);
+}
+
+#[test]
+fn unlocked_routes_run_before_the_original_commands() {
+    let src = kfm();
+    let mut b = convert::convert(&src, "kfm_first", None).unwrap();
+    extra::apply(&mut b.json, &json!({"mugenRoutes": [{"state": 1000, "id": "palm_first", "input": "~D, DF, F, x"}]})).unwrap();
+    let out = temp("kfm-first");
+    convert::write(&b, &out, "kfm_first").unwrap();
+    let umf = Arc::new(bundle::compile(&bundle::load(&out).unwrap(), 1, true).unwrap());
+    let first = &umf.states[&-1].controllers[0];
+    assert!(format!("{:?}", first.trigger_all).contains("umf_palm_first"), "the unlocked route must be checked before the original ones it shares an input with");
+    let route = routes::Route { command: "umf_palm_first".into(), input: "~D, DF, F, x".into(), state: 1000, when: "stand", cost: 0 };
+    assert!(parity::sim::run(&umf, &route).outcome.states.contains(&1000));
+    let _ = std::fs::remove_dir_all(&out);
 }

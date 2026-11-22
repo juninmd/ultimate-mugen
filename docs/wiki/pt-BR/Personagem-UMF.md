@@ -378,6 +378,10 @@ Um zip (ou pasta `mugen/`) com um `.json` UMF ao lado de uma pasta `sprites/` co
 
 O motor monta o lutador com o mesmo código de um personagem M.U.G.E.N (`ume_engine::loader::assemble_mugen_char`), então estados, comandos, constantes, animações, paletas e sons são os mesmos. Os campos UMF (`profile`, `series`, falas, `rivals`, `scripts`) ficam por cima. `mugen2umf parity` prova golpe a golpe.
 
+Os `moves` nativos funcionam por cima de um lutador exato: cada `anim` (e o `anim` de projéteis) é o número de uma action M.U.G.E.N (`"anim": "3000"`), e os golpes compilam como os de um lutador nativo, com comandos `m_<id>`, cadeias, agarrões, projéteis e variantes aéreas. Os estados ficam num bloco de 100000 números acima do maior estado original e as rotas do `Statedef -1` rodam antes das originais, então nenhum estado original é substituído. O `parity` compara a parte exata sem eles e os lista em "Added by UMF", jogados pelo input real.
+
+As paletas de SFF v1 seguem o M.U.G.E.N: num SFF de paleta compartilhada (tipo de paleta 1 no cabeçalho), um sprite marcado "mesma paleta" usa a paleta do personagem (o `.act` escolhido), nunca a paleta própria do sprite anterior (em geral o retrato 9000). SFFs de paleta individual continuam herdando do sprite anterior.
+
 ## Elemento do lutador
 
 O campo opcional `element` aceita `fire`, `ice`, `lightning`, `water`, `earth`, `wind` ou `neutral`. O HUD exibe o elemento ao lado do retrato do lutador, com texto localizado quando o ícone não estiver disponível. O campo não altera o dano nem as regras da luta.

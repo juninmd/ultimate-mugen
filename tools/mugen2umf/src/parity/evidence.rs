@@ -38,11 +38,18 @@ pub fn evidence(orig: &Arc<CharDef>, umf: &Arc<CharDef>, routes: &[Route], dir: 
     std::fs::create_dir_all(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
     let mut written = vec![];
     for route in routes {
-        let (mut a, b) = (shots(orig, route), shots(umf, route));
+        let (mut a, mut b) = (shots(orig, route), shots(umf, route));
+        let blank = tiny_skia::Pixmap::new(ume_engine::snapshot::W, ume_engine::snapshot::H).ok_or("pixmap")?;
         if a.is_empty() {
+            if b.is_empty() || orig.commands.iter().any(|c| c.name.eq_ignore_ascii_case(&route.command)) {
+                continue;
+            }
+            b.resize(SHOTS, blank);
+            let path = dir.join(format!("added_{}", file_name(route)));
+            sheet(&b, SHOTS).save_png(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+            written.push(path);
             continue;
         }
-        let blank = tiny_skia::Pixmap::new(ume_engine::snapshot::W, ume_engine::snapshot::H).ok_or("pixmap")?;
         a.resize(SHOTS, blank.clone());
         let mut all = a;
         all.extend(b);

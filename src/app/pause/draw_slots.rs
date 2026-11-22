@@ -52,7 +52,7 @@ impl App {
             let tw = r.right() - tx - 12.0;
             match card.mv {
                 Some(mv) => {
-                    let name = truncate_to(&mv.name, tw, &|s| ui.measure(s, 19.0 * f, false));
+                    let name = truncate_to(crate::i18n::fighter_lines::shown(&mv.name), tw, &|s| ui.measure(s, 19.0 * f, false));
                     ui.text(&name, tx, r.y + 27.0 * f, 19.0 * f, fade(hex(INK), a), Align::Left, false);
                     let size = fit_input_size(&mv.input, tw, 17.0 * f, 11.0, &|_, s| s * 1.6);
                     ui.input_icons(&mv.input, tx, r.bottom() - 9.0, size, |b| self.c.face(b));

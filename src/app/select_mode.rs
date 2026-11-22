@@ -1,7 +1,14 @@
 use super::*;
 use crate::i18n::tr3;
 
+pub(crate) const TEAM_MAX: usize = if cfg!(any(target_os = "android", target_os = "ios")) { 5 } else { 7 };
+const TAG_MAX: usize = 3;
+
 const FAMILY: [Mode; 6] = [Mode::Cpu, Mode::Versus, Mode::Watch, Mode::TeamSeq, Mode::TeamSimul, Mode::TeamTag];
+
+pub(crate) fn in_family(mode: Mode) -> bool {
+    FAMILY.contains(&mode)
+}
 
 impl App {
     pub(crate) fn set_mode(&mut self, mode: Mode) {
@@ -16,11 +23,26 @@ impl App {
         };
     }
 
+    pub(crate) fn adjust_team_n(&mut self, delta: isize) {
+        if self.mode == Mode::PowerArena {
+            return;
+        }
+        let cap = if self.mode == Mode::TeamTag { TAG_MAX } else { TEAM_MAX };
+        let next = (self.team_n as isize + delta).clamp(2, cap as isize) as usize;
+        self.team_n = next.max(self.team_pick.len() + 1).min(cap);
+        self.audio.sfx("select");
+    }
+
     pub(crate) fn cycle_select_mode(&mut self) -> bool {
+        self.step_select_mode(1)
+    }
+
+    pub(crate) fn step_select_mode(&mut self, delta: isize) -> bool {
         let Some(at) = FAMILY.iter().position(|&m| m == self.mode) else {
             return false;
         };
-        self.set_mode(FAMILY[(at + 1) % FAMILY.len()]);
+        let len = FAMILY.len() as isize;
+        self.set_mode(FAMILY[(at as isize + delta).rem_euclid(len) as usize]);
         self.audio.sfx("confirm");
         self.screen = Screen::Select {
             cur: [self.sel.0, self.sel.1],

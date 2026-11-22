@@ -68,12 +68,16 @@ pub fn story_clear() -> &'static str {
     tr("HISTÓRIA CONCLUÍDA", "STORY COMPLETE")
 }
 
-pub fn continue_label() -> &'static str {
-    tr("Continuar", "Continue")
-}
-
 pub fn game_over() -> &'static str {
     tr("FIM DE JOGO", "GAME OVER")
+}
+
+pub fn knocked_out() -> &'static str {
+    crate::i18n::tr3("NOCAUTEADO", "KNOCKED OUT", "NOQUEADO")
+}
+
+pub fn continue_with_credit() -> &'static str {
+    crate::i18n::tr3("Continuar (usa 1 crédito)", "Continue (uses 1 credit)", "Continuar (usa 1 crédito)")
 }
 
 pub fn quit_label() -> &'static str {

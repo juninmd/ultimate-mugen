@@ -14,6 +14,8 @@
     { "name": "arcade-click", "shard": "ui", "script": "web-arcade-smoke.js", "args": ["{dist}"] },
     { "name": "story", "shard": "ui", "script": "web-story-smoke.js", "args": ["{dist}"] },
     { "name": "epilogue", "shard": "ui", "script": "web-epilogue-smoke.js", "args": ["{dist}"] },
+    { "name": "team-7v7", "shard": "ui", "script": "web-team-smoke.js", "args": ["{dist}"] },
+    { "name": "team-7v7-touch", "shard": "mobile", "script": "web-team-smoke.js", "args": ["{dist}"], "env": { "TEAM_MOBILE": "1" } },
     { "name": "touch-menu", "shard": "mobile", "script": "web-touch-menu-smoke.js", "args": ["{dist}"] },
     { "name": "touch-fight", "shard": "mobile", "script": "web-touch-smoke.js", "args": ["{dist}"] },
     { "name": "engine-smoke-mobile", "shard": "mobile", "script": "smoke-web.js", "args": ["{dist}", "{out}"], "env": { "SMOKE_MOBILE": "1" } },

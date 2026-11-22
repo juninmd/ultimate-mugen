@@ -44,6 +44,7 @@ O que o motor ainda não suporta do MUGEN aparece no `report.md` (diagnóstico) 
 
 - Metadados e campos exclusivos do UMF: `name`, `series`, `author`, `description`, `color`, `intro`, `taunt`, `winQuote`, `rivals`, `profile` (ver abaixo).
 - `moves: [{id, name}]` sem `anim` só renomeia o golpe na lista (`mugen.names`, chave = nome do comando).
+- `moves` UMF completos (com `anim`, `input`, `kind`, `hits`, `projectile`, `throw`...) viram golpes nativos por cima do exato: `anim` é o número da action M.U.G.E.N (`"3000"`), estados num bloco de 100000 acima do maior estado original, rotas antes do `Statedef -1` original. O `parity.md` lista em "Added by UMF" se o input real alcança e quanto dano dá.
 - `mugenRoutes: [{state, id, input, name?, when?, cost?}]` destrava estados que o `.cmd` deixou sem comando (ex.: hyper S.H.I.E.L.D. da Black Widow) via `scripts`.
 - `scripts.cns`/`scripts.zss`/`scripts.commands`: golpes novos escritos em CNS/ZSS, com `@anim(<número>)`, somados depois do original (o `Statedef -1` novo roda depois do original).
 

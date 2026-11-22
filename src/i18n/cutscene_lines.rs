@@ -57,9 +57,9 @@ mod tests {
 
     #[test]
     fn every_cutscene_line_is_translated() {
-        let dir = concat!(env!("CARGO_MANIFEST_DIR"), "/src/app/cutscene");
-        for name in ["story.rs", "climax.rs", "endings.rs"] {
-            let source = std::fs::read_to_string(format!("{dir}/{name}")).unwrap();
+        let dir = env!("CARGO_MANIFEST_DIR");
+        for name in ["app/cutscene/story.rs", "app/cutscene/climax.rs", "app/cutscene/endings.rs", "boss/dialogue.rs"] {
+            let source = std::fs::read_to_string(format!("{dir}/src/{name}")).unwrap();
             for line in source
                 .lines()
                 .filter(|l| !l.contains("tr3") && !l.contains("contains("))

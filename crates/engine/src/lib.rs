@@ -47,6 +47,7 @@ pub mod signature;
 pub mod potential;
 pub mod raster;
 pub mod move_cost;
+pub mod move_preview;
 pub mod replay_camera;
 pub mod mutators;
 pub mod rules;

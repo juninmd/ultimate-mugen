@@ -50,6 +50,7 @@ pub struct PauseState {
     pub toast: Option<(String, f32)>,
     pub drag: Option<f32>,
     pub follow: bool,
+    pub preview: (usize, f32),
 }
 
 pub fn follow_target(scroll: f32, cur: usize, lay: &Layout) -> f32 {
@@ -76,6 +77,7 @@ impl PauseState {
             toast: None,
             drag: None,
             follow: true,
+            preview: (usize::MAX, 0.0),
         }
     }
 
@@ -93,6 +95,7 @@ impl PauseState {
 
     pub fn tick(&mut self, dt: f32) {
         self.open = (self.open + dt * 6.0).min(1.0);
+        self.preview.1 += dt;
         for f in &mut self.flash {
             *f = (*f - dt * 2.2).max(0.0);
         }

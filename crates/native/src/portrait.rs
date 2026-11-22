@@ -16,8 +16,8 @@ pub(super) fn portrait(nc: &NativeChar, palette: Option<&Value>) -> Option<Sprit
     let recolor = palette.and_then(|palette| Recolor::new(nc.art.style.get("colors"), palette));
     sprite_roots(nc.sprite_dir()).iter().find_map(|root| {
         let bytes = read_sprite(root, "portrait.png")?;
-        let png = super::decode_cache::png(root, "portrait", &bytes)?;
-        let (width, height, mut rgba) = portrait_thumbnail(png.width, png.height, &png.rgba);
+        let thumb = super::decode_cache::thumbnail(root, "portrait", &bytes, portrait_thumbnail)?;
+        let (width, height, mut rgba) = (thumb.width, thumb.height, thumb.rgba.to_vec());
         if let Some(recolor) = &recolor { recolor.apply(&mut rgba); }
         Some(Sprite { image: Some(ImageData::new(width, height, rgba)), width: width as f32, height: height as f32, axis_x: 0.0, axis_y: 0.0, scale: 1.0 })
     })

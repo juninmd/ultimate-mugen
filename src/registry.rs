@@ -352,7 +352,7 @@ impl Registry {
             match ume_native::parse_char(json) {
                 Ok(nc) => {
                     let arc = Arc::new(nc);
-                    ume_native::register_native(arc.clone());
+                    ume_native::register_native_warm(arc.clone());
                     chars.push(CharEntry {
                         key: format!("umf:{}", arc.id),
                         id: format!("umf:{}", arc.id),

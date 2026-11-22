@@ -16,11 +16,11 @@ catalog! {
     "menu.team_simul" => "Team · Parallel", "Equipe · Paralelo";
     "menu.team_tag" => "Team · Tag", "Equipe · Tag";
     "menu.mugen" => "Import M.U.G.E.N", "Importar M.U.G.E.N";
-    "menu.market" => "GitHub marketplace", "Mercado GitHub";
+    "menu.market" => "GitHub Marketplace", "Mercado GitHub";
     "menu.controls" => "Controls", "Controles";
     "menu.settings" => "Settings", "Configurações";
     "menu.replays" => "Replays", "Replays";
-    "menu.player_card" => "Player card", "Ficha do Jogador";
+    "menu.player_card" => "Player Card", "Ficha do Jogador";
     "menu.quit" => "Quit", "Sair";
     "menu.power_arena" => "Power Arena", "Arena do Poder";
     "desc.power_arena" => "Battle on platforms and push your rival out.", "Lute em plataformas e empurre o rival para fora.";

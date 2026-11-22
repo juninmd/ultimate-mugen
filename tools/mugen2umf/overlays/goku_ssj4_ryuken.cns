@@ -1,0 +1,192 @@
+[Statedef 3050]
+type    = S
+movetype= A
+physics = N
+juggle  = 2
+velset = 10,0
+ctrl = 0
+anim = 3050
+sprpriority = 3
+
+[State 3050, AssertSpecial]
+type = AssertSpecial
+trigger1 = 1
+flag = Unguardable
+
+[State 3050, AimX]
+type = VarSet
+trigger1 = NearestFoe,Alive
+fv = 0
+value = (NearestFoe,Pos X - Pos X) * Facing
+
+[State 3050, AimY]
+type = VarSet
+trigger1 = NearestFoe,Alive
+fv = 1
+value = NearestFoe,Pos Y - 30 - Pos Y
+
+[State 3050, Speed]
+type = VarSet
+trigger1 = 1
+fv = 2
+value = ifelse(MoveContact, 2, 10)
+
+[State 3050, Seek]
+type = VelSet
+trigger1 = Time >= 1 && NearestFoe,Alive
+x = Vel X * 0.82 + 0.18 * Fvar(2) * Fvar(0) / (sqrt(Fvar(0)*Fvar(0) + Fvar(1)*Fvar(1)) + 0.01)
+y = Vel Y * 0.82 + 0.18 * Fvar(2) * Fvar(1) / (sqrt(Fvar(0)*Fvar(0) + Fvar(1)*Fvar(1)) + 0.01)
+
+[State 3050, TurnAround]
+type = Turn
+trigger1 = Vel X < -2
+
+[State 3050, KeepHeading]
+type = VelSet
+trigger1 = Vel X < -2
+x = -Vel X
+
+[State 3050, Pitch]
+type = AngleDraw
+trigger1 = 1
+value = atan(Vel Y / (abs(Vel X) + 0.01)) * 180 / pi
+
+[State 3050, AttackMulSet]
+type = AttackMulSet
+trigger1 = 1
+value = 1+root,fvar(2)+root,fvar(3)
+
+[State 3050, Trans]
+type = Trans
+trigger1 = 1
+trans = add
+
+[State 3050, AssertSpecial]
+type = AssertSpecial
+trigger1 = 1
+flag = Noshadow
+
+[State 3050, PlaySnd]
+type = PlaySnd
+trigger1 = time = 0
+value = S0,40
+volume = 999
+
+[State 200, 1]
+type = HitDef
+triggerall = hitcount < 100
+trigger1 = 1
+attr = A, HA
+animtype  = heavy
+damage    = 4,2
+Hitflag = MAFDE
+guardflag = MA
+pausetime = 0,0
+sparkno = -1
+guard.sparkno = -1
+sparkxy = -15,0
+hitsound   = S5,ifelse(hitcount > 98,26,2666)
+guardsound = Sifelse(hitcount > 98,5,4),ifelse(hitcount > 98,26,1)
+ground.type = High
+ground.slidetime = 12
+ground.hittime  = 15
+ground.velocity = ifelse(hitcount > 98,-2,-1),ifelse(hitcount > 98,-15,0)
+air.velocity = ifelse(hitcount > 98,-2,-1),ifelse(hitcount > 98,-15,0)
+Fall = ifelse(hitcount > 98,1,0)
+Fall.recover = 0
+getpower = 0,0
+sprpriority = 3
+PalFX.time = ifelse(hitcount > 98,30,0)
+PalFX.add = -200,-200,-200
+PalFX.mul = 256,256,256
+PalFX.sinadd = 50,50,50,50
+PalFX.invertall = 0
+PalFX.color = 256
+
+[State 0, EnvShake]
+type = EnvShake
+trigger1 = timemod = 5,0
+time = 5
+ampl = -14
+
+[State 0, Explosion]
+type = Explod
+triggerall = hitcount = 100
+triggerall = numhelper(9022) = 0
+trigger1 = movecontact = 1
+anim = 9022
+ID = 9022
+pos = 0,0
+postype = left
+facing = 1
+vfacing = 1
+bindtime = -1
+removetime = -2
+scale = 999,999
+sprpriority = 9
+ontop = 1
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+supermove = 99999
+pausemove = 99999
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 0, Explosion]
+type = Explod
+triggerall = hitcount = 100
+triggerall = numexplod(406) = 0
+trigger1 = movecontact = 1
+anim = 410
+ID = 406
+pos = 0,-30
+postype = p2
+facing = -1
+vfacing = 1
+bindtime = 1
+removetime = -2
+scale = 3*Helper(999999),Fvar(16),3*Helper(999999),Fvar(16)
+sprpriority = 5
+ontop = 1
+ownpal = 1
+
+[State 0, Camara Lenta]
+type = Helper
+triggerall = hitcount = 100
+Triggerall = numhelper(590) = 0
+trigger1 = movehit = 1
+helpertype = normal
+name = "Camara Lenta"
+ID = 590
+stateno = 590
+pos = 999,999
+postype = p1
+facing = 1
+keyctrl = 0
+ownpal = 0
+
+[State 0, Luz]
+type = Helper
+triggerall = numhelper(595) = 0
+trigger1 = hitcount = 100
+helpertype = normal
+name = "Luz"
+ID = 595
+stateno = 595
+pos = 0,-30
+postype = p2
+facing = -1
+keyctrl = 0
+ownpal = 1
+size.xscale = 1*Helper(999999),Fvar(16)
+size.yscale = 1*Helper(999999),Fvar(16)
+supermovetime = 999
+
+[State 200, End]
+type = Destroyself
+trigger1 = root,stateno != 3000
+trigger2 = frontedgebodydist < -300
+trigger3 = hitcount = 100
+trigger4 = Time > 300
+;-------------------------------------------------------------------------------

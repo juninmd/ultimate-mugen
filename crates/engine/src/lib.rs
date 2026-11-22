@@ -54,5 +54,6 @@ pub mod replay_camera;
 pub mod photo_camera;
 pub mod mutators;
 pub mod rules;
+pub mod nearest;
 
 pub use ume_formats as formats;

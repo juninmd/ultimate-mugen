@@ -11,8 +11,13 @@ pub(super) struct Cropped {
 }
 
 pub(super) fn crop(width: u32, height: u32, rgba: Arc<Vec<u8>>) -> Cropped {
+    let bounds = content_box(width as usize, height as usize, &rgba);
+    crop_bounded(width, height, rgba, bounds)
+}
+
+fn crop_bounded(width: u32, height: u32, rgba: Arc<Vec<u8>>, bounds: Option<[usize; 4]>) -> Cropped {
     let (w, h) = (width as usize, height as usize);
-    let Some([x0, y0, x1, y1]) = content_box(w, h, &rgba) else {
+    let Some([x0, y0, x1, y1]) = bounds else {
         return Cropped { image: ImageData::new(width, height, rgba), left: 0.0, top: 0.0 };
     };
     let (x0, y0) = (x0.saturating_sub(MARGIN), y0.saturating_sub(MARGIN));
@@ -27,16 +32,16 @@ pub(super) fn crop(width: u32, height: u32, rgba: Arc<Vec<u8>>) -> Cropped {
     Cropped { image: ImageData::new((x1 - x0) as u32, (y1 - y0) as u32, out), left: x0 as f32, top: y0 as f32 }
 }
 
-pub(super) fn crop_art(width: u32, height: u32, rgba: Arc<Vec<u8>>, recolor: Option<&Recolor>, hair_region: Option<[u32; 4]>) -> Cropped {
+pub(super) fn crop_art(width: u32, height: u32, rgba: Arc<Vec<u8>>, bounds: Option<[usize; 4]>, recolor: Option<&Recolor>, hair_region: Option<[u32; 4]>) -> Cropped {
     match recolor {
-        Some(recolor) => crop_recolored(width, height, &rgba, recolor, hair_region),
-        None => crop(width, height, rgba),
+        Some(recolor) => crop_recolored(width, height, &rgba, bounds, recolor, hair_region),
+        None => crop_bounded(width, height, rgba, bounds),
     }
 }
 
-fn crop_recolored(width: u32, height: u32, rgba: &[u8], recolor: &Recolor, hair_region: Option<[u32; 4]>) -> Cropped {
+fn crop_recolored(width: u32, height: u32, rgba: &[u8], bounds: Option<[usize; 4]>, recolor: &Recolor, hair_region: Option<[u32; 4]>) -> Cropped {
     let (w, h) = (width as usize, height as usize);
-    let [x0, y0, x1, y1] = padded_box(w, h, rgba).unwrap_or([0, 0, w, h]);
+    let [x0, y0, x1, y1] = padded_box(w, h, bounds).unwrap_or([0, 0, w, h]);
     let mut out = Vec::with_capacity((x1 - x0) * (y1 - y0) * 4);
     for row in y0..y1 {
         out.extend_from_slice(&rgba[(row * w + x0) * 4..(row * w + x1) * 4]);
@@ -47,12 +52,12 @@ fn crop_recolored(width: u32, height: u32, rgba: &[u8], recolor: &Recolor, hair_
     Cropped { image: ImageData::new((x1 - x0) as u32, (y1 - y0) as u32, out), left: x0 as f32, top: y0 as f32 }
 }
 
-fn padded_box(w: usize, h: usize, rgba: &[u8]) -> Option<[usize; 4]> {
-    let [x0, y0, x1, y1] = content_box(w, h, rgba)?;
+fn padded_box(w: usize, h: usize, bounds: Option<[usize; 4]>) -> Option<[usize; 4]> {
+    let [x0, y0, x1, y1] = bounds?;
     Some([x0.saturating_sub(MARGIN), y0.saturating_sub(MARGIN), (x1 + MARGIN).min(w), (y1 + MARGIN).min(h)])
 }
 
-fn content_box(w: usize, h: usize, rgba: &[u8]) -> Option<[usize; 4]> {
+pub(super) fn content_box(w: usize, h: usize, rgba: &[u8]) -> Option<[usize; 4]> {
     if rgba.len() < w * h * 4 {
         return None;
     }

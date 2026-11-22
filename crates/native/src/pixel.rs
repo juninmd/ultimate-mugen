@@ -101,7 +101,7 @@ fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool,
     let axis_x = axis("axisX", dec.width as f32 / 2.0, dec.width as f32);
     let axis_y = axis("axisY", dec.height as f32, dec.height as f32);
     let hurt = fit.then(|| super::pixel_hurt::fit_body(hurtbox(lower, stem), stem, &rgba, dec.width, dec.height, [axis_x, axis_y], STAND_UNITS / units));
-    let c = super::pixel_crop::crop_art(dec.width, dec.height, rgba, recolor.filter(|_| !fit), hair_region);
+    let c = super::pixel_crop::crop_art(dec.width, dec.height, rgba, dec.bounds, recolor.filter(|_| !fit), hair_region);
     Some(FrameArt {
         width: c.image.w as f32 * res,
         height: c.image.h as f32 * res,

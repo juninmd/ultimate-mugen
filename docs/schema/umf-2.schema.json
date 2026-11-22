@@ -1,0 +1,408 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/juninmd/ultimate-mugen/master/docs/schema/umf-2.schema.json",
+  "title": "UMF 2 fighter or umf-kit/1 kit",
+  "description": "Ultimate MUGEN Format 2: one JSON file per fighter. Mirrors the serde structs in crates/native/src. Unknown keys are rejected so typos fail in CI instead of being ignored by the loader.",
+  "type": "object",
+  "required": ["format", "id"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "format": { "enum": ["umf/1", "umf/2", "umf-kit/1"] },
+    "library": { "type": ["boolean", "string"], "description": "Kit only: marks the kit as an ability library." },
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "series": { "type": "string" },
+    "author": { "type": "string" },
+    "description": { "type": "string" },
+    "color": { "$ref": "#/$defs/hexColor" },
+    "extends": { "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" }, "minItems": 1 }] },
+    "spriteSet": { "type": "string" },
+    "element": { "$ref": "#/$defs/element" },
+    "boss": { "type": "boolean" },
+    "npc": { "type": "boolean" },
+    "speed": { "type": "number", "exclusiveMinimum": 0 },
+    "form": { "type": "string" },
+    "winQuote": { "type": "string" },
+    "intro": { "type": "string" },
+    "taunt": { "type": "string" },
+    "rivals": { "type": "object", "additionalProperties": { "$ref": "#/$defs/rivalLines" } },
+    "profile": { "$ref": "#/$defs/profile" },
+    "stats": { "$ref": "#/$defs/stats" },
+    "passives": { "$ref": "#/$defs/passives" },
+    "abilities": { "$ref": "#/$defs/abilities" },
+    "helpers": { "$ref": "#/$defs/helpers" },
+    "companions": { "$ref": "#/$defs/helpers" },
+    "bossRules": { "$ref": "#/$defs/bossRules" },
+    "ui": { "$ref": "#/$defs/bossRules" },
+    "scripts": { "$ref": "#/$defs/scripts" },
+    "art": { "$ref": "#/$defs/art" },
+    "palettes": { "type": "array", "items": { "$ref": "#/$defs/palette" } },
+    "awakeningPalette": { "$ref": "#/$defs/palette" },
+    "anims": { "type": "object", "additionalProperties": { "$ref": "#/$defs/anim" } },
+    "moves": { "type": "array", "items": { "$ref": "#/$defs/move" } },
+    "stage": { "type": "string", "description": "Legacy hint, ignored by the loader." },
+    "country": { "type": "string", "description": "Legacy hint, superseded by profile.country." }
+  },
+  "additionalProperties": false,
+  "if": { "anyOf": [{ "required": ["extends"] }, { "properties": { "format": { "const": "umf-kit/1" } }, "required": ["format"] }] },
+  "then": {},
+  "else": { "required": ["name", "series", "author", "color", "art", "anims", "moves"] },
+  "$defs": {
+    "vec2": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+    "ivec2": { "type": "array", "items": { "type": "integer" }, "minItems": 2, "maxItems": 2 },
+    "rgb": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 255 }, "minItems": 3, "maxItems": 3 },
+    "snd": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 65535 }, "minItems": 2, "maxItems": 2 },
+    "box4": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4 },
+    "hexColor": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "tick": { "type": "integer", "minimum": 0 },
+    "element": { "enum": ["fire", "ice", "lightning", "water", "earth", "wind", "neutral"] },
+    "localText": { "type": "object", "properties": { "en": { "type": "string" }, "pt": { "type": "string" }, "es": { "type": "string" } }, "required": ["en"], "additionalProperties": { "type": "string" } },
+    "palette": { "type": "object", "additionalProperties": { "type": ["string", "object"] } },
+    "rivalLines": { "type": "object", "properties": { "intro": { "type": "string" }, "taunt": { "type": "string" }, "attack": { "type": "number" } }, "additionalProperties": false },
+    "profile": {
+      "type": "object",
+      "properties": {
+        "country": { "type": "string", "pattern": "^[A-Za-z]{2,12}$" },
+        "nationality": { "$ref": "#/$defs/localText" },
+        "origin": { "$ref": "#/$defs/localText" },
+        "bio": { "$ref": "#/$defs/localText" },
+        "title": { "$ref": "#/$defs/localText" },
+        "fightingStyle": { "$ref": "#/$defs/localText" },
+        "affiliation": { "$ref": "#/$defs/localText" },
+        "element": { "type": "string" },
+        "weakness": { "type": "string" },
+        "alignment": { "enum": ["hero", "villain", "anti-hero", "neutral"] },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "stats": {
+      "type": "object",
+      "properties": {
+        "life": { "type": "number", "exclusiveMinimum": 0 }, "power": { "type": "number", "minimum": 0 },
+        "attack": { "type": "number", "minimum": 0 }, "defense": { "type": "number", "minimum": 0 },
+        "walk": { "$ref": "#/$defs/vec2" }, "run": { "$ref": "#/$defs/vec2" },
+        "jump": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4 },
+        "gravity": { "type": "number" }, "airJumps": { "type": "number", "minimum": 0 }, "airDashes": { "type": "number", "minimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 }, "width": { "$ref": "#/$defs/vec2" },
+        "guardMax": { "type": "number" }, "dizzyMax": { "type": "number" }, "weight": { "type": "number" }, "chipDefense": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "passives": {
+      "type": "object",
+      "properties": {
+        "meterRegen": { "type": "number" }, "lifeRegen": { "type": "number" },
+        "rage": { "type": "object", "properties": { "maxMultiplier": { "type": "number" }, "exponent": { "type": "number" }, "startRatio": { "type": "number" }, "fullRatio": { "type": "number" } }, "additionalProperties": false },
+        "stacks": { "type": "object", "properties": { "damageGain": { "type": "number" }, "defenceGain": { "type": "number" }, "speedGain": { "type": "number" }, "maxStacks": { "type": "integer" }, "decayTicks": { "type": "integer" }, "resetOnRound": { "type": "boolean" }, "specials": { "type": "boolean" }, "supers": { "type": "boolean" } }, "additionalProperties": false },
+        "enrageTime": { "type": "object", "properties": { "maxMultiplier": { "type": "number" }, "startSeconds": { "type": "number" }, "rampSeconds": { "type": "number" }, "exponent": { "type": "number" } }, "additionalProperties": false },
+        "signature": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" }, "max": { "type": "number" }, "gainHit": { "type": "number" }, "gainSpecial": { "type": "number" }, "gainHurt": { "type": "number" },
+            "decayDelaySeconds": { "type": "number" }, "decayPerSecond": { "type": "number" }, "drainOnSuper": { "type": "boolean" }, "riskPerSecond": { "type": "number" },
+            "tiers": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "number" }, "attack": { "type": "number" }, "defence": { "type": "number" }, "speed": { "type": "number" } }, "required": ["at"], "additionalProperties": false } }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "abilities": {
+      "type": "object",
+      "properties": {
+        "fly": { "type": "object", "properties": { "speed": { "type": "number" }, "cost": { "type": "number" }, "input": { "type": "string" }, "anim": { "type": "string" }, "upAnim": { "type": "string" }, "downAnim": { "type": "string" }, "fwdAnim": { "type": "string" }, "backAnim": { "type": "string" }, "sound": { "$ref": "#/$defs/snd" } }, "additionalProperties": false },
+        "teleport": { "type": "object", "properties": { "cost": { "type": "number" }, "input": { "type": "string" }, "anim": { "type": "string" }, "at": { "type": "integer" }, "offset": { "type": "number" }, "invuln": { "type": "integer" }, "turn": { "type": "boolean" }, "sound": { "$ref": "#/$defs/snd" } }, "additionalProperties": false },
+        "superSpeed": { "type": "object", "properties": { "mul": { "type": "number" }, "cost": { "type": "number" }, "input": { "type": "string" } }, "additionalProperties": false },
+        "charge": { "type": "object", "properties": { "input": { "type": "string" }, "anim": { "type": "string" }, "auraColor": { "$ref": "#/$defs/rgb" }, "shake": { "type": "boolean" }, "sound": { "$ref": "#/$defs/snd" }, "explod": { "type": "string" } }, "additionalProperties": false },
+        "forms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" }, "name": { "type": "string" }, "cost": { "type": "number" }, "attack": { "type": "number" }, "defense": { "type": "number" },
+              "palette": { "$ref": "#/$defs/palette" }, "parts": { "type": "array", "items": { "type": "string" } }, "character": { "type": "string" },
+              "moves": { "type": "array", "items": { "$ref": "#/$defs/move" } }, "replaceMoves": { "type": "boolean" }, "replace_moves": { "type": "boolean" }
+            },
+            "required": ["id", "name"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "helpers": {
+      "type": "object",
+      "properties": {
+        "stand": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "integer" }, "input": { "type": "string" }, "autoSummon": { "type": "boolean" }, "cost": { "type": "number" }, "drain": { "type": "number" },
+            "idleAnim": { "type": "string" }, "despawnAnim": { "type": "string" }, "offset": { "$ref": "#/$defs/vec2" }, "bind": { "type": "boolean" }, "hittable": { "type": "boolean" },
+            "lifeTransfer": { "type": "number" }, "sprPriority": { "type": "integer" },
+            "moves": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" }, "name": { "type": "string" }, "input": { "type": "string" }, "triggerMove": { "type": "string" }, "anim": { "type": "string" }, "cost": { "type": "number" }, "detach": { "type": "boolean" },
+                  "hits": { "type": "array", "items": { "$ref": "#/$defs/hit" } }, "moves": { "type": "array", "items": { "$ref": "#/$defs/velChange" } }, "projectile": { "$ref": "#/$defs/projectiles" }
+                },
+                "required": ["id", "name", "anim"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "clones": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "integer" }, "input": { "type": "string" }, "name": { "type": "string" }, "count": { "type": "integer", "minimum": 1 }, "maxActive": { "type": "integer", "minimum": 1 }, "cost": { "type": "number" },
+            "duration": { "type": "integer" }, "spawnOffset": { "$ref": "#/$defs/vec2" }, "walkSpeed": { "type": "number" }, "attackRange": { "type": "number" }, "oneHitPoof": { "type": "boolean" },
+            "idleAnim": { "type": "string" }, "walkAnim": { "type": "string" }, "poofAnim": { "type": "string" }, "attacks": { "type": "array", "items": { "$ref": "#/$defs/move" } }
+          },
+          "required": ["input"],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "uiText": {
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" }, "params": { "type": "array", "items": { "type": "string" } }, "id": { "type": "integer" }, "pos": { "$ref": "#/$defs/vec2" }, "vel": { "$ref": "#/$defs/vec2" }, "scale": { "$ref": "#/$defs/vec2" },
+        "color": { "$ref": "#/$defs/rgb" }, "align": { "type": "integer" }, "time": { "type": "integer" }, "when": { "type": "string" }, "persistent": { "type": "integer" }
+      },
+      "required": ["text"],
+      "additionalProperties": false
+    },
+    "modifyPlayer": {
+      "type": "object",
+      "properties": {
+        "target": { "type": "string" }, "lifeMax": { "type": "string" }, "life": { "type": "string" }, "powerMax": { "type": "string" }, "power": { "type": "string" },
+        "aiLevel": { "type": "string" }, "redLife": { "type": "string" }, "dizzyPoints": { "type": "string" }, "guardPoints": { "type": "string" }, "ctrl": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "bossRules": {
+      "type": "object",
+      "properties": {
+        "hideHud": { "type": "boolean" }, "hideLifeBar": { "type": "boolean" }, "hidePowerBar": { "type": "boolean" }, "hideTimer": { "type": "boolean" }, "freezeTimer": { "type": "boolean" },
+        "asserts": { "type": "array", "items": { "type": "string" } }, "texts": { "type": "array", "items": { "$ref": "#/$defs/uiText" } }, "modifyPlayer": { "type": "array", "items": { "$ref": "#/$defs/modifyPlayer" } },
+        "phases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" }, "lifeBelowRatio": { "type": "number", "minimum": 0, "maximum": 1 }, "when": { "type": "string" }, "once": { "type": "boolean" },
+              "asserts": { "type": "array", "items": { "type": "string" } }, "texts": { "type": "array", "items": { "$ref": "#/$defs/uiText" } }, "modifyPlayer": { "type": "array", "items": { "$ref": "#/$defs/modifyPlayer" } },
+              "attackMul": { "type": "number" }, "defenceMul": { "type": "number" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "scripts": {
+      "type": "object",
+      "properties": {
+        "zss": { "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }] },
+        "cns": { "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }] },
+        "override": { "type": "boolean" },
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": { "name": { "type": "string" }, "input": { "type": "string" }, "display": { "type": "string" }, "time": { "type": "integer" }, "buffer": { "type": "integer" }, "pauseBuffer": { "type": "integer" }, "cost": { "type": "number" }, "state": { "type": "integer" } },
+            "required": ["name", "input"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "art": {
+      "type": "object",
+      "description": "type 'sprites' = PNG files in assets/chars/sprites/<id>/ (or a pack). 'rig' is the deprecated procedural rig. poses and style are open: they are interpreted by crates/native/src/pixel*.rs and recolor.rs.",
+      "properties": {
+        "type": { "enum": ["sprites", "rig"] },
+        "style": { "type": "object", "properties": { "colors": { "$ref": "#/$defs/palette" }, "boxes": { "enum": ["exact", "fit"] } } },
+        "poses": { "type": "object", "additionalProperties": { "type": ["string", "object"] } }
+      },
+      "required": ["type"],
+      "additionalProperties": false
+    },
+    "anim": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "loop": { "type": "integer", "minimum": 0 },
+        "frames": { "type": "array", "minItems": 1, "items": { "oneOf": [{ "type": "string", "pattern": "^[^*\\s]+(\\*-?[0-9]+)?$" }, { "$ref": "#/$defs/frame" }] } }
+      },
+      "required": ["frames"],
+      "additionalProperties": false
+    },
+    "frame": {
+      "type": "object",
+      "properties": {
+        "pose": { "type": ["string", "object"] }, "sprite": { "type": "string" }, "effect": { "type": "object", "properties": { "type": { "type": "string" } }, "required": ["type"] },
+        "ticks": { "type": "integer", "minimum": -1 },
+        "hit": { "type": "object", "properties": { "part": { "type": "string" }, "radius": { "type": "number" }, "box": { "$ref": "#/$defs/box4" } }, "required": ["part"], "additionalProperties": false },
+        "hurt": { "oneOf": [{ "const": "none" }, { "type": "array", "items": { "$ref": "#/$defs/box4" } }] },
+        "offset": { "$ref": "#/$defs/vec2" }
+      },
+      "required": ["ticks"],
+      "additionalProperties": false
+    },
+    "hit": {
+      "type": "object",
+      "properties": {
+        "at": { "type": "integer", "minimum": 0 }, "damage": { "type": "number", "minimum": 0 }, "guardDamage": { "type": "number" },
+        "level": { "enum": ["light", "medium", "heavy"] }, "guard": { "enum": ["high", "mid", "low"] },
+        "knockback": { "$ref": "#/$defs/vec2" }, "airKnockback": { "$ref": "#/$defs/vec2" }, "launch": { "type": "boolean" },
+        "hitstop": { "type": "integer" }, "hitstun": { "type": "integer" }, "spark": { "type": "integer" }, "shake": { "type": "integer" }, "priority": { "type": "integer" },
+        "hitflag": { "type": "string" }, "pausetime": { "$ref": "#/$defs/ivec2" }, "cornerpush": { "type": "number" },
+        "hitSound": { "$ref": "#/$defs/snd" }, "guardSound": { "$ref": "#/$defs/snd" }, "sparkPos": { "$ref": "#/$defs/vec2" },
+        "groundBounce": { "type": "boolean" }, "wallBounce": { "type": "boolean" }, "element": { "$ref": "#/$defs/element" }, "stun": { "type": "integer" }
+      },
+      "required": ["at", "damage"],
+      "additionalProperties": false
+    },
+    "velChange": { "type": "object", "properties": { "at": { "type": "integer" }, "vel": { "type": "array", "items": { "type": ["number", "null"] }, "minItems": 2, "maxItems": 2 } }, "required": ["at", "vel"], "additionalProperties": false },
+    "projectile": {
+      "type": "object",
+      "properties": {
+        "at": { "type": "integer" }, "anim": { "type": "string" }, "hitAnim": { "type": "string" }, "speed": { "$ref": "#/$defs/vec2" }, "accel": { "$ref": "#/$defs/vec2" }, "offset": { "$ref": "#/$defs/vec2" },
+        "hits": { "type": "integer" }, "damage": { "type": "number" }, "level": { "enum": ["light", "medium", "heavy"] }, "launch": { "type": "boolean" }, "knockback": { "$ref": "#/$defs/vec2" },
+        "removeTime": { "type": "integer" }, "priority": { "type": "integer" }, "element": { "$ref": "#/$defs/element" }, "stun": { "type": "integer" }, "missTime": { "type": "integer" },
+        "guardDamage": { "type": "number" }, "hitSound": { "$ref": "#/$defs/snd" }, "pausetime": { "$ref": "#/$defs/ivec2" }, "hitflag": { "type": "string" }, "shake": { "type": "integer" },
+        "repeat": { "type": "object", "properties": { "count": { "type": "integer", "minimum": 1 }, "every": { "type": "integer" }, "offsetStep": { "$ref": "#/$defs/vec2" }, "speedStep": { "$ref": "#/$defs/vec2" }, "damageStep": { "type": "number" } }, "required": ["count"], "additionalProperties": false }
+      },
+      "required": ["at", "anim", "speed", "offset", "damage"],
+      "additionalProperties": false
+    },
+    "projectiles": { "oneOf": [{ "$ref": "#/$defs/projectile" }, { "type": "array", "items": { "$ref": "#/$defs/projectile" } }] },
+    "camera": {
+      "type": "object",
+      "properties": { "zoom": { "type": "number" }, "delta": { "type": "number" }, "pos": { "$ref": "#/$defs/vec2" }, "time": { "type": "integer" }, "delay": { "type": "integer" }, "lag": { "type": "number" }, "bound": { "type": "boolean" }, "freeze": { "type": "boolean" }, "hideUi": { "type": "boolean" }, "bars": { "type": "number" } },
+      "additionalProperties": false
+    },
+    "flash": {
+      "type": "object",
+      "properties": { "at": { "type": "integer" }, "time": { "type": "integer" }, "color": { "$ref": "#/$defs/rgb" }, "under": { "type": "boolean" }, "superMove": { "type": "boolean" } },
+      "required": ["time"],
+      "additionalProperties": false
+    },
+    "teleportStep": {
+      "oneOf": [
+        { "type": "integer" },
+        { "type": "object", "properties": { "at": { "type": "integer" }, "mode": { "type": "string" }, "offset": { "$ref": "#/$defs/vec2" }, "turn": { "type": "boolean" } }, "required": ["at"], "additionalProperties": false }
+      ]
+    },
+    "throw": {
+      "type": "object",
+      "properties": {
+        "damage": { "type": "number" }, "bind": { "$ref": "#/$defs/vec2" }, "p2State": { "type": "integer" }, "p2Anim": { "type": "string" }, "at": { "type": "integer" }, "releaseAt": { "type": "integer" },
+        "launch": { "$ref": "#/$defs/vec2" }, "cameraFree": { "type": "boolean" }, "camera": { "$ref": "#/$defs/camera" },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": { "type": "integer" }, "bind": { "$ref": "#/$defs/vec2" }, "anim": { "type": "string" }, "p2Anim": { "type": "string" }, "p2State": { "type": "integer" }, "damage": { "type": "number" }, "shake": { "type": "integer" },
+              "facing": { "type": "integer" }, "launch": { "$ref": "#/$defs/vec2" }, "camera": { "$ref": "#/$defs/camera" }, "flash": { "$ref": "#/$defs/flash" }, "sound": { "$ref": "#/$defs/snd" },
+              "slowmo": { "type": "integer" }, "invert": { "type": "boolean" }, "bars": { "type": "number" }, "lines": { "type": "number" }
+            },
+            "required": ["at"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["damage"],
+      "additionalProperties": false
+    },
+    "cinematic": {
+      "type": "object",
+      "properties": {
+        "letterbox": { "type": "boolean" }, "bars": { "type": "number" }, "hideUi": { "type": "boolean" }, "freeze": { "type": "boolean" }, "lines": { "type": "number" }, "camera": { "$ref": "#/$defs/camera" },
+        "finishSlow": { "type": "integer" }, "title": { "type": "string" },
+        "cuts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": { "type": "integer" }, "camera": { "$ref": "#/$defs/camera" }, "flash": { "$ref": "#/$defs/flash" }, "shake": { "type": "integer" }, "slowmo": { "type": "integer" }, "invert": { "type": "boolean" },
+              "bars": { "type": "number" }, "lines": { "type": "number" }, "darken": { "type": "boolean" }, "sound": { "$ref": "#/$defs/ivec2" }, "text": { "type": "string" }, "anim": { "type": "string" }
+            },
+            "required": ["at"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "move": {
+      "type": "object",
+      "description": "A move. With extends/use only id is required; the merge in crates/native/src/kit*.rs fills the rest before the typed parse.",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 }, "name": { "type": "string" }, "input": { "type": "string" }, "simple": { "type": "string" },
+        "kind": { "enum": ["normal", "special", "super"] }, "when": { "enum": ["stand", "crouch", "air"] }, "anim": { "type": "string" },
+        "use": { "type": "string" }, "remove": { "type": "boolean" }, "note": { "type": "string" },
+        "hits": { "type": "array", "items": { "$ref": "#/$defs/hit" } }, "moves": { "type": "array", "items": { "$ref": "#/$defs/velChange" } },
+        "projectile": { "$ref": "#/$defs/projectiles" }, "cost": { "type": "number", "minimum": 0 }, "invuln": { "$ref": "#/$defs/ivec2" }, "airPhysics": { "type": "boolean" },
+        "teleport": { "oneOf": [{ "$ref": "#/$defs/teleportStep" }, { "type": "array", "items": { "$ref": "#/$defs/teleportStep" } }] },
+        "fx": { "type": "string" }, "voice": { "type": "string" },
+        "sounds": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "integer" }, "snd": { "$ref": "#/$defs/snd" }, "fight": { "type": "boolean" } }, "required": ["at", "snd"], "additionalProperties": false } },
+        "armor": { "type": "object", "properties": { "hits": { "type": "integer", "minimum": 0 }, "threshold": { "type": "number" } }, "required": ["hits"], "additionalProperties": false },
+        "parry": { "type": "object", "properties": { "window": { "$ref": "#/$defs/ivec2" }, "spark": { "type": "integer" } }, "required": ["window"], "additionalProperties": false },
+        "burst": { "type": "boolean" }, "flight": { "type": "boolean" }, "timestop": { "type": "integer" },
+        "throw": { "$ref": "#/$defs/throw" }, "cinematic": { "$ref": "#/$defs/cinematic" },
+        "cancels": { "type": "array", "items": { "type": "string" } },
+        "rekka": { "type": "object", "properties": { "after": { "type": "array", "items": { "type": "string" } }, "window": { "$ref": "#/$defs/ivec2" }, "contact": { "type": "boolean" } }, "required": ["after", "window"], "additionalProperties": false },
+        "requires": {
+          "type": "object",
+          "properties": {
+            "life": { "$ref": "#/$defs/range" }, "enemyLife": { "$ref": "#/$defs/range" }, "distance": { "$ref": "#/$defs/range" }, "enemyState": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "explods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": { "type": "integer" }, "anim": { "type": "string" }, "pos": { "$ref": "#/$defs/vec2" }, "postype": { "type": "string" }, "bind": { "type": "integer" }, "removeTime": { "type": "integer" },
+              "priority": { "type": "integer" }, "scale": { "$ref": "#/$defs/vec2" }, "superMove": { "type": "boolean" }, "vel": { "$ref": "#/$defs/vec2" }, "accel": { "$ref": "#/$defs/vec2" }
+            },
+            "required": ["at", "anim"],
+            "additionalProperties": false
+          }
+        },
+        "afterimage": {
+          "type": "object",
+          "properties": {
+            "at": { "type": "integer" }, "time": { "type": "integer" }, "length": { "type": "integer" }, "framegap": { "type": "integer" }, "trans": { "enum": ["add", "add1", "sub", "none"] },
+            "palBright": { "$ref": "#/$defs/rgb" }, "palContrast": { "$ref": "#/$defs/rgb" }, "palAdd": { "$ref": "#/$defs/rgb" }, "palMul": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 }
+          },
+          "additionalProperties": false
+        },
+        "shake": { "oneOf": [{ "$ref": "#/$defs/shake" }, { "type": "array", "items": { "$ref": "#/$defs/shake" } }] },
+        "flash": { "oneOf": [{ "$ref": "#/$defs/flash" }, { "type": "array", "items": { "$ref": "#/$defs/flash" } }] },
+        "superPause": { "type": "object", "properties": { "at": { "type": "integer" }, "time": { "type": "integer" }, "pos": { "$ref": "#/$defs/vec2" }, "anim": { "type": "integer" }, "darken": { "type": "boolean" } }, "additionalProperties": false },
+        "followUp": { "type": "object", "properties": { "to": { "type": "string" }, "on": { "enum": ["hit", "contact"] }, "at": { "type": "integer" } }, "required": ["to"], "additionalProperties": false },
+        "blink": {
+          "oneOf": [{ "$ref": "#/$defs/blink" }, { "type": "array", "items": { "$ref": "#/$defs/blink" } }]
+        },
+        "vfx": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "integer" }, "anim": { "type": "string" }, "offset": { "$ref": "#/$defs/vec2" }, "time": { "type": "integer" }, "scale": { "type": "number" }, "follow": { "type": "boolean" }, "behind": { "type": "boolean" } }, "required": ["at", "anim"], "additionalProperties": false } },
+        "quake": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "integer" }, "time": { "type": "integer" }, "amp": { "type": "number" } }, "required": ["at"], "additionalProperties": false } }
+      },
+      "required": ["id"],
+      "additionalProperties": false
+    },
+    "range": { "type": "object", "properties": { "min": { "type": "number" }, "max": { "type": "number" } }, "additionalProperties": false },
+    "shake": { "type": "object", "properties": { "at": { "type": "integer" }, "time": { "type": "integer" }, "ampl": { "type": "number" }, "freq": { "type": "number" } }, "required": ["time"], "additionalProperties": false },
+    "blink": { "type": "object", "properties": { "at": { "type": "integer" }, "to": { "enum": ["behind", "front", "above", "back"] }, "gap": { "type": "number" }, "y": { "type": "number" } }, "required": ["at"], "additionalProperties": false }
+  }
+}

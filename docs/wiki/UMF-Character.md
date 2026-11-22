@@ -2,6 +2,24 @@
 
 UMF (*Ultimate Mugen Format*) describes a whole fighter in **one JSON file**. The compiler (`crates/native/src/compile.rs`) generates commands, states, HitDefs, projectiles, super pause, cancels and hitboxes. The result runs on the same state machine as M.U.G.E.N characters.
 
+## How a move is defined
+
+This is an excerpt of the `jab` entry from [Kaito’s definition](../../assets/chars/kaito.json). It belongs in `moves`, and `anim` refers to an entry in `anims`.
+
+```json
+{
+  "id": "jab",
+  "name": "Snap Jab",
+  "input": "x",
+  "kind": "normal",
+  "anim": "jab",
+  "hits": [{ "at": 2, "damage": 28, "level": "light", "hitstun": 13 }],
+  "cancels": ["strong", "gale", "rise", "tide", "launcher", "overhead", "slide", "string_a"]
+}
+```
+
+`at: 2` selects the second animation frame. Each frame’s `ticks` value sets its duration at 60 simulation ticks per second. The compiler produces the input command, combat state and `HitDef` for damage and hit reaction. `cancels` lists the move IDs that can follow before the current animation finishes.
+
 ## Step by step
 
 1. Copy a finished fighter as a base: `cp assets/chars/kaito.json assets/chars/mine.json`.
@@ -150,7 +168,7 @@ A frame with only a pose and a tick count can be written as `"pose*ticks"`, and 
 "jab": { "frames": ["jab0*3", { "pose": "jab1", "ticks": 3, "hit": { "part": "handR", "radius": 10 } }, "jab0*5"], "loop": 0 }
 ```
 
-Run `node scripts/umf2-migrate.mjs` before committing a shipped fighter: it writes the canonical layout that CI checks. See [ADR 0007](adr/0007-umf2-definitive-fighter-format.md).
+Run `node scripts/umf2-migrate.mjs` before committing a shipped fighter: it writes the canonical layout that CI checks. See [ADR 0007](adr/0007-umf2-definitive-fighter-format.md). The format is also a JSON Schema checked in CI: [UMF schema](UMF-Schema.md).
 
 | Frame field | Description |
 |---|---|

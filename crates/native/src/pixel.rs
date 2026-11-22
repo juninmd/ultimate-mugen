@@ -14,15 +14,15 @@ const LYING_HURT: [f32; 4] = [-46.0, -26.0, 46.0, 0.0];
 pub(super) const STRIKE_BOX: [f32; 4] = [2.0, -84.0, 38.0, -32.0];
 pub(super) const STAND_UNITS: f32 = 100.0;
 
-pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame, palette: Option<&Value>) -> Option<FrameArt> {
+pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame, palette: Option<&Value>) -> Option<FrameArt> { load_art(nc, fr, palette, true) }
+
+pub(super) fn load_art(nc: &NativeChar, fr: &NativeFrame, palette: Option<&Value>, fit: bool) -> Option<FrameArt> {
     if fr.effect.is_some() { return None; }
     let recolor = palette.and_then(|p| Recolor::new(nc.art.style.get("colors"), p));
-    let mut render = load_pose(&sprite_roots(nc.sprite_dir()), &native_frame_sprite_key(fr), fr.hit.is_some(), recolor.as_ref())?;
-    let height = nc.stats.height.filter(|height| height.is_finite() && *height > 0.0).unwrap_or(STAND_UNITS as f64) as f32;
-    let height_ratio = height / STAND_UNITS;
+    let (mut render, _) = load_pose_with_source(&sprite_roots(nc.sprite_dir()), &native_frame_sprite_key(fr), fr.hit.is_some(), recolor.as_ref(), fit)?;
+    let height_ratio = nc.stats.height.filter(|height| height.is_finite() && *height > 0.0).unwrap_or(STAND_UNITS as f64) as f32 / STAND_UNITS;
     render.scale *= height_ratio;
-    super::pixel_hit::fit_to_character(nc, fr, &mut render, height_ratio);
-    if !super::mugen_parity::exact_boxes(nc) { super::pixel_fit::fit_boxes(&mut render, fr); }
+    if fit { super::pixel_hit::fit_to_character(nc, fr, &mut render, height_ratio); if !super::mugen_parity::exact_boxes(nc) { super::pixel_fit::fit_boxes(&mut render, fr); } }
     Some(render)
 }
 
@@ -50,17 +50,13 @@ pub(super) fn sprite_roots(id: &str) -> Vec<PathBuf> {
     roots
 }
 
-fn load_pose(roots: &[PathBuf], pose: &str, striking: bool, recolor: Option<&Recolor>) -> Option<FrameArt> {
-    load_pose_with_source(roots, pose, striking, recolor).map(|(render, _)| render)
-}
-
-fn load_pose_with_source(roots: &[PathBuf], pose: &str, striking: bool, recolor: Option<&Recolor>) -> Option<(FrameArt, PathBuf)> {
+fn load_pose_with_source(roots: &[PathBuf], pose: &str, striking: bool, recolor: Option<&Recolor>, fit: bool) -> Option<(FrameArt, PathBuf)> {
     let lower = pose.to_ascii_lowercase();
     let stem = pose_stem(&lower);
     [pose, stem, BASE_STEM, "idle"]
         .iter()
         .flat_map(|name| roots.iter().map(move |root| (root, name)))
-        .find_map(|(root, name)| read_render(root, name, &lower, stem, striking, recolor).map(|render| (render, root.join(format!("{name}.png")))))
+        .find_map(|(root, name)| read_render(root, name, &lower, stem, striking, recolor, fit).map(|render| (render, root.join(format!("{name}.png")))))
 }
 
 pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
@@ -73,7 +69,7 @@ pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
             if frame.effect.is_some() {
                 return serde_json::json!({"frame": index, "pose": pose, "resolution": "procedural-effect"});
             }
-            match load_pose_with_source(&roots, &pose, frame.hit.is_some(), None) {
+            match load_pose_with_source(&roots, &pose, frame.hit.is_some(), None, true) {
                 Some((render, source)) => {
                     let stem = source.file_stem().and_then(|name| name.to_str()).unwrap_or_default();
                     let lower = pose.to_ascii_lowercase();
@@ -91,7 +87,7 @@ pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
     serde_json::json!({"id": character.id, "declaredHeight": character.stats.height, "avatar": roots.iter().any(|root| root.join("portrait.png").is_file()), "animations": animations})
 }
 
-fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool, recolor: Option<&Recolor>) -> Option<FrameArt> {
+fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool, recolor: Option<&Recolor>, fit: bool) -> Option<FrameArt> {
     let bytes = read_sprite(root, &format!("{name}.png"))?;
     let dec = super::decode_cache::png(root, name, &bytes)?;
     let mut rgba = dec.rgba.clone();
@@ -105,7 +101,7 @@ fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool,
     let axis = |key: &str, default: f32, limit: f32| frame.get(key).and_then(Value::as_f64).filter(|number| number.is_finite() && *number >= 0.0 && *number <= limit as f64).map_or(default, |number| number as f32);
     let axis_x = axis("axisX", dec.width as f32 / 2.0, dec.width as f32);
     let axis_y = axis("axisY", dec.height as f32, dec.height as f32);
-    let hurt = super::pixel_hurt::fit_body(hurtbox(lower, stem), stem, &rgba, dec.width, dec.height, [axis_x, axis_y], STAND_UNITS / units);
+    let hurt = fit.then(|| super::pixel_hurt::fit_body(hurtbox(lower, stem), stem, &rgba, dec.width, dec.height, [axis_x, axis_y], STAND_UNITS / units));
     Some(FrameArt {
         image: Some(ImageData::new(dec.width, dec.height, rgba)),
         width: dec.width as f32 * res,
@@ -113,7 +109,7 @@ fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool,
         axis_x: axis_x * res,
         axis_y: axis_y * res,
         scale: STAND_UNITS / units / res,
-        hurt: vec![hurt],
+        hurt: hurt.into_iter().collect(),
         hit: if striking { vec![STRIKE_BOX] } else { vec![] },
     })
 }
@@ -169,6 +165,8 @@ fn basic_stem(p: &str) -> &'static str {
 mod tests {
     use super::*;
     use tiny_skia::Pixmap;
+
+    fn load_pose(roots: &[PathBuf], pose: &str, striking: bool, recolor: Option<&Recolor>) -> Option<FrameArt> { load_pose_with_source(roots, pose, striking, recolor, true).map(|(render, _)| render) }
 
     fn write_png(dir: &Path, name: &str, w: u32, h: u32) {
         let mut pm = Pixmap::new(w, h).unwrap();

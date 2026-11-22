@@ -7,7 +7,7 @@ mod conflict;
 pub use conflict::Conflicts;
 mod keys;
 mod names;
-pub use names::action_label;
+pub use names::{action_label, move_keys};
 use keys::KEYS;
 
 /// Rebindable fighting actions: label and engine input bit.

@@ -117,13 +117,21 @@ impl Match {
         }
     }
 
-    fn damage_breakable(&mut self, bi: usize, damage: f32, at: (f32, f32), attacker: usize) {
+    pub(super) fn damage_breakable(
+        &mut self,
+        bi: usize,
+        damage: f32,
+        at: (f32, f32),
+        attacker: usize,
+    ) {
         let damage = damage.max(1.0);
         let b = &mut self.objects.breakables[bi];
         b.life -= damage;
         b.rehit = REHIT_TICKS;
         b.shake = SHAKE_TICKS;
         let (lane, x, height, score, drop) = (b.lane, b.x, b.height, b.score, b.drop);
+        let (blast_radius, blast_damage, blast_launch) =
+            (b.blast_radius, b.blast_damage, b.blast_launch);
         let broke = b.life <= 0.0;
         if broke {
             b.life = 0.0;
@@ -142,9 +150,12 @@ impl Match {
         }
         self.objects.emit(ObjectEvent::Broken { index: bi });
         let root = self.idx(self.fighters[attacker].root).unwrap_or(attacker);
-        if self.fighters[root].side == self.objects.collector_side {
+        if self.objects.any_collector || self.fighters[root].side == self.objects.collector_side {
             self.fighters[root].score += score as f64;
             self.fighters[root].score_total += score as f64;
+        }
+        if blast_radius > 0.0 {
+            self.trigger_blast(x, lane, blast_radius, blast_damage, blast_launch);
         }
         let Some(spec) = drop else { return };
         if self.objects.pickups.len() == self.objects.pickups.capacity() {

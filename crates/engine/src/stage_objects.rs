@@ -1,4 +1,5 @@
 mod goal;
+mod hazards;
 mod pickups;
 mod strikes;
 mod types;
@@ -22,6 +23,7 @@ pub struct StageObjects {
     pub events: Vec<ObjectEvent>,
     pub goal: Goal,
     pub collector_side: usize,
+    pub any_collector: bool,
 }
 
 impl Default for StageObjects {
@@ -32,6 +34,7 @@ impl Default for StageObjects {
             events: Vec::with_capacity(MAX_EVENTS),
             goal: Goal::None,
             collector_side: 0,
+            any_collector: false,
         }
     }
 }
@@ -46,6 +49,7 @@ impl StageObjects {
         self.pickups.clear();
         self.events.clear();
         self.goal = Goal::None;
+        self.any_collector = false;
     }
 
     pub fn add(&mut self, breakable: Breakable) -> usize {
@@ -94,6 +98,7 @@ impl Match {
             }
         }
         self.strike_breakables();
+        self.slam_breakables();
         self.block_on_solid_breakables();
         self.step_pickups();
         self.step_object_goal();

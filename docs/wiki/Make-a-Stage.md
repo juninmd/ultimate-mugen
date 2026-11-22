@@ -74,6 +74,12 @@ objects = [
 
 Verify with the [Stage objects](Stage-Objects.md#data-assetsstoryobjectstoml) evidence tour: `UME_TOUR=storyobjects` and `UME_TOUR=storyloop`.
 
+### Built-in arena loops, size and interactivity
+
+- **True 60 FPS seamless loop:** built-in animated stages (`assets/stages/animation/<id>/00.png..07-mid.png`) decode in parallel (`ume_formats::par::map`) and cross-fade smoothly between consecutive frames across a closed 96-tick cycle (`loop_sample`), eliminating wrap jumps from the last frame back to frame `0`.
+- **Expanded arena dimensions:** built-in arenas span `bound_left = -680` to `bound_right = 680` (`bound_high = -140`, `zoom_out = 0.62`, `zoom_in = 1.05`) with `0.21` panoramic parallax in `illustration_layout`.
+- **Reactive floors & interactive arena props:** all 21 illustrated stages (including `brazil` and the 14 World Wonders via `StageKind::Arena`) render `StageReact` ground cracks, scorch marks, ripples and impact debris. In Versus/Arcade fights, `src/stages/interactive.rs` places destructible crates and explosive hazard barrels (`ObjectEvent::Blast`) on the outer wings (`|x| >= 220`, keeping the center fighting lane clear); knocked-back fighters slamming into props shatter them, and both sides can collect dropped pickups (`any_collector = true`). Set `UME_STAGE_PROPS=0` to disable arena props.
+
 ## 3. What needs code
 
 These things cannot be done with files today. Each one is a feature gap, not a bug in your files:

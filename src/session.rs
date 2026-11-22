@@ -151,7 +151,7 @@ impl Session {
                 }
             }
         }
-        let r = MatchRenderer::new(&stage);
+        crate::stages::interactive::populate(&mut m, &stage); let r = MatchRenderer::new(&stage);
         let mut vfx = Vfx::new();
         vfx.weather = crate::vfx::Weather::for_stage(&stage.info.name);
         let seed = m.rng;

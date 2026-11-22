@@ -50,7 +50,7 @@ impl Match {
                 && !f.ikemen.standby
                 && f.alive
                 && f.life > 0.0
-                && f.side == self.objects.collector_side
+                && (self.objects.any_collector || f.side == self.objects.collector_side)
                 && (f.pos.x - p.pos.x).abs() <= PICKUP_REACH_X
                 && (f.pos.y - p.pos.y).abs() <= PICKUP_REACH_Y
                 && (!self.lanes.active || (f.lane - p.lane).abs() <= LANE_TOLERANCE)

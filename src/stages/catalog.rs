@@ -67,7 +67,7 @@ pub fn builtin() -> Vec<StageEntry> {
             id: "brazil".into(),
             name: "Praça do Interior — Brasil".into(),
             thumb: [[97, 59, 132], [238, 163, 69], [166, 106, 70]],
-            build: Box::new(|| illustrated("brazil", "Praça do Interior — Brasil", 6, StageKind::Custom)),
+            build: Box::new(|| illustrated("brazil", "Praça do Interior — Brasil", 6, StageKind::Arena)),
         },
     ];
     stages.extend(wonders::builtin());

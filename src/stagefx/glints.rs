@@ -94,6 +94,10 @@ impl StageReact {
                     self.shards(x + jx, 1, s);
                 }
             }
+            StageKind::Arena => {
+                self.dust_at(x, n, 2.8 + s, 0.45, self.look.dust);
+                self.sparks(x, -6.0, (n / 2).max(2), hx(0xffe098, 1.0), s * 0.9);
+            }
             StageKind::Custom => {}
         }
     }

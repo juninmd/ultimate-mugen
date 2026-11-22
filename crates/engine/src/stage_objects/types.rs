@@ -22,6 +22,9 @@ pub struct Breakable {
     pub score: f32,
     pub solid: bool,
     pub drop: Option<PickupSpec>,
+    pub blast_radius: f32,
+    pub blast_damage: f32,
+    pub blast_launch: [f32; 2],
     pub rehit: i32,
     pub shake: i32,
     pub broken: bool,
@@ -42,6 +45,9 @@ impl Breakable {
             score: 0.0,
             solid: false,
             drop: None,
+            blast_radius: 0.0,
+            blast_damage: 0.0,
+            blast_launch: [0.0, 0.0],
             rehit: 0,
             shake: 0,
             broken: false,
@@ -86,6 +92,12 @@ pub enum ObjectEvent {
     },
     Broken {
         index: usize,
+    },
+    Blast {
+        x: f32,
+        lane: f32,
+        radius: f32,
+        damage: f32,
     },
     Dropped {
         kind: u16,

@@ -33,6 +33,8 @@ pub(super) fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> De
     let mut pal_keys: HashMap<Arc<Vec<u8>>, usize> = HashMap::new();
     let mut prev: Option<(Option<Arc<Vec<u8>>>, i32)> = None;
     let mut prev_adjacent = false;
+    let shared_mode = r.u8(32) == 1;
+    let mut shared: Option<(Option<Arc<Vec<u8>>>, i32)> = None;
 
     let mut entries: Vec<(DecodedSprite, usize, bool)> = Vec::with_capacity(count);
     let mut jobs: Vec<V1Job> = Vec::with_capacity(count.min(8192));
@@ -111,7 +113,11 @@ pub(super) fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> De
                 spr.indexed = Some(px);
                 let pcx = j.pcx;
                 let mut pal: Option<Arc<Vec<u8>>> = None;
-                let inherited = if j.same_pal && prev_adjacent { prev.clone() } else { None };
+                let inherited = match (j.same_pal, shared_mode) {
+                    (true, true) => shared.clone().or_else(|| prev.clone()),
+                    (true, false) if prev_adjacent => prev.clone(),
+                    _ => None,
+                };
                 match inherited {
                     Some((ppal, pidx)) => {
                         pal = ppal.clone();
@@ -146,6 +152,9 @@ pub(super) fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> De
                     }
                 }
                 spr.palette = pal;
+                if shared.is_none() && spr.palette.is_some() && spr.group != 9000 {
+                    shared = Some((spr.palette.clone(), spr.palette_index));
+                }
             }
         } else if wanted(spr.group, spr.index) {
             if let Some(src) = sprites.get(link) {

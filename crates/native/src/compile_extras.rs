@@ -76,7 +76,7 @@ fn move_sounds(m: &NativeMove, sid: i32) -> String {
     m.sounds.iter().map(|s| format!("[State {sid}, snd]\ntype = PlaySnd\ntrigger1 = AnimElem = {}\nvalue = {}{}, {}\n\n", s.at.max(1), if s.fight { "F" } else { "" }, s.snd[0], s.snd[1])).collect()
 }
 
-pub(super) fn voice_and_traits_state(m: &NativeMove, sid: i32) -> String {
+pub(crate) fn voice_and_traits_state(m: &NativeMove, sid: i32) -> String {
     let mut out = voice_state(m, sid);
     if let Some(p) = &m.parry {
         let sp = p.spark.unwrap_or(2);

@@ -38,3 +38,10 @@ pub fn compile(loaded: &Loaded, pal_no: i32, with_images: bool) -> Result<CharDe
     let read = move |name: &str| std::fs::read(dir.join(name)).ok().map(Arc::new);
     Ok(ume_native::exact::compile_exact_with(&loaded.fighter, spec, &read, pal_no, with_images, None))
 }
+
+pub fn compile_base(loaded: &Loaded, pal_no: i32, with_images: bool) -> Result<CharDef, String> {
+    let mut fighter = loaded.fighter.clone();
+    fighter.moves.clear();
+    fighter.scripts = None;
+    compile(&Loaded { json_path: loaded.json_path.clone(), fighter }, pal_no, with_images)
+}

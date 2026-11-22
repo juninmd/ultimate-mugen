@@ -14,7 +14,7 @@
 | Palettes | SFF palettes (`sffpal_<k>.png`) and `pal1.act`..`pal12.act`: palette swaps and `RemapPal`/`PalFX` see the same colors |
 | Sounds | every `.snd` entry as `snd_g_i.wav` |
 | UMF-only fields | `profile` (country, nationality, origin, bio, title, fighting style, affiliation in en/pt/es), `series`, quotes, `rivals`: `profile_facts` gathers the facts, the skill writes, `set_profile` validates |
-| Improvements | `--extra`: move names (`mugen.names`), `mugenRoutes` for states the `.cmd` left without a command, new moves as `scripts` (CNS/ZSS) |
+| Improvements | `--extra`: move names (`mugen.names`), `mugenRoutes` for states the `.cmd` left without a command, new moves as `scripts` (CNS/ZSS) or as native UMF `moves` whose `anim` is a M.U.G.E.N action number |
 
 ## Proof
 

@@ -8,7 +8,7 @@ Este documento apresenta os dossiês biográficos completos, históricos marciai
 
 | ID | Nome | País | Alinhamento | Papel / Arquétipo | Cenário Natal | Forma Desperta |
 |---|---|---|---|---|---|---|
-| `kaito` | **Kaito Arashi** | Japão | Herói | Karateca Andarilho da Tempestade | Telhado do Dojo — Pôr do Sol (`dojo`) | Olho da Tempestade |
+| `kaito` | **Kaito Arashi** | Austrália | Herói | Karateca Andarilho da Tempestade | Telhado do Dojo — Pôr do Sol (`dojo`) | Olho da Tempestade |
 | `shion` | **Shion Kurogane** | Japão | Anti-Herói | Espadachim Exilado da Lua Pálida | Bambuzal ao Luar (`bamboo`) | Lua Cheia |
 | `akio` | **Akio Hoshi** | Japão | Herói | Lutador Impetuoso da Queda Estelar | Telhado do Dojo — Pôr do Sol (`dojo`) | Luz Estelar |
 | `suzume` | **Suzume Kagerou** | Japão | Anti-Herói | Kunoichi das Sombras do Lótus Carmesim | Bambuzal ao Luar (`bamboo`) | Lótus Sombrio |
@@ -33,13 +33,13 @@ Este documento apresenta os dossiês biográficos completos, históricos marciai
 
 | Identidade Visual | Perfil de Combate |
 |---|---|
-| ![Retrato Kaito](../../../assets/chars/sprites/kaito/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Crônicas da Estrada da Tempestade<br/>**ID:** `kaito` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Costa de Shizuoka e Sopé do Monte Fuji, Japão 🇯🇵<br/>**Alinhamento:** **Herói / Vanguarda do Equilíbrio**<br/>**Cor Temática:** `#2f8f9d` (Verde-água e Dourado)<br/>**Forma Desperta:** Olho da Tempestade<br/>**Cenário:** Telhado do Dojo — Pôr do Sol (`dojo`)<br/>**Estilo:** Karatê Arashi-ryu (Impacto dos Ventos) |
+| ![Retrato Kaito](../../../assets/chars/sprites/kaito/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Crônicas da Estrada da Tempestade<br/>**ID:** `kaito` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Tasmânia, Austrália 🇦🇺<br/>**Alinhamento:** **Herói / Vanguarda do Equilíbrio**<br/>**Cor Temática:** `#2f8f9d` (Verde-água e Dourado)<br/>**Forma Desperta:** Olho da Tempestade<br/>**Cenário:** Telhado do Dojo — Pôr do Sol (`dojo`)<br/>**Estilo:** Karatê Arashi-ryu (Impacto dos Ventos) |
 
 ![Sprite Kaito](../../../assets/chars/sprites/kaito/01_idle.png)
 *Postura de Luta em Pixel Art*
 
 #### Biografia e Background
-Kaito Arashi é um karateca andarilho que viaja a pé por onde as correntes de ar soprarem. Vestindo um kimono verde-água remendado que já presenciou centenas de combates árduos pela Ásia, Kaito encara a luta não como espetáculo de vaidade, mas como uma conversa sincera entre dois espíritos. Criado por um mestre eremita nos penhascos tempestuosos da Península de Izu, ele aprendeu a sincronizar o ritmo de sua respiração com a passagem dos tufões costeiros, gerando ondas de choque de alta densidade e rajadas de vácuo a cada soco desferido.
+Kaito Arashi é um karateca andarilho que viaja a pé por onde as correntes de ar soprarem. Vestindo um kimono verde-água remendado que já presenciou centenas de combates árduos pela Ásia, Kaito encara a luta não como espetáculo de vaidade, mas como uma conversa sincera entre dois espíritos. Criado na Tasmânia e treinado por um mestre eremita na Península de Izu, ele aprendeu a sincronizar o ritmo de sua respiração com a passagem dos tufões costeiros, gerando ondas de choque de alta densidade e rajadas de vácuo a cada soco desferido.
 
 Quando o Eclipse Escarlate começou a rasgar o céu, Kaito sentiu a perturbação das correntes de ar e o desespero das vilas atingidas pelas fendas dimensionais. Empunhando seu bastão de caminhada, desceu a montanha com o voto inabalável de encontrar a fonte da corrupção e proteger os viajantes e inocentes das sombras de Oboro.
 
@@ -51,6 +51,7 @@ Quando o Eclipse Escarlate começou a rasgar o céu, Kaito sentiu a perturbaçã
 #### Golpes Característicos
 - **Punho do Vendaval (*Gale Fist / Reppūken*)**: Dispara uma esfera de pressão de vento cortante rente ao solo.
 - **Tempestade Ascendente (*Rising Tempest / Shoryū-Arashi*)**: Gancho giratório aéreo envolto em vórtices de ar.
+- **Chute Canguru** (`~D, DB, B, a+b`): Kaito se agacha, salta para a frente e lança o adversário com um chute frontal.
 - **Chute Passo de Trovão (*Thunderstep Kick*)**: Sequência de chutes voadores de vácuo em trajetória horizontal.
 - **Super — Barragem do Tufão (*Typhoon Barrage*)**: Combinação devastadora de 9 golpes que arremessa o oponente para o olho do ciclone.
 

@@ -1,5 +1,11 @@
 {
   "frames": {
+    "kangarooKickImpact": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [137, 80, 201, 135]
+    },
     "hitCrouchImpact": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -85,12 +91,14 @@
     "airGuard": {
       "axisX": 200.0,
       "axisY": 392.0,
-      "refHeight": 320.0
+      "refHeight": 320.0,
+      "awakeningHair": [175, 120, 251, 171]
     },
     "airGuardHit": {
       "axisX": 200.0,
       "axisY": 392.0,
-      "refHeight": 320.0
+      "refHeight": 320.0,
+      "awakeningHair": [163, 120, 242, 175]
     },
     "airLowKick": {
       "awakeningHair": [
@@ -503,7 +511,8 @@
     "jab1": {
       "axisX": 200.0,
       "axisY": 392.0,
-      "refHeight": 320.0
+      "refHeight": 320.0,
+      "awakeningHair": [177, 77, 234, 131]
     },
     "jumpDown": {
       "awakeningHair": [

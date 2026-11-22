@@ -8,7 +8,7 @@ This document presents the complete biographical dossiers, martial backgrounds, 
 
 | ID | Name | Country | Alignment | Role / Archetype | Home Stage | Awakened Form |
 |---|---|---|---|---|---|---|
-| `kaito` | **Kaito Arashi** | Japan | Hero | Wandering Storm Karateka | Sunset Dojo Roof (`dojo`) | Eye of the Storm |
+| `kaito` | **Kaito Arashi** | Australia | Hero | Wandering Storm Karateka | Sunset Dojo Roof (`dojo`) | Eye of the Storm |
 | `shion` | **Shion Kurogane** | Japan | Anti-Hero | Exiled Pale Moon Greatswordsman | Moonlit Bamboo Grove (`bamboo`) | Full Moon |
 | `akio` | **Akio Hoshi** | Japan | Hero | Hot-Blooded Starfall Striker | Sunset Dojo Roof (`dojo`) | Starlight |
 | `suzume` | **Suzume Kagerou** | Japan | Anti-Hero | Shadow Kunoichi of the Crimson Lotus | Moonlit Bamboo Grove (`bamboo`) | Dark Lotus |
@@ -33,13 +33,13 @@ This document presents the complete biographical dossiers, martial backgrounds, 
 
 | Visual Identity | Combat Profile |
 |---|---|
-| ![Kaito Portrait](../../assets/chars/sprites/kaito/portrait.png)<br/>*Avatar Portrait* | **Series:** Chronicles of the Storm Road (*Crônicas da Estrada da Tempestade*)<br/>**ID:** `kaito` \| **Author:** Ultimate MUGEN<br/>**Origin:** Shizuoka Coast & Mt. Fuji Foothills, Japan 🇯🇵<br/>**Alignment:** **Hero / Vanguard of Balance**<br/>**Theme Color:** `#2f8f9d` (Teal / Sea-green)<br/>**Awakened Form:** Eye of the Storm (*Olho da Tempestade*)<br/>**Home Stage:** Sunset Dojo Roof (`dojo`)<br/>**Fighting Style:** Arashi-ryu Karate (Wind & Gale Striking) |
+| ![Kaito Portrait](../../assets/chars/sprites/kaito/portrait.png)<br/>*Avatar Portrait* | **Series:** Chronicles of the Storm Road (*Crônicas da Estrada da Tempestade*)<br/>**ID:** `kaito` \| **Author:** Ultimate MUGEN<br/>**Origin:** Tasmania, Australia 🇦🇺<br/>**Alignment:** **Hero / Vanguard of Balance**<br/>**Theme Color:** `#2f8f9d` (Teal / Sea-green)<br/>**Awakened Form:** Eye of the Storm (*Olho da Tempestade*)<br/>**Home Stage:** Sunset Dojo Roof (`dojo`)<br/>**Fighting Style:** Arashi-ryu Karate (Wind & Gale Striking) |
 
 ![Kaito Battle Sprite](../../assets/chars/sprites/kaito/01_idle.png)
 *Standard In-Game Combat Stance*
 
 #### Biography & Background
-Kaito Arashi is a wandering martial artist who journeys wherever the trade winds blow. Clad in a sea-green kimono that has witnessed hundreds of grueling matches across Asia, Kaito considers fighting not a sport of vanity, but a profound form of spiritual communication. Raised by an ascetic master atop the stormy cliffs of the Izu Peninsula, he learned to synchronize his breathing with coastal typhoons, generating sonic shockwaves and gale-force momentum through disciplined fist thrusts.
+Kaito Arashi is a wandering martial artist who journeys wherever the trade winds blow. Clad in a sea-green kimono that has witnessed hundreds of grueling matches across Asia, Kaito considers fighting not a sport of vanity, but a profound form of spiritual communication. Raised in Tasmania and trained by an ascetic master on the Izu Peninsula, he learned to synchronize his breathing with coastal typhoons, generating sonic shockwaves and gale-force momentum through disciplined fist thrusts.
 
 When the Scarlet Eclipse fractured reality, Kaito was among the first to witness the sky bleeding crimson. Sensing the spiritual disharmony tearing the world apart, he took up his walking staff and descended from the mountains, determined to confront Mikazuki Oboro and safeguard the mortal realm.
 
@@ -51,6 +51,7 @@ When the Scarlet Eclipse fractured reality, Kaito was among the first to witness
 #### Signature Moves
 - **Gale Fist (*Reppūken*)**: Throws a spinning orb of condensed wind pressure along the floor.
 - **Rising Tempest (*Shoryū-Arashi*)**: An airborne spiraling dragon uppercut enveloped in gale vortices.
+- **Kangaroo Kick** (`~D, DB, B, a+b`): Kaito crouches, hops forward and drives a front kick into the opponent, launching them on hit.
 - **Thunderstep Kick (*Tatsumaki-Kyaku*)**: A horizontal multi-hit vacuum spin kick that breaks opponent momentum.
 - **Super — Typhoon Barrage**: A nine-hit chain combination culminating in a skyward tornado launch.
 

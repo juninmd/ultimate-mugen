@@ -6,6 +6,8 @@ use ume_engine::input::k;
 mod conflict;
 pub use conflict::Conflicts;
 mod keys;
+mod names;
+pub use names::action_label;
 use keys::KEYS;
 
 /// Rebindable fighting actions: label and engine input bit.
@@ -37,7 +39,7 @@ pub fn id(key: KeyCode) -> Option<&'static str> {
     KEYS.iter().find(|e| e.0 == key).map(|e| e.1)
 }
 pub fn label(key: KeyCode) -> &'static str {
-    KEYS.iter().find(|e| e.0 == key).map(|e| e.2).unwrap_or("?")
+    KEYS.iter().find(|e| e.0 == key).map_or("?", |e| names::key_label(e.2))
 }
 fn from_id(s: &str) -> Option<KeyCode> {
     KEYS.iter().find(|e| e.1 == s).map(|e| e.0)

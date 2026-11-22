@@ -1181,7 +1181,7 @@ fn glass(
     tint: [f32; 3],
 ) {
     let a = p(x, y);
-    if glass_panel(a.x, a.y, w * s, h * s, r * s, tint) {
+    if crate::lite::glass() && glass_panel(a.x, a.y, w * s, h * s, r * s, tint) {
         return;
     }
     let pts: Vec<Vec2> = poly::chamfer(x, y, w, h, r * 0.6)

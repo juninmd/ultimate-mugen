@@ -31,7 +31,7 @@ mod replays; mod photo; mod trials;
 mod route;
 mod screenpack;
 mod session;
-mod settings;
+mod lite; mod settings;
 mod settings_labels;
 mod shots;
 mod smoke;

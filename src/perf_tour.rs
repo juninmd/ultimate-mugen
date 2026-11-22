@@ -29,6 +29,8 @@ pub async fn run(app: &mut App, _dir: &str) {
     app.team = (per_side > 1).then(|| Team::new(chars[..per_side].iter().map(|c| find(app, c)).collect(), chars[per_side..per_side * 2].iter().map(|c| find(app, c)).collect(), true));
     app.mode = if app.team.is_some() { Mode::TeamSimul } else { Mode::Watch };
     app.sel = (a, b, stage(app, &stage_id));
+    if let Some(p) = std::env::var("UME_PRESET").ok().and_then(|v| v.parse().ok()) { app.settings.set_preset(p); }
+    app.g.post.level = crate::lite::apply(&app.settings);
     let load = Instant::now();
     app.start_fight().await;
     println!("perf: load {:.1} ms · {} vs {} · {} · rss {:.0} MB", load.elapsed().as_secs_f64() * 1000.0, app.reg.chars[a].id, app.reg.chars[b].id, stage_id, rss_mb());

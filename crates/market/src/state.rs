@@ -52,7 +52,7 @@ impl Default for MarketState {
 impl MarketState {
     pub fn from_json(bytes: &[u8]) -> MarketState {
         let mut state = serde_json::from_slice::<MarketState>(bytes).ok().filter(|s| s.version == VERSION).unwrap_or_default();
-        state.installed.retain(|i| !crate::catalog::is_stale_fighter_sfx_music(i.kind, &i.item_id));
+        state.installed.retain(|i| !crate::sfx_filter::is_stale_fighter_sfx_music(i.kind, &i.item_id));
         state
     }
 

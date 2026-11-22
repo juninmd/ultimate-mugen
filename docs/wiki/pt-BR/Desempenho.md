@@ -466,3 +466,14 @@ Compilar um lutador UMF rasterizava os frames base em paralelo e depois recolori
 | Depois | 4,70 / 4,46 / 4,54 s | 551 ms | 405 ms | 319 ms |
 
 A saída não muda: um checksum de todos os sprites (pixels, tamanho, eixo, escala) e de todos os frames de animação dos 21 lutadores em duas paletas é idêntico antes e depois. Lutadores sem formas (`npc_*`) não mudam, pois não têm variantes para renderizar.
+
+## Predefinições gráficas para máquinas fracas
+
+Ajustes, aba DESEMPENHO: uma predefinição (Alta, Média, Baixa, Mínima ou Personalizada quando alguma opção difere) mais opções individuais. Tudo é só visual; `Match::tick`, rollback e replays nunca leem esses valores.
+
+- Escala de renderização: a cena da luta é desenhada em um alvo menor e o pós-processamento amplia para a janela; o HUD continua nítido.
+- Opções: pós-processamento, qualidade da arte, partículas, rastro de imagem, HUD translúcido, sombras, fundo animado, filtro CRT e limite de FPS.
+- Ajuste automático (ligado por padrão na web): média do tempo de quadro por 4 s de luta após 3 s de aquecimento; acima de 24 ms desce uma predefinição, salva e mostra um aviso. Nunca sobe a qualidade sozinho.
+- Medir: `UME_PRESET=0..3 UME_TOUR=perf` no desktop ou a luta `?e2e=1&modo=watch` no Chromium.
+
+Medido na máquina de nuvem com renderização por software (1280x720): desktop 28,7 ms (Alta) para 15,8 ms (Mínima); web 10,5 fps (Alta) para 21,8 fps (Mínima).

@@ -86,7 +86,11 @@ impl App {
             if focused {
                 self.ui.adapted_highlight(("tune.x", "tune.y"), 48.0, y - 30.0, VW - 96.0, ROW_H - 6.0);
             }
-            let text = tr(label.0, label.1);
+            let text = match label.1 {
+                "Character" => crate::i18n::tr3(label.0, label.1, "Personaje"),
+                "Reset to default" => crate::i18n::tr3(label.0, label.1, "Restablecer predeterminado"),
+                _ => tr(label.0, label.1),
+            };
             self.ui.text(text, 80.0, y, 26.0, if focused { WHITE } else { hex("#d8d0f0") }, Align::Left, focused);
             let value = match i {
                 0 => format!("‹ {name} ›"),

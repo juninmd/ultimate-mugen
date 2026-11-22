@@ -4,6 +4,7 @@ import unittest
 
 from mugen_chain import segment
 from mugen_charge import charge_spec
+from mugen_motion import motion
 from mugen_parse import read_states
 from mugen_routes import routes
 from mugen_scripts import passthrough
@@ -67,6 +68,24 @@ class Parity(unittest.TestCase):
         spec, _ = passthrough(states, {"start": ["s"]}, {195: {"frames": []}}, lambda n: "taunt", set())
         self.assertEqual(spec["commands"], [{"name": "umf_start", "input": "x+y", "display": "Taunt"}])
         self.assertIn('command = "umf_start"', spec["cns"])
+
+    def test_motion_controllers_map_to_umf_fields_and_conditional_ones_are_reported(self):
+        def c(kind, at, **body):
+            return dict(ctrl(kind, **body), at=at, span=(5, 12))
+        fields, dropped = motion([
+            c("velmul", [], trigger1="Time >= 0", x=".93"),
+            c("veladd", [], trigger1="Time >= 0", y=".56"),
+            c("posfreeze", [], trigger1="time >= 0"),
+            c("posset", [5], trigger1="Time = 0", y="0"),
+            c("palfx", [6], trigger1="Time = 0", time="20", add="30,30,30", sinadd="64,64,64,64"),
+            c("posset", [], trigger1="Pos Y < -175", y="-175"),
+        ])
+        self.assertEqual(fields["velMul"], [{"from": 5, "to": 12, "x": 0.93}])
+        self.assertEqual(fields["velAdd"], [{"from": 5, "to": 12, "y": 0.56}], "a per-tick VelAdd is the move's own gravity")
+        self.assertEqual(fields["posFreeze"], [{"from": 5, "to": 12}])
+        self.assertEqual(fields["posSet"], [{"at": 5, "y": 0.0}])
+        self.assertEqual(fields["palFx"], [{"at": 6, "time": 20, "add": [30, 30, 30], "sinAdd": [64, 64, 64, 64]}])
+        self.assertEqual(dropped, ["posset"], "a conditional PosSet has no frame to land on, so it must be reported, not guessed")
 
 
 if __name__ == "__main__":

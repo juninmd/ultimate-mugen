@@ -141,6 +141,7 @@ pub(super) fn move_fx_cns(m: &NativeMove, sid: i32, anim_no: &HashMap<String, i3
             );
         }
     }
+    out += &super::move_motion::motion_cns(m, sid);
     out
 }
 

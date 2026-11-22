@@ -4,6 +4,7 @@ import json
 import os
 import re
 import sys
+from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mugen_abilities import is_fly_state, detect_abilities, detect_cancels
@@ -96,6 +97,7 @@ def convert(src, out, fighter_id, name, extra):
             moves.append(fu_move)
             wanted += [a for a in fu_anims if a in actions]
     cancels = detect_cancels(cmd_ctrls, state_to_id)
+    dropped = Counter(k for move in moves for k in move.pop("_dropped", []))
     for move in moves:
         if move["id"] in cancels:
             move["cancels"] = cancels[move["id"]]
@@ -170,7 +172,7 @@ def convert(src, out, fighter_id, name, extra):
         fighter.update(add)
     json.dump(fighter, open(os.path.join(out, f"{fighter_id}.json"), "w", encoding="utf-8"), ensure_ascii=False)
     sprite_files = sum(1 for g, i in sff.index if os.path.exists(os.path.join(out, "sprites", f"s{g}_{i}.png")))
-    report = coverage(states, commands, actions, sff, bank, state_to_id, consumed, (scripts or {}).get("cns"), fighter, sprite_files, shadowed)
+    report = coverage(states, commands, actions, sff, bank, state_to_id, consumed, (scripts or {}).get("cns"), fighter, sprite_files, shadowed, dropped)
     open(os.path.join(out, "coverage.md"), "w", encoding="utf-8").write(report)
     return fighter
 

@@ -3,6 +3,7 @@ import re
 from mugen_abilities import detect_throw, detect_wall_bounce
 from mugen_chain import chain, lands, segment, state_anim, triggers
 from mugen_fx import extract_fx
+from mugen_motion import motion
 from mugen_parse import nums
 
 STANDARD = {
@@ -151,15 +152,16 @@ def build_move(state_no, states, actions, label, cmd_input, when, cost, skip=fro
             base = len(frames)
             if k and lands(states[links[k - 1]], n) and "landAt" not in landing:
                 landing["landAt"] = base + 1
+            seg = segment(states[n], actions[state_anim(states[n])], links[k + 1] if k + 1 < len(links) else None)
             for c in states[n]["ctrl"]:
                 elems = frame_at(c, actions[state_anim(states[n])]["frames"])
-                ctrl.append(dict(c, at=[e + base for e in elems]))
-            frames += segment(states[n], actions[state_anim(states[n])], links[k + 1] if k + 1 < len(links) else None)
+                ctrl.append(dict(c, at=[e + base for e in elems], span=(base + 1, base + len(seg))))
+            frames += seg
         anim_no = 900000 + state_no
         actions[anim_no] = {"frames": frames, "loop": None}
         state["ctrl"] = ctrl
     else:
-        state["ctrl"] = [dict(c, at=frame_at(c, actions[anim_no]["frames"])) for c in states[state_no]["ctrl"]]
+        state["ctrl"] = [dict(c, at=frame_at(c, actions[anim_no]["frames"]), span=(1, 0)) for c in states[state_no]["ctrl"]]
     frames = actions[anim_no]["frames"]
     move = {"id": label, "name": label.replace("_", " ").title(), "input": cmd_input, "kind": "normal", "anim": anim_name(anim_no)}
     if when != "stand":
@@ -209,6 +211,8 @@ def build_move(state_no, states, actions, label, cmd_input, when, cost, skip=fro
     if fx["teleport"]:
         move["teleport"] = fx["teleport"]
     move.update(landing)
+    motion_fields, move["_dropped"] = motion(state["ctrl"])
+    move.update(motion_fields)
     p1_hit = next((int(nums(c["body"].get("p1stateno"), (-1,))[0]) for c in state["ctrl"] if c["type"] == "hitdef" and c["body"].get("p1stateno")), None)
     if not throw and p1_hit in states and p1_hit not in links:
         move["_followUpState"] = (p1_hit, "hitNow")

@@ -104,3 +104,39 @@ fn fly_moves_start_from_flight_and_return_to_it() {
     assert!(back, "the fly move must return to flight");
     assert!(m.fighters[0].pos.y < 0.0 && (m.fighters[0].pos.y - y).abs() < 30.0, "a fly move hovers instead of falling");
 }
+
+#[test]
+fn own_gravity_velmul_palfx_and_posfreeze_run_like_mugen() {
+    let def = kaito(|v| {
+        let moves = v["moves"].as_array_mut().unwrap();
+        let mut hop = moves[0].clone();
+        hop["id"] = json!("hop");
+        hop["input"] = json!("z");
+        hop["moves"] = json!([{ "at": 1, "vel": [2.0, -11.0] }]);
+        hop["velAdd"] = json!([{ "from": 1, "y": 0.56 }]);
+        hop["velMul"] = json!([{ "from": 1, "x": 0.5 }]);
+        hop["palFx"] = json!([{ "at": 1, "time": 20, "add": [30, 30, 30] }]);
+        moves.push(hop);
+        let mut hold = moves[0].clone();
+        hold["id"] = json!("hold");
+        hold["input"] = json!("c");
+        hold["moves"] = json!([{ "at": 1, "vel": [6.0, 0.0] }]);
+        hold["posFreeze"] = json!([{ "from": 1 }]);
+        moves.push(hold);
+    });
+    let mut m = arena(&def);
+    let x0 = m.fighters[0].pos.x;
+    press(&mut m, &[k::Z, 0]);
+    assert!(m.fighters[0].palfx.is_some(), "palFx must tint the fighter");
+    let mut peak = 0.0f32;
+    for _ in 0..30 {
+        m.tick(&[0, 0]);
+        peak = peak.min(m.fighters[0].pos.y);
+    }
+    assert!(peak < -90.0 && peak > -115.0, "own gravity 0.56 from -11 climbs ~100 px; engine gravity stacked on top would stop near -61 (got {peak})");
+    assert!((m.fighters[0].pos.x - x0).abs() < 8.0, "velMul 0.5 every tick must stop the drift (moved {})", m.fighters[0].pos.x - x0);
+    press(&mut m, &[0; 120]);
+    let x1 = m.fighters[0].pos.x;
+    press(&mut m, &[k::C, 0, 0, 0, 0, 0]);
+    assert!((m.fighters[0].pos.x - x1).abs() < 0.5, "posFreeze must pin the fighter");
+}

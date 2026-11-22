@@ -26,7 +26,7 @@ Add `"$schema"` to the fighter (the loader ignores it) or map the file in your e
 | Identity and profile | `id` (`^[a-z0-9][a-z0-9_-]*$`), `profile` with `en`, `pt`, `es` texts, `element`, `alignment` |
 | `stats`, `passives`, `abilities` | Typed numbers, `fly`, `teleport`, `superSpeed`, `charge`, `forms` |
 | `anims` | `frames` as `"pose*ticks"` strings or objects with `pose`, `sprite`, `effect`, `hit`, `hurt`, `offset`, `ticks` |
-| `moves` | `kind`, `when`, `hits`, `projectile` (one or list), `cancels`, `rekka`, `throw`, `cinematic`, `explods`, `afterimage`, `shake`, `flash`, `superPause`, `followUp`, `blink`, `vfx`, `quake` |
+| `moves` | `kind`, `when`, `hits`, `projectile` (one or list), `cancels`, `rekka`, `throw`, `cinematic`, `explods`, `afterimage`, `shake`, `flash`, `superPause`, `followUp`, `blink`, `vfx`, `quake`, `velMul`, `velAdd`, `posFreeze`, `posSet`, `palFx` |
 | `helpers`, `bossRules`, `scripts` | Stand, clones, boss phases, ZSS and CNS hooks |
 | Kits and `extends` | A fighter with `extends` or `format: "umf-kit/1"` may omit the required fields; a move then needs only its `id` |
 

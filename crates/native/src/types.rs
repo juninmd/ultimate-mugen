@@ -159,6 +159,8 @@ pub struct NativeMove {
     #[serde(default)] pub blink: Option<OneOrMany<super::blocks::BlinkSpec>>,
     #[serde(default)] pub vfx: Vec<super::blocks::VfxSpec>,
     #[serde(default)] pub quake: Vec<super::blocks::QuakeSpec>,
+    #[serde(default, rename = "velMul")] pub vel_mul: Vec<super::move_motion::VelRange>, #[serde(default, rename = "velAdd")] pub vel_add: Vec<super::move_motion::VelRange>, #[serde(default, rename = "posFreeze")] pub pos_freeze: Vec<super::move_motion::FrameRange>,
+    #[serde(default, rename = "posSet")] pub pos_set: Vec<super::move_motion::PosSetSpec>, #[serde(default, rename = "palFx")] pub pal_fx: Vec<super::move_motion::PalFxSpec>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

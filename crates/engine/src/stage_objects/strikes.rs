@@ -162,7 +162,7 @@ impl Match {
             return;
         }
         let toss = (self.random() - 0.5) * 1.6;
-        let drop_x = x.clamp(self.stage.bound_left + 8.0, self.stage.bound_right - 8.0);
+        let drop_x = crate::clamp::ordered(x, self.stage.bound_left + 8.0, self.stage.bound_right - 8.0);
         self.objects.pickups.push(Pickup {
             spec,
             pos: V2 {

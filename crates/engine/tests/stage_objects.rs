@@ -219,3 +219,27 @@ fn stage_objects_are_deterministic_and_idle_matches_are_untouched() {
     assert!(plain.objects.is_idle());
     assert!(plain.objects.events.is_empty());
 }
+
+#[test]
+fn breaking_a_crate_while_the_arena_scrolls_does_not_abort_the_tick() {
+    let mut m = street(true);
+    m.stage.bound_left = 539.0;
+    m.stage.bound_right = 100.0;
+    run(&mut m, 5);
+    m.fighters[1].pos.x = m.fighters[0].pos.x - 150.0;
+    let b = crate_ahead(&m, 1.0);
+    m.objects.add(b);
+    enter(&mut m, 0, JAB_STATE);
+    run(&mut m, 40);
+    assert!(m.objects.breakables[0].broken, "the crate breaks");
+    let x = m
+        .objects
+        .events
+        .iter()
+        .find_map(|e| match e {
+            ObjectEvent::Dropped { x, .. } => Some(*x),
+            _ => None,
+        })
+        .expect("the pickup is dropped");
+    assert!(x.is_finite(), "the pickup lands somewhere real, got {x}");
+}

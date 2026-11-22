@@ -14,7 +14,7 @@ pub struct Hud {
     pub replay: bool,
     pub inputs: Vec<(u32, u16)>,
     life: life_bar::LifeFx,
-    combo: [(i32, f32, i32); 2],
+    combo: [(i32, f32, i32, f32); 2],
     pop: [f32; 2],
     last_hits: [i32; 2],
     pub bars: Option<[Option<(f32, f32)>; 2]>,
@@ -29,7 +29,7 @@ impl Hud {
             replay: false,
             inputs: vec![],
             life: Default::default(),
-            combo: [(0, 0.0, 0); 2],
+            combo: [(0, 0.0, 0, 0.0); 2],
             pop: [0.0; 2],
             last_hits: [0; 2],
             bars: None,
@@ -40,7 +40,7 @@ impl Hud {
 
     /// Test/demo hook: pretend a combo just finished (shows in the training "last combo" line).
     pub fn inject_last_combo(&mut self, hits: i32, dmg: f32) {
-        self.combo[0] = (hits, dmg, 0);
+        self.combo[0] = (hits, dmg, 0, 0.0);
     }
 
     pub fn draw(
@@ -342,9 +342,9 @@ impl Hud {
                             / s
                             + 9.0;
                         let tx = if side == 0 {
-                            nx + name_w + 6.0
+                            nx + name_w.max(48.0) + 6.0
                         } else {
-                            nx - name_w - 6.0 - tw
+                            nx - name_w.max(48.0) - 6.0 - tw
                         };
                         let ty = by + bh + 10.6 + name_dy;
                         poly::grad_h(
@@ -364,7 +364,7 @@ impl Hud {
                         text(&label, tx + 6.2, ty + 4.2, 4.0, WHITE, Align::Left, true);
                     }
                 }
-                if show_life { opacity::scope(opacity::PASSIVE, || passive_meter::draw(&p, s, gt, f, &passive_meter::Bar { x: bx, y: by, w: bw, h: bh, side })); opacity::scope(opacity::GUARD, || guard::draw(&p, &text, s, gt, f, bx, by, bw, bh, side)); opacity::scope(opacity::GUARD, || rush_marker::draw(&p, &text, s, gt, m.fighters.iter().position(|x| x.id == f.id).and_then(|i| m.rush_window(i)), (bx, by, bw, bh), side)); }
+                if show_life { opacity::scope(opacity::PASSIVE, || passive_meter::draw(&p, s, gt, f, &passive_meter::Bar { x: bx, y: by + bh + 9.6 + if f.ikemen.guard_max > 0.0 { 3.0 } else { 0.0 }, w: bw, side })); opacity::scope(opacity::GUARD, || guard::draw(&p, &text, s, gt, f, bx, by, bw, bh, side)); opacity::scope(opacity::GUARD, || rush_marker::draw(&p, &text, s, gt, m.fighters.iter().position(|x| x.id == f.id).and_then(|i| m.rush_window(i)), (bx, by, bw, bh), side)); }
                 if show_wins {
                     for i in 0..m.rounds_to_win {
                         let won = m.wins[side] > i;
@@ -439,7 +439,7 @@ impl Hud {
                         poly::outline(&chip, 0.5 * s, poly::with_a(col, if ready { 0.95 } else { 0.45 }));
                         text(&lbl, tx, cy + 0.95, 3.8, col, al, true);
                     }
-                    form_steps::draw(&form_steps::Row { p: &p, text: &text, s, gt, side, x: bx, y: py + ph2 + 1.2, w: bw, colors }, f);
+                    form_steps::draw(&form_steps::Row { p: &p, text: &text, s, gt, side, x: bx, y: by - 6.4, w: bw, colors }, f);
                 }
             }
             let strip_y = 30.5;
@@ -725,9 +725,9 @@ impl Hud {
                         .last_hit_by
                         .is_some_and(|id| m.fighters.iter().any(|f| f.id == id && f.root == att.id))
                 {
-                    *c = (def.ghv.hitcount, att.combo_damage, 70);
-                } else if c.2 > 0 {
-                    c.2 -= 1;
+                    *c = (def.ghv.hitcount, combo_tier::shown_damage(c.3, def.life, att.combo_damage), 70, c.3);
+                } else {
+                    *c = (c.0, c.1, (c.2 - 1).max(0), if def.move_type == 'H' { c.3 } else { def.life });
                 }
                 if c.2 <= 0 || c.0 < 2 {
                     self.last_hits[side] = 0;

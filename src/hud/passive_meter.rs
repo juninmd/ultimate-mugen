@@ -11,10 +11,8 @@ const FORM_LOW: [f32; 3] = [0.9, 0.6, 0.2];
 const FORM_HIGH: [f32; 3] = [1.0, 0.95, 0.5];
 
 const STRIP_HEIGHT: f32 = 1.5;
-const STRIP_LIFT: f32 = 0.6;
 const PIP_WIDTH: f32 = 3.4;
 const PIP_GAP: f32 = 0.9;
-const PIP_SPAN_SHARE: f32 = 0.55;
 const RAGE_LOW: [f32; 3] = [1.0, 0.2, 0.12];
 const TIME_LOW: [f32; 3] = [0.65, 0.2, 1.0];
 const TIME_HIGH: [f32; 3] = [1.0, 0.25, 0.15];
@@ -45,8 +43,17 @@ pub(super) struct Bar {
     pub x: f32,
     pub y: f32,
     pub w: f32,
-    pub h: f32,
     pub side: usize,
+}
+
+const ROW_PITCH: f32 = STRIP_HEIGHT + 0.8;
+const RAIL_SHARE: f32 = 0.42;
+const RAIL_MAX_W: f32 = 46.0;
+
+fn span(bar: &Bar) -> (f32, f32) {
+    let w = (bar.w * RAIL_SHARE).min(RAIL_MAX_W);
+    let x = if bar.side == 0 { bar.x } else { bar.x + bar.w - w };
+    (x, w)
 }
 
 fn strip<P: Fn(f32, f32) -> Vec2>(
@@ -58,8 +65,7 @@ fn strip<P: Fn(f32, f32) -> Vec2>(
     progress: f32,
     colors: ([f32; 3], [f32; 3]),
 ) {
-    let inset = bar.h * 0.45;
-    let (span_x, span_w) = (bar.x + inset, bar.w - inset * 2.0);
+    let (span_x, span_w) = span(bar);
     poly::solid(
         &rect(p, s, span_x, y, span_w, STRIP_HEIGHT),
         Color::new(0.0, 0.0, 0.0, 0.35),
@@ -85,39 +91,33 @@ pub(super) fn draw<P: Fn(f32, f32) -> Vec2>(p: &P, s: f32, gt: f32, f: &Fighter,
     if !f.alive {
         return;
     }
-    let base_y = bar.y + bar.h - STRIP_HEIGHT - STRIP_LIFT;
-    let mut lift = 0.0;
+    let mut y = bar.y;
     let forms = f.form_count();
     if f.form > 0 && forms > 0 {
-        strip(p, s, gt, bar, base_y, f.form as f32 / forms as f32, (FORM_LOW, FORM_HIGH));
-        lift += STRIP_HEIGHT + 0.8;
+        strip(p, s, gt, bar, y, f.form as f32 / forms as f32, (FORM_LOW, FORM_HIGH));
+        y += ROW_PITCH;
     }
     if f.potential.level != PotentialLevel::Idle {
         let colors = if f.potential.level == PotentialLevel::Fury { (FURY_LOW, FURY_HIGH) } else { (POTENTIAL_LOW, POTENTIAL_HIGH) };
-        strip(p, s, gt, bar, base_y - lift, f.potential.remaining_ratio(), colors);
-        lift += STRIP_HEIGHT + 0.8;
+        strip(p, s, gt, bar, y, f.potential.remaining_ratio(), colors);
+        y += ROW_PITCH;
     }
     let Some(view) = f.passive_view() else { return };
-    let y = base_y - lift;
-    let inset = bar.h * 0.45;
-    let (span_x, span_w) = (bar.x + inset, bar.w - inset * 2.0);
+    let (span_x, span_w) = span(bar);
     if let Some(progress) = view.rage {
         strip(p, s, gt, bar, y, progress, (RAGE_LOW, RAGE_HIGH));
+        y += ROW_PITCH;
     }
     if let Some(progress) = view.time {
-        let lift = if view.rage.is_some() {
-            STRIP_HEIGHT + 0.8
-        } else {
-            0.0
-        };
-        strip(p, s, gt, bar, y - lift, progress, (TIME_LOW, TIME_HIGH));
+        strip(p, s, gt, bar, y, progress, (TIME_LOW, TIME_HIGH));
+        y += ROW_PITCH;
     }
     if let Some(sig) = view.signature {
-        let lift = (view.rage.is_some() as i32 + view.time.is_some() as i32) as f32 * (STRIP_HEIGHT + 0.8);
-        strip(p, s, gt, bar, y - lift, sig.ratio, (SIGNATURE_LOW, SIGNATURE_HIGH));
+        strip(p, s, gt, bar, y, sig.ratio, (SIGNATURE_LOW, SIGNATURE_HIGH));
+        y += ROW_PITCH;
     }
     if view.max_stacks > 0 {
-        let pitch = (PIP_WIDTH + PIP_GAP).min(span_w * PIP_SPAN_SHARE / view.max_stacks as f32);
+        let pitch = (PIP_WIDTH + PIP_GAP).min(span_w / view.max_stacks as f32);
         let width = pitch - PIP_GAP.min(pitch * 0.3);
         let lit = Color::from_rgba(
             f.def.color[0].max(140),

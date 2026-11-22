@@ -77,7 +77,7 @@ impl App {
         }
         let framing = if replaying { ume_engine::replay_camera::frame(&mut s.m) } else { None };
         s.draw(&mut self.g, &self.ui);
-        if !s.paused { crate::easter::draw(&self.ui, dt, if self.c.touch.enabled { 146.0 } else { 116.0 }); }
+        if !s.paused { crate::easter::draw(&self.ui, dt, s.vfx.below_banners(if self.c.touch.enabled { 146.0 } else { 116.0 })); }
         if let Some(saved) = framing {
             ume_engine::replay_camera::unframe(&mut s.m, saved);
         }

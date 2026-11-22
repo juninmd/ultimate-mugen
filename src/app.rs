@@ -480,7 +480,7 @@ impl App {
         set_keep_aspect(self.settings.keep_aspect);
         set_linear_filter(self.settings.linear);
         self.g.fx_gain = IMPACT[self.settings.impact.min(IMPACT.len() - 1)].0;
-        self.c.nav.active = !matches!(self.screen, Screen::Fight);
+        self.c.nav.set_screen(&self.screen);
         self.c.update();
         self.preview_t += get_frame_time();
         let dt = get_frame_time();

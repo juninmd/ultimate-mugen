@@ -186,7 +186,7 @@ impl TouchPad {
         touch_style::draw_stick(c, lay.stick_radius, self.stick_pos);
         for i in (0..BUTTONS).filter(|i| self.visible(*i)) {
             let base = touch_style::base_color(i);
-            touch_style::draw_button(lay.pos[i], lay.radius[i], TOUCH_BUTTONS[i].0, base, self.pressed[i]);
+            touch_style::draw_button(lay.pos[i], lay.radius[i], super::touch_label::button(TOUCH_BUTTONS[i]), base, self.pressed[i]);
         }
         let label = if self.more_open { "x" } else { "+" };
         let base = Color::new(0.6, 0.6, 0.65, 0.5);

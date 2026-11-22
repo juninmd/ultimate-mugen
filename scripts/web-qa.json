@@ -5,7 +5,8 @@
     "web-import-probe": "needs a pack path argument, latency probe",
     "web-frame-probe": "manual profiling tool, not a pass/fail check",
     "web-sprite-readiness": "no CLI entry for the wasm dist, covered by cargo tests",
-    "web-story-playthrough": "long manual playthrough, not part of the PR gate"
+    "web-story-playthrough": "long manual playthrough, not part of the PR gate",
+    "web-tour": "manual visual tour that screenshots every screen on desktop and phone for review"
   },
   "scenarios": [
     { "name": "web-flow", "shard": "ui", "script": "web-smoke.js", "args": ["{dist}"] },
@@ -22,6 +23,7 @@
     { "name": "native-awakening", "shard": "loading", "script": "web-awakening-smoke.js", "args": ["{dist}"] },
     { "name": "power-arena", "shard": "loading", "script": "web-power-arena-smoke.js", "args": ["{dist}"], "knownFail": "arena: o oponente derruba o jogador (estado 5110) antes de ele alcançar a primeira plataforma - ver issue #926" },
     { "name": "audio-unlock", "shard": "loading", "script": "web-audio-smoke.js", "args": ["{dist}"] },
-    { "name": "fatal-trap", "shard": "loading", "script": "web-fatal-smoke.js", "args": ["{dist}"], "expectFatal": true }
+    { "name": "fatal-trap", "shard": "loading", "script": "web-fatal-smoke.js", "args": ["{dist}"], "expectFatal": true },
+    { "name": "preflight-mobile", "shard": "mobile", "script": "web-preflight-smoke.js", "args": ["{dist}"] }
   ]
 }

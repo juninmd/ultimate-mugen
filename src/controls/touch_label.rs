@@ -15,3 +15,13 @@ pub fn label(bit: u32) -> &'static str {
         _ => "II",
     }
 }
+
+pub fn button((fallback, bits): (&'static str, u32)) -> &'static str {
+    match bits {
+        k::X | k::Y | k::Z | k::A | k::B | k::C | k::D2 | k::T | k::S => label(bits),
+        k::E => crate::i18n::tr3("ESPECIAL 3", "SPECIAL 3", "ESPECIAL 3"),
+        k::TAG => crate::i18n::tr3("TROCA", "TAG", "CAMBIO"),
+        k::GUARD => crate::i18n::tr3("DEFESA", "GUARD", "DEFENSA"),
+        _ => fallback,
+    }
+}

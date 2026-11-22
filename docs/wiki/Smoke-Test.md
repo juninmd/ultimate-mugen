@@ -41,3 +41,7 @@ Netplay, auto update, zip import and the on-screen touch controls are not exerci
 ## Nightly sweeps
 
 Full-roster simulations that take 10 to 30 s each (`native_roster_lab`, `native_air_abilities`, `native_match_invariants`, `native_input_moves`, `native_normal_reach`, `native_no_stuck_states`, `native_attack_keyframes`, `pixel_states_test` and the air-normals sweep) are marked `#[ignore = "nightly: full-roster sweep"]`. The PR gate skips them; `.github/workflows/nightly.yml` runs them every day (`cargo test --workspace --release -- --ignored`), and locally you can run them the same way.
+
+## Fight census
+
+`ume-tools fight-census --roster a,b,c --level 8` plays every ordered pair AI against AI and prints KO time, guard rate, stalls and win percentage per fighter. Use it to spot balance outliers before and after a stat change.

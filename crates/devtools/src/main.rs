@@ -1,5 +1,5 @@
 use std::path::{Path, PathBuf};
-use ume_devtools::{sff_cook, ability_reel, audit_moves, audit_sprites, debug_fight, homologate, knockdown_rate, motion, mugen_census, pack, roster_audit, story_npcs, thumbnails};
+use ume_devtools::{sff_cook, ability_reel, audit_moves, audit_sprites, debug_fight, homologate, knockdown_rate, fight_census, motion, mugen_census, pack, roster_audit, story_npcs, thumbnails};
 
 const USAGE: &str = "usage: ume-tools <command>\n\
   pack-sprites [out_root=web/dist] [--sprites dir]  pack assets/chars/sprites into web .pack files\n\
@@ -105,6 +105,13 @@ fn run(args: &[String]) -> Result<(), String> {
             } else {
                 print!("{}", debug_fight::format_text(&val));
             }
+        }
+        Some("fight-census") => {
+            let frames = flag("--frames").map(|v| v.parse::<usize>().map_err(|e| e.to_string())).transpose()?.unwrap_or(5400);
+            let level = flag("--level").map(|v| v.parse::<i32>().map_err(|e| e.to_string())).transpose()?.unwrap_or(8);
+            let roster: Vec<String> = flag("--roster").ok_or("fight-census needs --roster a,b,c")?.split(',').map(String::from).collect();
+            let val = fight_census::run(&roster, level, frames)?;
+            println!("{}", serde_json::to_string_pretty(&val).map_err(|e| e.to_string())?);
         }
         Some("knockdown-rate") => {
             let frames = flag("--frames").map(|v| v.parse::<usize>().map_err(|e| e.to_string())).transpose()?.unwrap_or(5400);

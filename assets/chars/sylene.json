@@ -12,7 +12,7 @@
   "intro": "Mostre-me quanto tempo você dura no gelo.",
   "taunt": "Tão quente... eu resolvo isso.",
   "form": "Rainha do Inverno",
-  "stats": {"life":940,"power":3000,"attack":132,"defense":94,"walk":[3.72,2.1],"run":[6.16,4.4],"jump":[-8.6,-2.5,0,2.6],"height":100,"width":[14,14],"airDashes":1},
+  "stats": {"life":940,"power":3000,"attack":108,"defense":94,"walk":[3.72,2.1],"run":[6.16,4.4],"jump":[-8.6,-2.5,0,2.6],"height":100,"width":[14,14],"airDashes":1},
   "art": {
     "type": "sprites",
     "style": {

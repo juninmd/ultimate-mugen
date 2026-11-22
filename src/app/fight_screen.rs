@@ -69,6 +69,8 @@ impl App {
             s.switch_control();
         }
         s.update(dt, &mut self.c, &mut self.audio);
+        self.trials_step(dt);
+        let s = self.session.as_mut().unwrap();
         if !s.paused {
             crate::easter::tick(&s.m, &s.stage.info.name, &mut self.audio);
         }
@@ -81,6 +83,7 @@ impl App {
         if replaying {
             self.replay_bar();
         }
+        self.trials_draw();
         if self.survival_is_playing() {
             self.survival_hud();
         }

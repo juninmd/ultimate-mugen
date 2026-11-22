@@ -53,6 +53,7 @@ fn name(kind: StageKind) -> &'static str {
         StageKind::Plains => "plains",
         StageKind::Spirit => "spirit",
         StageKind::Volcano => "volcano",
+        StageKind::Arena => "arena",
         StageKind::Custom => "custom",
     }
 }

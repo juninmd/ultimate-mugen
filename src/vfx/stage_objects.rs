@@ -110,6 +110,18 @@ impl Vfx {
                     }
                     self.sfx.push("guardbreak");
                 }
+                ObjectEvent::Blast { x, lane, radius, .. } => {
+                    let mid = lane - 26.0;
+                    self.ring(x, mid, radius.max(60.0), 0.45, 2.2, [1.0, 0.72, 0.22]);
+                    self.ring(x, mid, radius * 0.65, 0.32, 1.4, [1.0, 0.96, 0.75]);
+                    self.glow(x, mid, radius * 0.55, 0.35, [1.0, 0.65, 0.2]);
+                    self.spark_burst(x, mid, 1.0, 22, 4.4, [1.0, 0.78, 0.28], 3.1);
+                    self.dust(x, lane, 14, 2.6, 0.8, [0.55, 0.48, 0.44]);
+                    self.flash = self.flash.max(0.38);
+                    self.chroma = self.chroma.max(0.45);
+                    self.trauma = (self.trauma + 0.55).min(1.0);
+                    self.sfx.push("burst");
+                }
                 ObjectEvent::Dropped { x, lane, .. } => {
                     self.glow(x, lane - 20.0, 16.0, 0.3, [1.0, 0.95, 0.7]);
                 }

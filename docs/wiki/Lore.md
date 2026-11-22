@@ -64,7 +64,7 @@ The warriors of the Convergence are divided into three distinct philosophical ca
 
 ### 1. The Convergence Protectors (Heroes)
 Dedicated to mending the Astral Loom, closing the dimensional fissures, and protecting innocent mortals from annihilation:
-- **Kaito Arashi** (Japan): Wandering righteous karateka seeking balance through the storm.
+- **Kaito Arashi** (Australia): Wandering righteous karateka seeking balance through the storm.
 - **Daichi Ginrou** (Mongolia): Free-spirited mountain warrior whose golden spirit protects the vulnerable.
 - **Akio Hoshi** (Japan): Impetuous star-striker whose fiery heart never backs down from tyranny.
 - **Lian Feng** (China): Jade Lantern Grandmaster maintaining the ancient cosmic harmony.

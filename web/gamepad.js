@@ -140,7 +140,8 @@
       files = Array.from(files).filter((file) => /\.zip$/i.test(file.name));
       if (!files.length) return;
       wasm.ume_import_begin();
-      (async () => { try { for (const f of files) await send(f); } finally { wasm.ume_import_end(); } })();
+      // One unreadable file (moved or deleted after picking) must not drop the rest of the batch.
+      (async () => { try { for (const f of files) { try { await send(f); } catch (e) { console.warn('[import] skipped ' + f.name + ': ' + (e && e.message)); } } } finally { wasm.ume_import_end(); } })();
     };
     window.umeClearImports = async () => { seen.clear(); const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).clear(); };
     (async () => {

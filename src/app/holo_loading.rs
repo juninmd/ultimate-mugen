@@ -3,11 +3,11 @@ use crate::holo::{self, CardState};
 
 const CYAN: Color = Color::new(0.35, 0.9, 1.0, 1.0);
 
-struct Card {
+pub(super) struct Card {
     tex: Option<(Texture2D, f32, f32)>,
-    name: String,
-    side: usize,
-    state: CardState,
+    pub(super) name: String,
+    pub(super) side: usize,
+    pub(super) state: CardState,
 }
 
 impl App {
@@ -34,15 +34,35 @@ impl App {
         cards
     }
 
+    pub(super) fn holo_card_named(&mut self, name: &str, state: CardState, side: usize) -> Card {
+        let found = self.reg.chars.iter().position(|e| e.name == name);
+        let mut plan = vec![];
+        if let Some(i) = found {
+            plan.push((side, 0, i));
+        }
+        let mut cards = self.holo_card_data(&plan, if state == CardState::Ready { 1 } else { 0 });
+        match cards.pop() {
+            Some(mut card) => {
+                card.state = state;
+                card
+            }
+            None => Card { tex: None, name: name.to_string(), side, state },
+        }
+    }
+
     pub(super) fn holo_chips(&mut self, step: u8, cy: f32, w: f32, h: f32) {
         let plan = self.load_plan();
         let cards = self.holo_card_data(&plan, step as usize);
-        let gap = 14.0;
-        let total = cards.len() as f32 * w + (cards.len().saturating_sub(1)) as f32 * gap;
-        let mut x = VW / 2.0 - total / 2.0;
-        for c in &cards {
-            self.holo_paint(c, x, cy, w, h, false);
-            x += w + gap;
+        let gap = 10.0;
+        let header_half = 246.0;
+        for side in 0..2 {
+            let group: Vec<&Card> = cards.iter().filter(|c| c.side == side).collect();
+            let total = group.len() as f32 * (w + gap) - gap;
+            let mut x = if side == 0 { VW / 2.0 - header_half - total } else { VW / 2.0 + header_half };
+            for c in group {
+                self.holo_paint(c, x, cy, w, h, false);
+                x += w + gap;
+            }
         }
     }
 
@@ -72,7 +92,7 @@ impl App {
         }
     }
 
-    fn holo_paint(&self, c: &Card, x: f32, y: f32, w: f32, h: f32, labels: bool) {
+    pub(super) fn holo_paint(&self, c: &Card, x: f32, y: f32, w: f32, h: f32, labels: bool) {
         let ui = &self.ui;
         let frame = if crate::tweaks::current().reduce_motion { 0 } else { (ui.t * 30.0) as u32 };
         let level = if frame == 0 { 1.0 } else { crate::title_crt::flicker(frame) };
@@ -117,6 +137,11 @@ impl App {
                 ui.rect(x + 4.0, ey - 1.0, w - 8.0, 2.0, Color::new(0.8, 1.0, 1.0, 0.9));
                 ui.gradient_v(x + 4.0, ey - 14.0, w - 8.0, 14.0, Color::new(0.35, 0.9, 1.0, 0.0), Color::new(0.35, 0.9, 1.0, 0.35));
             }
+        }
+        if c.tex.is_none() {
+            let initial: String = c.name.chars().take(1).collect::<String>().to_uppercase();
+            let a = if c.state == CardState::Pending { 0.25 } else { 0.7 };
+            ui.text(&initial, x + w / 2.0, y + h * 0.62, (w * 0.55).max(12.0), Color::new(CYAN.r, CYAN.g, CYAN.b, a), Align::Center, true);
         }
         let mut sy = y;
         while sy < y + h {

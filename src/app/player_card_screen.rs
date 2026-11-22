@@ -19,7 +19,7 @@ const MENU_INDEX: usize = 9;
 
 pub(super) fn tab_label(i: usize) -> &'static str {
     match i {
-        0 => tr3("Card", "Card", "Card"),
+        0 => tr3("Ficha", "Card", "Ficha"),
         1 => tr3("Lutadores", "Fighters", "Luchadores"),
         2 => tr3("Partidas", "Matches", "Partidas"),
         3 => tr3("Amigos", "Friends", "Amigos"),

@@ -43,13 +43,26 @@ impl Gfx {
         w: f32,
         h: f32,
     ) {
+        self.draw_wide_image_alpha(image, x, y, w, h, 1.0);
+    }
+
+    pub(super) fn draw_wide_image_alpha(
+        &mut self,
+        image: &Arc<ImageData>,
+        x: f32,
+        y: f32,
+        w: f32,
+        h: f32,
+        alpha: f32,
+    ) {
+        let tint = Color::new(1.0, 1.0, 1.0, alpha.clamp(0.0, 1.0));
         if image.w <= CHUNK_WIDTH {
             let texture = self.texture(image, true);
             draw_texture_ex(
                 &texture,
                 x,
                 y,
-                WHITE,
+                tint,
                 DrawTextureParams {
                     dest_size: Some(vec2(w, h)),
                     ..Default::default()
@@ -67,7 +80,7 @@ impl Gfx {
                 &texture,
                 left,
                 y,
-                WHITE,
+                tint,
                 DrawTextureParams {
                     dest_size: Some(vec2(right - left, h)),
                     ..Default::default()

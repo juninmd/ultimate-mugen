@@ -18,7 +18,7 @@ mod cutscene;
 mod fight_seed;
 mod keyedit; pub(crate) mod keyedit_note;
 mod loading;
-mod pause; mod photo_mode; mod photo_overlay;
+mod pause; mod photo_mode; mod photo_overlay; mod trials_hud;
 mod market;
 mod market_text; mod market_links;
 mod menu_fighters;
@@ -60,7 +60,7 @@ mod title_screen;
 use select_category::CATEGORY_COUNT;
 #[cfg(target_arch = "wasm32")]
 mod web_import;
-mod controls_screen; mod holo_loading;
+mod controls_screen; mod holo_loading; mod market_holo;
 mod empty_art; mod menu_bgm;
 pub(crate) use keyedit::KeyEdit;
 
@@ -172,7 +172,7 @@ pub struct App {
     pub team_pal: Vec<i32>,
     /// last finished fight (replayable) and the replay being played now
     last_fight: Option<Replay>,
-    pub replaying: Option<Replay>, pub(crate) photo: Option<crate::photo::Photo>,
+    pub replaying: Option<Replay>, pub(crate) photo: Option<crate::photo::Photo>, pub(crate) trials: Option<(String, crate::trials::Tracker)>,
     /// web deep link waiting for the imported packs to land in the registry
     #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
     deep: Option<(Option<String>, Option<String>, Option<usize>, Mode, bool, Option<String>, f32)>,
@@ -361,7 +361,7 @@ impl App {
             window_pinned: false,
             team: None,
             last_fight: None,
-            replaying: None, photo: None,
+            replaying: None, photo: None, trials: None,
             team_n: 3,
             team_pick: vec![],
             sel_filter: 0,
@@ -1764,7 +1764,7 @@ impl App {
             self.ui
                 .rect(px + pw - 82.0, py + 12.0, 70.0, 20.0, hex("#ffcc33"));
             self.ui.text(
-                "PRONTO",
+                crate::i18n::tr3("PRONTO", "READY", "LISTO"),
                 px + pw - 47.0,
                 py + 28.0,
                 14.0,

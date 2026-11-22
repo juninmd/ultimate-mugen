@@ -1098,9 +1098,9 @@ impl MatchRenderer {
                     .max(m.view_h);
                 let (h, w, x) = crate::stages::illustration_layout(*span, image.w as f32 / image.h as f32, h, m.view_w, m.camera.x, m.zoom);
                 let rect = ImageRect { x: x + shx, y: ground - h * 0.85 + shy, w, h, view_w: m.view_w, view_h: m.view_h, cam_x: m.camera.x };
-                if front { return if *span > 0.0 { } else { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, true) }; }
+                if front { self.fx.draw_illustrated(g, m, true, shx, shy); return if *span > 0.0 { } else { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, true) }; }
                 g.draw_backdrop(image, frames, *span, m.game_time as usize, g.ox + rect.x * s, g.oy + rect.y * s, w * s, h * s);
-                if *span <= 0.0 { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, false); }
+                self.fx.draw_illustrated(g, m, false, shx, shy); if *span <= 0.0 { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, false); }
             }
             StageArt::Mugen(bg) => mugen_layers::draw_mugen_stage(g, m, bg, front, shx, shy, &mut self.sky),
         }

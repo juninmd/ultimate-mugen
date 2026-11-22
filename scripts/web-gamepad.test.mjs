@@ -131,3 +131,26 @@ test('a multi-file import keeps every file after the file input is cleared', asy
   assert.deepEqual(pushed, [4, 7], 'both packs reach the wasm queue even though the input was cleared');
   assert.equal(open, 0, 'the batch is closed once every file was handed over');
 });
+
+test('an unreadable file in a multi-file import does not drop the files after it', async () => {
+  const warnings = [];
+  const { window } = load({ globals: { console: { warn: (...args) => warnings.push(args.join(' ')) } } });
+  const pushed = [];
+  let open = 0;
+  window.umeStartImports({
+    ume_import_begin: () => { open++; },
+    ume_import_end: () => { open--; },
+    ume_import_pending: () => 0,
+    ume_import: (bytes) => pushed.push(bytes.length),
+  });
+  await new Promise((r) => setTimeout(r, 0));
+  window.umeImport([
+    { name: 'a.zip', arrayBuffer: async () => new Uint8Array(3).buffer },
+    { name: 'moved.zip', arrayBuffer: async () => { throw new Error('NotReadableError'); } },
+    { name: 'c.zip', arrayBuffer: async () => new Uint8Array(5).buffer },
+  ]);
+  await new Promise((r) => setTimeout(r, 20));
+  assert.deepEqual(pushed, [3, 5], 'the file after the unreadable one is still imported');
+  assert.equal(open, 0, 'the batch is closed');
+  assert.ok(warnings.some((w) => w.includes('moved.zip')), 'the skipped file is named in the console');
+});

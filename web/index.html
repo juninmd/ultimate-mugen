@@ -37,6 +37,7 @@
   <div id="boot"><b>ULTIMATE MUGEN</b><div id="bar" role="progressbar" aria-labelledby="bootmsg" aria-valuemin="0" aria-valuemax="100"><i></i></div><span id="bootmsg" aria-live="polite">Downloading the game…</span></div>
   <div id="fatal" role="alert"><span id="fataltx"></span><button id="fatalbtn" type="button"></button></div>
   <div id="rot" role="status"><span id="rottx"></span><button id="rotx" type="button" aria-label="Close">&times;</button></div>
+  <script src="preflight.js"></script>
   <script src="gamepad.js"></script>
   <script src="assets.js"></script>
   <script src="market.js"></script>
@@ -93,11 +94,13 @@
     window.ume_panic = (text) => showFatal(new Error(text), `${tx.fatal} (${text})`);
     let ume;
     try {
+const blocked = window.umePreflight && window.umePreflight(navigator.language);
+if (blocked) throw Object.assign(new Error(blocked), { preflight: true });
 ume = await import('./ultimate-mugen.js?v=__BUILD__');
 await ume.default({ module_or_path: await load().catch(() => new URL('./ultimate-mugen_bg.wasm?v=__BUILD__', import.meta.url)) });
 } catch (e) {
   boot.remove();
-  showFatal(e, tx.fail);
+  showFatal(e, e && e.preflight ? e.message : `${tx.fail}: ${e && e.message ? e.message : e}`);
 }
 if (ume && !fatal.classList.contains('on')) {
   barBox.classList.remove('ind');

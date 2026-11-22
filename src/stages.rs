@@ -13,6 +13,7 @@ use ume_formats::stage::MugenStage;
 
 
 pub mod ambience;
+pub mod interactive;
 mod story_strip;
 pub use story_strip::*;
 mod wonders; pub(crate) mod looping; pub(crate) mod story_loop; pub(crate) mod scenery;

@@ -1,5 +1,16 @@
 {
   "frames": {
+    "kangarooKickImpact": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [
+        137,
+        80,
+        201,
+        135
+      ]
+    },
     "hitCrouchImpact": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -85,19 +96,31 @@
     "airGuard": {
       "axisX": 200.0,
       "axisY": 392.0,
-      "refHeight": 320.0
+      "refHeight": 320.0,
+      "awakeningHair": [
+        175,
+        120,
+        251,
+        171
+      ]
     },
     "airGuardHit": {
       "axisX": 200.0,
       "axisY": 392.0,
-      "refHeight": 320.0
+      "refHeight": 320.0,
+      "awakeningHair": [
+        163,
+        120,
+        242,
+        175
+      ]
     },
     "airLowKick": {
       "awakeningHair": [
-        158,
-        90,
-        248,
-        166
+        161,
+        108,
+        245,
+        180
       ],
       "axisX": 200.0,
       "axisY": 392.0,
@@ -503,7 +526,13 @@
     "jab1": {
       "axisX": 200.0,
       "axisY": 392.0,
-      "refHeight": 320.0
+      "refHeight": 320.0,
+      "awakeningHair": [
+        177,
+        77,
+        234,
+        131
+      ]
     },
     "jumpDown": {
       "awakeningHair": [
@@ -910,10 +939,10 @@
     },
     "walk1": {
       "awakeningHair": [
-        190,
-        0,
-        273,
-        48
+        191,
+        24,
+        269,
+        69
       ],
       "axisX": 205.155,
       "axisY": 400.0,

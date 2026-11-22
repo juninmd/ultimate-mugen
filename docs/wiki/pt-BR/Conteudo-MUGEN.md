@@ -7,6 +7,8 @@
 
 Use Menu principal › **Importar M.U.G.E.N** (o único botão de importação; na web abre o seletor do navegador, no desktop o diálogo de arquivos do sistema) ou arraste o `.zip` para a janela da web. A importação é idempotente: o mesmo arquivo, ou o mesmo lutador ou cenário encontrado de novo em outro caminho, nome ou caixa de letras, é registrado uma única vez (a identidade é um hash do `.def` normalizado mais o arquivo de sprites). Pacotes salvos no navegador por versões antigas são deduplicados automaticamente no próximo carregamento.
 
+A tela mostra um mosaico de hologramas com todos os lutadores importados (`F` inclui também os nativos). Setas, controle ou toque movem o cursor, Enter ou clique abre a ficha: retrato, autor, série, `.def` de origem, versão, quantidade de paletas, nacionalidade e bio quando existem, medidores e a lista completa de golpes com comando e custo de energia (Esquerda/Direita trocam de lutador, Esc volta). Cima na primeira linha foca o botão de importar. Capture com `UME_SHOTS_ONLY=mugenroster` (`UME_ROSTER_ZIPS=a.zip:b.zip` importa pacotes antes).
+
 Uma importação web mostra uma tela de carregamento em tela cheia desde o momento em que os arquivos são escolhidos até o último pacote ser registrado. Os arquivos são lidos, descompactados e registrados **um por frame**, com no máximo dois pacotes brutos aguardando na memória do wasm; um lote de pacotes grandes não roda mais em um único frame congelado. A mesma tela aparece na inicialização enquanto os pacotes salvos no IndexedDB são restaurados, um de cada vez.
 
 Centenas de personagens são registradas sem decodificar tudo; só o que está sob o cursor é carregado, e um cache LRU limita a memória.

@@ -11,6 +11,22 @@ pub(super) struct Card {
 }
 
 impl App {
+    pub(super) fn holo_card_at(&mut self, r: usize, state: CardState, side: usize) -> Card {
+        let e = &self.reg.chars[r];
+        let por = if e.mugen {
+            e.portrait()
+        } else {
+            e.tile_portrait(1)
+                .or_else(|| e.peek(1).and_then(|d| d.sprites.get(&(9000, 1)).cloned()))
+        };
+        let name = e.name.clone();
+        let tex = por.and_then(|p| {
+            let (w, h) = (p.width, p.height);
+            p.image.clone().map(|im| (self.g.texture(&im, true), w, h))
+        });
+        Card { tex, name, side, state }
+    }
+
     fn holo_card_data(&mut self, plan: &[(usize, usize, usize)], step: usize) -> Vec<Card> {
         let mut cards = vec![];
         for (k, &(side, _, r)) in plan.iter().enumerate() {
@@ -18,18 +34,7 @@ impl App {
             if e.mugen && k <= step + 6 {
                 e.ensure_portrait();
             }
-            let por = if e.mugen {
-                e.portrait()
-            } else {
-                e.tile_portrait(1)
-                    .or_else(|| e.peek(1).and_then(|d| d.sprites.get(&(9000, 1)).cloned()))
-            };
-            let name = e.name.clone();
-            let tex = por.and_then(|p| {
-                let (w, h) = (p.width, p.height);
-                p.image.clone().map(|im| (self.g.texture(&im, true), w, h))
-            });
-            cards.push(Card { tex, name, side, state: holo::card_state(k, step) });
+            cards.push(self.holo_card_at(r, holo::card_state(k, step), side));
         }
         cards
     }

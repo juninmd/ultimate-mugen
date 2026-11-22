@@ -5,11 +5,6 @@ use crate::i18n::{fill, tr3};
 use crate::registry::{reason_counts, Quarantined};
 use crate::ui::*;
 
-pub(super) const COLS: usize = 4;
-pub(super) const ROWS: usize = 3;
-pub(super) const TILE_W: f32 = 220.0;
-pub(super) const TILE_H: f32 = 136.0;
-pub(super) const GAP: f32 = 10.0;
 pub(super) const LIST_ROWS: usize = 10;
 pub(super) const LIST_H: f32 = 44.0;
 pub(super) const TOP: f32 = 218.0;
@@ -28,6 +23,11 @@ pub(super) fn short(s: &str, max: usize) -> String {
 impl App {
     pub(crate) fn mugen_catalog(&mut self, view: u8, page: usize) -> Option<(u8, usize)> {
         crate::screen_art::ScreenArt::Archive.background(&self.ui);
+        if view == GALLERY && super::mugen_roster::sheet_open() {
+            let list = self.roster_list();
+            self.mugen_sheet(&list);
+            return Some((view, page));
+        }
         let loaded: Vec<usize> = (0..self.reg.chars.len()).filter(|&i| self.reg.chars[i].mugen).collect();
         let quarantined: Vec<Quarantined> = self.reg.quarantined.clone();
         let stages = self.reg.stages.iter().filter(|s| s.mugen).count();
@@ -39,22 +39,22 @@ impl App {
             view = if view == GALLERY { QUARANTINE } else { GALLERY };
             page = 0;
         }
-        let per = if view == GALLERY { COLS * ROWS } else { LIST_ROWS };
-        let total = if view == GALLERY { loaded.len() } else { quarantined.len() };
-        let pages = total.div_ceil(per).max(1);
-        if self.c.pressed(nav::RIGHT) && page + 1 < pages {
-            page += 1;
-        }
-        if self.c.pressed(nav::LEFT) && page > 0 {
-            page -= 1;
-        }
-        let page = page.min(pages - 1);
-
-        if view == GALLERY {
-            self.catalog_gallery(&loaded, page);
+        let (page, pages, total) = if view == GALLERY {
+            let list = self.roster_list();
+            let page = self.mugen_roster(&list);
+            (page, super::mugen_roster_nav::page_count(list.len()), list.len())
         } else {
+            let pages = quarantined.len().div_ceil(LIST_ROWS).max(1);
+            if self.c.pressed(nav::RIGHT) && page + 1 < pages {
+                page += 1;
+            }
+            if self.c.pressed(nav::LEFT) && page > 0 {
+                page -= 1;
+            }
+            let page = page.min(pages - 1);
             self.catalog_list(&quarantined, page);
-        }
+            (page, pages, quarantined.len())
+        };
         self.catalog_footer(view, page, pages, total);
 
         if self.c.pressed(nav::BACK) {
@@ -65,7 +65,7 @@ impl App {
 
     fn import_button_row(&mut self) {
         let (x, y, w, h) = BUTTON;
-        let hover = self.hover_rect(x, y, w, h);
+        let hover = self.hover_rect(x, y, w, h) || super::mugen_roster::button_focused();
         let pulse = 0.5 + 0.5 * (self.ui.t * 3.0).sin();
         crate::menu_art::glass(&self.ui, x, y, w, h, 1.0);
         self.ui.rect(x, y, w, h, Color::new(0.13, 0.91, 1.0, if hover { 0.34 } else { 0.18 + 0.06 * pulse }));
@@ -82,7 +82,7 @@ impl App {
         crate::import_button::place(ui.x(x), ui.y(y), w * ui.s, h * ui.s);
         #[cfg(not(target_arch = "wasm32"))]
         {
-            if self.c.pressed(nav::OK) || self.clicked_rect(x, y, w, h) {
+            if (self.c.pressed(nav::OK) && super::mugen_roster::button_focused()) || self.clicked_rect(x, y, w, h) {
                 self.audio.sfx("confirm");
                 crate::native_import::pick();
             }
@@ -133,7 +133,7 @@ impl App {
         };
         self.ui.text(&tabs, 156.0, 656.0, 18.0, hex("#ffcc33"), Align::Left, true);
         let nav_hint = fill(
-            tr3("Página {p}/{n}   ·   TAB alterna   ·   ESQ/DIR páginas   ·   ESC voltar", "Page {p}/{n}   ·   TAB switches   ·   LEFT/RIGHT pages   ·   ESC back", "Página {p}/{n}   ·   TAB alterna   ·   IZQ/DER páginas   ·   ESC volver"),
+            tr3("Página {p}/{n}   ·   SETAS navegam   ·   ENTER ficha   ·   F filtro   ·   TAB quarentena   ·   ESC voltar", "Page {p}/{n}   ·   ARROWS move   ·   ENTER sheet   ·   F filter   ·   TAB quarantine   ·   ESC back", "Página {p}/{n}   ·   FLECHAS mueven   ·   ENTER ficha   ·   F filtro   ·   TAB cuarentena   ·   ESC volver"),
             &[("p", &(page + 1).to_string()), ("n", &pages.to_string())],
         );
         self.ui.text(&nav_hint, 156.0, 686.0, 15.0, hex("#8a8fa6"), Align::Left, false);

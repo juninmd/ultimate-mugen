@@ -111,3 +111,18 @@ fn umf_moves_layer_on_top_of_the_exact_fighter() {
     assert!(with_overlay.moves.iter().all(|m| m.identical), "original moves play the same with the overlay loaded:\n{}", with_overlay.markdown());
     let _ = std::fs::remove_dir_all(&out);
 }
+
+#[test]
+fn unlocked_routes_run_before_the_original_commands() {
+    let src = kfm();
+    let mut b = convert::convert(&src, "kfm_first", None).unwrap();
+    extra::apply(&mut b.json, &json!({"mugenRoutes": [{"state": 1000, "id": "palm_first", "input": "~D, DF, F, x"}]})).unwrap();
+    let out = temp("kfm-first");
+    convert::write(&b, &out, "kfm_first").unwrap();
+    let umf = Arc::new(bundle::compile(&bundle::load(&out).unwrap(), 1, true).unwrap());
+    let first = &umf.states[&-1].controllers[0];
+    assert!(format!("{:?}", first.trigger_all).contains("umf_palm_first"), "the unlocked route must be checked before the original ones it shares an input with");
+    let route = routes::Route { command: "umf_palm_first".into(), input: "~D, DF, F, x".into(), state: 1000, when: "stand", cost: 0 };
+    assert!(parity::sim::run(&umf, &route).outcome.states.contains(&1000));
+    let _ = std::fs::remove_dir_all(&out);
+}

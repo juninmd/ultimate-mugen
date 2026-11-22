@@ -69,13 +69,14 @@ fn evidence_tool(a: &Args) -> Result<String, String> {
     } else {
         picked.retain(|m| wanted.contains(&m.route.command.to_ascii_lowercase()));
     }
-    let routes: Vec<routes::Route> = picked.iter().map(|m| m.route.clone()).collect();
+    let mut routes: Vec<routes::Route> = picked.iter().map(|m| m.route.clone()).collect();
+    routes.extend(report.added.iter().filter(|m| m.reached && (wanted.is_empty() || wanted.contains(&m.route.command.to_ascii_lowercase()))).map(|m| m.route.clone()));
     let sources = ume_engine::loader::read_mugen_sources(&src.vfs, &src.def)?;
     let orig = Arc::new(ume_engine::loader::assemble_mugen_char(sources, 1, true));
     let umf = Arc::new(bundle::compile(&bundle::load(out)?, 1, true)?);
     let dir = bundle::find_json(out)?.with_file_name("evidence");
     let written = parity::evidence(&orig, &umf, &routes, &dir)?;
-    Ok(format!("{}\n{} sheets (top row original, bottom row UMF):\n{}", report.summary(), written.len(), written.iter().map(|p| p.display().to_string()).collect::<Vec<_>>().join("\n")))
+    Ok(format!("{}\n{} sheets (top row original, bottom row UMF; added_* = UMF-only moves):\n{}", report.summary(), written.len(), written.iter().map(|p| p.display().to_string()).collect::<Vec<_>>().join("\n")))
 }
 
 fn validate_tool(a: &Args) -> Result<String, String> {

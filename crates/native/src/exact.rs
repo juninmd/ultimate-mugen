@@ -73,7 +73,12 @@ pub fn compile_exact_with(nc: &NativeChar, spec: &MugenSpec, read: Reader, pal_n
     let mut d = assemble_mugen_char(sources(nc, spec, read, with_images, only), pal_no, with_images);
     let anim_no: HashMap<String, i32> = spec.anims.keys().map(|id| (id.to_string(), *id)).collect();
     let move_states = overlay_moves(nc, &anim_no, &mut d);
+    let routes_before = d.states.get(&-1).map_or(0, |s| s.controllers.len());
     super::scripts::compile_scripts(nc.scripts.as_ref(), &anim_no, &move_states, &mut d.states);
+    if let Some(routes) = d.states.get_mut(&-1) {
+        let added = routes.controllers.len().saturating_sub(routes_before);
+        routes.controllers.rotate_right(added);
+    }
     super::scripts::script_commands(nc.scripts.as_ref(), &mut d.commands, &mut d.movelist);
     rename_moves(&mut d, spec);
     d.source = Source::Mugen;

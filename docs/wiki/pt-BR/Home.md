@@ -29,6 +29,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Modo Foto](Modo-Foto.md) | Jogadores | Câmera livre, filtros e captura PNG limpa em luta pausada ou replay |
 | [Desafios de Combo](Desafios-de-Combo.md) | Jogadores | Sete metas de combo no treino, salvas por lutador |
 | [Mutadores](Mutadores.md) | Criadores | Mudanças de regra por partida; gravidade é o primeiro mutador |
+| [Golpes em pé](Golpes-em-Pe.md) | Jogadores, Criadores | Golpes leves empurram sem derrubar; limiar por % de vida |
 | [Rush Cancel](Rush-Cancel.md) | Jogadores e Criadores | Gaste energia para cancelar um golpe conectado, Overdrive e a apresentação |
 | [Níveis de Combo](Niveis-de-Combo.md) | Jogadores e Criadores | Selos de combo, marca de energia, air dashes e rebotes |
 | [Kits inspirados em Bleach](Kits-Inspirados-em-Bleach.md) | Jogadores | Ideias de Byakuya, Yoruichi e Zaraki em tres nativos |

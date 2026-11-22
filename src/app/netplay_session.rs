@@ -69,6 +69,7 @@ impl App {
             life: 2,
             single_round: false,
             classic_pushbox: true,
+            knockdown: ume_engine::matchs::DEFAULT_KNOCKDOWN_PRESET,
             ..saved
         };
         self.start_fight().await;

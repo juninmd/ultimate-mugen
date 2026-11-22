@@ -34,6 +34,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Photo Mode](Photo-Mode.md) | Players | Free camera, filters and clean PNG capture on a paused fight or replay |
 | [Combo Trials](Combo-Trials.md) | Players | Seven combo goals in training, saved per fighter |
 | [Match Mutators](Mutators.md) | Creators | Per-match rule changes; gravity is the first mutator |
+| [Standing Hits](Standing-Hits.md) | Players, Creators | Light hits push back without knocking down; threshold by life % |
 | [Rush Cancel](Rush-Cancel.md) | Players & Creators | Spend meter to cancel a connected move, Overdrive and the presentation |
 | [Combo Tiers](Combo-Tiers.md) | Players & Creators | Combo badges, energy notch, air dashes and bounces |
 | [Bleach-inspired kits](Bleach-Inspired-Kits.md) | Players | Abilities inspired by Bleach in three native fighters |

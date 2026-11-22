@@ -194,6 +194,7 @@ impl Session {
     pub fn apply_rules(&mut self, r: crate::settings::Rules) {
         self.m.rounds_to_win = if r.single_round { 1 } else { r.rounds_to_win };
         self.m.classic_pushbox = r.classic_pushbox;
+        self.m.knockdown = r.knockdown;
         self.speed = r.game_speed.clamp(0.5, 2.0);
         self.m.round_ticks = r.round_ticks;
         self.m.timer = if r.round_ticks > 0 {

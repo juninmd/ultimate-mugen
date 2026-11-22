@@ -38,7 +38,9 @@ fn load(png: &[u8], pixel_art: bool) -> Option<Texture2D> {
         Some(rgba) => rgba.clone(),
         None => ume_formats::png::png_indexed_to_rgba(&decoded),
     };
-    let t = Texture2D::from_rgba8(decoded.width as u16, decoded.height as u16, &rgba);
+    let t = ume_formats::perf::time(&format!("vfx:upload {}x{}", decoded.width, decoded.height), || {
+        Texture2D::from_rgba8(decoded.width as u16, decoded.height as u16, &rgba)
+    });
     t.set_filter(if pixel_art { FilterMode::Nearest } else { FilterMode::Linear });
     Some(t)
 }

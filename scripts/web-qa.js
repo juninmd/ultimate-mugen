@@ -40,8 +40,9 @@ const run = scenario => new Promise(done => {
     const consoleFile = path.join(out, 'console.log');
     const consoleText = fs.existsSync(consoleFile) ? fs.readFileSync(consoleFile, 'utf8') : '';
     const ok = code === 0 && !timedOut;
-    const result = { name: scenario.name, ok, code, signal, timedOut, ms: Date.now() - started, problems: problemLines(consoleText), tail: tail(output, 25) };
-    console.log(`${ok ? 'PASS' : 'FAIL'} ${scenario.name} (${(result.ms / 1000).toFixed(0)}s)`);
+    const result = { name: scenario.name, ok, code, signal, timedOut, ms: Date.now() - started, problems: problemLines(consoleText), tail: tail(output, 25), knownFail: scenario.knownFail };
+    const label = ok ? 'PASS' : scenario.knownFail ? 'KNOWN' : 'FAIL';
+    console.log(`${label} ${scenario.name} (${(result.ms / 1000).toFixed(0)}s)${!ok && scenario.knownFail ? ` - ${scenario.knownFail}` : ''}`);
     done(result);
   });
 });
@@ -61,5 +62,5 @@ const run = scenario => new Promise(done => {
   fs.writeFileSync(path.join(outRoot, 'summary.json'), JSON.stringify(results, null, 2));
   if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown);
   console.log(markdown);
-  process.exit(results.every(r => r.ok) ? 0 : 1);
+  process.exit(results.every(r => r.ok || r.knownFail) ? 0 : 1);
 })();

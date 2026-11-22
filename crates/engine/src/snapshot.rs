@@ -1,5 +1,5 @@
 use tiny_skia::{Color, FillRule, Paint, PathBuilder, Pixmap, PixmapPaint, Transform};
-use crate::chardef::{AnimFrame, CharDef};
+use crate::chardef::{AnimFrame, Blend, CharDef};
 use crate::matchs::Match;
 
 pub const W: u32 = 420;
@@ -120,6 +120,13 @@ pub fn frame(m: &Match, boxes: bool) -> Pixmap {
     let camx = roots.iter().map(|f| f.pos.x).sum::<f32>() / roots.len().max(1) as f32;
     let scale = 1.0;
     for f in m.fighters.iter() {
+        if let Some(ai) = f.after_image.as_ref() {
+            for k in ai.params.shown(ai.trail.len(), ai.length) {
+                let t = &ai.trail[k];
+                let ghost = AnimFrame { group: t.group, index: t.index, x: t.fx, y: t.fy, time: 1, flip_h: t.flip_h, flip_v: false, blend: Blend::None, alpha: None, xscale: 1.0, yscale: 1.0, angle: 0.0, clsn1: vec![], clsn2: vec![] };
+                blit(&mut c, &f.anim_def, &ghost, (t.x, t.y), t.facing, scale, camx, (0.55 - 0.05 * k as f32).max(0.12));
+            }
+        }
         if let Some(fr) = f.frame() {
             blit(
                 &mut c,

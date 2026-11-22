@@ -35,6 +35,7 @@ impl App {
             self.draw_arcade_ladder_bar(t);
         }
         if !ready {
+            self.holo_chips(step_now, 10.0, 50.0, 62.0);
             let within = if step_now + 1 == total { self.warm_progress() } else { 0.0 };
             self.ui.progress_bar(
                 440.0,
@@ -71,7 +72,7 @@ impl App {
                 while !self.warm_step() {
                     self.ui.begin();
                     let progress = (st as f32 + self.warm_progress()) / total as f32;
-                    self.ui.loading_screen(progress, &self.load_label(st));
+                    self.holo_loading_screen(st, progress, &self.load_label(st));
                     next_frame().await;
                 }
                 continue;
@@ -81,7 +82,7 @@ impl App {
                     Ok(true) => break,
                     Ok(false) => {
                         self.ui.begin();
-                        self.ui.loading_screen((st as f32 + 0.5) / total as f32, &self.load_label(st));
+                        self.holo_loading_screen(st, (st as f32 + 0.5) / total as f32, &self.load_label(st));
                         next_frame().await;
                     }
                     Err(e) => {

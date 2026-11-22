@@ -60,7 +60,7 @@ mod title_screen;
 use select_category::CATEGORY_COUNT;
 #[cfg(target_arch = "wasm32")]
 mod web_import;
-mod controls_screen;
+mod controls_screen; mod holo_loading;
 mod empty_art; mod menu_bgm;
 pub(crate) use keyedit::KeyEdit;
 

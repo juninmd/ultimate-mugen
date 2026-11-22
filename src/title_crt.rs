@@ -25,6 +25,9 @@ pub fn sweep_position(time: f32) -> f32 {
 }
 
 pub fn draw(ui: &Ui, time: f32, animated: bool) {
+    if !crate::lite::crt() {
+        return;
+    }
     let (w, h) = (screen_width(), screen_height());
     let pitch = SCANLINE_PITCH * ui.s.max(0.5);
     let frame = if animated { (time * 30.0) as u32 } else { 0 };

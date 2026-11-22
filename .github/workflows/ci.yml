@@ -61,17 +61,14 @@ jobs:
       - run: ./scripts/build-web.sh
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with: { name: web-dist, path: web/dist, retention-days: 1, if-no-files-found: error }
-  web-smoke:
+  web-qa:
     needs: web-build
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - { shard: ui, scripts: "web-smoke.js web-story-smoke.js web-epilogue-smoke.js web-touch-menu-smoke.js", match: "1/1" }
-          - { shard: match-1, scripts: web-match-smoke.js, match: "1/2" }
-          - { shard: match-2, scripts: web-match-smoke.js, match: "2/2" }
+        shard: [ui, mobile, engine, loading, match-1, match-2]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
@@ -79,43 +76,12 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with: { path: ~/.cache/ms-playwright, key: "playwright-${{ runner.os }}-1.56.1-chromium" }
       - run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
-      - run: for s in $SCRIPTS; do node "scripts/$s" web/dist; done
-        env:
-          SCRIPTS: ${{ matrix.scripts }}
-          MATCH_SMOKE_SHARD: ${{ matrix.match }}
-          WEB_SMOKE_SHOTS: web-smoke-shots
-      - run: node scripts/web-mugen-smoke.js web/dist assets/mugen/elecbyte.zip
-        if: matrix.shard == 'ui'
-        env:
-          MUGEN_SMOKE_CHAR: kfm
-          WEB_SMOKE_SHOTS: web-smoke-shots
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        if: failure()
-        with:
-          name: web-smoke-shots-${{ matrix.shard }}
-          path: web-smoke-shots/*.png
-  smoke-web:
-    needs: web-build
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { name: web, mobile: "0" }
-          - { name: web-mobile, mobile: "1" }
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
-        with: { name: web-dist, path: web/dist }
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with: { path: ~/.cache/ms-playwright, key: "playwright-${{ runner.os }}-1.56.1-chromium" }
-      - run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
-      - run: node scripts/smoke-web.js web/dist smoke-report
-        env: { SMOKE_MOBILE: "${{ matrix.mobile }}" }
+      - run: node --test scripts/web-guard.test.mjs
+        if: matrix.shard == 'engine'
+      - run: node scripts/web-qa.js --dist web/dist --out web-qa-report --shard ${{ matrix.shard }}
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with: { name: "smoke-${{ matrix.name }}", path: smoke-report, retention-days: 7, if-no-files-found: ignore }
+        with: { name: "web-qa-${{ matrix.shard }}", path: web-qa-report, retention-days: 7, if-no-files-found: ignore }
   android:
     runs-on: ubuntu-latest
     timeout-minutes: 20

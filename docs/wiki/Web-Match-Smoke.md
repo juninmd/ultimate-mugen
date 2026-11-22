@@ -1,6 +1,6 @@
 # Web Match Smoke
 
-`node scripts/web-match-smoke.js web/dist` plays complete matches in headless Chromium (CI job `web-smoke`, after the web build) and fails when a match freezes.
+`node scripts/web-match-smoke.js web/dist` plays complete matches in headless Chromium (CI job `web-qa`, after the web build) and fails when a match freezes.
 
 Each scenario opens a deep link with `?e2e=1`, which publishes `window.__ume_state` every frame (screen, `clock.tick`, round, wins, fighters). Settings are injected through `localStorage` (30 s rounds, 1.15x speed, muted).
 

@@ -69,6 +69,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [CPU tactics](AI-Tactics.md) | Developers | Anti-air, whiff punish, hit confirm and meter rules of the CPU |
 | [Fighter study](Fighter-Study.md) | Developers | 50+ fighters surveyed and the moves they inspired |
 | [Smoke test (debug mode)](Smoke-Test.md) | Developers | One command checks every main feature on desktop and web, with screenshots and a report |
+| [Web QA pipeline](Web-QA.md) | Developers | Parallel CI shards that play the wasm build in Chromium, with prints and logs on every failure |
 | [Stress and resilience](Stress-and-Resilience.md) | Developers | Fuzzing, spawner caps, hot path numbers |
 | [Native animation audit](Native-Animation-Audit.md) | Developers | Pose coverage of the native roster |
 | [Authoring tool survey](Authoring-Tool-Survey.md) | Developers | What Fighter Factory Studio checks and how to match it |

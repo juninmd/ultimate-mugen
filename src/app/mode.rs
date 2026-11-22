@@ -32,7 +32,7 @@ impl Mode {
     }
     /// Team size (1 for the regular modes).
     pub fn is_team(self) -> bool {
-        matches!(self, Mode::TeamSeq | Mode::TeamSimul | Mode::TeamTag)
+        matches!(self, Mode::TeamSeq | Mode::TeamSimul | Mode::TeamTag | Mode::PowerArena)
     }
     /// Stable key used by replay files.
     pub fn key(self) -> &'static str {

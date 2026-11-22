@@ -26,6 +26,10 @@ pub enum Screen {
     Tower {
         t: f32,
     },
+    /// Power Arena setup: squad size, enemy count and kind
+    ArenaSetup {
+        row: usize,
+    },
     /// Survival game over: final score and fights won
     SurvivalOver {
         score: i64,

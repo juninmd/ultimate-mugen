@@ -43,7 +43,7 @@ mod menu_view; mod menu_icons;
 mod menu_focus;
 mod mode;
 mod screen;
-mod team;
+mod team; pub(crate) mod arena_setup; mod arena_pick;
 pub use mode::Mode;
 pub use screen::Screen;
 pub use team::Team;
@@ -179,6 +179,7 @@ pub struct App {
     /// fighters per team in the team modes (2..=5)
     pub team_n: usize,
     pub team_pick: Vec<usize>,
+    pub arena: arena_setup::ArenaCfg,
     /// select-screen state: filter (0 all · 1 originals · 2 MUGEN), first visible row, cursor dwell timer
     sel_filter: u8,
     pub ending_shown: bool,
@@ -362,7 +363,7 @@ impl App {
             last_fight: None,
             replaying: None, photo: None, trials: None,
             team_n: 3,
-            team_pick: vec![],
+            team_pick: vec![], arena: Default::default(),
             sel_filter: 0,
             ending_shown: false,
             char_tint: WHITE,
@@ -507,6 +508,7 @@ impl App {
             Screen::Market => self.market_screen(),
             Screen::Story { .. } => self.story_screen(dt).await,
             Screen::Tower { .. } => self.tower_screen(dt),
+            Screen::ArenaSetup { .. } => self.arena_setup_screen(),
             Screen::SurvivalOver { .. } => self.survival_over_screen(),
             Screen::Replays { .. } => self.replays_screen(),
             Screen::PlayerCard { .. } => self.player_card_screen(),
@@ -726,6 +728,7 @@ impl App {
             _ => Mode::Cpu,
         };
         let stage = get("cenario").and_then(|v| v.parse::<usize>().ok());
+        self.arena_link_params(get("inimigos").and_then(|v| v.parse().ok()), get("time").and_then(|v| v.parse().ok()));
         self.deep = Some((p1, p2, stage, mode, get("luta").is_some_and(|v| v != "0"), screen, 0.0));
     }
 
@@ -757,7 +760,7 @@ impl App {
                 self.screen = Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] };
             }
             Some("stages") => self.open_stages(self.sel.2 + 1),
-            _ if fight => self.screen = Screen::Vs { t: 0.0, step: 0 },
+            _ if fight => { self.arena_link_team(); self.screen = Screen::Vs { t: 0.0, step: 0 } }
             _ => self.open_stages(self.sel.2 + 1),
         }
         self.deep = None;
@@ -905,11 +908,11 @@ impl App {
 
         crate::screen_art::ScreenArt::Select.background(&self.ui);
         if self.mode.is_team() {
-            if is_key_pressed(KeyCode::E) {
+            if is_key_pressed(KeyCode::E) && self.mode != Mode::PowerArena {
                 self.team_n = (self.team_n + 1).min(if self.mode == Mode::TeamTag { 3 } else { 5 });
                 self.audio.sfx("select");
             }
-            if is_key_pressed(KeyCode::Q) {
+            if is_key_pressed(KeyCode::Q) && self.mode != Mode::PowerArena {
                 self.team_n = (self.team_n - 1).max(2).max(self.team_pick.len() + 1);
                 self.audio.sfx("select");
             }
@@ -989,7 +992,7 @@ impl App {
                 "{} {}v{}",
                 self.mode.label(),
                 self.team_n,
-                self.team_n
+                self.arena_opponents()
             );
         } else {
             self.sel_buf.push_str(self.mode.label());
@@ -1423,6 +1426,10 @@ impl App {
             }
             self.audio.sfx("confirm");
             self.sel_flash = (picking, 1.0);
+            if self.mode == Mode::PowerArena {
+                self.arena_take_pick(cur);
+                return;
+            }
             if self.mode.is_team() {
                 let me = cur[0];
                 if self.team_pick.contains(&me) {
@@ -2018,7 +2025,7 @@ impl App {
                 .as_ref()
                 .map(|r| r.rules)
                 .unwrap_or_else(|| self.settings.rules());
-            sess.apply_rules(self.fight_rules); if self.mode == Mode::PowerArena { sess.m.enable_power_arena(); }
+            sess.apply_rules(self.fight_rules); if self.mode == Mode::PowerArena { sess.m.enable_power_arena(); sess.m.enable_swarm(self.arena.total as u32); }
             self.story_tune(&mut sess);
             self.tower_tune(&mut sess);
             if seq {

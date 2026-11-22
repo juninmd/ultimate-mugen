@@ -88,7 +88,7 @@ impl Hud {
         let roots = [r0, r1];
         let partners: Vec<&Fighter> = if m.fighters.len() > 2 {
             m.roots()
-                .filter(|f| f.id != r0.id && f.id != r1.id && !(m.lanes.active && f.side == 1))
+                .filter(|f| f.id != r0.id && f.id != r1.id && !(m.lanes.active && f.side == 1) && !(m.swarm.is_some() && f.side == 1))
                 .collect()
         } else {
             Vec::new()
@@ -638,6 +638,7 @@ impl Hud {
             if m.team_simul && !m.lanes.active {
                 let alive = |sd: usize| m.roots().filter(|f| f.side == sd && f.alive).count();
                 let tot = |sd: usize| m.roots().filter(|f| f.side == sd).count();
+                let (foes_left, foes_total) = m.swarm.as_ref().map_or((alive(1), tot(1)), |s| (s.remaining() as usize, s.total as usize));
                 outlined(
                     &format!("{}/{}", alive(0), tot(0)),
                     w / 2.0 - 22.0,
@@ -647,7 +648,7 @@ impl Hud {
                     Align::Center,
                 );
                 outlined(
-                    &format!("{}/{}", alive(1), tot(1)),
+                    &format!("{foes_left}/{foes_total}"),
                     w / 2.0 + 22.0,
                     34.0,
                     6.4,

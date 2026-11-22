@@ -120,6 +120,19 @@ The plan lives in `Pilot::Dummy(DummyPlan)` (`src/session/dummy.rs`); the dummy 
 
 ## Power Arena
 
-Choose **Power Arena** in the main menu and select both fighters to start a match against the CPU. Climb 40 floating platforms across eight tiers. Jump through them from below and land on them while descending. Fighters can recover while they are above the base. Once they fall past its edge, they tumble into the void, and the round ends when the fighter falls out. The camera follows changes in elevation and zooms out as fighters separate horizontally or vertically.
+Choose **Power Arena** in the main menu, set up the match and pick your fighters to start against the CPU. Climb 40 floating platforms across eight tiers. Jump through them from below and land on them while descending. Fighters can recover while they are above the base. Once they fall past its edge, they tumble into the void, and the round ends when the fighter falls out. The camera follows changes in elevation and zooms out as fighters separate horizontally or vertically.
 
 Open a match directly on the web with `?modo=arena&p1=kaito&p2=shion&luta=1`.
+
+### Squad vs. swarm (1 to 5 against up to 100)
+
+The menu entry opens a setup screen before the fighter select: **your squad** (1 to 5 fighters), **enemies** (1, 5, 10, 25, 50 or 100) and the enemy **type** (random fighters, or pick one fighter who is repeated). Mouse, touch, keyboard and gamepad all work on it.
+
+- Only a capped number of enemies is on the field at once (16 on desktop, 12 in the browser, 8 on Android/iOS). When one falls, a fresh one enters after a short delay at a random spot of the stage (floor or platform) away from your squad, until the chosen total is spent. The round ends when the last enemy is down or your whole squad is.
+- Random enemies come from at most 8 distinct fighters (6 in the browser, 3 on mobile) that share their sprites, so the sprite atlas and memory stay flat no matter how many enemies you choose.
+- The map grows with the crowd: it is built from an odd number of tiles of the original 1,108 px arena (1, 3, 5 or 7), with the platform layout repeated. Ring-out edges follow the wider map.
+- The camera follows your squad only, so far-away enemies do not stretch the zoom. Fighters outside the view are not drawn.
+- A **minimap** appears under the top HUD whenever the map is wider than the view: green and cyan dots are your squad, red dots the enemies, and the yellow frame is the camera. The HUD shows enemies left over the chosen total.
+
+Code: simulation in `crates/engine/src/matchs/swarm.rs` (`Match::enable_swarm`, `swarm_step`), setup screen in `src/app/arena_setup.rs` and `arena_pick.rs`, minimap and tiled platforms in `src/power_arena.rs`. Evidence capture: `UME_SHOTS_ONLY=arena ultimate-mugen --shots <dir> --res 1280x720 --mute` also prints step and draw times, atlas fill and upload size (`UME_ARENA_SLOTS`, `UME_ARENA_POOL` and `UME_ARENA_TOTAL` override the profile).
+

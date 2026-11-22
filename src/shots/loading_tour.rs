@@ -32,3 +32,25 @@ pub(super) async fn run(app: &mut App, dir: &str) {
         .await;
     }
 }
+
+pub(super) async fn market_download(app: &mut App, dir: &str, repo: &str, ids: &[String]) {
+    let key = |id: &str| format!("{repo}\u{0}{id}");
+    app.market.queue.clear();
+    app.market.progress.total_files = 9;
+    for (i, id) in ids.iter().enumerate().take(2) {
+        app.market.current = Some(key(id));
+        app.market.progress.done_files = 2 + i;
+        for _ in 0..3 {
+            app.frame().await;
+            next_frame().await;
+        }
+    }
+    app.market.current = ids.get(2).map(|id| key(id));
+    for id in ids.iter().skip(3).take(6) {
+        app.market.queue.push_back((repo.to_string(), id.clone()));
+    }
+    super::screen(app, dir, "market-download", 6).await;
+    app.market.current = None;
+    app.market.queue.clear();
+    app.frame().await;
+}

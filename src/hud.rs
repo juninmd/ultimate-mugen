@@ -709,7 +709,7 @@ impl Hud {
                     &t,
                     cx,
                     cy + 5.2 * pulse,
-                    14.0 * pulse,
+                    14.0 * pulse * (2.0 / t.chars().count().max(2) as f32),
                     if urgent { hex("#ff5a5a") } else { WHITE },
                     Align::Center,
                 );

@@ -15,8 +15,8 @@ impl Match {
             .collect();
         let center = (self.stage.p1x + self.stage.p2x) * 0.5;
         let reach = (SLOT_WIDTH * total as f32 + SPAN_BASE) * 0.5;
-        let lo = (center - reach).max(self.stage.bound_left - self.view_w * 0.5 + EDGE_MARGIN);
-        let hi = (center + reach).min(self.stage.bound_right + self.view_w * 0.5 - EDGE_MARGIN);
+        let lo = (center - reach).max(self.stage.bound_left + EDGE_MARGIN);
+        let hi = (center + reach).min(self.stage.bound_right - EDGE_MARGIN);
         let slot = (hi - lo) / total as f32;
         let mut order: Vec<usize> = (0..total).collect();
         for k in (1..total).rev() {

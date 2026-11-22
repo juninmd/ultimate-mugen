@@ -30,7 +30,7 @@ fn seven_a_side_spawns_spread_out_and_apart() {
     for pair in sorted.windows(2) {
         assert!(pair[1] - pair[0] >= 8.0, "fighters never spawn on top of each other: {sorted:?}");
     }
-    let (lo, hi) = (m.stage.bound_left - m.view_w / 2.0, m.stage.bound_right + m.view_w / 2.0);
+    let (lo, hi) = (m.stage.bound_left, m.stage.bound_right);
     assert!(sorted.iter().all(|&x| x >= lo && x <= hi), "spawns stay inside the playable stage");
 }
 

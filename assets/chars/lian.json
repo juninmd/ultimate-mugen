@@ -1510,5 +1510,9 @@
     "weakness": "ice",
     "alignment": "hero",
     "tags": ["kicker","jade","aerial","combo"]
+  },
+  "rivals": {
+    "kaito": {"intro":"Kaito, vamos ver qual vento é mais puro: tempestade ou jade.","taunt":"Equilíbrio é tudo."},
+    "sylene": {"intro":"Seu gelo é forte, Sylene, mas a chama da lanterna não apaga.","attack":1.04}
   }
 }

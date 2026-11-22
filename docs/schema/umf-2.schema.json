@@ -51,6 +51,7 @@
     "vec2": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
     "ivec2": { "type": "array", "items": { "type": "integer" }, "minItems": 2, "maxItems": 2 },
     "rgb": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 255 }, "minItems": 3, "maxItems": 3 },
+    "rgbDelta": { "type": "array", "items": { "type": "integer", "minimum": -255, "maximum": 255 }, "minItems": 3, "maxItems": 3 },
     "snd": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 65535 }, "minItems": 2, "maxItems": 2 },
     "box4": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4 },
     "hexColor": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
@@ -114,7 +115,7 @@
         "fly": { "type": "object", "properties": { "speed": { "type": "number" }, "cost": { "type": "number" }, "input": { "type": "string" }, "anim": { "type": "string" }, "upAnim": { "type": "string" }, "downAnim": { "type": "string" }, "fwdAnim": { "type": "string" }, "backAnim": { "type": "string" }, "sound": { "$ref": "#/$defs/snd" } }, "additionalProperties": false },
         "teleport": { "type": "object", "properties": { "cost": { "type": "number" }, "input": { "type": "string" }, "anim": { "type": "string" }, "at": { "type": "integer" }, "offset": { "type": "number" }, "invuln": { "type": "integer" }, "turn": { "type": "boolean" }, "sound": { "$ref": "#/$defs/snd" } }, "additionalProperties": false },
         "superSpeed": { "type": "object", "properties": { "mul": { "type": "number" }, "cost": { "type": "number" }, "input": { "type": "string" } }, "additionalProperties": false },
-        "charge": { "type": "object", "properties": { "input": { "type": "string" }, "anim": { "type": "string" }, "auraColor": { "$ref": "#/$defs/rgb" }, "shake": { "type": "boolean" }, "sound": { "$ref": "#/$defs/snd" }, "explod": { "type": "string" } }, "additionalProperties": false },
+        "charge": { "type": "object", "properties": { "input": { "type": "string" }, "anim": { "type": "string" }, "auraColor": { "$ref": "#/$defs/rgb" }, "shake": { "type": "boolean" }, "sound": { "$ref": "#/$defs/snd" }, "explod": { "type": "string" }, "soundAt": { "type": "array", "items": { "type": "integer" } }, "startAnim": { "type": "string" }, "startSound": { "$ref": "#/$defs/snd" }, "endAnim": { "type": "string" } }, "additionalProperties": false },
         "forms": {
           "type": "array",
           "items": {
@@ -265,7 +266,7 @@
         "hitstop": { "type": "integer" }, "hitstun": { "type": "integer" }, "spark": { "type": "integer" }, "shake": { "type": "integer" }, "priority": { "type": "integer" },
         "hitflag": { "type": "string" }, "pausetime": { "$ref": "#/$defs/ivec2" }, "cornerpush": { "type": "number" },
         "hitSound": { "$ref": "#/$defs/snd" }, "guardSound": { "$ref": "#/$defs/snd" }, "sparkPos": { "$ref": "#/$defs/vec2" },
-        "groundBounce": { "type": "boolean" }, "wallBounce": { "type": "boolean" }, "element": { "$ref": "#/$defs/element" }, "stun": { "type": "integer" }
+        "groundBounce": { "type": "boolean" }, "wallBounce": { "type": "boolean" }, "element": { "$ref": "#/$defs/element" }, "stun": { "type": "integer" }, "recover": { "type": "boolean" }
       },
       "required": ["at", "damage"],
       "additionalProperties": false
@@ -276,7 +277,7 @@
       "properties": {
         "at": { "type": "integer" }, "anim": { "type": "string" }, "hitAnim": { "type": "string" }, "speed": { "$ref": "#/$defs/vec2" }, "accel": { "$ref": "#/$defs/vec2" }, "offset": { "$ref": "#/$defs/vec2" },
         "hits": { "type": "integer" }, "damage": { "type": "number" }, "level": { "enum": ["light", "medium", "heavy"] }, "launch": { "type": "boolean" }, "knockback": { "$ref": "#/$defs/vec2" },
-        "removeTime": { "type": "integer" }, "priority": { "type": "integer" }, "element": { "$ref": "#/$defs/element" }, "stun": { "type": "integer" }, "missTime": { "type": "integer" },
+        "removeTime": { "type": "integer" }, "priority": { "type": "integer" }, "element": { "$ref": "#/$defs/element" }, "stun": { "type": "integer" }, "recover": { "type": "boolean" }, "missTime": { "type": "integer" },
         "guardDamage": { "type": "number" }, "hitSound": { "$ref": "#/$defs/snd" }, "pausetime": { "$ref": "#/$defs/ivec2" }, "hitflag": { "type": "string" }, "shake": { "type": "integer" },
         "repeat": { "type": "object", "properties": { "count": { "type": "integer", "minimum": 1 }, "every": { "type": "integer" }, "offsetStep": { "$ref": "#/$defs/vec2" }, "speedStep": { "$ref": "#/$defs/vec2" }, "damageStep": { "type": "number" } }, "required": ["count"], "additionalProperties": false }
       },
@@ -348,7 +349,7 @@
       "description": "A move. With extends/use only id is required; the merge in crates/native/src/kit*.rs fills the rest before the typed parse.",
       "properties": {
         "id": { "type": "string", "minLength": 1 }, "name": { "type": "string" }, "input": { "type": "string" }, "simple": { "type": "string" },
-        "kind": { "enum": ["normal", "special", "super"] }, "when": { "enum": ["stand", "crouch", "air"] }, "anim": { "type": "string" },
+        "kind": { "enum": ["normal", "special", "super"] }, "when": { "enum": ["stand", "crouch", "air", "fly"] }, "anim": { "type": "string" },
         "use": { "type": "string" }, "remove": { "type": "boolean" }, "note": { "type": "string" },
         "hits": { "type": "array", "items": { "$ref": "#/$defs/hit" } }, "moves": { "type": "array", "items": { "$ref": "#/$defs/velChange" } },
         "projectile": { "$ref": "#/$defs/projectiles" }, "cost": { "type": "number", "minimum": 0 }, "invuln": { "$ref": "#/$defs/ivec2" }, "airPhysics": { "type": "boolean" },
@@ -357,7 +358,7 @@
         "sounds": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "integer" }, "snd": { "$ref": "#/$defs/snd" }, "fight": { "type": "boolean" } }, "required": ["at", "snd"], "additionalProperties": false } },
         "armor": { "type": "object", "properties": { "hits": { "type": "integer", "minimum": 0 }, "threshold": { "type": "number" } }, "required": ["hits"], "additionalProperties": false },
         "parry": { "type": "object", "properties": { "window": { "$ref": "#/$defs/ivec2" }, "spark": { "type": "integer" } }, "required": ["window"], "additionalProperties": false },
-        "burst": { "type": "boolean" }, "flight": { "type": "boolean" }, "timestop": { "type": "integer" },
+        "burst": { "type": "boolean" }, "flight": { "type": "boolean" }, "landAt": { "type": "integer" }, "timestop": { "type": "integer" },
         "throw": { "$ref": "#/$defs/throw" }, "cinematic": { "$ref": "#/$defs/cinematic" },
         "cancels": { "type": "array", "items": { "type": "string" } },
         "rekka": { "type": "object", "properties": { "after": { "type": "array", "items": { "type": "string" } }, "window": { "$ref": "#/$defs/ivec2" }, "contact": { "type": "boolean" } }, "required": ["after", "window"], "additionalProperties": false },
@@ -384,14 +385,14 @@
           "type": "object",
           "properties": {
             "at": { "type": "integer" }, "time": { "type": "integer" }, "length": { "type": "integer" }, "framegap": { "type": "integer" }, "trans": { "enum": ["add", "add1", "sub", "none"] },
-            "palBright": { "$ref": "#/$defs/rgb" }, "palContrast": { "$ref": "#/$defs/rgb" }, "palAdd": { "$ref": "#/$defs/rgb" }, "palMul": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 }
+            "palBright": { "$ref": "#/$defs/rgb" }, "palContrast": { "$ref": "#/$defs/rgb" }, "palAdd": { "$ref": "#/$defs/rgbDelta" }, "palMul": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 }
           },
           "additionalProperties": false
         },
         "shake": { "oneOf": [{ "$ref": "#/$defs/shake" }, { "type": "array", "items": { "$ref": "#/$defs/shake" } }] },
         "flash": { "oneOf": [{ "$ref": "#/$defs/flash" }, { "type": "array", "items": { "$ref": "#/$defs/flash" } }] },
         "superPause": { "type": "object", "properties": { "at": { "type": "integer" }, "time": { "type": "integer" }, "pos": { "$ref": "#/$defs/vec2" }, "anim": { "type": "integer" }, "darken": { "type": "boolean" } }, "additionalProperties": false },
-        "followUp": { "type": "object", "properties": { "to": { "type": "string" }, "on": { "enum": ["hit", "contact"] }, "at": { "type": "integer" } }, "required": ["to"], "additionalProperties": false },
+        "followUp": { "type": "object", "properties": { "to": { "type": "string" }, "on": { "enum": ["hit", "contact", "hitNow", "end"] }, "at": { "type": "integer" } }, "required": ["to"], "additionalProperties": false },
         "blink": {
           "oneOf": [{ "$ref": "#/$defs/blink" }, { "type": "array", "items": { "$ref": "#/$defs/blink" } }]
         },

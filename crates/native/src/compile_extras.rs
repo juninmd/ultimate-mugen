@@ -28,11 +28,11 @@ pub(in crate) fn hitdef_from_spec(h: &HitSpec, sm: f32, attr: &str, is_proj: boo
     let (sp_x, sp_y) = h.spark_pos.map(|s| (s[0], s[1])).unwrap_or((0.0, 0.0));
 
     let mut s = format!(
-        "attr = {attr}\ndamage = {damage}, {gd}\nanimtype = {}\nguardflag = {}\nhitflag = {hflag}\npriority = {prio}, Hit\npausetime = {p1stop}, {p2stop}\nguard.pausetime = {}, {}\nsparkno = {spark}\nguard.sparkno = 40\nsparkxy = {sp_x}, {sp_y}\nhitsound = {hs_g}, {hs_i}\nguardsound = {gs_g}, {gs_i}\nground.type = {}\nground.slidetime = {}\nground.hittime = {stun}\nground.velocity = {}, {}\nair.velocity = {}, {}\nair.hittime = {}\nguard.velocity = {}\nfall = {}\nair.fall = {}\nfall.recover = 1\ngetpower = {}, {}\ngivepower = {}, {}\n",
+        "attr = {attr}\ndamage = {damage}, {gd}\nanimtype = {}\nguardflag = {}\nhitflag = {hflag}\npriority = {prio}, Hit\npausetime = {p1stop}, {p2stop}\nguard.pausetime = {}, {}\nsparkno = {spark}\nguard.sparkno = 40\nsparkxy = {sp_x}, {sp_y}\nhitsound = {hs_g}, {hs_i}\nguardsound = {gs_g}, {gs_i}\nground.type = {}\nground.slidetime = {}\nground.hittime = {stun}\nground.velocity = {}, {}\nair.velocity = {}, {}\nair.hittime = {}\nguard.velocity = {}\nfall = {}\nair.fall = {}\nfall.recover = {}\ngetpower = {}, {}\ngivepower = {}, {}\n",
         lv.anim, guardflag(h.guard.as_deref()), if is_proj { 0 } else { stop - 2 }, stop - 2,
         if h.guard.as_deref() == Some("low") { "Low" } else { "High" }, (stun as f32 * 0.6).round() as i32,
         kb[0], if launch { if kb[1] != 0.0 { kb[1] } else { -7.0 } } else { kb[1] }, air[0], air[1], stun + 6, kb[0] * 0.7,
-        launch as i32, (launch || h.level.as_deref() == Some("heavy")) as i32,
+        launch as i32, (launch || h.level.as_deref() == Some("heavy")) as i32, i32::from(h.recover.unwrap_or(true)),
         (damage * 1.2).round(), (damage * 0.5).round(), (damage * 0.6).round(), (damage * 0.3).round());
     if let Some(t) = h.shake { s += &format!("envshake.time = {t}\n"); }
     s += &crate::element::hitdef_lines(h.element.as_deref(), h.stun, h.shake);
@@ -46,7 +46,7 @@ pub(in crate) fn hitdef_projectile(p: &super::ProjectileSpec, sm: f32, kb: Optio
     let spec = HitSpec {
         at: 0, damage: p.damage * sm, guard_damage: p.guard_damage.map(|g| g * sm), level: Some(p.level.as_deref().unwrap_or("medium").into()), guard: None, knockback: kb, air_knockback: None,
         launch: Some(p.launch.unwrap_or(false)), hitstop: None, hitstun: None, spark: None, shake: p.shake, priority: Some(4), hitflag: p.hitflag.clone(),
-        pausetime: p.pausetime, cornerpush: None, hit_sound: p.hit_sound, guard_sound: None, spark_pos: None, ground_bounce: None, wall_bounce: None, element: p.element.clone(), stun: p.stun,
+        pausetime: p.pausetime, cornerpush: None, hit_sound: p.hit_sound, guard_sound: None, spark_pos: None, ground_bounce: None, wall_bounce: None, element: p.element.clone(), stun: p.stun, recover: p.recover,
     };
     hitdef_from_spec(&spec, 1.0, attr, true)
 }

@@ -18,7 +18,7 @@ pub(super) fn super_pause_cns(m: &NativeMove, sid: i32, default_freeze: i32) -> 
         let anim = sp.anim.unwrap_or(30);
         let darken = if sp.darken.unwrap_or(true) { 1 } else { 0 };
         out += &format!(
-            "[State {sid}, super]\ntype = SuperPause\ntrigger1 = {trig}\ntime = {time}\nanim = {anim}\npos = {}, {}\ndarken = {darken}\nsound = -1\n\n",
+            "[State {sid}, super]\ntype = SuperPause\ntrigger1 = {trig}\npersistent = 0\ntime = {time}\nanim = {anim}\npos = {}, {}\ndarken = {darken}\nsound = -1\n\n",
             pos[0], pos[1]
         );
     } else if m.kind == "super" {
@@ -148,15 +148,25 @@ pub(super) fn follow_up_cns(m: &NativeMove, sid: i32, target_sid: Option<i32>) -
     let (Some(fu), Some(next_sid)) = (&m.follow_up, target_sid) else {
         return String::new();
     };
-    let cond = match fu.on.as_deref().unwrap_or("hit") {
-        "contact" => "MoveContact = 1",
+    let on = fu.on.as_deref().unwrap_or("hit");
+    let cond = match on {
+        "contact" => "MoveContact > 0",
         "end" => "1",
-        _ => "MoveHit = 1",
+        "hitNow" => "MoveHit = 1",
+        _ => "MoveHit > 0",
     };
-    let timing = fu
-        .at
-        .filter(|a| *a > 0)
-        .map(|a| format!("AnimElem = {a}"))
-        .unwrap_or_else(|| "AnimTime = 0".to_string());
+    let timing = if on == "hitNow" {
+        "1".to_string()
+    } else {
+        fu.at.filter(|a| *a > 0).map(|a| format!("AnimElem = {a}")).unwrap_or_else(|| "AnimTime = 0".to_string())
+    };
     format!("[State {sid}, followup]\ntype = ChangeState\ntrigger1 = {cond} && {timing}\nvalue = {next_sid}\nctrl = 0\n\n")
+}
+
+pub(super) fn land_cns(land_at: Option<i32>, sid: i32, anim: i32) -> String {
+    let landed = "Pos Y >= 0 && Vel Y > 0";
+    match land_at {
+        Some(elem) => format!("[State {sid}, land]\ntype = ChangeAnim\ntrigger1 = {landed} && AnimElemNo(0) < {elem}\nvalue = {anim}\nelem = {elem}\n\n[State {sid}, land_stop]\ntype = VelSet\ntrigger1 = {landed}\nx = 0\ny = 0\n\n"),
+        None => format!("[State {sid}, land]\ntype = ChangeState\ntrigger1 = {landed}\nvalue = 52\n\n"),
+    }
 }

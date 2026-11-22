@@ -55,7 +55,7 @@ def read_air(path):
         number = int(parts[k])
         if number in actions:
             continue
-        frames, clsn1, clsn2, default2, mode, loop = [], [], [], [], None, None
+        frames, clsn1, clsn2, default1, default2, mode, loop = [], [], [], [], [], None, None
         for raw in parts[k + 1].splitlines():
             line = strip(raw)
             low = line.lower()
@@ -66,8 +66,10 @@ def read_air(path):
                 continue
             m = re.match(r"clsn([12])(default)?\s*:\s*(\d+)", low)
             if m:
-                mode = ("1", "2d" if m.group(2) else "2")[m.group(1) == "2"]
-                if mode == "2d":
+                mode = m.group(1) + ("d" if m.group(2) else "")
+                if mode == "1d":
+                    default1 = []
+                elif mode == "2d":
                     default2 = []
                 elif mode == "1":
                     clsn1 = []
@@ -79,14 +81,14 @@ def read_air(path):
                 box = nums(m.group(2))[:4]
                 x1, y1, x2, y2 = box
                 box = [min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2)]
-                (default2 if mode == "2d" else clsn1 if m.group(1) == "1" else clsn2).append(box)
+                {"1d": default1, "2d": default2, "1": clsn1}.get(mode, clsn2).append(box)
                 continue
             fields = [f.strip() for f in line.split(",")]
             if len(fields) >= 5 and re.match(r"^-?\d+$", fields[0]) and re.match(r"^-?\d+$", fields[1]):
                 g, i, x, y, t = (int(float(v)) for v in fields[:5])
                 flip = fields[5].upper() if len(fields) > 5 else ""
                 frames.append({"g": g, "i": i, "x": x, "y": y, "t": t, "flip": flip,
-                               "clsn1": clsn1, "clsn2": clsn2 or default2})
+                               "clsn1": clsn1 or default1, "clsn2": clsn2 or default2})
                 clsn1, clsn2 = [], []
         actions[number] = {"frames": frames, "loop": loop}
     return actions
@@ -104,12 +106,18 @@ def read_commands(path):
 def read_states(paths):
     states = {}
     for path in paths:
-        current = None
+        current, seen = None, set()
         for name, body, pairs in sections(read_text(path)):
             m = re.match(r"(?i)statedef\s+(-?\d+)", name)
             if m:
                 current = int(m.group(1))
-                states.setdefault(current, {"def": body, "ctrl": []})
+                if current >= 0 and current in seen:
+                    current = None
+                elif current < 0 and current in states:
+                    seen.add(current)
+                else:
+                    seen.add(current)
+                    states[current] = {"def": body, "ctrl": []}
                 continue
             if re.match(r"(?i)state\s", name) and current is not None:
                 states[current]["ctrl"].append({"type": body.get("type", "").lower(), "body": body, "pairs": pairs})

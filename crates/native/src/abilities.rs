@@ -3,7 +3,7 @@ use ume_engine::chardef::MoveInfo;
 use ume_engine::commands::{parse_command, CommandDef};
 use std::collections::HashMap;
 
-const FLY_STATE: i32 = 3900;
+pub(super) const FLY_STATE: i32 = 3900;
 const FLY_FALL_STATE: i32 = 3901;
 const TELEPORT_STATE: i32 = 3910;
 const SPEED_VAR: i32 = 58;
@@ -48,7 +48,7 @@ pub(super) fn ability_code(spec: Option<&AbilitySpec>, anim_no: &HashMap<String,
             dir_anims += &format!("[State {FLY_STATE}, anim_idle]\ntype = ChangeAnim\ntrigger1 = command != \"holdup\" && command != \"holddown\" && command != \"holdfwd\" && command != \"holdback\" && Anim != {anim}\nvalue = {anim}\n\n");
         }
         let fly_snd = fly.sound.map(|s| format!("[State {FLY_STATE}, snd]\ntype = PlaySnd\ntrigger1 = Time = 0\nvalue = {}, {}\n\n", s[0], s[1])).unwrap_or_default();
-        let mut fly_cmd = parse_command("fly_toggle", input, 1, 4); fly_cmd.pause_buffer = 4;
+        let mut fly_cmd = parse_command("fly_toggle", input, motion_time(input), 4); fly_cmd.pause_buffer = 4;
         code.commands.push(fly_cmd);
         code.movelist.push(entry("Fly (toggle)", input, "fly_toggle", cost, true));
         code.minus1 += &format!("[State -1, fly]\ntype = ChangeState\nvalue = {FLY_STATE}\ntriggerall = !IsHelper && command = \"fly_toggle\"\ntriggerall = stateno != {FLY_STATE}\n{fuel}trigger1 = ctrl && (statetype = S || statetype = A)\n\n");
@@ -67,7 +67,7 @@ pub(super) fn ability_code(spec: Option<&AbilitySpec>, anim_no: &HashMap<String,
         let turn_cns = if tp.turn.unwrap_or(true) { format!("[State {TELEPORT_STATE}, turn]\ntype = Turn\ntrigger1 = {blink_trig}\n\n") } else { String::new() };
         let tp_snd = tp.sound.map(|s| format!("[State {TELEPORT_STATE}, snd]\ntype = PlaySnd\ntrigger1 = Time = 0\nvalue = {}, {}\n\n", s[0], s[1])).unwrap_or_default();
         let paid = if cost > 0.0 { format!("triggerall = power >= {cost}\n") } else { String::new() };
-        let mut tp_cmd = parse_command("teleport_cmd", input, 1, 4); tp_cmd.pause_buffer = 4;
+        let mut tp_cmd = parse_command("teleport_cmd", input, motion_time(input), 4); tp_cmd.pause_buffer = 4;
         code.commands.push(tp_cmd);
         code.movelist.push(entry("Teleport", input, "teleport_cmd", cost, false));
         code.minus1 += &format!("[State -1, teleport]\ntype = ChangeState\nvalue = {TELEPORT_STATE}\ntriggerall = !IsHelper && command = \"teleport_cmd\"\n{paid}trigger1 = ctrl && statetype != L\n\n");
@@ -79,7 +79,7 @@ pub(super) fn ability_code(spec: Option<&AbilitySpec>, anim_no: &HashMap<String,
         let mul = ss.mul.unwrap_or(1.8).max(1.0);
         let fuel = if cost > 0.0 { "triggerall = var(58) = 1 || power >= 1\n" } else { "" };
         let empty = if cost > 0.0 { "\ntrigger3 = power < 1" } else { "" };
-        let mut spd_cmd = parse_command("speed_toggle", input, 1, 4); spd_cmd.pause_buffer = 4;
+        let mut spd_cmd = parse_command("speed_toggle", input, motion_time(input), 4); spd_cmd.pause_buffer = 4;
         code.commands.push(spd_cmd);
         code.movelist.push(entry("Super Speed (toggle)", input, "speed_toggle", cost, true));
         code.minus1 += &format!("[State -1, super_speed]\ntype = VarSet\nv = {SPEED_VAR}\nvalue = ifelse(var({SPEED_VAR}) = 0, 1, 0)\ntriggerall = !IsHelper && command = \"speed_toggle\"\n{fuel}trigger1 = ctrl\n\n");
@@ -88,3 +88,5 @@ pub(super) fn ability_code(spec: Option<&AbilitySpec>, anim_no: &HashMap<String,
     }
     code
 }
+
+fn motion_time(input: &str) -> i32 { if input.contains(',') { 20 } else { 1 } }

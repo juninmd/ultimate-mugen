@@ -1,6 +1,8 @@
 import re
 
-from mugen_abilities import detect_throw, detect_wall_bounce, extract_fx
+from mugen_abilities import detect_throw, detect_wall_bounce
+from mugen_chain import chain, lands, segment, state_anim, triggers
+from mugen_fx import extract_fx
 from mugen_parse import nums
 
 STANDARD = {
@@ -17,10 +19,6 @@ LEVEL = {"light": "light", "medium": "medium", "med": "medium", "hard": "heavy",
 
 def anim_name(number):
     return f"seq{number - 900000}" if number >= 900000 else STANDARD.get(number, f"a{number}")
-
-
-def triggers(ctrl):
-    return [v.lower() for k, v in ctrl["pairs"] if k.startswith("trigger")]
 
 
 def frame_at(ctrl, frames):
@@ -79,6 +77,8 @@ def hit_from(ctrl, at, states=None):
         hit["airKnockback"] = pair(b["air.velocity"])
     if b.get("fall", "0").strip().startswith("1") or b.get("ground.type", "").strip().lower() == "trip":
         hit["launch"] = True
+    if b.get("fall.recover", "1").strip().startswith("0"):
+        hit["recover"] = False
     sound = b.get("hitsound", "").strip()
     if sound and not sound.upper().startswith("S"):
         s = nums(sound, (5, 0))
@@ -109,6 +109,10 @@ def projectile_from(ctrl, at, actions):
         proj["knockback"] = pair(b["ground.velocity"])
     if b.get("fall", "0").strip().startswith("1"):
         proj["launch"] = True
+    if b.get("fall.recover", "1").strip().startswith("0"):
+        proj["recover"] = False
+    if proj.get("hits", 1) > 1 and "missTime" not in proj:
+        proj["missTime"] = 0
     if b.get("pausetime"):
         p = nums(b["pausetime"], (0, 0))
         proj["pausetime"] = [int(p[0]), int(p[1])]
@@ -134,56 +138,23 @@ def sound_from(ctrl, at):
     return out
 
 
-def state_anim(state):
-    anim_no = int(nums(state["def"].get("anim"), (-1,))[0]) if state["def"].get("anim") else None
-    for ctrl in state["ctrl"]:
-        if anim_no is None and ctrl["type"] == "changeanim":
-            anim_no = int(nums(ctrl["body"].get("value"), (0,))[0])
-    return anim_no
-
-
-def chain(state_no, states, actions, limit=4, skip=frozenset()):
-    out, confirm = [state_no], None
-    while len(out) < limit:
-        nxt_uncond, nxt_cond = [], []
-        for c in states[out[-1]]["ctrl"]:
-            if c["type"] != "changestate":
-                continue
-            t = " ".join(triggers(c))
-            if "command" in t:
-                continue
-            val = int(nums(c["body"].get("value"), (0,))[0])
-            if val < 200 or val in out or val in skip or val not in states or state_anim(states[val]) not in actions:
-                continue
-            if "movehit" in t or "movecontact" in t:
-                if "!= 1" not in t and "!movehit" not in t and "!movecontact" not in t:
-                    nxt_cond.append((val, "contact" if "movecontact" in t else "hit"))
-            else:
-                nxt_uncond.append(val)
-        if nxt_cond:
-            confirm = nxt_cond[0]
-            break
-        if not nxt_uncond:
-            break
-        out.append(nxt_uncond[0])
-    return out, confirm
-
-
 def build_move(state_no, states, actions, label, cmd_input, when, cost, skip=frozenset()):
     links, confirm = chain(state_no, states, actions, skip=skip)
     links = [n for n in links if state_anim(states[n]) in actions]
     if not links:
         return None, []
     anim_no = state_anim(states[links[0]])
-    state = {"def": states[state_no]["def"], "ctrl": []}
+    state, landing = {"def": states[state_no]["def"], "ctrl": []}, {}
     if len(links) > 1:
         frames, ctrl = [], []
-        for n in links:
+        for k, n in enumerate(links):
             base = len(frames)
+            if k and lands(states[links[k - 1]], n) and "landAt" not in landing:
+                landing["landAt"] = base + 1
             for c in states[n]["ctrl"]:
                 elems = frame_at(c, actions[state_anim(states[n])]["frames"])
                 ctrl.append(dict(c, at=[e + base for e in elems]))
-            frames += actions[state_anim(states[n])]["frames"]
+            frames += segment(states[n], actions[state_anim(states[n])], links[k + 1] if k + 1 < len(links) else None)
         anim_no = 900000 + state_no
         actions[anim_no] = {"frames": frames, "loop": None}
         state["ctrl"] = ctrl
@@ -197,7 +168,7 @@ def build_move(state_no, states, actions, label, cmd_input, when, cost, skip=fro
     for ctrl in state["ctrl"]:
         at, kind = ctrl["at"], ctrl["type"]
         if kind == "hitdef":
-            for a in (at or [first_clsn1(frames)])[:6]:
+            for a in at or [first_clsn1(frames)]:
                 hits.append(hit_from(ctrl, a, states))
         elif kind == "projectile":
             proj, anims = projectile_from(ctrl, (at or [1])[0], actions)
@@ -237,7 +208,11 @@ def build_move(state_no, states, actions, label, cmd_input, when, cost, skip=fro
         move["invuln"] = fx["invuln"]
     if fx["teleport"]:
         move["teleport"] = fx["teleport"]
-    if confirm:
+    move.update(landing)
+    p1_hit = next((int(nums(c["body"].get("p1stateno"), (-1,))[0]) for c in state["ctrl"] if c["type"] == "hitdef" and c["body"].get("p1stateno")), None)
+    if not throw and p1_hit in states and p1_hit not in links:
+        move["_followUpState"] = (p1_hit, "hitNow")
+    elif confirm:
         move["_followUpState"] = confirm
     power = nums(state["def"].get("poweradd"), (0,))[0]
     if fx["super_pause"] or power <= -1000 or cost >= 1000:
@@ -248,43 +223,3 @@ def build_move(state_no, states, actions, label, cmd_input, when, cost, skip=fro
         if cost:
             move["cost"] = cost
     return move, extra
-
-
-def convert_input(text):
-    parts = [p.strip() for p in text.split(",")]
-    if len(parts) == 2 and parts[0].startswith("/"):
-        direction = parts[0].lstrip("/$~")
-        return f"{direction}+{parts[1].lstrip('/$')}"
-    return ", ".join(p.replace("/", "").replace("$", "") if not re.match(r"~\d+\$", p) else p for p in parts)
-
-
-def trigger_groups(ctrl):
-    shared, groups = [], {}
-    for key, value in ctrl["pairs"]:
-        if key == "triggerall":
-            shared.append(value.lower())
-        elif key.startswith("trigger") and key[7:].isdigit():
-            groups.setdefault(int(key[7:]), []).append(value.lower())
-    return [" & ".join(shared + lines) for _, lines in sorted(groups.items())] or [" & ".join(shared)]
-
-
-def routes(cmd_states, commands):
-    commands = {k.lower(): v for k, v in commands.items()}
-    out = []
-    for ctrl in cmd_states:
-        if ctrl["type"] != "changestate":
-            continue
-        value = int(nums(ctrl["body"].get("value"), (-1,))[0])
-        usable = [g for g in trigger_groups(ctrl) if not re.search(r"ctrl\s*=\s*0|stateno\s*=\s*3001", g)]
-        if not usable:
-            continue
-        text = usable[0]
-        names = re.findall(r'command\s*=\s*"([^"]+)"', text)
-        hold_only = all(re.fullmatch(r"/\$?\w+", c.strip()) for c in commands.get(names[0], ["x"])) if names else False
-        if not names or hold_only or names[0] not in commands:
-            continue
-        state_type = re.search(r"statetype\s*=\s*([sca])", text)
-        when = {"a": "air", "c": "crouch"}.get(state_type.group(1) if state_type else "s", "stand")
-        cost = int(max([float(x) for x in re.findall(r"power\s*>=?\s*(\d+)", text)] or [0]))
-        out.append((value, names[0], commands[names[0]][0], when, cost))
-    return out

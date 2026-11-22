@@ -19,9 +19,8 @@ impl Fighter {
     }
 
     pub(crate) fn counts_as_stuck(&self) -> bool {
-        self.move_type == 'H'
-            || !self.def.rules().script_landing
-            || self.state_time > 200
+        let scripted_attack = self.move_type == 'A' && self.anim_total_time > 0 && self.state_time <= self.anim_total_time + 60;
+        self.move_type == 'H' || !scripted_attack && (!self.def.rules().script_landing || self.state_time > 200)
     }
 
     pub(crate) fn hit_state_overstay(&self, free: bool) -> bool {

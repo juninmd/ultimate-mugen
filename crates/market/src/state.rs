@@ -49,7 +49,9 @@ impl Default for MarketState {
 
 impl MarketState {
     pub fn from_json(bytes: &[u8]) -> MarketState {
-        serde_json::from_slice::<MarketState>(bytes).ok().filter(|s| s.version == VERSION).unwrap_or_default()
+        let mut state = serde_json::from_slice::<MarketState>(bytes).ok().filter(|s| s.version == VERSION).unwrap_or_default();
+        state.installed.retain(|i| !crate::catalog::is_stale_fighter_sfx_music(i.kind, &i.item_id));
+        state
     }
 
     pub fn to_json(&self) -> Vec<u8> {
@@ -176,5 +178,21 @@ mod tests {
         assert_eq!(s.installed[0].tag(), "market:r:char:a");
         assert!(s.remove_installed("r", "char:a").is_some());
         assert!(s.remove_installed("r", "char:a").is_none());
+    }
+}
+
+#[cfg(test)]
+mod stale_sfx_tests {
+    use super::*;
+
+    #[test]
+    fn saved_fighter_sfx_installed_as_music_is_dropped_on_load() {
+        let mut s = MarketState::default();
+        let mk = |id: &str, kind| Installed { repo_key: "a/b".into(), item_id: id.into(), kind, name: "x".into(), bytes: 1, files: 1, active: true, installed_at: 0, version: String::new() };
+        s.installed.push(mk("music:umf/Goku/sprites/snd_44_0.wav", Kind::Music));
+        s.installed.push(mk("music:music/theme.ogg", Kind::Music));
+        let back = MarketState::from_json(&s.to_json());
+        assert_eq!(back.installed.len(), 1);
+        assert_eq!(back.installed[0].item_id, "music:music/theme.ogg");
     }
 }

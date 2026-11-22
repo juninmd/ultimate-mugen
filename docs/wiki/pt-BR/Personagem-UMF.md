@@ -2,6 +2,24 @@
 
 UMF (*Ultimate Mugen Format*) descreve um lutador inteiro em **um arquivo JSON**. O compilador (`crates/native/src/compile.rs`) gera comandos, estados, HitDefs, projéteis, super pause, cancelamentos e hitboxes. O resultado roda na mesma máquina de estados dos personagens M.U.G.E.N.
 
+## Como um golpe é definido
+
+Este é um trecho do golpe `jab` da [definição do Kaito](../../../assets/chars/kaito.json). Ele fica na lista `moves`, e `anim` aponta para uma entrada em `anims`.
+
+```json
+{
+  "id": "jab",
+  "name": "Snap Jab",
+  "input": "x",
+  "kind": "normal",
+  "anim": "jab",
+  "hits": [{ "at": 2, "damage": 28, "level": "light", "hitstun": 13 }],
+  "cancels": ["strong", "gale", "rise", "tide", "launcher", "overhead", "slide", "string_a"]
+}
+```
+
+`at: 2` seleciona o segundo quadro da animação. O valor de `ticks` define a duração de cada quadro, a 60 ticks de simulação por segundo. O compilador gera o comando, o estado de combate e o `HitDef` com o dano e a reação ao acerto. `cancels` lista os IDs dos golpes que podem começar antes do fim da animação atual.
+
 ## Passo a passo
 
 1. Copie um lutador pronto como base: `cp assets/chars/kaito.json assets/chars/meu.json`.

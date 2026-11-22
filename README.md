@@ -27,6 +27,35 @@
 
 ---
 
+## Why Ultimate MUGEN exists
+
+A fighter someone built years ago should still have a place in a new roster. Ultimate MUGEN is an open-source 2D fighting game engine built in Rust to carry forward that community work and give creators a more direct way to build original fighters. Elecbyte's M.U.G.E.N and Ikemen GO inspired the project.
+
+The engine loads classic M.U.G.E.N characters and stages, and the built-in pixel-art roster demonstrates what creators can make with UMF. Both kinds of fighter use the same combat simulation, so you can put a community character and a native fighter in the same match.
+
+### What the new engine changes
+
+| Design choice | What it means in practice |
+|---|---|
+| **A fixed 60 Hz combat simulation** | Moves, collisions and input timing run in ticks independent of rendering. With the same match setup and inputs, the engine can replay a fight or resimulate recent ticks during rollback. |
+| **A renderer built for indexed sprites** | Classic sprites can keep one byte per pixel for the color index. The GPU looks up the palette when drawing, so a palette swap can reuse the same sprite pixels. |
+| **Loading designed around frame time** | Desktop workers handle decoding off the main thread. In the browser, ZIP import processes a bounded amount of work per frame so progress can redraw and the player can cancel. |
+| **Two ways to author fighters** | The classic loader reads M.U.G.E.N files. The UMF compiler turns a declarative fighter definition into commands, animations and states for the same combat engine. |
+
+[Engine architecture](docs/wiki/Engine.md) · [Compatibility decisions](docs/wiki/Compatibility-Decisions.md) · [Netplay and replays](docs/wiki/Netplay-and-Replays.md)
+
+### UMF, the native fighter format
+
+UMF (*Ultimate Mugen Format*) brings stats, animation timing and combat rules together in a JSON definition. Pixel-art sprites can live in separate PNG files. The fighter definition says which input activates a move, which animation it plays, when it hits and which moves can follow it.
+
+For example, Kaito's **Snap Jab** uses the `x` input and the `jab` animation. Its hit activates on the second animation frame and deals 28 base damage. The move declares follow-ups such as **Reverse Punch** and **Gale Fist** by ID. The same format can describe meter costs, projectiles, armor, passive abilities and transformations.
+
+UMF 2 also lets creators reuse whole definitions with `extends` and compose individual moves with `use`. Shared kits can provide moves, poses, animations and stats across multiple fighters.
+
+[Create a UMF fighter](docs/wiki/UMF-Character.md) · [Kaito's definition](assets/chars/kaito.json) · [Passive abilities](docs/wiki/Passives.md)
+
+---
+
 ## ✨ At a glance
 
 <table>

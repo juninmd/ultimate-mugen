@@ -60,7 +60,7 @@ impl App {
             } else {
                 tr3("Original", "Original", "Original")
             };
-            let credit = format!("{origin} · {} · {}", e.series, e.author);
+            let credit = format!("{origin} · {} · {}", crate::i18n::fighter_lines::shown(&e.series), e.author);
             self.ui.text(
                 &crate::credit_line::truncate(&credit, 60),
                 520.0,

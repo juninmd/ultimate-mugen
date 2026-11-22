@@ -50,7 +50,7 @@ impl App {
     fn native_quote(&self, i: usize, boss_line: bool) -> String {
         match &self.reg.chars[i].src {
             crate::registry::Src::Native(nc) => {
-                if boss_line { nc.intro.clone().unwrap_or_default() } else { nc.win_quote.clone().unwrap_or_default() }
+                crate::i18n::fighter_lines::shown(if boss_line { nc.intro.as_deref() } else { nc.win_quote.as_deref() }.unwrap_or_default()).to_string()
             }
             _ => String::new(),
         }

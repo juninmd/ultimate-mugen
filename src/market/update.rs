@@ -1,10 +1,11 @@
 use super::*;
 
 pub fn installed_notice(prior: Option<bool>, name: &str) -> String {
-    match prior {
-        Some(_) => format!("Atualizado: {name}"),
-        None => format!("Instalado: {name}"),
-    }
+    let verb = match prior {
+        Some(_) => crate::i18n::tr3("Atualizado", "Updated", "Actualizado"),
+        None => crate::i18n::tr3("Instalado", "Installed", "Instalado"),
+    };
+    format!("{verb}: {name}")
 }
 
 impl Market {
@@ -137,7 +138,8 @@ mod tests {
 
     #[test]
     fn notice_tells_updates_from_installs() {
-        assert_eq!(installed_notice(None, "x"), "Instalado: x");
-        assert_eq!(installed_notice(Some(true), "x"), "Atualizado: x");
+        assert!(installed_notice(None, "x").ends_with(": x"));
+        assert!(installed_notice(Some(true), "x").ends_with(": x"));
+        assert_ne!(installed_notice(None, "x"), installed_notice(Some(true), "x"));
     }
 }

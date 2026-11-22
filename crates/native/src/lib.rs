@@ -13,6 +13,7 @@ mod rekka;
 mod multihit;
 pub mod move_fx;
 pub mod move_fx_spec;
+pub mod move_motion;
 pub mod blocks;
 pub mod throw;
 pub mod cinematic;

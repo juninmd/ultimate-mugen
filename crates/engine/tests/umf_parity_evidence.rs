@@ -158,5 +158,6 @@ fn original_vs_umf_parity() {
     assert!(genki.2.min.1 <= -90.0 && genki.2.min.0 <= genki.1.min.0 + 20.0, "Genki Dama must teleport up and back like the original");
     assert!(genki.2.end.1 && genki.2.end.2.abs() < 1.0, "Genki Dama must land and return control");
     assert!((tele.2.min.0 - tele.1.min.0).abs() < 20.0, "teleport must travel like the original");
+    assert!((meteor.2.min.1 - meteor.1.min.1).abs() < 5.0, "Meteor must jump as high as the original (VelAdd/VelMul)");
     assert!(charge_s.1.power.1 > 0.0, "original charge reference did not run");
 }

@@ -26,7 +26,7 @@ Coloque `"$schema"` no lutador (o carregador ignora) ou mapeie o arquivo nas con
 | Identidade e perfil | `id` (`^[a-z0-9][a-z0-9_-]*$`), `profile` com textos `en`, `pt`, `es`, `element`, `alignment` |
 | `stats`, `passives`, `abilities` | Números tipados, `fly`, `teleport`, `superSpeed`, `charge`, `forms` |
 | `anims` | `frames` como `"pose*ticks"` ou objetos com `pose`, `sprite`, `effect`, `hit`, `hurt`, `offset`, `ticks` |
-| `moves` | `kind`, `when`, `hits`, `projectile` (um ou lista), `cancels`, `rekka`, `throw`, `cinematic`, `explods`, `afterimage`, `shake`, `flash`, `superPause`, `followUp`, `blink`, `vfx`, `quake` |
+| `moves` | `kind`, `when`, `hits`, `projectile` (um ou lista), `cancels`, `rekka`, `throw`, `cinematic`, `explods`, `afterimage`, `shake`, `flash`, `superPause`, `followUp`, `blink`, `vfx`, `quake`, `velMul`, `velAdd`, `posFreeze`, `posSet`, `palFx` |
 | `helpers`, `bossRules`, `scripts` | Stand, clones, fases de chefe, ganchos ZSS e CNS |
 | Kits e `extends` | Lutador com `extends` ou `format: "umf-kit/1"` pode omitir os campos obrigatórios; o golpe então precisa só do `id` |
 

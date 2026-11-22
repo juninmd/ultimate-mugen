@@ -5,7 +5,7 @@ from mugen_chain import chain
 
 MAPPED = {"hitdef", "projectile", "velset", "veladd", "playsnd", "explod", "afterimage", "afterimagetime", "envshake", "envcolor",
           "superpause", "nothitby", "posadd", "turn", "changestate", "changeanim", "targetbind", "targetlifeadd", "targetstate",
-          "changeanim2", "ctrlset", "poweradd", "null"}
+          "changeanim2", "ctrlset", "poweradd", "null", "velmul", "posfreeze", "posset", "palfx"}
 ENGINE_COMMON = set(range(0, 170)) | set(range(5000, 5300)) | {5500, 5900}
 
 
@@ -33,11 +33,11 @@ def _parents(states):
     return out
 
 
-def coverage(states, commands, actions, sff, bank, state_to_id, consumed, scripts_cns, fighter, sprite_files, shadowed=frozenset()):
+def coverage(states, commands, actions, sff, bank, state_to_id, consumed, scripts_cns, fighter, sprite_files, shadowed=frozenset(), dropped=None):
     owner = _move_states(state_to_id, states, actions, consumed)
     script_ids = {int(x) for x in re.findall(r"\[Statedef (\d+)\]", scripts_cns or "")}
     parents = _parents(states)
-    rows, lost, kinds = [], Counter(), {}
+    rows, lost, kinds = [], Counter(dropped or {}), {}
     for sid in sorted(s for s in states if s >= 0):
         if sid in owner:
             kind = f"move `{owner[sid]}`"

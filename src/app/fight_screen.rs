@@ -76,7 +76,7 @@ impl App {
             crate::easter::tick(&s.m, &s.stage.info.name, &mut self.audio);
         }
         let framing = if replaying { ume_engine::replay_camera::frame(&mut s.m) } else { None };
-        s.draw(&mut self.g, &self.ui);
+        crate::power_arena::dock_above_touch_pad(self.c.touch.enabled); s.draw(&mut self.g, &self.ui);
         if !s.paused { crate::easter::draw(&self.ui, dt, s.vfx.below_banners(if self.c.touch.enabled { 146.0 } else { 116.0 })); }
         if let Some(saved) = framing {
             ume_engine::replay_camera::unframe(&mut s.m, saved);

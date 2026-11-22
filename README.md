@@ -138,12 +138,25 @@ The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set pe
 
 ## 🆕 What's new
 
-- **Story mode:** five stages of waves, thugs with their own traits and a boss per stage, with cutscenes and endings, plus breakable crates and barrels, food pickups and car-wrecking bonus rounds. [Guide](docs/wiki/Story-Mode.md) · [Stage objects](docs/wiki/Stage-Objects.md)
-- **Music and audio:** a built-in music theme per stage, tiered hit sounds, music ducking on impacts and a crowd cheer on the KO. [Audio](docs/wiki/Audio.md)
-- **Move shortcuts:** bind any move from the pause list to `1`-`4` (gamepad `L1`/`L2`/`R1`/`R2`); `L3` + `R3` transforms and `R3` alone charges ki. [Controls](docs/wiki/Configuration.md#controls)
-- **Richer movesets:** every native fighter has EX specials, a level 3 hyper, an escape burst, an ascended form with its own hyper, and air versions of its specials. [Shared toolkit](docs/wiki/Characters.md#shared-toolkit)
-- **Automatic updates and releases:** every merge to `master` publishes a release; the desktop build asks before updating. [Auto-update](docs/wiki/Auto-Update.md)
-- **M.U.G.E.N compatibility:** fixes found loading real community characters (walk and guard exits, taunts, intros, duplicate AIR actions). [Compatibility decisions](docs/wiki/Compatibility-Decisions.md)
+- **Game modes:** Arcade, Story (with a written epilogue per fighter), Versus CPU, 2 Players, Training, CPU vs CPU, Survival, Tower, Power Arena, Sequence/Parallel/Tag teams and online rollback. Combo Trials and Photo Mode work inside fights. [Game modes](docs/wiki/Game-Modes.md) · [Combo Trials](docs/wiki/Combo-Trials.md) · [Photo Mode](docs/wiki/Photo-Mode.md)
+- **Story:** five stages of waves and bosses, then a final boss and epilogues in EN/PT/ES. Every native fighter has its own unique country. [Guide](docs/wiki/Story-Mode.md) · [Stage objects](docs/wiki/Stage-Objects.md)
+- **MUGEN → UMF converter:** `tools/mugen2umf` is an exact converter in Rust with move-by-move parity checks. One package serves a CLI (`mugen2umf <tool>`) and an MCP server (`mugen2umf mcp`). [UMF guide](docs/wiki/UMF-Character.md)
+- **Mercado GitHub:** install characters, stages and music from any public repository, with list/grid views, MUGEN and UMF badges, a character-vs-pack kind, an outdated status and batch install, update and remove. [Marketplace](docs/wiki/Marketplace.md)
+- **Import M.U.G.E.N:** a holographic mosaic of every imported fighter and a full character sheet with portrait, stats and move list. [M.U.G.E.N content](docs/wiki/MUGEN-Content.md)
+- **Desktop in one file:** release builds embed the native fighter sprite packs, so the executable runs alone. [Installation](docs/wiki/Installation.md)
+- **Web and wiki:** the [web build](https://juninmd.github.io/ultimate-mugen/) and the [wiki](https://juninmd.github.io/ultimate-mugen/wiki/) are redeployed on every merge to `master`. Every sub screen has a **Back** button, which also helps on mobile.
+- **Also:** per-stage music, move shortcuts on `1`-`4`, EX specials and hypers for every native fighter, and automatic desktop updates. [Audio](docs/wiki/Audio.md) · [Controls](docs/wiki/Configuration.md#controls) · [Auto-update](docs/wiki/Auto-Update.md)
+
+<table>
+<tr>
+<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/market-view/acoes-market-grid.jpg" alt="Mercado GitHub grid with MUGEN and UMF badges"></td>
+<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/holo-gate/gate-import.png" alt="Holographic mosaic of imported fighters"></td>
+</tr>
+<tr>
+<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/mugen2umf-exact/goku-ssj_sequence.png" alt="Converted Goku SSJ4 move sequence from the exact converter"></td>
+<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/char-flags/depois-selecao.png" alt="Select screen with a country flag per fighter"></td>
+</tr>
+</table>
 
 ---
 

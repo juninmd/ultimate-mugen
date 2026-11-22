@@ -32,7 +32,8 @@ impl Gfx {
             if used + bytes > budget && (!allow_oversized || used > 0) {
                 return (i, used);
             }
-            if !spr.prefetch(ATLAS_CAP) {
+            let cost = ume_formats::perf::time(&format!("atlas:upload {} B", bytes), || spr.prefetch(ATLAS_CAP));
+            if !cost {
                 return (keys.len(), used);
             }
             used += bytes;

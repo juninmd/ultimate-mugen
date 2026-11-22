@@ -53,7 +53,9 @@ impl Gfx {
         self.tex
             .entry(img.id)
             .or_insert_with(|| {
-                let t = Texture2D::from_rgba_shared(img.w as u16, img.h as u16, img.rgba.clone());
+                let t = ume_formats::perf::time(&format!("tex:upload {}x{}", img.w, img.h), || {
+                    Texture2D::from_rgba_shared(img.w as u16, img.h as u16, img.rgba.clone())
+                });
                 t.set_filter(if nearest {
                     FilterMode::Nearest
                 } else {

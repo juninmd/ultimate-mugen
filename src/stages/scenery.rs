@@ -40,7 +40,7 @@ pub fn want(id: &str) {
         let Ok(data) = js_sys::futures::JsFuture::from(ume_fetch_asset(&path)).await else {
             return;
         };
-        let Ok(image) = super::decode_illustration(&js_sys::Uint8Array::new(&data).to_vec()) else {
+        let Ok(image) = super::web_decode::decode_opaque_illustration(&js_sys::Uint8Array::new(&data)).await else {
             return;
         };
         STILLS.with(|stills| stills.borrow_mut().insert(id, Some(image)));

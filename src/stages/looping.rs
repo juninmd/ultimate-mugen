@@ -67,8 +67,7 @@ pub async fn prepare(id: &str) -> Result<(), String> {
         let Ok(data) = js_sys::futures::JsFuture::from(ume_fetch_asset(&path)).await else {
             return Ok(());
         };
-        let bytes = js_sys::Uint8Array::new(&data).to_vec();
-        let Ok(image) = decode_loop_frame(&bytes) else {
+        let Ok(image) = super::web_decode::decode_opaque_illustration(&js_sys::Uint8Array::new(&data)).await else {
             return Ok(());
         };
         images.push(image);

@@ -36,3 +36,22 @@ window.ume_fetch_asset = async (path) => {
     clearTimeout(timeout);
   }
 };
+
+window.ume_decode_image = async (bytes) => {
+  if (typeof createImageBitmap !== 'function' || typeof OffscreenCanvas !== 'function') return null;
+  const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }), {
+    premultiplyAlpha: 'none',
+    colorSpaceConversion: 'none',
+  });
+  try {
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    context.drawImage(bitmap, 0, 0);
+    const image = context.getImageData(0, 0, bitmap.width, bitmap.height);
+    const data = new Uint8Array(image.data.buffer);
+    for (let i = 3; i < data.length; i += 4) if (data[i] !== 255) return null;
+    return { width: image.width, height: image.height, data };
+  } finally {
+    bitmap.close();
+  }
+};

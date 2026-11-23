@@ -113,3 +113,9 @@ fn own_epilogues_win_over_invented_ones_and_nameless_fighters_use_the_fallback()
     assert_eq!(pick_named(&table, "umf:kaito", "Other").unwrap().as_ref(), table.get("kaito").unwrap());
     assert_eq!(pick_named(&table, "mystery", "").unwrap().as_ref(), table.get(FALLBACK).unwrap());
 }
+
+#[test]
+fn the_final_boss_follows_the_active_script() {
+    let last = crate::story::active_script().stages.last().unwrap();
+    assert_eq!(final_boss("nobody"), last.boss);
+}

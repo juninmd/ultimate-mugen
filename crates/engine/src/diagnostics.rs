@@ -11,7 +11,7 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::Arc;
 use ume_formats::ini::parse_ini;
 
-mod params;
+mod params; mod value_prefix;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Category {
@@ -144,7 +144,7 @@ fn audit_controller(c: &Controller, push: &mut impl FnMut(Category, String)) {
     let supported = controller_supported(&c.kind);
     if !supported { push(Category::Controller, c.kind.clone()); }
     for node in c.trigger_all.iter().chain(c.triggers.iter().flatten()).map(|e| &e.node) { audit_node(node, push); }
-    for node in c.params.iter().flat_map(|(_, p)| p.exprs.iter().map(|e| &e.node)).filter(|n| !is_bare_word(n)) { audit_node(node, push); }
+    for node in c.params.iter().flat_map(|(_, p)| p.exprs.iter().map(|e| &e.node)).filter(|n| !is_bare_word(n)) { audit_node(node, &mut |cat, name| if !(cat == Category::Trigger && value_prefix::is_value_prefix_artifact(&name)) { push(cat, name) }); }
     if !supported { return; }
     let names: Vec<&str> = c.params.iter().map(|(k, _)| k.as_str()).filter(|k| !is_universal_param(k)).collect();
     if names.is_empty() { return; }

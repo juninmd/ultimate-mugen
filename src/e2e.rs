@@ -138,9 +138,9 @@ mod web {
             }
         }
         let story = app.story_snapshot().map_or_else(|| "null".into(), |(stage, wave, credits, score, phase)| {
-            let (mercy, helper_pending) = app.story_decision_snapshot().unwrap_or((None, false));
+            let (mercy, helper_pending, helper_cursor, helper_chosen) = app.story_decision_snapshot().unwrap_or((None, false, 0, false));
             let mercy = match mercy { Some(true) => "true", Some(false) => "false", None => "null" };
-            format!("{{\"stage\":{stage},\"wave\":{wave},\"credits\":{credits},\"score\":{score},\"phase\":\"{phase}\",\"mercy\":{mercy},\"helper_pending\":{helper_pending}}}")
+            format!("{{\"stage\":{stage},\"wave\":{wave},\"credits\":{credits},\"score\":{score},\"phase\":\"{phase}\",\"mercy\":{mercy},\"helper_pending\":{helper_pending},\"helper_cursor\":{helper_cursor},\"helper_chosen\":{helper_chosen}}}")
         });
         let epilogue = app.story_epilogue_page().map_or("null".to_string(), |page| page.to_string());
         let arcade = app.arcade.as_ref().map_or_else(

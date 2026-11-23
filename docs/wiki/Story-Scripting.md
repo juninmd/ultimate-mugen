@@ -81,3 +81,5 @@ The epilogue editor's **Scene** row cycles the background (any stage with art) w
 Story Studio also edits each stage's **name** (per language) and **boss** (Left/Right cycles through the installed fighters); the epilogue's final boss follows the last stage's boss. The **Foes per wave** row (Left/Right) sets 1 to 4 enemies in every wave of the stage.
 
 At the final boss introduction, choose **Spare** or **Finish** with Left/Right or by tapping the option. The choice selects the corresponding epilogue.
+
+After that choice, tap the sides of the helper picker to browse allies and tap the selected name to call them into the final fight.

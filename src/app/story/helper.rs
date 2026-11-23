@@ -52,14 +52,22 @@ impl App {
         let candidates = self.story_helper_candidates(run);
         let mut cursor = run.helper_cursor.min(candidates.len());
         let mut moved = false;
-        if self.c.pressed(crate::controls::nav::LEFT) || self.clicked_rect(0.0, 440.0, VW * 0.3, 120.0) {
+        if self.c.pressed(crate::controls::nav::LEFT)
+            || self.clicked_rect(0.0, 440.0, VW * 0.3, 120.0)
+            || self.tapped_in(0.0, 440.0, VW * 0.3, 120.0)
+        {
             cursor = helper::step(cursor, candidates.len(), false);
             moved = true;
-        } else if self.c.pressed(crate::controls::nav::RIGHT) || self.clicked_rect(VW * 0.7, 440.0, VW * 0.3, 120.0) {
+        } else if self.c.pressed(crate::controls::nav::RIGHT)
+            || self.clicked_rect(VW * 0.7, 440.0, VW * 0.3, 120.0)
+            || self.tapped_in(VW * 0.7, 440.0, VW * 0.3, 120.0)
+        {
             cursor = helper::step(cursor, candidates.len(), true);
             moved = true;
         }
-        let accept = confirmed || self.clicked_rect(VW * 0.3, 440.0, VW * 0.4, 120.0);
+        let accept = confirmed
+            || self.clicked_rect(VW * 0.3, 440.0, VW * 0.4, 120.0)
+            || self.tapped_in(VW * 0.3, 440.0, VW * 0.4, 120.0);
         let Some(run) = self.story.as_mut() else { return };
         run.helper_cursor = cursor;
         if moved {

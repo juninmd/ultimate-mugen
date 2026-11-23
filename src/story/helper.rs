@@ -72,9 +72,9 @@ pub fn none_label() -> &'static str {
 
 pub fn hint() -> &'static str {
     tr3(
-        "Esquerda ou direita para escolher, confirmar para aceitar",
-        "Left or right to choose, confirm to accept",
-        "Izquierda o derecha para elegir, confirmar para aceptar",
+        "Esq/Dir ou toque nas laterais; confirme ou toque no nome",
+        "Left/right or tap sides; confirm or tap the name",
+        "Izq/Der o toca los lados; confirma o toca el nombre",
     )
 }
 

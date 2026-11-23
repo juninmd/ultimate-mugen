@@ -35,7 +35,7 @@ const MIN_CHANGE = 0.004;
     for (let i = 0; i < x.length; i += 4) diff += (Math.abs(x[i] - y[i]) + Math.abs(x[i + 1] - y[i + 1]) + Math.abs(x[i + 2] - y[i + 2])) / 765;
     return diff / (x.length / 4);
   }, [a.toString('base64'), b.toString('base64')]);
-  const touch = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map(([x, y], i) => ({ x, y, id: i + 1 })) });
+  const touch = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map(([x, y, id], i) => ({ x, y, id: id ?? i + 1 })) });
   const tap = async (x, y, hold = 120) => { await touch('touchStart', [[x, y]]); await wait(hold); await touch('touchEnd', []); await wait(900); };
   const expectChange = async (label, before, after) => {
     const c = await change(before, after);
@@ -113,7 +113,7 @@ const MIN_CHANGE = 0.004;
     await touch('touchStart', [[W * 0.155, H * 0.77], [bx, by - gap]]); await wait(120);
     const lit = await shot(i === 0 ? '07c-tap-over-held-stick' : null, padClip);
     await expectChange(`attack tap ${i + 1} registers over the held stick`, idlePad, lit);
-    await touch('touchEnd', [[W * 0.155, H * 0.77]]); await wait(120);
+    await touch('touchEnd', [[bx, by - gap, 2]]); await wait(120);
   }
   const stillHeld = await shot('07d-stick-after-taps', stickClip);
   await touch('touchEnd', []);

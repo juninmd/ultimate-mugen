@@ -47,3 +47,58 @@ pub fn decode_snd_checked(buf: &[u8]) -> Result<HashMap<(i32, i32), Vec<u8>>, St
     }
     Ok(out)
 }
+
+const SND_HEADER_LEN: usize = 512;
+
+pub fn encode_snd(sounds: &[((i32, i32), &[u8])]) -> Vec<u8> {
+    let payload: usize = sounds.iter().map(|(_, data)| 16 + data.len()).sum();
+    let mut out = Vec::with_capacity(SND_HEADER_LEN + payload);
+    out.extend_from_slice(SIGNATURE);
+    out.extend_from_slice(&1u16.to_le_bytes());
+    out.extend_from_slice(&1u16.to_le_bytes());
+    out.extend_from_slice(&(sounds.len() as u32).to_le_bytes());
+    let first_offset = if sounds.is_empty() { 0u32 } else { SND_HEADER_LEN as u32 };
+    out.extend_from_slice(&first_offset.to_le_bytes());
+    out.resize(SND_HEADER_LEN, 0);
+
+    for (idx, ((group, index), data)) in sounds.iter().enumerate() {
+        let current = out.len();
+        let next = if idx + 1 < sounds.len() {
+            (current + 16 + data.len()) as u32
+        } else {
+            0u32
+        };
+        out.extend_from_slice(&next.to_le_bytes());
+        out.extend_from_slice(&(data.len() as u32).to_le_bytes());
+        out.extend_from_slice(&group.to_le_bytes());
+        out.extend_from_slice(&index.to_le_bytes());
+        out.extend_from_slice(data);
+    }
+    out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn encode_snd_round_trips_multiple_entries() {
+        let wav_a = b"RIFF\x24\x00\x00\x00WAVEfmt ";
+        let wav_b = b"RIFF\x10\x00\x00\x00WAVEdata";
+        let encoded = encode_snd(&[((0, 0), wav_a.as_slice()), ((5, 2), wav_b.as_slice())]);
+        assert!(encoded.len() >= SND_HEADER_LEN);
+        let decoded = decode_snd_checked(&encoded).expect("valid encoded SND");
+        assert_eq!(decoded.len(), 2);
+        assert_eq!(decoded.get(&(0, 0)).map(Vec::as_slice), Some(wav_a.as_slice()));
+        assert_eq!(decoded.get(&(5, 2)).map(Vec::as_slice), Some(wav_b.as_slice()));
+    }
+
+    #[test]
+    fn encode_snd_handles_empty_bank() {
+        let encoded = encode_snd(&[]);
+        assert_eq!(encoded.len(), SND_HEADER_LEN);
+        let decoded = decode_snd_checked(&encoded).expect("valid empty SND");
+        assert!(decoded.is_empty());
+    }
+}
+

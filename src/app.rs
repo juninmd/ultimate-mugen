@@ -490,7 +490,9 @@ impl App {
         set_keep_aspect(self.settings.keep_aspect);
         set_linear_filter(self.settings.linear);
         self.g.fx_gain = IMPACT[self.settings.impact.min(IMPACT.len() - 1)].0;
-        self.c.nav.set_screen(&self.screen);
+        let paused = self.session.as_ref().is_some_and(|s| s.paused) && matches!(self.screen, Screen::Fight);
+        self.c.nav.set_screen(&self.screen, paused);
+        self.c.touch.suspended = paused;
         self.c.update();
         self.preview_t += get_frame_time();
         let dt = get_frame_time();

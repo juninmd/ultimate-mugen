@@ -19,6 +19,9 @@ pub struct TouchPad {
     pub more_open: bool,
     idle_frames: u32,
     age: [u8; BUTTONS],
+    probe: Option<String>,
+    probe_on: bool,
+    pub suspended: bool,
 }
 
 pub const QUICK_SKILLS: usize = 4;
@@ -69,6 +72,9 @@ impl TouchPad {
             more_open: false,
             idle_frames: IDLE_FADE_FRAMES,
             age: [0; BUTTONS],
+            probe: None,
+            probe_on: crate::storage::read("touchdebug").is_some(),
+            suspended: false,
         }
     }
     fn reset(&mut self) {
@@ -112,8 +118,14 @@ impl TouchPad {
             self.reset();
             return;
         }
-        let lay = touch_layout::compute();
         let samples = self.samples(dpi_scale().max(0.01));
+        if self.suspended {
+            let began = std::mem::take(&mut self.began);
+            self.reset();
+            self.began = began;
+            return;
+        }
+        let lay = touch_layout::compute();
         let floating = crate::tweaks::current().touch_floating_stick;
         let out = self.fingers.update(&samples, &lay, self.more_open, floating);
         self.idle_frames = if samples.is_empty() { self.idle_frames.saturating_add(1) } else { 0 };
@@ -148,13 +160,25 @@ impl TouchPad {
             }
         }
         self.bits = bits;
+        self.publish_probe();
+    }
+    fn publish_probe(&mut self) {
+        if !self.probe_on {
+            return;
+        }
+        let mask = self.pressed.iter().enumerate().fold(0u32, |m, (i, p)| m | (*p as u32) << i);
+        let line = format!("{} {} {}", self.bits, mask, self.more_open as u8);
+        if self.probe.as_deref() != Some(line.as_str()) {
+            crate::storage::write("touchdebug.out", &line);
+            self.probe = Some(line);
+        }
     }
     fn fade(&self) -> f32 {
         let over = self.idle_frames.saturating_sub(IDLE_FADE_FRAMES) as f32 / 30.0;
         1.0 - (1.0 - IDLE_ALPHA) * over.min(1.0)
     }
     pub fn draw(&self) {
-        if !self.enabled {
+        if !self.enabled || self.suspended {
             return;
         }
         let opacity = crate::tweaks::current().touch_opacity * self.fade();

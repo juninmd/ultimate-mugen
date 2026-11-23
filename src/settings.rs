@@ -86,6 +86,7 @@ pub struct Settings {
     pub auto_update: bool,
     pub show_boxes: bool,
     pub story_enabled: bool,
+    pub skip_intros: bool,
     pub lang: crate::i18n::Lang,
     pub lite: crate::lite::Lite,
 }
@@ -127,6 +128,7 @@ impl Default for Settings {
             auto_update: true,
             show_boxes: false,
             story_enabled: true,
+            skip_intros: false,
             lang: crate::i18n::Lang::En,
             lite: crate::lite::Lite::default(),
         }

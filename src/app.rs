@@ -2018,6 +2018,7 @@ impl App {
             }
             sess.team = info;
             sess.is_replay = replay.is_some();
+            sess.auto_skip_intro = self.settings.skip_intros;
             let seed = replay.as_ref().map_or_else(crate::app::fight_seed::fresh_seed, |r| r.seed);
             sess.m.rng = seed;
             sess.seed = seed;

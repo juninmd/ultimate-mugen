@@ -45,6 +45,7 @@ enum Act {
     SurvivalRecovery,
     ShowBoxes,
     StoryEnabled,
+    SkipIntros,
     Language,
     CheckUpdate,
     AutoUpdate,
@@ -347,6 +348,7 @@ impl App {
                     ),
                 ),
                 row(Act::ShowBoxes, tr3("Exibir Hitboxes / Hurtboxes", "Show Hitboxes / Hurtboxes", "Mostrar Hitboxes / Hurtboxes"), on_off(s.show_boxes), tr3("Mostra caixas de ataque e colisão durante as lutas", "Displays attack and body collision boxes during fights", "Muestra cajas de ataque y colisión durante los combates")),
+                row(Act::SkipIntros, tr3("Pular intros dos lutadores", "Skip fighter intros", "Saltar intros de luchadores"), on_off(s.skip_intros), tr3("Começa o round direto, sem a pose de apresentação (qualquer botão ou toque também pula)", "Starts the round straight away, no face-off pose (any button or tap also skips)", "Empieza el round directo, sin la pose de presentación (cualquier botón o toque también salta)")),
                 row(Act::StoryEnabled, tr3("Modo História (TOML)", "Story mode (TOML)", "Modo Historia (TOML)"), on_off(s.story_enabled && crate::story::active_script().campaign.enabled), tr3("Ative/desative ou personalize em story/campaign.toml", "Enable/disable or customize via story/campaign.toml", "Activa/desactiva o personaliza en story/campaign.toml")),
             ],
             6 => lite_rows::rows(s),
@@ -437,6 +439,7 @@ impl App {
             }
             Act::ShowBoxes if go => { s.show_boxes = !s.show_boxes; self.debug_boxes = s.show_boxes; if let Some(sess) = self.session.as_mut() { sess.r.debug = s.show_boxes; } crate::hud::debug_panel::set(s.show_boxes); }
             Act::StoryEnabled if go => s.story_enabled = !s.story_enabled,
+            Act::SkipIntros if go => s.skip_intros = !s.skip_intros,
             Act::Language if go => s.lang = s.lang.next(step),
             Act::AutoUpdate if go => s.auto_update = !s.auto_update,
             Act::CheckUpdate if ok => {

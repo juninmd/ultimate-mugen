@@ -79,6 +79,7 @@ fn text_round_trips() {
         auto_update: false,
         show_boxes: true,
         story_enabled: false,
+        skip_intros: true,
         lang: crate::i18n::Lang::En,
         ..Settings::default()
     };

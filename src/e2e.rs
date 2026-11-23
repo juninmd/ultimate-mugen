@@ -137,12 +137,11 @@ mod web {
                 fighters.push_str(&fighter_json(f));
             }
         }
-        let story = app
-            .story_snapshot()
-            .map(|(stage, wave, credits, score, phase)| {
-                format!("{{\"stage\":{stage},\"wave\":{wave},\"credits\":{credits},\"score\":{score},\"phase\":\"{phase}\"}}")
-            })
-            .unwrap_or_else(|| "null".into());
+        let story = app.story_snapshot().map_or_else(|| "null".into(), |(stage, wave, credits, score, phase)| {
+            let (mercy, helper_pending) = app.story_decision_snapshot().unwrap_or((None, false));
+            let mercy = match mercy { Some(true) => "true", Some(false) => "false", None => "null" };
+            format!("{{\"stage\":{stage},\"wave\":{wave},\"credits\":{credits},\"score\":{score},\"phase\":\"{phase}\",\"mercy\":{mercy},\"helper_pending\":{helper_pending}}}")
+        });
         let epilogue = app.story_epilogue_page().map_or("null".to_string(), |page| page.to_string());
         let arcade = app.arcade.as_ref().map_or_else(
             || "null".to_string(),

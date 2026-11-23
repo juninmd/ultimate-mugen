@@ -25,10 +25,6 @@ impl Plan {
         }
     }
 
-    fn is_empty(&self) -> bool {
-        self.chars.is_empty()
-    }
-
     fn index_of(&self, def: &str) -> usize {
         self.chars.iter().position(|(d, _)| d == def).unwrap_or(0)
     }

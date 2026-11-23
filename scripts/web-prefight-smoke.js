@@ -29,6 +29,7 @@ const server = staticServer(dir, types);
   let s = await state();
   while ((!s || s.screen !== 'story' || !s.story || s.story.stage !== 4) && Date.now() < deadline) { await p.waitForTimeout(1500); s = await state(); }
   if (!s || !s.story || s.story.stage !== 4) problems.push(`never reached the final boss intro (${JSON.stringify(s && { screen: s.screen, story: s.story })})`);
+  if (!s?.story || s.story.wave < 1 || s.story.score < 1) problems.push('last-wave victory was not recorded');
   await p.waitForTimeout(1500);
   await shot('prefight-1-boss.png');
   await key('Enter', 800);
@@ -40,6 +41,11 @@ const server = staticServer(dir, types);
   await shot('prefight-mercy.png');
   s = await state();
   if (!s || s.screen !== 'story' || s.story.phase !== 'Intro') problems.push(`mercy choice did not follow the dialogue (${JSON.stringify(s && s.story)})`);
+  await key('ArrowLeft', 800);
+  await shot('prefight-helper.png');
+  await key('Enter', 800);
+  await key('Enter', 800);
+  await p.waitForFunction(() => ['vs', 'fight'].includes(JSON.parse(globalThis.__ume_state || 'null')?.screen), null, { timeout: 90000 });
   await b.close(); server.close();
   if (problems.length) { console.error('WEB PREFIGHT SMOKE FAILED\n' + problems.join('\n')); process.exit(1); }
   console.log('WEB PREFIGHT SMOKE OK');

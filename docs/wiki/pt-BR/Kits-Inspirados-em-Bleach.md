@@ -13,3 +13,9 @@ Espadachim nobre e preciso: `byakurai` (`~D, DF, F, y`, raio fino rapido), `shak
 ## Shion Kurogane (estilo Zaraki)
 
 `reckless` (`D, D, x`, armadura de dois golpes) e furia a partir de 50% de vida (ate 1.5x) somada ao enrage por tempo.
+
+## Byakuren Sakuraba (Personagem Secreto do Modo História — Inspirado em Kuchiki Byakuya)
+Desbloqueado automaticamente ao zerar o Modo História (`stats.story.clear >= 1` em `assets/routes/unlocks.toml`). Conta com pacote próprio de sprites pixel-art em branco/preto/sakura (`assets/chars/sprites/byakuren/`), 6 efeitos sonoros WAV originais (`snd_200_0..5.wav`) e explora todos os recursos do UMF 2.0:
+- **Habilidades Core**: Caminhada Espiritual (`fly`), *Shunpo* (`teleport`), *Senka* (`superSpeed`), *Carga de Reiatsu* (`charge`) e clone autônomo *Utsusemi* (`helpers.clones`).
+- **Kido & Shikai**: *Chire, Sakuramai* (chão e ar), *Hadō #4: Byakurai*, *Hadō #33: Sōkatsui*, *Bakudō #61: Rikujōkōrō*, *Bakudō #81: Dankū* e *Shunpo: Senka* com teleporte nas costas.
+- **Transformações em 2 Estágios**: Forma 1 (*Bankai: Mil Pétalas da Sombra* — libera *Maré de Pétalas* e *Gokei: Cúpula*) e Forma 2 (*Shukei: Hakuteiken* — libera o golpe supremo de 2 barras *Juízo Branco*).

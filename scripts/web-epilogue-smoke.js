@@ -2,6 +2,7 @@ const fs = require('fs'), path = require('path');
 const { staticServer } = require('./web-smoke-server');
 const { chromium } = require('playwright');
 const dir = path.resolve(process.argv[2] || path.join(__dirname, '..', 'web', 'dist'));
+const ally = process.env.EPILOGUE_ALLY === '1';
 const shotDir = process.env.WEB_SMOKE_SHOTS;
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.wasm': 'application/wasm', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.zip': 'application/zip' };
 const server = staticServer(dir, types);
@@ -18,7 +19,7 @@ const sceneLuminance = (page, buffer) => page.evaluate(async base64 => {
 }, buffer.toString('base64'));
 (async () => {
   await new Promise(ok => server.listen(0, '127.0.0.1', ok));
-  const url = `http://127.0.0.1:${server.address().port}/index.html?e2e=1&e2e_epilogue=1`;
+  const url = `http://127.0.0.1:${server.address().port}/index.html?e2e=1&e2e_epilogue=1${ally ? '&e2e_ally=1' : ''}`;
   const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   const problems = [];
@@ -49,7 +50,14 @@ const sceneLuminance = (page, buffer) => page.evaluate(async base64 => {
   await reach(2, 'the home scene');
   await p.waitForTimeout(2500);
   const home = await capture('epilogue-home.png');
-  await reach(4, 'the end card');
+  if (ally) {
+    await reach(4, 'the ally page');
+    await p.waitForTimeout(2500);
+    await capture('epilogue-ally.png');
+    await reach(5, 'the end card');
+  } else {
+    await reach(4, 'the end card');
+  }
   await p.waitForTimeout(1500);
   await capture('epilogue-end.png');
   await key('Enter', 1500);

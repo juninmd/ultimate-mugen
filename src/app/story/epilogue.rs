@@ -4,7 +4,7 @@ use crate::gfx::*;
 use crate::story::epilogue::Epilogue;
 use crate::story::{epilogue, epilogue_music};
 use std::borrow::Cow;
-use crate::story::{Phase, StoryRun};
+use crate::story::{HelperPick, Phase, StoryRun};
 
 const INPUT_DELAY: f32 = 0.25;
 const TEXT_REVEALED: f32 = 99.0;
@@ -15,7 +15,7 @@ impl App {
             return false;
         }
         let player = self.player_char_id();
-        let Some(script) = self.epilogue_script(&player, run.mercy) else {
+        let Some(script) = self.epilogue_script(&player, run) else {
             return false;
         };
         let beats = script.beats(crate::profile::lang());
@@ -47,7 +47,7 @@ impl App {
             return;
         }
         let player = self.player_char_id();
-        let Some(script) = self.epilogue_script(&player, run.mercy) else {
+        let Some(script) = self.epilogue_script(&player, run) else {
             return;
         };
         if run.epilogue == 0 {
@@ -60,9 +60,18 @@ impl App {
         }
     }
 
-    fn epilogue_script(&self, player: &str, mercy: Option<bool>) -> Option<Cow<'static, Epilogue>> {
+    fn epilogue_script(&self, player: &str, run: &StoryRun) -> Option<Cow<'static, Epilogue>> {
         let name = self.reg.chars.get(self.sel.0).map_or("", |entry| entry.name.as_str());
-        epilogue::of_named(player, name, mercy)
+        let script = epilogue::of_named(player, name, run.mercy)?;
+        let HelperPick::Chosen(id) = &run.helper else {
+            return Some(script);
+        };
+        let Some(ally) = self.story_char(id).map(|i| self.reg.chars[i].name.as_str()) else {
+            return Some(script);
+        };
+        let mut owned = script.into_owned();
+        owned.pages.push(crate::story::helper::ally_page(ally));
+        Some(Cow::Owned(owned))
     }
 
     pub(crate) fn story_epilogue_page(&self) -> Option<usize> {

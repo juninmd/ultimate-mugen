@@ -1,0 +1,540 @@
+{
+ "events": [
+  {
+   "t": 8852,
+   "screen": "story",
+   "story": {
+    "stage": 4,
+    "wave": 0,
+    "credits": 3,
+    "score": 0,
+    "phase": "Intro",
+    "mercy": null,
+    "helper_pending": false,
+    "helper_cursor": 0,
+    "helper_chosen": false
+   },
+   "fighters": []
+  },
+  {
+   "t": 13354,
+   "screen": "vs",
+   "story": {
+    "stage": 4,
+    "wave": 0,
+    "credits": 3,
+    "score": 0,
+    "phase": "Intro",
+    "mercy": null,
+    "helper_pending": false,
+    "helper_cursor": 0,
+    "helper_chosen": false
+   },
+   "fighters": []
+  },
+  {
+   "t": 16730,
+   "screen": "fight",
+   "story": {
+    "stage": 4,
+    "wave": 0,
+    "credits": 3,
+    "score": 0,
+    "phase": "Intro",
+    "mercy": null,
+    "helper_pending": false,
+    "helper_cursor": 0,
+    "helper_chosen": false
+   },
+   "fighters": [
+    {
+     "side": 0,
+     "x": -1264.7,
+     "y": 0,
+     "ground": 0,
+     "lane": 0,
+     "facing": -1,
+     "life": 1000,
+     "max": 1000,
+     "state": 5900,
+     "alive": true,
+     "anim": -1,
+     "anim_elem": 0,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": -1357.8,
+     "y": 0,
+     "ground": 0,
+     "lane": -10,
+     "facing": 1,
+     "life": 110,
+     "max": 110,
+     "state": 5900,
+     "alive": true,
+     "anim": -1,
+     "anim_elem": 0,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": -1295.4,
+     "y": 0,
+     "ground": 0,
+     "lane": 6,
+     "facing": 1,
+     "life": 90,
+     "max": 90,
+     "state": 5900,
+     "alive": true,
+     "anim": -1,
+     "anim_elem": 0,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": -1187.2,
+     "y": 0,
+     "ground": 0,
+     "lane": -3,
+     "facing": -1,
+     "life": 100,
+     "max": 100,
+     "state": 5900,
+     "alive": true,
+     "anim": -1,
+     "anim_elem": 0,
+     "form": 0
+    }
+   ]
+  },
+  {
+   "t": 66088,
+   "screen": "fight",
+   "story": {
+    "stage": 4,
+    "wave": 1,
+    "credits": 3,
+    "score": 2650,
+    "phase": "Intro",
+    "mercy": null,
+    "helper_pending": false,
+    "helper_cursor": 0,
+    "helper_chosen": false
+   },
+   "fighters": [
+    {
+     "side": 0,
+     "x": -1072.3,
+     "y": 0,
+     "ground": 0,
+     "lane": 0,
+     "facing": 1,
+     "life": 1000,
+     "max": 1000,
+     "state": 20,
+     "alive": true,
+     "anim": 20,
+     "anim_elem": 0,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": -360,
+     "y": 0,
+     "ground": 0,
+     "lane": -10,
+     "facing": -1,
+     "life": 120,
+     "max": 120,
+     "state": 0,
+     "alive": true,
+     "anim": 0,
+     "anim_elem": 0,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": -295,
+     "y": 0,
+     "ground": 0,
+     "lane": 6,
+     "facing": -1,
+     "life": 90,
+     "max": 90,
+     "state": 0,
+     "alive": true,
+     "anim": 0,
+     "anim_elem": 0,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": -230,
+     "y": 0,
+     "ground": 0,
+     "lane": -3,
+     "facing": -1,
+     "life": 90,
+     "max": 90,
+     "state": 0,
+     "alive": true,
+     "anim": 0,
+     "anim_elem": 0,
+     "form": 0
+    }
+   ]
+  },
+  {
+   "t": 83494,
+   "screen": "fight",
+   "story": {
+    "stage": 4,
+    "wave": 2,
+    "credits": 3,
+    "score": 5650,
+    "phase": "Intro",
+    "mercy": null,
+    "helper_pending": false,
+    "helper_cursor": 0,
+    "helper_chosen": false
+   },
+   "fighters": [
+    {
+     "side": 0,
+     "x": -604.4,
+     "y": 0,
+     "ground": 0,
+     "lane": -5.5,
+     "facing": 1,
+     "life": 1000,
+     "max": 1000,
+     "state": 0,
+     "alive": true,
+     "anim": 0,
+     "anim_elem": 5,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": 301.3,
+     "y": 0,
+     "ground": 0,
+     "lane": -10,
+     "facing": -1,
+     "life": 120,
+     "max": 120,
+     "state": 0,
+     "alive": true,
+     "anim": 0,
+     "anim_elem": 0,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": 344.7,
+     "y": 0,
+     "ground": 0,
+     "lane": 6,
+     "facing": -1,
+     "life": 110,
+     "max": 110,
+     "state": 0,
+     "alive": true,
+     "anim": 0,
+     "anim_elem": 0,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": 388,
+     "y": 0,
+     "ground": 0,
+     "lane": -3,
+     "facing": -1,
+     "life": 100,
+     "max": 100,
+     "state": 0,
+     "alive": true,
+     "anim": 0,
+     "anim_elem": 0,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": 431.3,
+     "y": 0,
+     "ground": 0,
+     "lane": 8,
+     "facing": -1,
+     "life": 90,
+     "max": 90,
+     "state": 0,
+     "alive": true,
+     "anim": 0,
+     "anim_elem": 0,
+     "form": 0
+    }
+   ]
+  },
+  {
+   "t": 133728,
+   "screen": "fight",
+   "story": {
+    "stage": 4,
+    "wave": 3,
+    "credits": 3,
+    "score": 10150,
+    "phase": "Intro",
+    "mercy": null,
+    "helper_pending": false,
+    "helper_cursor": 0,
+    "helper_chosen": false
+   },
+   "fighters": [
+    {
+     "side": 0,
+     "x": -240,
+     "y": 0,
+     "ground": 0,
+     "lane": -2.2,
+     "facing": 1,
+     "life": 1000,
+     "max": 1000,
+     "state": 0,
+     "alive": true,
+     "anim": 0,
+     "anim_elem": 0,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": 941.3,
+     "y": 0,
+     "ground": 0,
+     "lane": -10,
+     "facing": -1,
+     "life": 90,
+     "max": 90,
+     "state": 0,
+     "alive": true,
+     "anim": 0,
+     "anim_elem": 0,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": 984.7,
+     "y": 0,
+     "ground": 0,
+     "lane": 6,
+     "facing": -1,
+     "life": 90,
+     "max": 90,
+     "state": 0,
+     "alive": true,
+     "anim": 0,
+     "anim_elem": 0,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": 1028,
+     "y": 0,
+     "ground": 0,
+     "lane": -3,
+     "facing": -1,
+     "life": 90,
+     "max": 90,
+     "state": 0,
+     "alive": true,
+     "anim": 0,
+     "anim_elem": 0,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": 1071.3,
+     "y": 0,
+     "ground": 0,
+     "lane": 8,
+     "facing": -1,
+     "life": 100,
+     "max": 100,
+     "state": 0,
+     "alive": true,
+     "anim": 0,
+     "anim_elem": 0,
+     "form": 0
+    }
+   ]
+  },
+  {
+   "t": 189868,
+   "screen": "story",
+   "story": {
+    "stage": 4,
+    "wave": 4,
+    "credits": 3,
+    "score": 14850,
+    "phase": "Intro",
+    "mercy": null,
+    "helper_pending": false,
+    "helper_cursor": 0,
+    "helper_chosen": false
+   },
+   "fighters": []
+  },
+  {
+   "t": 195940,
+   "screen": "story",
+   "story": {
+    "stage": 4,
+    "wave": 4,
+    "credits": 3,
+    "score": 14850,
+    "phase": "Intro",
+    "mercy": true,
+    "helper_pending": true,
+    "helper_cursor": 0,
+    "helper_chosen": false
+   },
+   "fighters": []
+  },
+  {
+   "t": 198542,
+   "screen": "story",
+   "story": {
+    "stage": 4,
+    "wave": 4,
+    "credits": 3,
+    "score": 14850,
+    "phase": "Intro",
+    "mercy": true,
+    "helper_pending": true,
+    "helper_cursor": 1,
+    "helper_chosen": false
+   },
+   "fighters": []
+  },
+  {
+   "t": 201208,
+   "screen": "story",
+   "story": {
+    "stage": 4,
+    "wave": 4,
+    "credits": 3,
+    "score": 14850,
+    "phase": "Intro",
+    "mercy": true,
+    "helper_pending": false,
+    "helper_cursor": 1,
+    "helper_chosen": true
+   },
+   "fighters": []
+  },
+  {
+   "t": 206216,
+   "screen": "vs",
+   "story": {
+    "stage": 4,
+    "wave": 4,
+    "credits": 3,
+    "score": 14850,
+    "phase": "Intro",
+    "mercy": true,
+    "helper_pending": false,
+    "helper_cursor": 1,
+    "helper_chosen": true
+   },
+   "fighters": []
+  },
+  {
+   "t": 209781,
+   "screen": "fight",
+   "story": {
+    "stage": 4,
+    "wave": 4,
+    "credits": 3,
+    "score": 14850,
+    "phase": "Intro",
+    "mercy": true,
+    "helper_pending": false,
+    "helper_cursor": 1,
+    "helper_chosen": true
+   },
+   "fighters": [
+    {
+     "side": 0,
+     "x": 1207,
+     "y": 0,
+     "ground": 0,
+     "lane": 0,
+     "facing": 1,
+     "life": 1000,
+     "max": 1000,
+     "state": 19900,
+     "alive": true,
+     "anim": 190,
+     "anim_elem": 0,
+     "form": 0
+    },
+    {
+     "side": 1,
+     "x": 1262.7,
+     "y": 0,
+     "ground": 0,
+     "lane": -10,
+     "facing": 1,
+     "life": 1680,
+     "max": 1680,
+     "state": 19901,
+     "alive": true,
+     "anim": 195,
+     "anim_elem": 2,
+     "form": 0
+    },
+    {
+     "side": 0,
+     "x": 1364.9,
+     "y": 0,
+     "ground": 0,
+     "lane": 0,
+     "facing": -1,
+     "life": 1000,
+     "max": 1000,
+     "state": 0,
+     "alive": true,
+     "anim": 0,
+     "anim_elem": 5,
+     "form": 0
+    }
+   ]
+  },
+  {
+   "t": 237572,
+   "screen": "story",
+   "story": {
+    "stage": 4,
+    "wave": 0,
+    "credits": 3,
+    "score": 35500,
+    "phase": "Victory",
+    "mercy": true,
+    "helper_pending": false,
+    "helper_cursor": 1,
+    "helper_chosen": true
+   },
+   "fighters": []
+  },
+  {
+   "t": 270365,
+   "screen": "menu",
+   "story": null,
+   "fighters": []
+  }
+ ],
+ "problems": [],
+ "failedRequests": []
+}

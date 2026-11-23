@@ -11,8 +11,13 @@ impl Default for PlaySoundParams {
 pub struct Sound(Rc<backend::Clip>);
 
 pub async fn load_sound_from_bytes(data: &[u8]) -> Result<Sound, String> {
+    load_sound_now(data)
+}
+
+/// Both backends hand the clip back immediately (the browser decodes in the background), so callers that cannot await can load too.
+pub fn load_sound_now(data: &[u8]) -> Result<Sound, String> {
     if data.is_empty() { return Err("empty sound".into()); }
-    backend::load(data).await.map(|c| Sound(Rc::new(c)))
+    backend::load(data).map(|c| Sound(Rc::new(c)))
 }
 
 pub fn play_sound(s: &Sound, params: PlaySoundParams) { s.0.play(params) }
@@ -31,7 +36,7 @@ mod backend {
 
     pub struct Clip(quad_snd::Sound);
 
-    pub async fn load(data: &[u8]) -> Result<Clip, String> { Ok(Clip(CTX.with(|c| quad_snd::Sound::load(c, data)))) }
+    pub fn load(data: &[u8]) -> Result<Clip, String> { Ok(Clip(CTX.with(|c| quad_snd::Sound::load(c, data)))) }
 
     impl Clip {
         pub fn play(&self, p: PlaySoundParams) { CTX.with(|c| { self.0.play(c, quad_snd::PlaySoundParams { looped: p.looped, volume: p.volume }); }) }
@@ -62,7 +67,7 @@ mod backend {
 
     pub struct Clip(Rc<Shared>);
 
-    pub async fn load(data: &[u8]) -> Result<Clip, String> {
+    pub fn load(data: &[u8]) -> Result<Clip, String> {
         let shared = Rc::new(Shared::default());
         let Some(promise) = CTX.with(|c| c.as_ref().map(|c| c.decode_audio_data(&js_sys::Uint8Array::from(data).buffer()))) else { return Ok(Clip(shared)) };
         let promise = promise.map_err(|e| format!("{e:?}"))?;

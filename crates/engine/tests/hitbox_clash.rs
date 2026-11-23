@@ -5,11 +5,9 @@ use ume_engine::matchs::Event;
 
 fn attacking_char(name: &str) -> std::sync::Arc<ume_engine::chardef::CharDef> {
     let mut c = mugen_char(name, "");
-    if let Some(anim) = std::sync::Arc::get_mut(&mut c)
-        .expect("unique")
-        .anims
-        .get_mut(&0)
-    {
+    let def = std::sync::Arc::get_mut(&mut c).expect("unique");
+    def.source = ume_engine::chardef::Source::Native;
+    if let Some(anim) = def.anims.get_mut(&0) {
         for fr in &mut anim.frames {
             fr.clsn1 = vec![[-10.0, -70.0, 55.0, -20.0]];
             fr.clsn2 = vec![[-18.0, -80.0, 18.0, 0.0]];

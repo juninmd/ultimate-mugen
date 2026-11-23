@@ -20,6 +20,7 @@ impl Match {
                 || fa.ikemen.standby
                 || !fa.hitdef_active
                 || fa.move_type != 'A'
+                || fa.def.source != crate::chardef::Source::Native
             {
                 continue;
             }
@@ -44,6 +45,7 @@ impl Match {
                     || fb.side == fa.side
                     || !fb.hitdef_active
                     || fb.move_type != 'A'
+                    || fb.def.source != crate::chardef::Source::Native
                     || !self.same_lane(a, b)
                 {
                     continue;

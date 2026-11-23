@@ -27,6 +27,14 @@ impl StageJob {
             future: None,
         }
     }
+    #[cfg(not(target_arch = "wasm32"))]
+    pub(super) fn spawn_builtin(index: usize, build: Arc<dyn Fn() -> Stage + Send + Sync>) -> Self {
+        let again = build.clone();
+        match std::thread::Builder::new().name("stage-build".into()).spawn(move || Ok(StageBuild { stage: build(), preview: None })) {
+            Ok(thread) => StageJob { index, thread: Some(thread), immediate: None },
+            Err(_) => StageJob::ready(index, StageBuild { stage: again(), preview: None }),
+        }
+    }
     pub fn index(&self) -> usize {
         self.index
     }

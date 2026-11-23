@@ -55,7 +55,7 @@ fn entries() -> Vec<StageEntry> {
                 id: id.to_string(),
                 name,
                 thumb: THUMB,
-                build: Box::new(move || build(&vfs, &def)),
+                build: std::sync::Arc::new(move || build(&vfs, &def)),
             }
         })
         .collect()

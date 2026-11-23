@@ -75,3 +75,11 @@ Ordem de busca da campanha: `UME_STORY_SCRIPT` → salvo pelo Editor → `story/
 ### Editor de epílogos
 
 Editor da História → **Epílogos…** edita o final de qualquer lutador (ou do `*` padrão): título, fala do chefe e resposta do herói no telhado e cada página de narração, no idioma atual. As edições vão para `story-epilogues.toml` (uma tabela `["lutador"]` por epílogo editado, mesclada sobre o `epilogues.json` embutido); **Restaurar epílogo original** remove a edição. Um `●` no cabeçalho marca epílogo editado.
+
+A linha **Cena** do editor de epílogos troca o cenário de fundo (qualquer fase com arte) com Esq/Dir e salva na hora como `scene = "..."` no TOML.
+
+O Editor da História também edita o **nome** de cada fase (por idioma) e o **chefe** (Esq/Dir percorre os lutadores instalados); o chefe final do epílogo acompanha o chefe da última fase. A linha **Inimigos por onda** (Esq/Dir) muda de 1 a 4 inimigos em todas as ondas da fase.
+
+Na introdução do chefe final, escolha **Poupar** ou **Derrubar** com Esq/Dir ou tocando na opção. A escolha define o epílogo correspondente.
+
+Depois, toque nas laterais do seletor de ajudante para percorrer os aliados e toque no nome selecionado para chamá-lo à luta final.

@@ -6,6 +6,7 @@ pub const TEXT_MAX_CHARS: usize = 240;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Field {
+    Scene,
     Title,
     Boss,
     Reply,
@@ -13,7 +14,7 @@ pub enum Field {
 }
 
 pub fn fields(epilogue: &Epilogue) -> Vec<Field> {
-    [Field::Title, Field::Boss, Field::Reply]
+    [Field::Scene, Field::Title, Field::Boss, Field::Reply]
         .into_iter()
         .chain((0..epilogue.pages.len()).map(Field::Page))
         .collect()
@@ -21,6 +22,7 @@ pub fn fields(epilogue: &Epilogue) -> Vec<Field> {
 
 fn slot(epilogue: &mut Epilogue, field: Field) -> Option<&mut LocalText> {
     match field {
+        Field::Scene => None,
         Field::Title => Some(&mut epilogue.title),
         Field::Boss => Some(&mut epilogue.boss),
         Field::Reply => Some(&mut epilogue.reply),
@@ -29,6 +31,9 @@ fn slot(epilogue: &mut Epilogue, field: Field) -> Option<&mut LocalText> {
 }
 
 pub fn read(epilogue: &Epilogue, field: Field, lang: &str) -> String {
+    if field == Field::Scene {
+        return epilogue.scene.clone();
+    }
     let mut copy = epilogue.clone();
     slot(&mut copy, field).map(|text| text.pick(lang).to_string()).unwrap_or_default()
 }
@@ -38,6 +43,18 @@ pub fn write(epilogue: &mut Epilogue, field: Field, lang: &str, text: &str) {
     if let Some(target) = slot(epilogue, field) {
         target.0.insert(lang.to_string(), clean);
     }
+}
+
+pub fn next_scene(current: &str, dir: i32) -> String {
+    let scenes = crate::stages::scene_ids();
+    let at = scenes.iter().position(|id| *id == current).unwrap_or(0) as i32;
+    scenes[(at + dir).rem_euclid(scenes.len() as i32) as usize].to_string()
+}
+
+pub fn commit_scene(id: &str, dir: i32) -> Result<(), String> {
+    let mut epilogue = epilogue_store::table().get(id).cloned().ok_or_else(|| format!("unknown epilogue {id}"))?;
+    epilogue.scene = next_scene(&epilogue.scene, dir);
+    epilogue_store::save_override(id, epilogue)
 }
 
 pub fn commit(id: &str, field: Field, lang: &str, text: &str) -> Result<(), String> {

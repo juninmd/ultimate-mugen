@@ -119,3 +119,61 @@ fn any_collector_allows_p2_to_pick_up_arena_drops() {
     assert!(m.fighters[1].life > 500.0, "heal pickup restored P2 life");
     assert!(m.fighters[1].power > 0.0, "power pickup restored P2 meter");
 }
+
+#[test]
+fn explosive_blast_ignites_neighboring_barrel_fuse_for_chain_reaction() {
+    let mut m = duel(mugen_char("p1", ""), mugen_char("p2", ""));
+    m.stage.bound_left = -680.0;
+    m.stage.bound_right = 680.0;
+    m.objects.any_collector = true;
+
+    let mut b1 = Breakable::new(1, 300.0, 0.0, 18.0, 50.0, 50.0);
+    b1.blast_radius = 96.0;
+    b1.blast_damage = 70.0;
+    b1.blast_launch = [4.5, -5.2];
+    m.objects.add(b1);
+
+    let mut b2 = Breakable::new(1, 385.0, 0.0, 18.0, 50.0, 120.0);
+    b2.blast_radius = 96.0;
+    b2.blast_damage = 70.0;
+    b2.blast_launch = [4.5, -5.2];
+    m.objects.add(b2);
+
+    let crate_near = Breakable::new(0, 345.0, 0.0, 20.0, 42.0, 40.0);
+    m.objects.add(crate_near);
+
+    m.camera.x = 340.0;
+    m.fighters[0].pos.x = 220.0;
+    m.fighters[1].pos.x = 290.0;
+    m.fighters[1].state_no = 5050;
+    m.fighters[1].physics = 'N';
+    m.fighters[1].move_type = 'H';
+    m.fighters[1].ghv.fall = true;
+    m.fighters[1].vel.x = 5.0;
+
+    let mut blasts = Vec::new();
+    for t in 0..20 {
+        m.tick(&[0, 0]);
+        for ev in m.objects.events.drain(..) {
+            if let ObjectEvent::Blast { x, .. } = ev {
+                blasts.push((t, x));
+            }
+        }
+    }
+
+    assert_eq!(
+        blasts.len(),
+        2,
+        "both barrels must detonate in a chain reaction"
+    );
+    assert!((blasts[0].1 - 300.0).abs() < 1.0);
+    assert!((blasts[1].1 - 385.0).abs() < 1.0);
+    assert!(
+        blasts[1].0 > blasts[0].0,
+        "second barrel detonates after fuse delay"
+    );
+    assert!(
+        m.objects.breakables[2].broken,
+        "nearby crate shattered by blast splash"
+    );
+}

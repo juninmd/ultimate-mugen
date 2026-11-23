@@ -5,6 +5,14 @@ use crate::story::{beats, choice, helper, prefight, text, Phase};
 use crate::ui::*;
 
 impl App {
+    fn story_prompt(&self, prompt: &str, accent: Color) -> bool {
+        let (x, y, w, h) = (VW / 2.0 - 224.0, 488.0, 448.0, 48.0);
+        let hover = self.hover_rect(x, y, w, h);
+        self.ui.adapted_plate(x, y, w, h, hover.then_some(accent));
+        self.ui.text(prompt, VW / 2.0, y + 31.0, 22.0, WHITE, Align::Center, true);
+        self.tapped_in(x, y, w, h)
+    }
+
     pub(crate) async fn story_screen(&mut self, dt: f32) {
         let Screen::Story { t } = self.screen else { return };
         let Some(run) = self.story.clone() else {
@@ -22,9 +30,9 @@ impl App {
             let confirmed = self.c.pressed(nav::OK | nav::START) && t > 0.35;
             self.story_helper_input(&run, confirmed);
         } else if deciding {
-            if self.c.pressed(nav::LEFT) {
+            if self.c.pressed(nav::LEFT) || self.tapped_in(VW * 0.18, 484.0, VW * 0.24, 56.0) {
                 self.decide_mercy(true);
-            } else if self.c.pressed(nav::RIGHT) {
+            } else if self.c.pressed(nav::RIGHT) || self.tapped_in(VW * 0.58, 484.0, VW * 0.24, 56.0) {
                 self.decide_mercy(false);
             }
         }
@@ -105,15 +113,16 @@ impl App {
             self.ui.text(&text::tally_line(&tally), VW / 2.0, 480.0, 20.0, hex("#ffcc33"), Align::Center, true);
         }
         let prompt = match run.phase {
+            _ if talking => crate::i18n::tr3("OK para avançar", "OK to advance", "OK para avanzar"),
             _ if deciding => "",
             Phase::Defeated if run.can_continue() => text::continue_with_credit(),
             Phase::Defeated | Phase::Victory => text::quit_label(),
             _ => text::press_start(),
         };
-        let pulse = 0.65 + 0.35 * (t * 4.0).sin().abs();
-        self.ui.text(prompt, VW / 2.0, 520.0, 22.0, Color::new(1.0, 1.0, 1.0, pulse), Align::Center, true);
         let confirmed = self.c.pressed(nav::OK | nav::START) && t > 0.35;
-        if talking && (confirmed || self.clicked_rect(0.0, 230.0, VW, 220.0)) {
+        let advances = !deciding && (self.story_prompt(prompt, accent_color) || confirmed
+            || self.tapped_in(0.0, 230.0, VW, 220.0));
+        if talking && advances {
             self.audio.sfx("select");
             if let Some(run) = self.story.as_mut() {
                 run.prefight += 1;
@@ -121,7 +130,7 @@ impl App {
             self.screen = Screen::Story { t: 0.5 };
             return;
         }
-        if !deciding && !talking && (confirmed || self.clicked_rect(0.0, 230.0, VW, 220.0)) {
+        if !talking && advances {
             self.audio.sfx("confirm");
             self.story_resume();
             return;

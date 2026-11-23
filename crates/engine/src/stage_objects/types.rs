@@ -115,6 +115,12 @@ pub enum ObjectEvent {
         ticks_left: i32,
     },
     GoalTimedOut,
+    ZoneTriggered {
+        index: usize,
+        fighter: u32,
+        x: f32,
+        lane: f32,
+    },
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]

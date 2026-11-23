@@ -17,7 +17,7 @@ impl Match {
 
 impl Match {
     pub(super) fn builtin_guard_exit(&mut self, i: usize, s: i32, guard_input: bool) -> bool {
-        if !matches!(s, 130 | 131) || guard_input && self.in_guard_dist(i) {
+        if !matches!(s, 130 | 131) || guard_input && self.in_guard_threat(i) {
             return false;
         }
         let own = self.fighters[i].def.clone();

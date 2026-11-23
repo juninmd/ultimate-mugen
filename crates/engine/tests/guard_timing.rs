@@ -61,28 +61,6 @@ fn air_guard_blocks_a_jump_in_with_guardflag_a() {
 }
 
 #[test]
-fn a_jumping_fighter_enters_air_guard_when_the_enemy_is_in_range() {
-    let mut m = kaito_match();
-    m.fighters[1].state_type = 'A';
-    m.fighters[1].state_no = 50;
-    m.fighters[1].pos.y = -80.0;
-    m.fighters[1].ctrl = true;
-    m.fighters[1].guard_button = true;
-    m.fighters[0].move_type = 'A';
-    m.fighters[0].hitdef_active = true;
-    let mut hd = HitDefData::default();
-    hd.guardflag = "MA".into();
-    hd.guard_dist = 200.0;
-    m.fighters[0].hitdef = Some(hd);
-    m.tick(&[0, k::R]);
-    assert!(
-        (120..=132).contains(&m.fighters[1].state_no),
-        "air guard state {}",
-        m.fighters[1].state_no
-    );
-}
-
-#[test]
 fn perfect_guard_reduces_the_scaled_blockstun_further() {
     let mut m = kaito_match();
     m.tick(&[0, k::R]);

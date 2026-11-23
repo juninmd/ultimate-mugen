@@ -9,4 +9,13 @@ impl App {
         run.phase = Phase::Cleared;
         run.tally = Some(StageTally::new(0, 2000, 0.8));
     }
+
+    pub(crate) fn story_helper_preview(&mut self) {
+        let Some(run) = self.story.as_mut() else { return };
+        run.stage = crate::story::STAGES.len() - 1;
+        run.wave = run.stage_wave_count();
+        run.phase = Phase::Intro;
+        run.mercy = Some(false);
+        self.story_prepare_fight();
+    }
 }

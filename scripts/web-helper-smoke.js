@@ -1,0 +1,50 @@
+const fs = require('fs'), path = require('path');
+const { staticServer } = require('./web-smoke-server');
+const { chromium } = require('playwright');
+const dir = path.resolve(process.argv[2] || path.join(__dirname, '..', 'web', 'dist'));
+const shotDir = process.env.WEB_SMOKE_SHOTS;
+const types = { '.html': 'text/html', '.js': 'text/javascript', '.wasm': 'application/wasm', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.zip': 'application/zip' };
+const server = staticServer(dir, types);
+(async () => {
+  await new Promise(ok => server.listen(0, '127.0.0.1', ok));
+  const url = `http://127.0.0.1:${server.address().port}/index.html?e2e=1&e2e_helper=1`;
+  const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
+  const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
+  const problems = [];
+  p.on('pageerror', e => { if (!/register_plugin/.test(e.message)) problems.push(`pageerror: ${e.message}`); });
+  p.on('console', m => { if (/panicked|PanicHookInfo/.test(m.text())) problems.push(`console: ${m.text().slice(0, 200)}`); });
+  await p.goto(url);
+  await p.locator('#boot').waitFor({ state: 'detached', timeout: 45000 }).catch(() => {});
+  await p.waitForTimeout(12000);
+  await p.locator('#glcanvas').focus();
+  if (shotDir) fs.mkdirSync(shotDir, { recursive: true });
+  const frames = n => p.evaluate(n => new Promise(done => { const step = i => (i ? requestAnimationFrame(() => step(i - 1)) : done()); step(n); }), n);
+  const key = async (k, wait = 1000) => { await p.keyboard.down(k); await frames(2); await p.keyboard.up(k); await frames(5); await p.waitForTimeout(wait); };
+  const state = () => p.evaluate(() => { try { return JSON.parse(globalThis.__ume_state || 'null'); } catch { return null; } });
+  const shot = async name => { const buf = await p.screenshot(); if (shotDir) fs.writeFileSync(path.join(shotDir, name), buf); };
+  await key('Enter');
+  await key('Enter', 1500);
+  await key('Enter', 1500);
+  const deadline = Date.now() + 120000;
+  let s = await state();
+  while ((!s || s.screen !== 'story' || !s.story || s.story.stage !== 4) && Date.now() < deadline) { await p.waitForTimeout(1500); s = await state(); }
+  if (!s || !s.story || s.story.stage !== 4) problems.push(`never reached the final boss intro (${JSON.stringify(s && { screen: s.screen, story: s.story })})`);
+  await p.waitForTimeout(1500);
+  await shot('helper-pick-none.png');
+  await key('ArrowRight', 800);
+  await shot('helper-pick-fighter.png');
+  await key('Enter', 1200);
+  await key('Enter', 1500);
+  const fightDeadline = Date.now() + 120000;
+  s = await state();
+  while ((!s || s.screen !== 'fight') && Date.now() < fightDeadline) { await key('Enter', 2000); s = await state(); }
+  await p.waitForTimeout(6000);
+  s = await state();
+  await shot('helper-fight.png');
+  const allies = s && s.fighters ? s.fighters.filter(f => f.side === 0).length : 0;
+  await b.close(); server.close();
+  if (!s || s.screen !== 'fight') problems.push(`never reached the boss fight (${s && s.screen})`);
+  if (allies < 2) problems.push(`the helper did not join the fight (side 0 fighters: ${allies})`);
+  if (problems.length) { console.error('WEB HELPER SMOKE FAILED\n' + problems.join('\n')); process.exit(1); }
+  console.log(`WEB HELPER SMOKE OK allies ${allies}`);
+})().catch(e => { console.error('SCRIPT FAIL', e); process.exit(2); });

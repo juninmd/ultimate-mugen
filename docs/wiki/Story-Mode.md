@@ -16,6 +16,8 @@ Crates and barrels along each strip break when struck and can drop food, a gem o
 
 ## Final boss and epilogues
 
+Before the final fight, after the spare-or-finish choice, the player may call a **helper**: left and right cycle the native roster (or `GO SOLO`), confirm accepts. The helper fights beside the hero as a CPU teammate in that fight only (`src/story/helper.rs`, `src/app/story/helper.rs`); if the hero falls, control passes to the helper. Web hook: `?e2e=1&e2e_helper=1` jumps to this screen, smoke script `scripts/web-helper-smoke.js`.
+
 The last stage (Kingpin Rooftop) ends against **Valdric Morn**, commander of the Red Star Empire and the kingpin behind the street gang. A player who picked Valdric faces **Kaito Arashi** instead (`final_boss` in `src/story/epilogue.rs`, which reads the last entry of `STAGES`).
 
 Beating the final boss plays an epilogue before the `STORY COMPLETE` card. Every fighter of the roster has its own, in English, Portuguese and Spanish, made of five pages:

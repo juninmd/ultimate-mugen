@@ -1,3 +1,4 @@
+use super::helper::HelperPick;
 use super::script::{self, ScriptStage, StoryScript};
 use super::stages::{StageDef, STAGES};
 use super::tally::StageTally;
@@ -36,6 +37,8 @@ pub struct StoryRun {
     pub bonus: bool,
     pub epilogue: usize,
     pub mercy: Option<bool>,
+    pub helper: HelperPick,
+    pub helper_cursor: usize,
     pub tally: Option<StageTally>,
 }
 
@@ -52,6 +55,8 @@ impl Default for StoryRun {
             bonus: false,
             epilogue: 0,
             mercy: None,
+            helper: HelperPick::Pending,
+            helper_cursor: 0,
             tally: None,
         }
     }

@@ -10,6 +10,8 @@ mod epilogue_draw;
 mod epilogue_text;
 #[path = "story/boss_profile.rs"]
 mod boss_profile;
+#[path = "story/helper.rs"]
+mod helper;
 #[path = "story/hud.rs"]
 mod hud;
 #[path = "story/stage_card.rs"]
@@ -86,8 +88,7 @@ impl App {
         crate::stages::want_story_strip(arena);
         self.sel.1 = first;
         self.sel.2 = self.reg.stages.iter().position(|s| s.id.contains(arena)).unwrap_or(self.sel.2);
-        self.team = Some(Team::new(vec![me], foes, true));
-        self.team_pal = vec![self.side_pal(0)];
+        self.story_assemble_team(&run, me, foes);
         self.session = None;
     }
 

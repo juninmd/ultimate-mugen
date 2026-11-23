@@ -15,6 +15,8 @@ use ume_formats::stage::MugenStage;
 pub mod ambience;
 pub mod interactive;
 mod story_strip;
+#[cfg(target_arch = "wasm32")]
+mod web_decode;
 pub use story_strip::*;
 mod wonders; pub(crate) mod looping; pub(crate) mod story_loop; pub(crate) mod scenery;
 mod types;

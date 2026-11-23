@@ -56,7 +56,7 @@ pub async fn prepare() -> Result<(), String> {
     let data = js_sys::futures::JsFuture::from(ume_fetch_asset(&format!("assets/stages/story/{arena}.png")))
         .await
         .map_err(|e| format!("Story strip download failed: {e:?}"))?;
-    let image = decode_illustration(&js_sys::Uint8Array::new(&data).to_vec())?;
+    let image = super::web_decode::decode_opaque_illustration(&js_sys::Uint8Array::new(&data)).await?;
     WEB_STRIP.with(|cache| *cache.borrow_mut() = Some((arena, image)));
     Ok(())
 }

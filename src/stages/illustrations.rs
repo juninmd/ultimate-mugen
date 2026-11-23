@@ -90,7 +90,7 @@ pub async fn prepare_illustration(id: &str) -> Result<(), String> {
     let data = js_sys::futures::JsFuture::from(ume_fetch_asset(&format!("assets/stages/{id}.png")))
         .await
         .map_err(|e| format!("Stage download failed: {e:?}"))?;
-    let image = decode_illustration(&js_sys::Uint8Array::new(&data).to_vec())?;
+    let image = super::web_decode::decode_opaque_illustration(&js_sys::Uint8Array::new(&data)).await?;
     WEB_ILLUSTRATION.with(|cache| *cache.borrow_mut() = Some((id.to_string(), image)));
     Ok(())
 }

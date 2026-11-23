@@ -1,3 +1,4 @@
+pub(crate) mod checkpoint;
 pub mod beats;
 pub mod choice;
 pub mod epilogue;
@@ -13,6 +14,7 @@ pub mod objects;
 pub mod objects_art;
 pub mod objects_textures;
 mod run;
+pub mod typewriter;
 mod script_source;
 pub mod studio;
 pub mod script;

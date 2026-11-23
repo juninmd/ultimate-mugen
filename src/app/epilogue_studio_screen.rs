@@ -45,6 +45,7 @@ impl EpiState {
 
 fn field_label(field: Field) -> String {
     match field {
+        Field::Scene => tr3("Cena", "Scene", "Escena").into(),
         Field::Title => tr3("Título", "Title", "Título").into(),
         Field::Boss => tr3("Fala do chefe", "Boss line", "Frase del jefe").into(),
         Field::Reply => tr3("Resposta do herói", "Hero reply", "Respuesta del héroe").into(),
@@ -127,6 +128,15 @@ impl App {
             };
             st.refresh();
             self.audio.sfx("cancel");
+        } else if cur >= 1 && fields.get(cur - 1) == Some(&Field::Scene) {
+            if dir != 0 {
+                st.note = match edit::commit_scene(st.id(), dir) {
+                    Ok(()) => tr3("Cena trocada e salva", "Scene changed and saved", "Escena cambiada y guardada").into(),
+                    Err(e) => e,
+                };
+                st.refresh();
+                self.audio.sfx("select");
+            }
         } else if ok && cur >= 1 {
             let lang = crate::i18n::get();
             if let Some(field) = fields.get(cur - 1) {
@@ -163,6 +173,7 @@ impl App {
                     }
                     _ => edit::read(epilogue, field, lang.code()),
                 };
+                let text = if field == Field::Scene { format!("‹ {text} ›") } else { text };
                 (field_label(field), text)
             };
             let ink = if focused { WHITE } else { hex("#d8d0f0") };

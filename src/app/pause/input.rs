@@ -1,4 +1,4 @@
-use super::binding::{fresh_slot, held_slots, toggle, Bound};
+use super::binding::{fresh_slot, held_slots, ok_slot, toggle, Bound};
 use super::layout::Layout;
 use super::state::{Action, Tab};
 use crate::app::*;
@@ -36,6 +36,10 @@ impl App {
                     self.pause_set_tab(Tab::Moves);
                 }
             }
+        }
+        let touch_ok = accept_nav && self.c.touch.enabled && self.c.pressed(nav::OK);
+        if slot.is_none() && touch_ok && self.pause.tab == Tab::Moves {
+            slot = moves.get(self.pause.move_cur).map(|m| ok_slot(&self.c.shortcuts, name, &m.command));
         }
         if self.pause.tab == Tab::Moves {
             self.pause_moves_input(lay, name, moves, slot);

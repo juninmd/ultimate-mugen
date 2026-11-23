@@ -51,3 +51,52 @@ fn beat_text_is_capped() {
     set_beat(&mut script, 0, 0, Lang::En, &"x".repeat(500));
     assert_eq!(script.stage_beat(0, 0, Lang::En).chars().count(), BEAT_MAX_CHARS);
 }
+
+#[test]
+fn editing_a_stage_title_keeps_the_other_languages_and_caps_length() {
+    let mut script = StoryScript::default_campaign();
+    let pt = script.stage_title(0, Lang::Pt).to_string();
+    set_title(&mut script, 0, Lang::En, &"T".repeat(80));
+    assert_eq!(script.stage_title(0, Lang::En).chars().count(), TITLE_MAX_CHARS);
+    assert_eq!(script.stage_title(0, Lang::Pt), pt);
+}
+
+#[test]
+fn cycling_the_boss_wraps_and_never_leaves_both_bosses_equal() {
+    let mut script = StoryScript::default_campaign();
+    let roster: Vec<String> = ["a", "b", "c"].map(String::from).to_vec();
+    script.stages[0].boss = "a".into();
+    script.stages[0].alt_boss = "b".into();
+    cycle_boss(&mut script, 0, &roster, 1);
+    assert_eq!((script.stages[0].boss.as_str(), script.stages[0].alt_boss.as_str()), ("b", "a"));
+    cycle_boss(&mut script, 0, &roster, -1);
+    cycle_boss(&mut script, 0, &roster, -1);
+    assert_eq!(script.stages[0].boss, "c");
+    cycle_boss(&mut script, 0, &[], 1);
+    assert_eq!(script.stages[0].boss, "c");
+}
+
+#[test]
+fn foes_per_wave_clamp_and_keep_the_wave_count() {
+    let mut script = StoryScript::default_campaign();
+    let waves = script.stages[0].waves.len();
+    for _ in 0..10 {
+        adjust_foes(&mut script, 0, 1);
+    }
+    assert_eq!(foe_range(&script, 0), (FOES_MAX, FOES_MAX));
+    for _ in 0..10 {
+        adjust_foes(&mut script, 0, -1);
+    }
+    assert_eq!(foe_range(&script, 0), (FOES_MIN, FOES_MIN));
+    assert_eq!(script.stages[0].waves.len(), waves);
+}
+
+#[test]
+fn added_foes_reuse_the_waves_own_roster() {
+    let mut script = StoryScript::default_campaign();
+    let before = script.stages[0].waves[0].clone();
+    adjust_foes(&mut script, 0, 1);
+    let after = &script.stages[0].waves[0];
+    assert_eq!(after.len(), before.len() + 1);
+    assert!(after.iter().all(|id| before.contains(id)));
+}

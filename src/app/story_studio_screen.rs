@@ -6,12 +6,15 @@ use crate::story::studio::{self, BEATS, RULES};
 
 const RULE_ROWS: usize = RULES.len();
 const STAGE_ROW: usize = RULE_ROWS;
-const BEAT_ROW: usize = STAGE_ROW + 1;
+const TITLE_ROW: usize = STAGE_ROW + 1;
+const BOSS_ROW: usize = STAGE_ROW + 2;
+const FOES_ROW: usize = STAGE_ROW + 3;
+const BEAT_ROW: usize = STAGE_ROW + 4;
 const RESET_ROW: usize = BEAT_ROW + BEATS;
 const EPILOGUE_ROW: usize = RESET_ROW + 1;
 const ROWS: usize = EPILOGUE_ROW + 1;
 const ROW_TOP: f32 = 142.0;
-const ROW_H: f32 = 40.0;
+const ROW_H: f32 = 33.0;
 const VALUE_W: f32 = 700.0;
 
 pub(crate) struct StudioState {
@@ -82,7 +85,7 @@ impl App {
     fn studio_type(&mut self, st: &mut StudioState, cur: usize, lang: Lang) {
         let Some(buf) = st.edit.as_mut() else { return };
         for ch in typed_text().chars().filter(|c| !c.is_control()) {
-            if buf.chars().count() < studio::BEAT_MAX_CHARS {
+            if buf.chars().count() < if cur == TITLE_ROW { studio::TITLE_MAX_CHARS } else { studio::BEAT_MAX_CHARS } {
                 buf.push(ch);
             }
         }
@@ -93,7 +96,11 @@ impl App {
             st.edit = None;
         } else if is_key_pressed(KeyCode::Enter) {
             let text = st.edit.take().unwrap_or_default();
-            studio::set_beat(&mut st.script, st.stage, cur - BEAT_ROW, lang, &text);
+            if cur == TITLE_ROW {
+                studio::set_title(&mut st.script, st.stage, lang, &text);
+            } else {
+                studio::set_beat(&mut st.script, st.stage, cur - BEAT_ROW, lang, &text);
+            }
             self.studio_commit(st);
         }
     }
@@ -122,6 +129,25 @@ impl App {
             STAGE_ROW if dir != 0 => {
                 st.stage = (st.stage as i32 + dir).rem_euclid(stages as i32) as usize;
                 self.audio.sfx("select");
+            }
+            TITLE_ROW if ok => {
+                st.edit = Some(st.script.stage_title(st.stage, lang).to_string());
+                self.audio.sfx("confirm");
+            }
+            BOSS_ROW if dir != 0 => {
+                let roster: Vec<String> = self
+                    .reg
+                    .chars
+                    .iter()
+                    .filter(|c| !c.broken.get() && !c.id.starts_with("npc_"))
+                    .map(|c| c.id.strip_prefix("umf:").unwrap_or(&c.id).to_string())
+                    .collect();
+                studio::cycle_boss(&mut st.script, st.stage, &roster, dir);
+                self.studio_commit(st);
+            }
+            FOES_ROW if dir != 0 => {
+                studio::adjust_foes(&mut st.script, st.stage, dir);
+                self.studio_commit(st);
             }
             c if (BEAT_ROW..RESET_ROW).contains(&c) && ok => {
                 st.edit = Some(st.script.stage_beat(st.stage, c - BEAT_ROW, lang).to_string());
@@ -180,6 +206,22 @@ impl App {
             STAGE_ROW => {
                 let name = st.script.stage_title(st.stage, lang);
                 (tr3("Fase", "Stage", "Fase").into(), format!("‹ {}/{} · {} ›", st.stage + 1, st.script.stages.len().max(1), name))
+            }
+            TITLE_ROW => {
+                let text = match &st.edit {
+                    Some(buf) if i == cur => format!("{buf}_"),
+                    _ => st.script.stage_title(st.stage, lang).to_string(),
+                };
+                (tr3("Nome da fase", "Stage name", "Nombre de la fase").into(), text)
+            }
+            BOSS_ROW => {
+                let boss = st.script.stage(st.stage).map(|s| s.boss.as_str()).unwrap_or("-");
+                (tr3("Chefe da fase", "Stage boss", "Jefe de la fase").into(), format!("‹ {boss} ›"))
+            }
+            FOES_ROW => {
+                let (lo, hi) = studio::foe_range(&st.script, st.stage);
+                let shown = if lo == hi { lo.to_string() } else { format!("{lo}-{hi}") };
+                (tr3("Inimigos por onda", "Foes per wave", "Enemigos por oleada").into(), format!("‹ {shown} ›"))
             }
             EPILOGUE_ROW => (tr3("Epílogos…", "Epilogues…", "Epílogos…").into(), "›".into()),
             RESET_ROW => (tr3("Restaurar roteiro original", "Restore original script", "Restaurar guion original").into(), String::new()),

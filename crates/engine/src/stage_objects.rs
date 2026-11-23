@@ -3,9 +3,11 @@ mod hazards;
 mod pickups;
 mod strikes;
 mod types;
+mod zones;
 
 use crate::matchs::Match;
 pub use types::{Breakable, Goal, ObjectEvent, Pickup, PickupSpec};
+pub use zones::{StageZone, StageZoneKind};
 
 pub const REHIT_TICKS: i32 = 10;
 pub const SHAKE_TICKS: i32 = 9;
@@ -20,6 +22,7 @@ pub const STANDING_STRIKE_HEIGHT: f32 = 100.0;
 pub struct StageObjects {
     pub breakables: Vec<Breakable>,
     pub pickups: Vec<Pickup>,
+    pub zones: Vec<StageZone>,
     pub events: Vec<ObjectEvent>,
     pub goal: Goal,
     pub collector_side: usize,
@@ -31,6 +34,7 @@ impl Default for StageObjects {
         StageObjects {
             breakables: Vec::new(),
             pickups: Vec::new(),
+            zones: Vec::new(),
             events: Vec::with_capacity(MAX_EVENTS),
             goal: Goal::None,
             collector_side: 0,
@@ -41,12 +45,16 @@ impl Default for StageObjects {
 
 impl StageObjects {
     pub fn is_idle(&self) -> bool {
-        self.breakables.is_empty() && self.pickups.is_empty() && self.goal == Goal::None
+        self.breakables.is_empty()
+            && self.pickups.is_empty()
+            && self.zones.is_empty()
+            && self.goal == Goal::None
     }
 
     pub fn clear(&mut self) {
         self.breakables.clear();
         self.pickups.clear();
+        self.zones.clear();
         self.events.clear();
         self.goal = Goal::None;
         self.any_collector = false;
@@ -58,6 +66,11 @@ impl StageObjects {
         self.pickups
             .reserve(drops.saturating_sub(self.pickups.len()));
         self.breakables.len() - 1
+    }
+
+    pub fn add_zone(&mut self, zone: StageZone) -> usize {
+        self.zones.push(zone);
+        self.zones.len() - 1
     }
 
     pub fn start_break_all_goal(&mut self, ticks: i32) {
@@ -99,8 +112,10 @@ impl Match {
         }
         self.strike_breakables();
         self.slam_breakables();
+        self.step_fuses();
         self.block_on_solid_breakables();
         self.step_pickups();
+        self.step_zones();
         self.step_object_goal();
     }
 

@@ -62,7 +62,7 @@ pub fn frame(m: &mut Match, view: &PhotoView) -> Option<Framing> {
         view_h: m.view_h,
         zoffset: m.stage.zoffset,
     };
-    let zoom = (m.zoom / view.zoom.min(1.0));
+    let zoom = m.zoom / view.zoom.min(1.0);
     m.zoom = zoom;
     m.view_w = BASE_W * zoom;
     m.view_h = BASE_H * zoom;

@@ -35,7 +35,7 @@ const MIN_CHANGE = 0.004;
     for (let i = 0; i < x.length; i += 4) diff += (Math.abs(x[i] - y[i]) + Math.abs(x[i + 1] - y[i + 1]) + Math.abs(x[i + 2] - y[i + 2])) / 765;
     return diff / (x.length / 4);
   }, [a.toString('base64'), b.toString('base64')]);
-  const touch = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map(([x, y], i) => ({ x, y, id: i + 1 })) });
+  const touch = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map(([x, y, id], i) => ({ x, y, id: id ?? i + 1 })) });
   const tap = async (x, y, hold = 120) => { await touch('touchStart', [[x, y]]); await wait(hold); await touch('touchEnd', []); await wait(900); };
   const expectChange = async (label, before, after) => {
     const c = await change(before, after);
@@ -98,11 +98,33 @@ const MIN_CHANGE = 0.004;
   await touch('touchEnd', []);
   await expectChange('a face button lights up while touched', idlePad, pressedPad);
 
+  const padClip = { x: Math.round(bx - r * 1.2), y: Math.round(by - gap - r * 1.2), width: Math.round(r * 2.4), height: Math.round(r * 2.4) };
   await touch('touchStart', [[W * 0.095, H * 0.77], [bx, by - gap]]); await wait(100);
   await touch('touchMove', [[W * 0.155, H * 0.77], [bx, by - gap]]); await wait(400);
   const both = await shot('07-stick-and-button', stickClip);
+  const bothPad = await shot('07b-button-while-stick-held', padClip);
   await touch('touchEnd', []);
   await expectChange('stick and button work with two fingers', idleStick, both);
+  await expectChange('the button lights up while the stick finger is down', idlePad, bothPad);
+
+  await touch('touchStart', [[W * 0.095, H * 0.77]]); await wait(100);
+  await touch('touchMove', [[W * 0.155, H * 0.77]]); await wait(200);
+  for (let i = 0; i < 3; i++) {
+    await touch('touchStart', [[W * 0.155, H * 0.77], [bx, by - gap]]); await wait(120);
+    const lit = await shot(i === 0 ? '07c-tap-over-held-stick' : null, padClip);
+    await expectChange(`attack tap ${i + 1} registers over the held stick`, idlePad, lit);
+    await touch('touchEnd', [[bx, by - gap, 2]]); await wait(120);
+  }
+  const stillHeld = await shot('07d-stick-after-taps', stickClip);
+  await touch('touchEnd', []);
+  await expectChange('the stick keeps steering after attack taps', idleStick, stillHeld);
+
+  const floatClip = { x: Math.round(W * 0.2), y: Math.round(H * 0.4), width: Math.round(W * 0.2), height: Math.round(H * 0.4) };
+  const idleFloat = await shot(null, floatClip);
+  await touch('touchStart', [[W * 0.3, H * 0.6]]); await wait(300);
+  const floating = await shot('07e-floating-stick', floatClip);
+  await touch('touchEnd', []);
+  await expectChange('the floating stick appears where the thumb lands', idleFloat, floating);
 
   await tap(W / 2, H * 0.49);
   await wait(1500);

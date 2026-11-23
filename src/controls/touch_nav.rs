@@ -68,8 +68,8 @@ impl TouchNav {
         self.held
     }
 
-    pub fn set_screen(&mut self, screen: &Screen) {
-        self.active = !matches!(screen, Screen::Fight);
+    pub fn set_screen(&mut self, screen: &Screen, paused: bool) {
+        self.active = paused || !matches!(screen, Screen::Fight);
         self.arrows = !matches!(screen, Screen::Menu { .. });
     }
 

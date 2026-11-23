@@ -526,7 +526,7 @@ async fn story(app: &mut App, dir: &str) {
             ladder[others - 1],
             stage(app, "volcano"),
         );
-        app.arcade = Some((ladder, others - 1));
+        app.arcade = Some(crate::app::arcade::ArcadeRun::at(ladder, others - 1));
         app.ending_shown = false;
         app.screen = Screen::Results { winner: 0, cur: 0 };
         frames(app, 3).await;
@@ -606,7 +606,7 @@ async fn story(app: &mut App, dir: &str) {
         app.session = None;
     }
     app.sel = (find(app, "kaito"), find(app, "oboro"), 0);
-    app.arcade = Some((vec![find(app, "oboro")], 0));
+    app.arcade = Some(crate::app::arcade::ArcadeRun::new(vec![find(app, "oboro")], None, None));
     for (kind, page, name) in [
         (0u8, 1usize, "62-cutscene-opening"),
         (1, 3, "63-cutscene-boss"),

@@ -17,3 +17,4 @@ pub mod debug_fight;
 pub mod knockdown_rate;
 pub mod fight_census;
 pub mod float_scan;
+pub mod frame_data;

@@ -5,7 +5,7 @@ use ume_engine::common::{common_def, flat_stage};
 use ume_engine::matchs::Match;
 use ume_native::{compile_native, NativeChar};
 use ume_engine::stage_objects::{
-    Breakable, Goal, ObjectEvent, PickupSpec, PICKUP_ARM_TICKS, PICKUP_LIFETIME,
+    Breakable, ObjectEvent, PickupSpec, PICKUP_ARM_TICKS, PICKUP_LIFETIME,
 };
 
 const JAB_STATE: i32 = 201;

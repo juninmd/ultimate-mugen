@@ -116,6 +116,19 @@ mod web {
                 app.story_ally_preview();
             }
         }
+        if matches!(app.screen, Screen::Cutscene { kind: 0, .. }) {
+            let clear_count = crate::query_params().iter().find_map(|(k, v)| {
+                (k == "e2e_arcade_clear").then(|| v.parse::<usize>().ok()).flatten()
+            });
+            if let Some(clears @ 0..=2) = clear_count {
+                app.boss_progression.clears = clears;
+                if let Some(boss) = app.boss_idx() {
+                    app.sel.1 = boss;
+                    app.arcade = Some((vec![boss], 0));
+                    app.screen = Screen::Results { winner: 0, cur: 0 };
+                }
+            }
+        }
         let god = god_requested();
         let mut fighters = String::new();
         let mut over = -1i64;
@@ -182,7 +195,8 @@ mod web {
         let st = ume_shell::quad::stats();
         let gpu = format!("{{\"v\":{},\"dc\":{},\"up\":{},\"kb\":{},\"rf\":{:.3},\"if\":{:.3},\"resets\":{},\"tresets\":{}}}", st.vertices, st.draw_calls, st.uploads, st.upload_kb, st.rgba_fill, st.index_fill, st.rgba_resets, st.transient_resets);
         let json = format!(
-            "{{\"gpu\":{gpu},\"screen\":\"{}\",\"epilogue\":{epilogue},\"arcade\":{arcade},\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"roster\":{roster},\"import\":{import},\"wasm_mb\":{wasm_mb},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
+            "{{\"gpu\":{gpu},\"menu_cur\":{},\"screen\":\"{}\",\"epilogue\":{epilogue},\"arcade\":{arcade},\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"roster\":{roster},\"import\":{import},\"wasm_mb\":{wasm_mb},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
+            match &app.screen { Screen::Menu { cur } => *cur as i64, _ => -1 },
             screen_name(&app.screen),
             app.mode == Mode::Story,
             over,

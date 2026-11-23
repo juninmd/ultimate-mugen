@@ -44,6 +44,7 @@ fn trail(d: Arc<CharDef>, state: i32, label: &str, out: &std::path::Path) -> usi
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn skills_leave_afterimage_trails() {
     let (Some(_), Some(out)) = (load(1), out_dir()) else { return };
     for (state, label) in [(7500, "afterimage-shunkan-ido"), (1700, "afterimage-kamehameha"), (3030, "afterimage-dragon-fist"), (1390, "afterimage-fireballs")] {
@@ -54,6 +55,7 @@ fn skills_leave_afterimage_trails() {
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn charge_state_refills_ki_and_hands_control_back() {
     let (Some(_), Some(out)) = (load(1), out_dir()) else { return };
     let mut r = Duel::new(patched(), 260.0);

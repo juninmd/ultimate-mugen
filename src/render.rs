@@ -2,7 +2,7 @@ use crate::gfx::*;
 use crate::postfx::PostFx;
 use crate::stagefx::{Ctx, StageReact};
 use crate::stages::ambience::{draw_profile, ImageRect};
-use crate::stages::{Particle, Stage, StageArt};
+use crate::stages::{Particle, Stage, StageArt, StageKind};
 use crate::ui::Ui;
 use crate::vfx::{FxParams, Vfx};
 use std::collections::HashMap;
@@ -568,6 +568,11 @@ impl MatchRenderer {
                         .idx(e.owner)
                         .map(|o| m.fighters[o].remap.as_slice())
                         .unwrap_or(&[]);
+                    let pal = if e.own_pal {
+                        None
+                    } else {
+                        m.idx(e.owner).map(|o| m.fighter_pal(o))
+                    };
                     if let Some(fr) = e.cur.frame() {
                         let p = e.world_pos(m.camera);
                         Self::draw_sprite(
@@ -584,6 +589,7 @@ impl MatchRenderer {
                                 add: e.add,
                                 vflip: e.vfacing < 0.0,
                                 remap,
+                                pal,
                                 alpha: e.alpha,
                                 angle: e.angle,
                                 ..Default::default()
@@ -1100,7 +1106,9 @@ impl MatchRenderer {
                 let (h, w, x) = crate::stages::illustration_layout(*span, image.w as f32 / image.h as f32, h, m.view_w, m.camera.x, m.zoom);
                 let rect = ImageRect { x: x + shx, y: ground - h * 0.85 + shy, w, h, view_w: m.view_w, view_h: m.view_h, cam_x: m.camera.x };
                 if front { self.fx.draw_illustrated(g, m, true, shx, shy); return if *span > 0.0 { } else { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, true) }; }
-                g.draw_backdrop(image, frames, *span, m.game_time as usize, g.ox + rect.x * s, g.oy + rect.y * s, w * s, h * s);
+                let (bx, by, bw, bh) = (g.ox + rect.x * s, g.oy + rect.y * s, w * s, h * s);
+                let live = st.kind == StageKind::Airport && crate::lite::backdrop() && crate::model3d::airport_backdrop(m.game_time, bx, by, bw, bh);
+                if !live { g.draw_backdrop(image, frames, *span, m.game_time as usize, bx, by, bw, bh); }
                 self.fx.draw_illustrated(g, m, false, shx, shy); if *span <= 0.0 { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, false); }
             }
             StageArt::Mugen(bg) => mugen_layers::draw_mugen_stage(g, m, bg, front, shx, shy, &mut self.sky),

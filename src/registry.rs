@@ -179,15 +179,10 @@ impl CharEntry {
             self.reap();
             return;
         }
-        let (vfs, def) = (vfs.clone(), def.clone());
-        if let Ok(h) = std::thread::Builder::new()
-            .name("char-portrait".into())
-            .spawn(move || load_mugen_portrait(&vfs, &def))
-        {
+        if let Some(h) = preview_gate::spawn_portrait_worker(vfs.clone(), def.clone()) {
             self.jobs.borrow_mut().portrait = Some(h);
         }
     }
-    /// Collects finished background jobs (previews and portraits) into the caches.
     pub fn reap(&self) {
         let (done_load, done_portrait) = {
             let mut j = self.jobs.borrow_mut();

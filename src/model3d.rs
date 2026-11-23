@@ -5,6 +5,8 @@ use ume_engine::matchs::Match;
 #[cfg(feature = "model3d")]
 mod active;
 #[cfg(feature = "model3d")]
+mod airport;
+#[cfg(feature = "model3d")]
 mod bindings;
 #[cfg(feature = "model3d")]
 mod canvas;
@@ -87,4 +89,19 @@ pub(crate) fn hud_portrait(
     bool,
 )> {
     None
+}
+
+#[cfg(feature = "model3d")]
+pub(crate) fn airport_backdrop(time: i64, x: f32, y: f32, w: f32, h: f32) -> bool {
+    airport::draw(time, x, y, w, h)
+}
+
+#[cfg(not(feature = "model3d"))]
+pub(crate) fn airport_backdrop(_: i64, _: f32, _: f32, _: f32, _: f32) -> bool {
+    false
+}
+
+#[cfg(feature = "model3d")]
+pub(crate) fn airport_still() -> Option<std::sync::Arc<ume_engine::chardef::ImageData>> {
+    airport::still()
 }

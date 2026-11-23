@@ -102,6 +102,7 @@ fn trial(
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn gethit_matrix() {
     let Some(d) = load(1) else { return };
     let mut stuck = 0;

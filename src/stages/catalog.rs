@@ -71,5 +71,7 @@ pub fn builtin() -> Vec<StageEntry> {
         },
     ];
     stages.extend(wonders::builtin());
+    #[cfg(feature = "model3d")]
+    stages.push(super::airport::entry());
     stages
 }

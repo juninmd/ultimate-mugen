@@ -263,7 +263,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             let (vel, acc, pos, scale) = (pair(m, "vel", 0.0, l), pair(m, "accel", 0.0, l), pair(m, "pos", 0.0, l), pair(m, "scale", 1.0, 1.0));
             let (bt, rt, pri) = (opt(m, "bindtime"), opt(m, "removetime"), opt(m, "sprpriority"));
             let (ontop, under, rogh, ihp) = (opt(m, "ontop"), opt(m, "under"), opt(m, "removeongethit"), opt(m, "ignorehitpause"));
-            let (fac, vfac, smt, pmt) = (opt(m, "facing"), opt(m, "vfacing"), opt(m, "supermovetime"), opt(m, "pausemovetime"));
+            let (fac, vfac, smt, pmt, alp) = (opt(m, "facing"), opt(m, "vfacing"), opt(m, "supermovetime"), opt(m, "pausemovetime"), opt(m, "alpha"));
             let trans = sc.raw("trans").map(|t| t.trim().to_ascii_lowercase());
             let owner_facing = m.fighters[i].facing;
             for e in m.explods.iter_mut().filter(|e| e.owner == me && (id < 0 || e.id == id)) {
@@ -282,7 +282,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                 if let Some(v) = vfac { e.vfacing = if v < 0.0 { -1.0 } else { 1.0 }; }
                 if let Some(v) = smt { e.super_move = v as i32; }
                 if let Some(v) = pmt { e.pause_move = v as i32; }
-                if let Some(t) = &trans { e.add = t.starts_with("add") && t != "addalpha"; }
+                if let Some(v) = alp { e.alpha = (v / 256.0).clamp(0.0, 1.0); } if let Some(t) = &trans { e.add = t.starts_with("add") && t != "addalpha"; }
             }
         }
         "helper" => m.spawn_helper(i, sc),

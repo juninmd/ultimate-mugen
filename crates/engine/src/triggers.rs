@@ -135,7 +135,7 @@ impl<'a> Host for Ctx<'a> {
             "physics" => f.physics == c0,
             "p2statetype" => self.enemy().is_some_and(|e| e.state_type == c0),
             "p2movetype" => self.enemy().is_some_and(|e| e.move_type == c0),
-            "name" => f.def.name.eq_ignore_ascii_case(v0),
+            "name" => f.ikemen.helper_name.as_deref().unwrap_or(&f.def.name).eq_ignore_ascii_case(v0),
             "p1name" | "p2name" | "p3name" | "p4name" | "p5name" | "p6name" | "p7name" | "p8name" => {
                 let slot = (name.as_bytes()[1] - b'0') as usize;
                 self.m.roots().find(|r| r.player_no == slot).is_some_and(|r| r.def.name.eq_ignore_ascii_case(v0))
@@ -146,7 +146,7 @@ impl<'a> Host for Ctx<'a> {
                 _ => false,
             },
             "authorname" => f.def.author.eq_ignore_ascii_case(v0),
-            "displayname" => f.def.display_name.eq_ignore_ascii_case(v0),
+            "displayname" => f.def.display_name.eq_ignore_ascii_case(v0), "helpername" => f.ikemen.helper_name.as_deref().is_some_and(|n| n.eq_ignore_ascii_case(v0)),
             "selfcommand" => self.m.has_command(self.i, v0),
             "hitdefattr" => {
                 let Some(hd) = f.hitdef.as_ref() else { return neg };

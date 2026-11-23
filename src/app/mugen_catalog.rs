@@ -25,15 +25,18 @@ pub(super) fn short(s: &str, max: usize) -> String {
 impl App {
     pub(crate) fn mugen_catalog(&mut self, view: u8, page: usize) -> Option<(u8, usize)> {
         crate::screen_art::ScreenArt::Archive.background(&self.ui);
+        self.reg.reap_streams();
         if view == GALLERY && super::mugen_roster::sheet_open() {
             let list = self.roster_list();
+            let keep = list.get(super::mugen_roster::state().cur).copied();
+            self.reg.trim_cache(keep.as_slice());
             self.mugen_sheet(&list);
             return Some((view, page));
         }
-        let loaded: Vec<usize> = (0..self.reg.chars.len()).filter(|&i| self.reg.chars[i].mugen).collect();
-        let quarantined: Vec<Quarantined> = self.reg.quarantined.clone();
+        self.reg.trim_cache(&[]);
+        let loaded = self.reg.chars.iter().filter(|c| c.mugen).count();
         let stages = self.reg.stages.iter().filter(|s| s.mugen).count();
-        self.catalog_header(loaded.len(), &quarantined, stages);
+        self.catalog_header(loaded, &self.reg.quarantined, stages);
         self.import_button_row();
 
         let (mut view, mut page) = (view, page);
@@ -46,7 +49,8 @@ impl App {
             let page = self.mugen_roster(&list);
             (page, super::mugen_roster_nav::page_count(list.len()), list.len())
         } else {
-            let pages = quarantined.len().div_ceil(LIST_ROWS).max(1);
+            let q_len = self.reg.quarantined.len();
+            let pages = q_len.div_ceil(LIST_ROWS).max(1);
             if self.c.pressed(nav::RIGHT) && page + 1 < pages {
                 page += 1;
             }
@@ -54,8 +58,9 @@ impl App {
                 page -= 1;
             }
             let page = page.min(pages - 1);
+            let quarantined = self.reg.quarantined.clone();
             self.catalog_list(&quarantined, page);
-            (page, pages, quarantined.len())
+            (page, pages, q_len)
         };
         let picked = self.catalog_tabs(view, total);
         self.catalog_footer(page, pages);

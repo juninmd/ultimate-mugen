@@ -43,12 +43,14 @@ impl Canvas {
     fn v(&self, x: f32, y: f32, c: Color) -> Vertex { Vertex::new([x, y], self.white, RGBA_SPRITE, c.0, [0.0; 4], 0.0) }
 
     pub fn triangle(&mut self, a: [f32; 2], b: [f32; 2], c: [f32; 2], color: Color) {
-        let vs = [self.v(a[0], a[1], color), self.v(b[0], b[1], color), self.v(c[0], c[1], color)];
+        let v0 = self.v(a[0], a[1], color);
+        let vs = [v0, Vertex { pos: b, ..v0 }, Vertex { pos: c, ..v0 }];
         self.batch.push_tris(&vs, &[0, 1, 2], self.blend);
     }
 
     pub fn rect(&mut self, x: f32, y: f32, w: f32, h: f32, color: Color) {
-        let vs = [self.v(x, y, color), self.v(x + w, y, color), self.v(x + w, y + h, color), self.v(x, y + h, color)];
+        let v0 = self.v(x, y, color);
+        let vs = [v0, Vertex { pos: [x + w, y], ..v0 }, Vertex { pos: [x + w, y + h], ..v0 }, Vertex { pos: [x, y + h], ..v0 }];
         self.batch.push_tris(&vs, &[0, 1, 2, 0, 2, 3], self.blend);
     }
 
@@ -61,8 +63,15 @@ impl Canvas {
     }
 
     pub fn mesh(&mut self, points: &[[f32; 2]], colors: &[Color], indices: &[u32]) {
-        let vs: Vec<Vertex> = points.iter().zip(colors.iter().cycle()).map(|(p, c)| self.v(p[0], p[1], *c)).collect();
-        self.batch.push_tris(&vs, indices, self.blend);
+        self.shape_vertices.clear();
+        let white = self.white;
+        self.shape_vertices.extend(
+            points
+                .iter()
+                .zip(colors.iter().cycle())
+                .map(|(p, c)| Vertex::new(*p, white, RGBA_SPRITE, c.0, [0.0; 4], 0.0)),
+        );
+        self.batch.push_tris(&self.shape_vertices, indices, self.blend);
     }
 
     pub fn sprite(&mut self, q: Quad) {

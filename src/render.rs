@@ -542,7 +542,7 @@ impl MatchRenderer {
         items.sort_by_key(|x| (x.0, x.1));
         for (_, _, it) in items {
             match it {
-                It::F(i) => self.draw_fighter(g, m, &m.fighters[i], i, shx, shy),
+                It::F(i) => if !crate::model3d::draw(g, m, &m.fighters[i], shx, shy) { self.draw_fighter(g, m, &m.fighters[i], i, shx, shy) },
                 It::P(i) => {
                     let p = &m.projectiles[i];
                     if let Some(fr) = p.cur.frame() {

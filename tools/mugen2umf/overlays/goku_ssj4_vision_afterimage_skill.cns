@@ -1,0 +1,45 @@
+[Statedef 90300]
+type = S
+movetype = I
+physics = N
+anim = 100
+velset = 0,0
+ctrl = 0
+poweradd = -200 * 30 / 30
+
+[State 90300, Invulnerable]
+type = NotHitBy
+trigger1 = Time = 0
+value = SA
+time = 18
+
+[State 90300, Sound]
+type = PlaySnd
+trigger1 = Time = 0
+value = 0,57
+volume = 255
+
+[State 90300, Trail]
+type = AfterImage
+trigger1 = Time = 0
+time = 30
+length = 10
+framegap = 2
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State 90300, Blink Behind Foe]
+type = PosAdd
+trigger1 = Time = 6
+x = P2Dist X
+
+[State 90300, Face Foe]
+type = Turn
+trigger1 = Time = 6
+
+[State 90300, Recover]
+type = ChangeState
+trigger1 = Time >= 30
+value = 0
+ctrl = 1

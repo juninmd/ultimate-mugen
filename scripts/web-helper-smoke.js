@@ -37,7 +37,9 @@ const server = staticServer(dir, types);
   await key('Enter', 1500);
   const fightDeadline = Date.now() + 120000;
   s = await state();
-  while ((!s || s.screen !== 'fight') && Date.now() < fightDeadline) { await key('Enter', 2000); s = await state(); }
+  while ((!s || s.screen !== 'fight') && Date.now() < fightDeadline) { await key('Enter', 300); s = await state(); }
+  await p.waitForTimeout(1200);
+  await shot('helper-fight-banner.png');
   await p.waitForTimeout(6000);
   s = await state();
   await shot('helper-fight.png');

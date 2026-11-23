@@ -8,12 +8,13 @@ const RULE_ROWS: usize = RULES.len();
 const STAGE_ROW: usize = RULE_ROWS;
 const TITLE_ROW: usize = STAGE_ROW + 1;
 const BOSS_ROW: usize = STAGE_ROW + 2;
-const BEAT_ROW: usize = STAGE_ROW + 3;
+const FOES_ROW: usize = STAGE_ROW + 3;
+const BEAT_ROW: usize = STAGE_ROW + 4;
 const RESET_ROW: usize = BEAT_ROW + BEATS;
 const EPILOGUE_ROW: usize = RESET_ROW + 1;
 const ROWS: usize = EPILOGUE_ROW + 1;
 const ROW_TOP: f32 = 142.0;
-const ROW_H: f32 = 36.0;
+const ROW_H: f32 = 33.0;
 const VALUE_W: f32 = 700.0;
 
 pub(crate) struct StudioState {
@@ -144,6 +145,10 @@ impl App {
                 studio::cycle_boss(&mut st.script, st.stage, &roster, dir);
                 self.studio_commit(st);
             }
+            FOES_ROW if dir != 0 => {
+                studio::adjust_foes(&mut st.script, st.stage, dir);
+                self.studio_commit(st);
+            }
             c if (BEAT_ROW..RESET_ROW).contains(&c) && ok => {
                 st.edit = Some(st.script.stage_beat(st.stage, c - BEAT_ROW, lang).to_string());
                 self.audio.sfx("confirm");
@@ -212,6 +217,11 @@ impl App {
             BOSS_ROW => {
                 let boss = st.script.stage(st.stage).map(|s| s.boss.as_str()).unwrap_or("-");
                 (tr3("Chefe da fase", "Stage boss", "Jefe de la fase").into(), format!("‹ {boss} ›"))
+            }
+            FOES_ROW => {
+                let (lo, hi) = studio::foe_range(&st.script, st.stage);
+                let shown = if lo == hi { lo.to_string() } else { format!("{lo}-{hi}") };
+                (tr3("Inimigos por onda", "Foes per wave", "Enemigos por oleada").into(), format!("‹ {shown} ›"))
             }
             EPILOGUE_ROW => (tr3("Epílogos…", "Epilogues…", "Epílogos…").into(), "›".into()),
             RESET_ROW => (tr3("Restaurar roteiro original", "Restore original script", "Restaurar guion original").into(), String::new()),

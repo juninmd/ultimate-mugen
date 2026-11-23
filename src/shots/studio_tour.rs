@@ -9,4 +9,11 @@ pub async fn run(app: &mut App, dir: &str) {
     app.screen = Screen::StoryStudio { cur: 7 };
     screen(app, dir, "studio-editando", 20).await;
     app.studio = None;
+    app.epi_studio = Some(crate::app::EpiState::open());
+    app.screen = Screen::EpilogueStudio { cur: 4 };
+    screen(app, dir, "epilogo-lista", 20).await;
+    app.epi_studio = Some(crate::app::EpiState::open().editing("Dawn broke over the city and the shutters opened on a quiet street.", "kaito"));
+    app.screen = Screen::EpilogueStudio { cur: 4 };
+    screen(app, dir, "epilogo-editando", 20).await;
+    app.epi_studio = None;
 }

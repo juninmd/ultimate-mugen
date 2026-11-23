@@ -193,3 +193,48 @@ pub(crate) fn raw_rows(buf: &[u8], w: usize, h: usize, bpl: usize) -> Vec<u8> {
     }
     px
 }
+
+impl PcxHeader {
+    pub fn is_8bit_indexed(&self) -> bool {
+        self.bits_per_pixel == 8 && self.planes == 1
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rejects_truncated_and_oversized_pcx_headers() {
+        assert!(read_pcx_header(&[0u8; 64]).is_err());
+        let mut huge = vec![0u8; PCX_HEADER_SIZE];
+        huge[8] = 0xff;
+        huge[9] = 0x7f;
+        huge[10] = 0xff;
+        huge[11] = 0x7f;
+        assert!(read_pcx_header(&huge).is_err());
+    }
+
+    #[test]
+    fn decodes_rle_pcx_with_vga_palette_and_fixes_short_bpl() {
+        let mut buf = vec![0u8; PCX_HEADER_SIZE];
+        buf[2] = 1;
+        buf[3] = 8;
+        buf[8] = 3;
+        buf[10] = 1;
+        buf[65] = 1;
+        buf[66] = 2;
+        buf.extend_from_slice(&[0xc4, 7, 0xc4, 9]);
+        buf.push(0x0c);
+        buf.extend_from_slice(&vec![128u8; 768]);
+        let hdr = read_pcx_header(&buf).expect("valid header");
+        assert!(hdr.is_8bit_indexed());
+        assert_eq!((hdr.width, hdr.height, hdr.bytes_per_line), (4, 2, 4));
+        let img = decode_pcx(&buf, true).expect("valid pcx");
+        assert_eq!(img.pixels, vec![7, 7, 7, 7, 9, 9, 9, 9]);
+        let pal = img.palette.expect("vga palette");
+        assert_eq!(pal[3], 0);
+        assert_eq!(pal[7], 255);
+    }
+}
+

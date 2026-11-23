@@ -14,6 +14,7 @@ mod web {
             Screen::Fight => "fight",
             Screen::Results { .. } => "results",
             Screen::Story { .. } => "story",
+            Screen::StoryCheckpoint { .. } => "story_checkpoint",
             Screen::Tower { .. } => "tower",
             Screen::ArenaSetup { .. } => "arena_setup",
             Screen::SurvivalOver { .. } => "survival_over",
@@ -91,6 +92,11 @@ mod web {
         let defeat = crate::query_params().iter().any(|(k, _)| k == "e2e_defeat");
         if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (defeat, &app.screen, app.story_snapshot()) {
             app.story_defeat_preview();
+        }
+        let checkpoint = crate::query_params().iter().any(|(k, _)| k == "e2e_story_checkpoint");
+        if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (checkpoint, &app.screen, app.story_snapshot()) {
+            app.story_jump_to_boss();
+            app.story_win();
         }
         let ending = crate::query_params().iter().any(|(k, _)| k == "e2e_epilogue");
         if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (ending, &app.screen, app.story_snapshot()) {

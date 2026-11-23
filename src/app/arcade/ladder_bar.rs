@@ -27,11 +27,11 @@ impl App {
         if self.mode != Mode::Arcade {
             return;
         }
-        let Some((ladder, idx)) = self.arcade.as_ref() else {
+        let Some(run) = self.arcade.as_ref() else {
             return;
         };
         let boss = self.boss_idx();
-        let Some(prog) = arcade_progress(ladder, *idx, boss) else {
+        let Some(prog) = arcade_progress(&run.ladder, run.index, boss) else {
             return;
         };
         let reveal = (t * 2.5).clamp(0.0, 1.0);
@@ -40,16 +40,16 @@ impl App {
         let accent = if prog.is_boss { hex("#ff4d6d") } else { hex("#ffcc33") };
         self.ui.rect(x, y, w * reveal, 2.0, accent);
 
-        let count = ladder.len().min(11);
+        let count = run.ladder.len().min(11);
         let gap = 6.0;
         let inner_w = w - 20.0;
         let step_w = (inner_w - gap * (count.saturating_sub(1) as f32)) / count.max(1) as f32;
         let ny = y + 5.0;
         let nh = 24.0;
-        for (i, &char_idx) in ladder.iter().take(count).enumerate() {
+        for (i, &char_idx) in run.ladder.iter().take(count).enumerate() {
             let nx = x + 10.0 + i as f32 * (step_w + gap);
-            let cleared = i < *idx;
-            let active = i == *idx;
+            let cleared = i < run.index;
+            let active = i == run.index;
             let rung_boss = boss == Some(char_idx);
             let bg = if active {
                 Color::new(accent.r, accent.g, accent.b, 0.92)

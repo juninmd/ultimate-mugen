@@ -22,7 +22,7 @@ storyboard = "chars/kfm/intro.def"
 
 [[step]]
 repeat = 6
-fight = { order = 1 }
+fight = { order = 1, stage = "dojo" }
 
 [[step]]
 when = "consecutive_wins == 6"
@@ -38,6 +38,7 @@ Each `[[step]]` has exactly one of `fight`, `storyboard` or `action`.
 | Key | Meaning |
 |---|---|
 | `fight` | `order` (1 picks the next regular opponent, 2 or more picks the boss), `p2` (fighter ids or names, first match wins), `stage`, `winscreen` |
+| `stage` | Stage id or name; `random` chooses a random stage. The first fight skips stage select when its route names a stage. An unknown stage keeps the normal automatic choice. |
 | `storyboard` | Parsed and validated, not played yet: the engine reports it and continues |
 | `action` | `clear` ends the route |
 | `repeat` | 1 to 99 times; `when` is checked on every repetition |

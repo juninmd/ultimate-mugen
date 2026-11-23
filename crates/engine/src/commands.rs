@@ -240,7 +240,7 @@ impl CommandState {
                     self.pause_hold.insert(c.key.clone(), c.pause_buffer);
                 }
                 self.active.insert(c.key.clone());
-            } else if self.pause_hold.contains_key(c.name.as_str()) {
+            } else if !self.pause_hold.is_empty() && self.pause_hold.contains_key(c.name.as_str()) {
                 self.active.insert(c.key.clone());
             }
         }

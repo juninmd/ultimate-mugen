@@ -1373,7 +1373,7 @@ impl Match {
     fn make_explod(&self, owner: &Fighter, def: Arc<CharDef>, anim: i32, x: f32, y: f32, lscl: f32) -> Explod {
         Explod { owner: owner.id, id: -1, cur: AnimCursor::new(def, anim), pos: V2 { x, y }, vel: V2::default(), accel: V2::default(), facing: owner.facing, vfacing: 1.0,
             bind_time: 0, bind_to: None, bind_off: V2::default(), remove_time: -2, time: 0, spr_priority: 5, on_top: true, under: false, scale: [1.0, 1.0],
-            add: false, remove_on_get_hit: false, super_move: 0, pause_move: 0, lscl, ignore_hit_pause: true, screen: false, alpha: 1.0, angle: 0.0 }
+            add: false, remove_on_get_hit: false, super_move: 0, pause_move: 0, lscl, ignore_hit_pause: true, screen: false, alpha: 1.0, angle: 0.0, own_pal: true }
     }
     pub fn spawn_spark(&mut self, a: usize, no: i32, own: bool, x: f32, y: f32, guard: bool, heavy: bool, scale: f32) {
         let f = &self.fighters[a];
@@ -1488,7 +1488,7 @@ impl Match {
         e.remove_on_get_hit = num(self, "removeongethit", 0.0, 0) != 0.0;
         e.super_move = num(self, "supermove", num(self, "supermovetime", 0.0, 0) as f64, 0) as i32;
         e.pause_move = num(self, "pausemove", num(self, "pausemovetime", 0.0, 0) as f64, 0) as i32;
-        e.add = sc.raw("trans").is_some_and(|t| t.to_ascii_lowercase().starts_with("add")); e.alpha = (num(self, "alpha", 256.0, 0) as f32).clamp(0.0, 256.0) / 256.0; e.angle = num(self, "angle", 0.0, 0) as f32;
+        e.add = sc.raw("trans").is_some_and(|t| t.to_ascii_lowercase().starts_with("add")); e.alpha = (num(self, "alpha", 256.0, 0) as f32).clamp(0.0, 256.0) / 256.0; e.angle = num(self, "angle", 0.0, 0) as f32; e.own_pal = num(self, "ownpal", 0.0, 0) != 0.0;
         e.ignore_hit_pause = num(self, "ignorehitpause", 1.0, 0) != 0.0;
         e.screen = screen_space || sc.raw("space").is_some_and(|s| s.trim().eq_ignore_ascii_case("screen"));
         if e.screen && !screen_space { e.pos.x -= self.camera.x; e.pos.y -= self.camera.y; e.bind_to = None; }
@@ -1549,6 +1549,7 @@ impl Match {
         let mut h = Fighter::new(id, root.def.clone(), f.side, f.player_no);
         h.is_helper = true;
         h.helper_id = self.num(i, sc, "id", 0.0, 0) as i32;
+        h.ikemen.helper_name = sc.raw("name").map(|s| s.trim().trim_matches('"').into());
         h.parent = Some(f.id); h.root = root.id;
         h.key_ctrl = num(self, "keyctrl", 0.0, 0) != 0.0;
         h.pause_move_time = if num(self, "pausemove", 0.0, 0) != 0.0 { 999_999 } else { num(self, "pausemovetime", 0.0, 0) as i32 };

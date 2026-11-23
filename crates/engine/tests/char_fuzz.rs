@@ -14,6 +14,7 @@ impl Lcg {
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn fuzzed_duels_never_need_the_watchdog() {
     let Some(d) = load(1) else { return };
     let cmds: Vec<_> = d
@@ -119,6 +120,7 @@ fn native_roster() -> Vec<(String, std::sync::Arc<ume_engine::chardef::CharDef>)
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn goku_against_every_native_fighter_never_gets_stuck() {
     let Some(goku) = load(1) else { return };
     let cmds: Vec<_> = goku

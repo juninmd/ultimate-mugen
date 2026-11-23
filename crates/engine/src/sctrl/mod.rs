@@ -69,11 +69,17 @@ fn force_feedback(m: &mut Match, i: usize, sc: &Controller) {
     let time = m.num(i, sc, "time", 60.0, 0) as i32;
     let ampl = m.num(i, sc, "ampl", 128.0, 0) as f32;
     let to_self = m.num(i, sc, "self", 1.0, 0) != 0.0;
-    let waveform = sc.raw("waveform").unwrap_or("sine").trim().to_ascii_lowercase();
+    let waveform = sc.raw("waveform").unwrap_or("sine").trim();
     let target = if to_self { Some(m.fighters[i].root) } else { m.enemy(i, 0).map(|e| m.fighters[e].id) };
     let Some(fighter) = target else { return };
     let strength = (ampl.abs() / 255.0).clamp(0.0, 1.0);
-    let (strong, weak) = match waveform.as_str() { "square" | "sinesquare" => (strength, strength), "off" => (0.0, 0.0), _ => (strength * 0.5, strength) };
+    let (strong, weak) = if waveform.eq_ignore_ascii_case("square") || waveform.eq_ignore_ascii_case("sinesquare") {
+        (strength, strength)
+    } else if waveform.eq_ignore_ascii_case("off") {
+        (0.0, 0.0)
+    } else {
+        (strength * 0.5, strength)
+    };
     m.events.push(Event::Rumble { fighter, strong, weak, ms: (time.max(0) as u32) * 1000 / 60 });
 }
 

@@ -35,34 +35,29 @@ fn check_size(width: usize, height: usize) -> Result<(), String> {
 }
 
 fn bounds(data: &[u8], width: usize, height: usize, bpp: usize) -> Bounds {
-    let blank = |row: usize, col: usize| {
-        data[(row * width + col) * bpp..][..bpp]
-            .iter()
-            .all(|&byte| byte == 0)
-    };
-    let rows: Vec<usize> = (0..height)
-        .filter(|&row| (0..width).any(|col| !blank(row, col)))
-        .collect();
-    let (Some(&top), Some(&bottom)) = (rows.first(), rows.last()) else {
-        return Bounds {
-            x: 0,
-            y: 0,
-            w: 0,
-            h: 0,
+    let mut top = height;
+    let mut bottom = 0usize;
+    let mut left = width;
+    let mut right = 0usize;
+    let row_bytes = width * bpp;
+    for row in 0..height {
+        let slice = &data[row * row_bytes..(row + 1) * row_bytes];
+        let Some(first_byte) = slice.iter().position(|&b| b != 0) else {
+            continue;
         };
-    };
-    let first = (top..=bottom)
-        .filter_map(|row| (0..width).find(|&col| !blank(row, col)))
-        .min()
-        .unwrap_or(0);
-    let last = (top..=bottom)
-        .filter_map(|row| (0..width).rev().find(|&col| !blank(row, col)))
-        .max()
-        .unwrap_or(0);
+        let last_byte = slice.iter().rposition(|&b| b != 0).unwrap_or(first_byte);
+        top = top.min(row);
+        bottom = row;
+        left = left.min(first_byte / bpp);
+        right = right.max(last_byte / bpp);
+    }
+    if top > bottom || left > right {
+        return Bounds { x: 0, y: 0, w: 0, h: 0 };
+    }
     Bounds {
-        x: first,
+        x: left,
         y: top,
-        w: last - first + 1,
+        w: right - left + 1,
         h: bottom - top + 1,
     }
 }

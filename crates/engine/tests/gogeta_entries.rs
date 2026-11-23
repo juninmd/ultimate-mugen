@@ -115,6 +115,7 @@ fn overlay(d: &std::sync::Arc<ume_engine::chardef::CharDef>, names: &[String]) -
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn every_special_entry_is_reachable() {
     let Some(d) = load(1) else { return };
     let dead = disabled();

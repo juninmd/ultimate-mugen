@@ -154,6 +154,7 @@ fn play(defs: [&Arc<CharDef>; 2], level: i32, seeds: [u32; 2], shots: Option<&Pa
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn seeded_duels_report_win_rate_and_damage() {
     let (Ok(a), Ok(b), Ok(out)) = (
         std::env::var("UME_DUEL_A"),

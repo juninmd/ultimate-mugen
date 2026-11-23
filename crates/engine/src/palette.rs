@@ -31,8 +31,23 @@ impl PalFx {
     }
 
     pub fn from_controller(m: &Match, i: usize, sc: &Controller, prefix: &str) -> PalFx {
-        let k = |name: &str| if prefix.is_empty() { name.to_string() } else { format!("{prefix}.{name}") };
-        let n = |name: &str, d: f64, idx: usize| m.num(i, sc, &k(name), d, idx) as f32;
+        let n = |name: &str, d: f64, idx: usize| -> f32 {
+            if prefix.is_empty() {
+                return m.num(i, sc, name, d, idx) as f32;
+            }
+            let mut buf = [0u8; 48];
+            let plen = prefix.len();
+            let nlen = name.len();
+            if plen + 1 + nlen <= buf.len() {
+                buf[..plen].copy_from_slice(prefix.as_bytes());
+                buf[plen] = b'.';
+                buf[plen + 1..plen + 1 + nlen].copy_from_slice(name.as_bytes());
+                if let Ok(s) = std::str::from_utf8(&buf[..plen + 1 + nlen]) {
+                    return m.num(i, sc, s, d, idx) as f32;
+                }
+            }
+            m.num(i, sc, &format!("{prefix}.{name}"), d, idx) as f32
+        };
         PalFx {
             time: n("time", 0.0, 0) as i32,
             add: [n("add", 0.0, 0), n("add", 0.0, 1), n("add", 0.0, 2)],
@@ -87,8 +102,27 @@ impl PalParams {
 
     pub fn apply_slice(&self, rgb_slice: &mut [[u8; 3]]) {
         if self.is_identity() { return; }
+        let hue_rot = if self.hue.rem_euclid(360.0).abs() > 0.0001 {
+            Some(self.hue.to_radians().sin_cos())
+        } else {
+            None
+        };
+        let t = self.color / 256.0;
+        let mul = [self.mul[0] / 256.0, self.mul[1] / 256.0, self.mul[2] / 256.0];
         for rgb in rgb_slice.iter_mut() {
-            *rgb = self.apply(*rgb);
+            let mut c = rgb.map(|v| v as f32);
+            if self.invert { c = c.map(|v| 255.0 - v); }
+            if self.color < 256.0 {
+                let gray = (c[0] + c[1] + c[2]) / 3.0;
+                c = c.map(|v| gray + (v - gray) * t);
+            }
+            if let Some((sin_a, cos_a)) = hue_rot {
+                let k = 0.577_350_26;
+                let dot = (c[0] + c[1] + c[2]) * k;
+                let cross = [(c[2] - c[1]) * k, (c[0] - c[2]) * k, (c[1] - c[0]) * k];
+                c = [0, 1, 2].map(|i| (c[i] * cos_a + cross[i] * sin_a + k * dot * (1.0 - cos_a)).clamp(0.0, 255.0));
+            }
+            *rgb = [0, 1, 2].map(|k| ((c[k] + self.add[k]) * mul[k]).clamp(0.0, 255.0) as u8);
         }
     }
 }
@@ -101,8 +135,18 @@ pub struct Trans { pub mode: BlendMode, pub src: f32, pub dst: f32 }
 
 impl Trans {
     pub fn parse(mode: &str, alpha: Option<(f32, f32)>) -> Trans {
-        let m = mode.trim().to_ascii_lowercase();
-        let mode = match m.as_str() { "add" => BlendMode::Add, "add1" => BlendMode::Add1, "sub" => BlendMode::Sub, "addalpha" => BlendMode::AddAlpha, _ => BlendMode::None };
+        let m = mode.trim();
+        let mode = if m.eq_ignore_ascii_case("add") {
+            BlendMode::Add
+        } else if m.eq_ignore_ascii_case("add1") {
+            BlendMode::Add1
+        } else if m.eq_ignore_ascii_case("sub") {
+            BlendMode::Sub
+        } else if m.eq_ignore_ascii_case("addalpha") {
+            BlendMode::AddAlpha
+        } else {
+            BlendMode::None
+        };
         let (src, dst) = match (mode, alpha) {
             (BlendMode::AddAlpha, Some(a)) => a,
             (BlendMode::AddAlpha, None) => (256.0, 0.0),

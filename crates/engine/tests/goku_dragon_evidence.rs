@@ -55,6 +55,7 @@ fn run(d: Arc<CharDef>, raised: f32, behind: bool, label: &str, out: &std::path:
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn dragon_homes_in_on_a_raised_foe() {
     let (Some(base), Some(out)) = (load(1), out_dir()) else { return };
     let (orig_dmg, _, orig_trail) = run(base, -100.0, false, "original-straight", &out);
@@ -119,6 +120,7 @@ fn team_scene(d: Arc<CharDef>, label: &str, out: &std::path::Path) -> Vec<f32> {
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn dragon_chooses_among_three_foes() {
     let (Some(base), Some(out)) = (load(1), out_dir()) else { return };
     let straight = team_scene(base, "dragao-original-3-inimigos", &out);
@@ -150,6 +152,7 @@ fn afterimage_sheet(d: Arc<CharDef>, state: i32, drift: f32, label: &str, out: &
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn afterimage_trails_are_drawn() {
     let (Some(base), Some(out)) = (load(1), out_dir()) else { return };
     for (state, drift, label) in [(1300, 3.0, "afterimage-shunkan-ido-drift"), (1300, 0.0, "afterimage-shunkan-ido"), (1800, 0.0, "afterimage-super-kamehameha")] {

@@ -1,10 +1,11 @@
 use std::path::{Path, PathBuf};
-use ume_devtools::{sff_cook, ability_reel, audit_moves, audit_sprites, debug_fight, frame_data, homologate, knockdown_rate, fight_census, float_scan, motion, mugen_census, pack, roster_audit, story_npcs, thumbnails};
+use ume_devtools::{sff_cook, ability_reel, audit_moves, audit_sprites, debug_fight, frame_data, homologate, knockdown_rate, fight_census, float_scan, motion, mugen_census, pack, roster_audit, stage_audit, story_npcs, thumbnails};
 
 const USAGE: &str = "usage: ume-tools <command>\n\
   pack-sprites [out_root=web/dist] [--sprites dir]  pack assets/chars/sprites into web .pack files\n\
   cook-sff <in.sff> <out.sff>             repack an .sff as LZ4 UMSF and verify it decodes to the same sprites\n\
   stage-thumbs [stages=assets/stages]    write 240x135 thumbnails to <stages>/thumbs\n\
+  stage-audit [stages=assets/stages] [--json]  verify stage PNG dimensions, thumbnails and animation frames\n\
   audit-moves [dir=assets/chars] [--json] static roster audit (inputs, cancels, throws, hit boxes)\n\
   audit-sprites --out <report.json> [--root <repo>]  native PNG inventory\n\
   debug-fight <char1> [char2] [--frames N] [--only-moves] [--json]  inspect frame data, triggers, clipboard and console trace\n\
@@ -38,6 +39,14 @@ fn run(args: &[String]) -> Result<(), String> {
         Some("stage-thumbs") => {
             let count = thumbnails::make_thumbnails(Path::new(positional.first().map(|s| s.as_str()).unwrap_or("assets/stages")))?;
             println!("OK: {count} thumbnails");
+        }
+        Some("stage-audit") => {
+            let rep = stage_audit::audit(Path::new(positional.first().map(|s| s.as_str()).unwrap_or("assets/stages")))?;
+            if args.iter().any(|a| a == "--json") {
+                println!("{}", serde_json::to_string_pretty(&stage_audit::to_json(&rep)).map_err(|e| e.to_string())?);
+            } else {
+                print!("{}", stage_audit::format_text(&rep));
+            }
         }
         Some("homologate") => {
             let root = PathBuf::from(positional.first().map(|s| s.as_str()).unwrap_or("."));

@@ -490,9 +490,6 @@ impl App {
         set_keep_aspect(self.settings.keep_aspect);
         set_linear_filter(self.settings.linear);
         self.g.fx_gain = IMPACT[self.settings.impact.min(IMPACT.len() - 1)].0;
-        let paused = self.session.as_ref().is_some_and(|s| s.paused) && matches!(self.screen, Screen::Fight);
-        self.c.nav.set_screen(&self.screen, paused);
-        self.c.touch.suspended = paused;
         self.c.update();
         self.preview_t += get_frame_time();
         let dt = get_frame_time();
@@ -531,7 +528,6 @@ impl App {
             Screen::Cutscene { .. } => self.cutscene(),
         }
         self.back_chip_draw();
-        self.c.nav.draw(self.c.touch.enabled);
         crate::e2e::publish(self);
         if is_key_pressed(KeyCode::F11) {
             self.toggle_fullscreen();
@@ -2147,7 +2143,6 @@ impl App {
     pub fn draw_session_only(&mut self) {
         if let Some(s) = self.session.as_mut() {
             s.draw(&mut self.g, &self.ui);
-            self.c.touch.draw();
         }
     }
     pub fn preview_opts<'a>() -> DrawOpts<'a> {

@@ -107,16 +107,16 @@ pub fn checksum(m: &Match) -> u128 {
         h.f32(f.life);
         h.u32(f.ikemen.standby as u32);
         h.f32(f.power);
-        for v in f.vars {
+        for &v in &f.vars {
             h.i32(v);
         }
-        for v in f.fvars {
+        for &v in &f.fvars {
             h.f64(v);
         }
-        for v in f.sysvars {
+        for &v in &f.sysvars {
             h.i32(v);
         }
-        for v in f.sysfvars {
+        for &v in &f.sysfvars {
             h.f64(v);
         }
         h.u32(f.asserts as u32);

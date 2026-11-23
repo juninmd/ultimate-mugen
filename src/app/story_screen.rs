@@ -105,6 +105,7 @@ impl App {
             self.ui.text(&text::tally_line(&tally), VW / 2.0, 480.0, 20.0, hex("#ffcc33"), Align::Center, true);
         }
         let prompt = match run.phase {
+            _ if talking => crate::i18n::tr3("OK para avançar", "OK to advance", "OK para avanzar"),
             _ if deciding => "",
             Phase::Defeated if run.can_continue() => text::continue_with_credit(),
             Phase::Defeated | Phase::Victory => text::quit_label(),

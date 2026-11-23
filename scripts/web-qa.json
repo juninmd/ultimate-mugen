@@ -4,7 +4,6 @@
     "web-remote-smoke": "needs network access to GitHub",
     "web-import-probe": "needs a pack path argument, latency probe",
     "web-frame-probe": "manual profiling tool, not a pass/fail check",
-    "web-sprite-readiness": "no CLI entry for the wasm dist, covered by cargo tests",
     "web-story-checkpoint-smoke": "checkpoint test, runs after story mode",
     "web-story-playthrough": "long manual playthrough, not part of the PR gate",
     "web-tour": "manual visual tour of title, menu, select, VS, fight and pause; run again with TOUR_MOBILE=1 for a phone"

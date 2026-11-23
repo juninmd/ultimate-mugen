@@ -9,6 +9,7 @@ use ume_engine::matchs::BgmAction;
 
 mod score; mod form_sfx; mod wav; mod voice; mod ui_sfx; mod easter_sfx;
 mod preload;
+mod sfx_bank;
 use score::music;
 use wav::wav;
 
@@ -437,7 +438,7 @@ fn rate_key(rate: f32) -> u16 {
 
 impl Audio {
     pub async fn new(enabled: bool) -> Self {
-        let mut a = Audio {
+        Audio {
             enabled,
             silent: !enabled,
             builtin: HashMap::new(),
@@ -466,56 +467,7 @@ impl Audio {
             bgm_looping: true,
             volume: 0.8,
             music_volume: 1.0,
-        };
-        if enabled {
-            for (k, n) in [
-                ("hitlight", 3u32),
-                ("crowd", 1),
-                ("hit", 3),
-                ("hitheavy", 3),
-                ("counter", 1),
-                ("guard", 3),
-                ("guardbreak", 2),
-                ("swing", 3),
-                ("swingh", 2),
-                ("land", 2),
-                ("dash", 1),
-                ("jump", 1),
-                ("super", 1),
-                ("transform", 1),
-                ("defeat", 1),
-                ("ko", 1),
-                ("round", 1),
-                ("fight", 1),
-                ("win", 1),
-                ("perfect", 1),
-                ("meter", 1),
-                ("select", 1),
-                ("back", 1),
-                ("confirm", 1),
-                ("combo1", 1),
-                ("combo2", 1),
-                ("combo3", 1),
-                ("combo4", 1),
-                ("combo5", 1),
-                ("combo6", 1), ("error", 1), ("toggle", 1), ("tick", 1), ("load", 1), ("pause", 1), ("results", 1), ("purchase", 1), ("unlock", 1),
-            ].into_iter().chain(easter_sfx::KINDS.iter().copied()).chain(form_sfx::KINDS.iter().copied()) {
-                for v in 0..n {
-                    let mono = synth(k, v);
-                    if let Ok(s) = load_sound_from_bytes(&wav(&mono)).await {
-                        a.builtin.entry(k).or_default().push(s);
-                    }
-                    a.builtin_pcm.insert(
-                        (k, v),
-                        Pcm {
-                            rate: SR,
-                            frames: mono.iter().map(|&x| [x, x]).collect(),
-                        },
-                    );
-                }
-            }
         }
-        a
     }
     pub fn set_levels(&mut self, master: f32, music: f32, sfx: f32) {
         self.silent = master <= 0.0;
@@ -541,7 +493,8 @@ impl Audio {
             _ => 1.0,
         };
         self.duck_now = self.duck_now.min(dip);
-        let Some((&name, v)) = self.builtin.get_key_value(k) else {
+        self.ensure_builtin(k);
+        let Some((&name, v)) = self.builtin.get_key_value(k).filter(|(_, v)| !v.is_empty()) else {
             return;
         };
         let i = self.rr.get().wrapping_mul(1664525).wrapping_add(1013904223);

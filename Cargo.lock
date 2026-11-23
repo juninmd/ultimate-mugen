@@ -3021,6 +3021,7 @@ dependencies = [
  "ume-engine",
  "ume-formats",
  "ume-market",
+ "ume-model3d",
  "ume-native",
  "ume-netplay",
  "ume-shell",
@@ -3084,6 +3085,15 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+]
+
+[[package]]
+name = "ume-model3d"
+version = "0.2.0"
+dependencies = [
+ "png 0.18.1",
+ "serde_json",
+ "tiny-skia",
 ]
 
 [[package]]

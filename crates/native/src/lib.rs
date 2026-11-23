@@ -58,7 +58,7 @@ mod recolor;
 mod portrait;
 mod preview;
 mod sprite_set;
-pub use compile::{compile_native, compile_native_with, STANDARD_ANIMS};
+pub use compile::{compile_native, compile_native_with, STANDARD_ANIMS}; pub use compile::extras::anim_numbers;
 pub use preview::{compile_native_preview, menu_sprite_files};
 pub use types::*;
 pub use ability_spec::*;

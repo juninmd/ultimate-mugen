@@ -1,0 +1,1266 @@
+{
+ "poses": {
+  "stance": {
+   "hips": [
+    0,
+    -0.07
+   ],
+   "torso": [
+    -25,
+    6,
+    0
+   ],
+   "chest": [
+    -10,
+    4,
+    0
+   ],
+   "head": [
+    30,
+    -4,
+    0
+   ],
+   "armR": [
+    [
+     -25,
+     -40
+    ],
+    [
+     5,
+     -15
+    ]
+   ],
+   "bladeR": [
+    5,
+    -25
+   ],
+   "armL": [
+    [
+     60,
+     -75
+    ],
+    [
+     40,
+     -60
+    ]
+   ],
+   "legR": [
+    [
+     -15,
+     -68
+    ],
+    [
+     -5,
+     -100
+    ],
+    [
+     -10,
+     0
+    ]
+   ],
+   "legL": [
+    [
+     165,
+     -72
+    ],
+    [
+     170,
+     -95
+    ],
+    [
+     30,
+     -10
+    ]
+   ]
+  },
+  "stanceBreath": {
+   "base": "stance",
+   "hips": [
+    0,
+    -0.085
+   ],
+   "chest": [
+    -10,
+    7,
+    0
+   ],
+   "armR": [
+    [
+     -25,
+     -44
+    ],
+    [
+     5,
+     -19
+    ]
+   ],
+   "bladeR": [
+    5,
+    -29
+   ]
+  },
+  "cutHigh": {
+   "base": "stance",
+   "torso": [
+    -40,
+    -2,
+    0
+   ],
+   "armR": [
+    [
+     -35,
+     35
+    ],
+    [
+     -10,
+     55
+    ]
+   ],
+   "bladeR": [
+    -20,
+    75
+   ]
+  },
+  "cutLow": {
+   "base": "stance",
+   "hips": [
+    0.1,
+    -0.14
+   ],
+   "torso": [
+    5,
+    14,
+    0
+   ],
+   "chest": [
+    12,
+    8,
+    0
+   ],
+   "head": [
+    -10,
+    0,
+    0
+   ],
+   "armR": [
+    [
+     10,
+     -35
+    ],
+    [
+     35,
+     -45
+    ]
+   ],
+   "bladeR": [
+    40,
+    -55
+   ],
+   "legR": [
+    [
+     -5,
+     -50
+    ],
+    [
+     0,
+     -100
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "legL": [
+    [
+     175,
+     -60
+    ],
+    [
+     178,
+     -80
+    ],
+    [
+     0,
+     -30
+    ]
+   ]
+  },
+  "lowBack": {
+   "base": "stance",
+   "torso": [
+    -45,
+    10,
+    0
+   ],
+   "armR": [
+    [
+     -70,
+     -55
+    ],
+    [
+     -140,
+     -45
+    ]
+   ],
+   "bladeR": [
+    175,
+    -35
+   ]
+  },
+  "riseHigh": {
+   "base": "stance",
+   "hips": [
+    0.08,
+    -0.06
+   ],
+   "torso": [
+    -5,
+    -6,
+    0
+   ],
+   "chest": [
+    0,
+    -6,
+    0
+   ],
+   "armR": [
+    [
+     -10,
+     55
+    ],
+    [
+     5,
+     75
+    ]
+   ],
+   "bladeR": [
+    10,
+    85
+   ],
+   "legR": [
+    [
+     -5,
+     -55
+    ],
+    [
+     0,
+     -100
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  "overhead": {
+   "base": "stance",
+   "hips": [
+    -0.03,
+    -0.06
+   ],
+   "torso": [
+    -15,
+    -10,
+    0
+   ],
+   "chest": [
+    -5,
+    -6,
+    0
+   ],
+   "armR": [
+    [
+     -15,
+     70
+    ],
+    [
+     175,
+     55
+    ]
+   ],
+   "bladeR": [
+    180,
+    5
+   ],
+   "armL": [
+    [
+     -10,
+     70
+    ],
+    [
+     170,
+     60
+    ]
+   ]
+  },
+  "chop": {
+   "base": "stance",
+   "hips": [
+    0.12,
+    -0.16
+   ],
+   "torso": [
+    0,
+    24,
+    0
+   ],
+   "chest": [
+    0,
+    10,
+    0
+   ],
+   "head": [
+    0,
+    -15,
+    0
+   ],
+   "armR": [
+    [
+     -5,
+     -10
+    ],
+    [
+     0,
+     -35
+    ]
+   ],
+   "bladeR": [
+    0,
+    -45
+   ],
+   "armL": [
+    [
+     10,
+     -20
+    ],
+    [
+     5,
+     -40
+    ]
+   ],
+   "legR": [
+    [
+     -5,
+     -50
+    ],
+    [
+     0,
+     -100
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "legL": [
+    [
+     175,
+     -60
+    ],
+    [
+     178,
+     -80
+    ],
+    [
+     0,
+     -30
+    ]
+   ]
+  },
+  "getsugaWind": {
+   "base": "stance",
+   "hips": [
+    -0.05,
+    -0.13
+   ],
+   "torso": [
+    -50,
+    -8,
+    0
+   ],
+   "chest": [
+    -20,
+    -4,
+    0
+   ],
+   "head": [
+    55,
+    0,
+    0
+   ],
+   "armR": [
+    [
+     -60,
+     55
+    ],
+    [
+     -170,
+     45
+    ]
+   ],
+   "bladeR": [
+    175,
+    35
+   ],
+   "armL": [
+    [
+     30,
+     0
+    ],
+    [
+     10,
+     5
+    ]
+   ],
+   "legR": [
+    [
+     -20,
+     -55
+    ],
+    [
+     -5,
+     -100
+    ],
+    [
+     -10,
+     0
+    ]
+   ],
+   "legL": [
+    [
+     160,
+     -58
+    ],
+    [
+     170,
+     -88
+    ],
+    [
+     30,
+     -15
+    ]
+   ]
+  },
+  "getsugaWindB": {
+   "base": "getsugaWind",
+   "hips": [
+    -0.05,
+    -0.15
+   ],
+   "chest": [
+    -22,
+    -6,
+    0
+   ],
+   "bladeR": [
+    175,
+    40
+   ]
+  },
+  "getsugaSwing": {
+   "base": "chop",
+   "torso": [
+    15,
+    28,
+    0
+   ],
+   "armR": [
+    [
+     15,
+     -5
+    ],
+    [
+     25,
+     -25
+    ]
+   ],
+   "bladeR": [
+    35,
+    -35
+   ],
+   "armL": [
+    [
+     150,
+     -40
+    ],
+    [
+     160,
+     -50
+    ]
+   ]
+  },
+  "getsugaFollow": {
+   "base": "getsugaSwing",
+   "torso": [
+    25,
+    22,
+    0
+   ],
+   "armR": [
+    [
+     40,
+     -40
+    ],
+    [
+     70,
+     -50
+    ]
+   ],
+   "bladeR": [
+    75,
+    -50
+   ]
+  },
+  "crossWind": {
+   "base": "stance",
+   "torso": [
+    -55,
+    0,
+    0
+   ],
+   "chest": [
+    -20,
+    0,
+    0
+   ],
+   "head": [
+    60,
+    0,
+    0
+   ],
+   "armR": [
+    [
+     -90,
+     10
+    ],
+    [
+     -140,
+     10
+    ]
+   ],
+   "bladeR": [
+    180,
+    5
+   ]
+  },
+  "crossH": {
+   "base": "stance",
+   "hips": [
+    0.08,
+    -0.12
+   ],
+   "torso": [
+    20,
+    10,
+    0
+   ],
+   "chest": [
+    15,
+    4,
+    0
+   ],
+   "head": [
+    -30,
+    0,
+    0
+   ],
+   "armR": [
+    [
+     30,
+     5
+    ],
+    [
+     70,
+     5
+    ]
+   ],
+   "bladeR": [
+    85,
+    5
+   ]
+  },
+  "shunpoLow": {
+   "base": "stance",
+   "hips": [
+    0.1,
+    -0.22
+   ],
+   "torso": [
+    0,
+    42,
+    0
+   ],
+   "chest": [
+    0,
+    8,
+    0
+   ],
+   "head": [
+    0,
+    -35,
+    0
+   ],
+   "armR": [
+    [
+     -45,
+     -15
+    ],
+    [
+     -150,
+     -25
+    ]
+   ],
+   "bladeR": [
+    180,
+    -10
+   ],
+   "armL": [
+    [
+     150,
+     -35
+    ],
+    [
+     165,
+     -45
+    ]
+   ],
+   "legR": [
+    [
+     0,
+     -35
+    ],
+    [
+     -5,
+     -110
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "legL": [
+    [
+     178,
+     -40
+    ],
+    [
+     180,
+     -65
+    ],
+    [
+     0,
+     -40
+    ]
+   ]
+  },
+  "guard": {
+   "base": "stance",
+   "hips": [
+    -0.02,
+    -0.11
+   ],
+   "torso": [
+    -15,
+    8,
+    0
+   ],
+   "chest": [
+    -5,
+    4,
+    0
+   ],
+   "head": [
+    15,
+    8,
+    0
+   ],
+   "armR": [
+    [
+     -15,
+     -25
+    ],
+    [
+     15,
+     25
+    ]
+   ],
+   "bladeR": [
+    25,
+    62
+   ],
+   "armL": [
+    [
+     30,
+     -20
+    ],
+    [
+     5,
+     35
+    ]
+   ]
+  },
+  "guardRecoil": {
+   "base": "guard",
+   "hips": [
+    -0.07,
+    -0.08
+   ],
+   "torso": [
+    -20,
+    -8,
+    0
+   ],
+   "head": [
+    20,
+    -8,
+    0
+   ]
+  },
+  "ceroCharge": {
+   "base": "stance",
+   "hips": [
+    0,
+    -0.1
+   ],
+   "torso": [
+    25,
+    6,
+    0
+   ],
+   "chest": [
+    10,
+    4,
+    0
+   ],
+   "head": [
+    -30,
+    16,
+    0
+   ],
+   "armL": [
+    [
+     5,
+     5
+    ],
+    [
+     0,
+     8
+    ]
+   ],
+   "wristL": [
+    0,
+    0,
+    0
+   ],
+   "armR": [
+    [
+     -70,
+     -60
+    ],
+    [
+     -170,
+     -45
+    ]
+   ],
+   "bladeR": [
+    180,
+    -25
+   ]
+  },
+  "ceroFire": {
+   "base": "ceroCharge",
+   "hips": [
+    -0.07,
+    -0.08
+   ],
+   "torso": [
+    25,
+    -12,
+    0
+   ],
+   "head": [
+    -30,
+    8,
+    0
+   ],
+   "armL": [
+    [
+     5,
+     14
+    ],
+    [
+     0,
+     16
+    ]
+   ]
+  },
+  "vastoCharge": {
+   "base": "stance",
+   "hips": [
+    0,
+    -0.12
+   ],
+   "torso": [
+    0,
+    28,
+    0
+   ],
+   "chest": [
+    0,
+    10,
+    0
+   ],
+   "head": [
+    0,
+    32,
+    0
+   ],
+   "armR": [
+    [
+     -110,
+     -25
+    ],
+    [
+     -150,
+     -35
+    ]
+   ],
+   "armL": [
+    [
+     110,
+     -25
+    ],
+    [
+     150,
+     -35
+    ]
+   ]
+  },
+  "vastoFire": {
+   "base": "vastoCharge",
+   "hips": [
+    -0.08,
+    -0.1
+   ],
+   "torso": [
+    0,
+    12,
+    0
+   ],
+   "head": [
+    0,
+    22,
+    0
+   ]
+  },
+  "point": {
+   "base": "stance",
+   "hips": [
+    0,
+    -0.05
+   ],
+   "torso": [
+    -50,
+    0,
+    0
+   ],
+   "chest": [
+    -10,
+    0,
+    0
+   ],
+   "head": [
+    55,
+    0,
+    0
+   ],
+   "armR": [
+    [
+     -5,
+     6
+    ],
+    [
+     0,
+     6
+    ]
+   ],
+   "bladeR": [
+    0,
+    2
+   ],
+   "armL": [
+    [
+     100,
+     -70
+    ],
+    [
+     90,
+     -70
+    ]
+   ]
+  },
+  "pointBreath": {
+   "base": "point",
+   "hips": [
+    0,
+    -0.06
+   ],
+   "chest": [
+    -10,
+    2,
+    0
+   ]
+  }
+ },
+ "clips": {
+  "BankaiIdle": {
+   "keys": [
+    {
+     "t": 0,
+     "pose": "stance"
+    },
+    {
+     "t": 0.45,
+     "pose": "stanceBreath"
+    },
+    {
+     "t": 0.9,
+     "pose": "stance"
+    }
+   ]
+  },
+  "Slash1": {
+   "keys": [
+    {
+     "t": 0,
+     "pose": "stance"
+    },
+    {
+     "t": 0.04,
+     "pose": "cutHigh",
+     "ease": "out"
+    },
+    {
+     "t": 0.09,
+     "pose": "cutLow",
+     "ease": "snap"
+    },
+    {
+     "t": 0.2,
+     "pose": "stance"
+    }
+   ]
+  },
+  "Slash2": {
+   "keys": [
+    {
+     "t": 0,
+     "pose": "stance"
+    },
+    {
+     "t": 0.08,
+     "pose": "lowBack",
+     "ease": "out"
+    },
+    {
+     "t": 0.14,
+     "pose": "riseHigh",
+     "ease": "snap"
+    },
+    {
+     "t": 0.26,
+     "pose": "riseHigh"
+    },
+    {
+     "t": 0.38,
+     "pose": "stance"
+    }
+   ]
+  },
+  "Slash3": {
+   "keys": [
+    {
+     "t": 0,
+     "pose": "stance"
+    },
+    {
+     "t": 0.1,
+     "pose": "overhead",
+     "ease": "out"
+    },
+    {
+     "t": 0.16,
+     "pose": "chop",
+     "ease": "snap"
+    },
+    {
+     "t": 0.32,
+     "pose": "chop"
+    },
+    {
+     "t": 0.45,
+     "pose": "stance"
+    }
+   ]
+  },
+  "GetsugaRelease": {
+   "keys": [
+    {
+     "t": 0,
+     "pose": "stance"
+    },
+    {
+     "t": 0.15,
+     "pose": "getsugaWind",
+     "ease": "out"
+    },
+    {
+     "t": 0.22,
+     "pose": "getsugaSwing",
+     "ease": "snap"
+    },
+    {
+     "t": 0.45,
+     "pose": "getsugaFollow"
+    },
+    {
+     "t": 0.67,
+     "pose": "stance"
+    }
+   ]
+  },
+  "GetsugaCharge": {
+   "shake": 1.4,
+   "keys": [
+    {
+     "t": 0,
+     "pose": "getsugaWind"
+    },
+    {
+     "t": 0.25,
+     "pose": "getsugaWindB"
+    },
+    {
+     "t": 0.5,
+     "pose": "getsugaWind"
+    }
+   ]
+  },
+  "Juujishou": {
+   "keys": [
+    {
+     "t": 0,
+     "pose": "stance"
+    },
+    {
+     "t": 0.12,
+     "pose": "crossWind",
+     "ease": "out"
+    },
+    {
+     "t": 0.2,
+     "pose": "crossH",
+     "ease": "snap"
+    },
+    {
+     "t": 0.3,
+     "pose": "overhead",
+     "ease": "out"
+    },
+    {
+     "t": 0.36,
+     "pose": "chop",
+     "ease": "snap"
+    },
+    {
+     "t": 0.7,
+     "pose": "chop"
+    },
+    {
+     "t": 0.92,
+     "pose": "stance"
+    }
+   ]
+  },
+  "ShunpoStrike": {
+   "keys": [
+    {
+     "t": 0,
+     "pose": "shunpoLow",
+     "ease": "snap"
+    },
+    {
+     "t": 0.17,
+     "pose": "shunpoLow"
+    },
+    {
+     "t": 0.22,
+     "pose": "cutLow",
+     "ease": "snap"
+    },
+    {
+     "t": 0.38,
+     "pose": "cutLow"
+    },
+    {
+     "t": 0.52,
+     "pose": "stance"
+    }
+   ]
+  },
+  "ShunpoDash": {
+   "keys": [
+    {
+     "t": 0,
+     "pose": "shunpoLow",
+     "ease": "snap"
+    },
+    {
+     "t": 0.08,
+     "pose": "shunpoLow"
+    },
+    {
+     "t": 0.14,
+     "pose": "getsugaSwing",
+     "ease": "snap"
+    },
+    {
+     "t": 0.36,
+     "pose": "getsugaFollow"
+    },
+    {
+     "t": 0.48,
+     "pose": "stance"
+    }
+   ]
+  },
+  "GuardBlock": {
+   "keys": [
+    {
+     "t": 0,
+     "pose": "stance"
+    },
+    {
+     "t": 0.06,
+     "pose": "guard",
+     "ease": "snap"
+    },
+    {
+     "t": 0.3,
+     "pose": "guard"
+    }
+   ]
+  },
+  "GuardHit": {
+   "keys": [
+    {
+     "t": 0,
+     "pose": "guard"
+    },
+    {
+     "t": 0.04,
+     "pose": "guardRecoil",
+     "ease": "snap"
+    },
+    {
+     "t": 0.25,
+     "pose": "guard"
+    }
+   ]
+  },
+  "Cero": {
+   "keys": [
+    {
+     "t": 0,
+     "pose": "stance"
+    },
+    {
+     "t": 0.12,
+     "pose": "ceroCharge",
+     "ease": "out"
+    },
+    {
+     "t": 0.17,
+     "pose": "ceroFire",
+     "ease": "snap"
+    },
+    {
+     "t": 0.4,
+     "pose": "ceroFire"
+    },
+    {
+     "t": 0.5,
+     "pose": "stance"
+    }
+   ],
+   "keys_hollow3d": [
+    {
+     "t": 0,
+     "pose": "stance"
+    },
+    {
+     "t": 0.12,
+     "pose": "vastoCharge",
+     "ease": "out"
+    },
+    {
+     "t": 0.17,
+     "pose": "vastoFire",
+     "ease": "snap"
+    },
+    {
+     "t": 0.4,
+     "pose": "vastoFire"
+    },
+    {
+     "t": 0.5,
+     "pose": "stance"
+    }
+   ]
+  },
+  "CeroCharge": {
+   "shake": 1.2,
+   "keys": [
+    {
+     "t": 0,
+     "pose": "ceroCharge"
+    },
+    {
+     "t": 0.5,
+     "pose": "ceroCharge"
+    }
+   ],
+   "keys_hollow3d": [
+    {
+     "t": 0,
+     "pose": "vastoCharge"
+    },
+    {
+     "t": 0.5,
+     "pose": "vastoCharge"
+    }
+   ]
+  },
+  "PointSword": {
+   "keys": [
+    {
+     "t": 0,
+     "pose": "stance"
+    },
+    {
+     "t": 0.35,
+     "pose": "point",
+     "ease": "out"
+    },
+    {
+     "t": 1.0,
+     "pose": "pointBreath"
+    },
+    {
+     "t": 1.6,
+     "pose": "point"
+    }
+   ]
+  }
+ }
+}

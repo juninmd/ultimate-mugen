@@ -155,7 +155,7 @@ pub struct NativeMove {
     #[serde(default)] pub shake: Option<OneOrMany<super::move_fx::ShakeSpec>>,
     #[serde(default)] pub flash: Option<OneOrMany<super::move_fx::FlashSpec>>,
     #[serde(default, rename = "superPause")] pub super_pause: Option<super::move_fx::SuperPauseSpec>,
-    #[serde(default, rename = "followUp")] pub follow_up: Option<super::move_fx::FollowUpSpec>,
+    #[serde(default, rename = "followUp")] pub follow_up: Option<super::move_fx::FollowUpSpec>, #[serde(default, rename = "holdRelease")] pub hold_release: Option<super::hold_release::HoldReleaseSpec>,
     #[serde(default)] pub blink: Option<OneOrMany<super::blocks::BlinkSpec>>,
     #[serde(default)] pub vfx: Vec<super::blocks::VfxSpec>,
     #[serde(default)] pub quake: Vec<super::blocks::QuakeSpec>,

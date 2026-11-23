@@ -13,7 +13,7 @@
   "form": "Bankai: Mil Pétalas da Sombra",
   "boss": false,
   "speed": 1.12,
-  "country": "Japão",
+  "country": "Portão dos Espíritos",
   "stage": "spirit",
   "rivals": {
     "kaname": {"intro":"Sua lâmina de inverno é admirável, Fuyutsuki... mas a primavera sempre vence.","taunt":"Gelo contra mil pétalas. Mostre sua disciplina."},
@@ -881,8 +881,8 @@
   },
   "helpers": {"clones":{"name":"Utsusemi (Clone de Pétalas)","input":"D, D, b","cost":400,"count":1,"maxActive":1,"duration":210,"walkSpeed":4.4,"attackRange":75,"oneHitPoof":true}},
   "profile": {
-    "country": "JP",
-    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
+    "country": "SPIRIT",
+    "nationality": {"en":"Spirit Gate Nobility","pt":"Nobreza do Portão dos Espíritos","es":"Nobleza del Portal Espiritual"},
     "origin": {"en":"Blossom Sanctuary","pt":"Santuário das Pétalas","es":"Santuario de los Pétalos"},
     "title": {"en":"Lord of a Thousand Blossoms","pt":"Senhor das Mil Pétalas","es":"Señor de los Mil Pétalos"},
     "fightingStyle": {"en":"Sakuraba Iaido, Shunpo & Kido","pt":"Iaido Sakuraba, Shunpo e Kido","es":"Iaido Sakuraba, Shunpo y Kido"},

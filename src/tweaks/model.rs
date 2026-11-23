@@ -28,9 +28,6 @@ pub struct Tweaks {
     pub colorblind: bool,
     pub reduce_motion: bool,
     pub title_crt: bool,
-    pub touch_scale: f32,
-    pub touch_opacity: f32,
-    pub touch_left_handed: bool,
     pub rules: RuleOverrides,
 }
 
@@ -59,9 +56,6 @@ impl Default for Tweaks {
             colorblind: false,
             reduce_motion: false,
             title_crt: true,
-            touch_scale: 1.0,
-            touch_opacity: 1.0,
-            touch_left_handed: false,
             rules: RuleOverrides::default(),
         }
     }

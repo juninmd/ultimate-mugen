@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod spawn; mod elixir; pub use elixir::{Elixir, ELIXIR_LIFE_FACTOR}; mod swarm; pub use swarm::{arena_tiles, Swarm, SWARM_MAX_TOTAL}; mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod knockdown; pub use knockdown::{KnockdownRule, KnockdownScope, DEFAULT_KNOCKDOWN_PRESET, KNOCKDOWN_PRESETS}; mod minus4; mod priority; mod types; mod unleash; mod walk;
+mod spawn; mod elixir; pub use elixir::{Elixir, ELIXIR_LIFE_FACTOR}; mod swarm; pub use swarm::{arena_tiles, Swarm, SWARM_MAX_TOTAL}; mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod knockdown; pub use knockdown::{KnockdownRule, KnockdownScope, DEFAULT_KNOCKDOWN_PRESET, KNOCKDOWN_PRESETS}; mod minus4; mod priority; mod telemetry; pub use telemetry::ComboTelemetry; mod types; mod unleash; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -439,14 +439,14 @@ impl Match {
                 }
                 'A' => {
                     f.vel.y += f.c("movement.yaccel", 0.44) * f.lscl * gravity;
-                    if !f.lands_by_script() && f.pos.y >= f.ground_level && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; f.air_dashes = 0; if f.move_type != 'H' { land = true; } }
+                    if !f.lands_by_script() && f.pos.y >= f.ground_level && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; f.air_dashes = 0; land = true; }
                 }
                 _ => {}
             }
             if f.slide_time > 0 { f.slide_time -= 1; }
             if f.move_type == 'H' && f.ghv.xaccel != 0.0 { f.vel.x += f.ghv.xaccel; }
         }
-        if land { let d = self.fighters[i].def.clone(); self.change_state(i, 52, d); }
+        if land { self.fighters[i].ctrl = true; let d = self.fighters[i].def.clone(); self.change_state(i, 52, d); }
     }
     fn rebind(&mut self) {
         for i in 0..self.fighters.len() {
@@ -1212,7 +1212,7 @@ impl Match {
             let point_mul = attack_mul / self.fighters[d].effective_defence().max(0.01);
             crate::ikemen::life::apply_hit_points(self, d, hd, true, point_mul);
             crate::ikemen::life::enter_stun_states(self, d, true);
-            self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power);
+            self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power); guard::apply_perfect_guard_reward(self, d);
             self.spawn_spark(a, hd.guard_spark_no, hd.guard_spark_own, at.0, at.1, true, false, hd.spark_scale);
             if let Some(s) = hd.guard_sound { self.sound(a, s.0, s.1, s.2, Some("guard")); }
             if cornered && self.fighters[a].def.rules().hitdef_corner_push && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { corner_pushed = if d_air { hd.air_guard_corner_push } else { hd.guard_corner_push }; self.fighters[a].vel.x = corner_pushed; }

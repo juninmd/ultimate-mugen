@@ -57,7 +57,7 @@ impl App {
                         return;
                     }
                     self.screen = Screen::Cutscene {
-                        kind: 5,
+                        kind: if boss_entry_id == "oboro" { 5 } else { 2 },
                         page: 0,
                         t: 0.0,
                     };

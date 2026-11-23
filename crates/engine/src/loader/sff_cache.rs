@@ -1,19 +1,16 @@
-//! One-slot cache for decoded `.sff` files.
-//!
-//! A mirror match, a rematch and a revisit of the same fighter in the select screen all re-decode the same bytes:
-//! the registry caches per palette, but the palette changes while the sprite file does not. Decoding an 8 MB `.sff`
-//! costs 0.2–0.9 s on the browser, and the decoded sprites keep their pixels in `Arc`s, so a cache hit is a cheap
-//! clone that shares every pixel buffer.
 use std::collections::HashSet;
 use std::sync::{Arc, Mutex, OnceLock};
 use ume_formats::sff::{decode_sff, decode_sff_only, DecodedSff};
+
+const SLOTS: usize = 4;
+const SAMPLE: usize = 64 << 10;
 
 struct Slot {
     fingerprint: (usize, u64, u64),
     decoded: Arc<DecodedSff>,
 }
 
-static SLOT: OnceLock<Mutex<Option<Slot>>> = OnceLock::new();
+static CACHE: OnceLock<Mutex<Vec<Slot>>> = OnceLock::new();
 
 fn fnv(seed: u64, bytes: impl IntoIterator<Item = u8>) -> u64 {
     let mut hash = seed;
@@ -24,21 +21,37 @@ fn fnv(seed: u64, bytes: impl IntoIterator<Item = u8>) -> u64 {
     hash
 }
 
+fn sample_hash(buf: &[u8]) -> u64 {
+    if buf.len() <= SAMPLE * 3 {
+        return fnv(0xcbf2_9ce4_8422_2325, buf.iter().copied());
+    }
+    let mid = buf.len() / 2 - SAMPLE / 2;
+    let tail = buf.len() - SAMPLE;
+    let h0 = fnv(0xcbf2_9ce4_8422_2325, buf[..SAMPLE].iter().copied());
+    let h1 = fnv(h0.rotate_left(13), buf[mid..mid + SAMPLE].iter().copied());
+    fnv(h1.rotate_left(29), buf[tail..].iter().copied())
+}
+
 fn fingerprint(buf: &[u8], wanted: &HashSet<(i32, i32)>) -> (usize, u64, u64) {
     let mut keys: Vec<(i32, i32)> = wanted.iter().copied().collect();
     keys.sort_unstable();
-    let mask = fnv(0xcbf2_9ce4_8422_2325, keys.iter().flat_map(|&(g, i)| g.to_le_bytes().into_iter().chain(i.to_le_bytes())));
-    (buf.len(), fnv(0xcbf2_9ce4_8422_2325, buf.iter().copied()), mask)
+    let mask = fnv(
+        0xcbf2_9ce4_8422_2325,
+        keys.iter()
+            .flat_map(|&(g, i)| g.to_le_bytes().into_iter().chain(i.to_le_bytes())),
+    );
+    (buf.len(), sample_hash(buf), mask)
 }
 
-/// Decodes `buf`, reusing the previous result when the bytes and the wanted sprite keys are identical. An empty
-/// `wanted` set means every sprite.
 pub fn decode_cached(buf: &[u8], wanted: &HashSet<(i32, i32)>) -> Result<DecodedSff, String> {
     let key = fingerprint(buf, wanted);
-    let slot = SLOT.get_or_init(|| Mutex::new(None));
-    if let Ok(guard) = slot.lock() {
-        if let Some(hit) = guard.as_ref().filter(|s| s.fingerprint == key) {
-            return Ok((*hit.decoded).clone());
+    let cache = CACHE.get_or_init(|| Mutex::new(Vec::with_capacity(SLOTS)));
+    if let Ok(mut guard) = cache.lock() {
+        if let Some(pos) = guard.iter().position(|s| s.fingerprint == key) {
+            let hit = guard.remove(pos);
+            let out = (*hit.decoded).clone();
+            guard.push(hit);
+            return Ok(out);
         }
     }
     let decoded = Arc::new(if wanted.is_empty() {
@@ -46,8 +59,16 @@ pub fn decode_cached(buf: &[u8], wanted: &HashSet<(i32, i32)>) -> Result<Decoded
     } else {
         decode_sff_only(buf, |group, index| wanted.contains(&(group, index)))?
     });
-    if let Ok(mut guard) = slot.lock() {
-        *guard = Some(Slot { fingerprint: key, decoded: decoded.clone() });
+    if let Ok(mut guard) = cache.lock() {
+        guard.retain(|s| s.fingerprint != key);
+        if guard.len() >= SLOTS {
+            guard.remove(0);
+        }
+        guard.push(Slot {
+            fingerprint: key,
+            decoded: decoded.clone(),
+        });
     }
     Ok((*decoded).clone())
 }
+

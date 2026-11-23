@@ -29,13 +29,13 @@ pub(crate) fn fraction(v: f32, full: f32) -> f32 {
 
 impl App {
     pub(crate) fn char_stats(&self, i: usize) -> CharStats {
-        let key = self.reg.chars[i].key.clone();
-        if let Some(s) = CACHE.with(|c| c.borrow().get(&key).copied()) {
+        let key = &self.reg.chars[i].key;
+        if let Some(s) = CACHE.with(|c| c.borrow().get(key.as_str()).copied()) {
             return s;
         }
         let (attack, life, speed) = self.reg.chars[i].stats();
         let stats = stats_from(attack, life, speed);
-        CACHE.with(|c| c.borrow_mut().insert(key, stats));
+        CACHE.with(|c| c.borrow_mut().insert(key.clone(), stats));
         stats
     }
 

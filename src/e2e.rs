@@ -4,6 +4,8 @@ mod web {
     use js_sys::Reflect;
     use wasm_bindgen::JsValue;
 
+    thread_local!(static RESULTS_PREVIEWED: std::cell::Cell<bool> = const { std::cell::Cell::new(false) });
+
     fn screen_name(screen: &Screen) -> &'static str {
         match screen {
             Screen::Title => "title",
@@ -70,6 +72,15 @@ mod web {
                 app.arcade_start(hero, None);
             }
         }
+        if crate::query_params().iter().any(|(k, _)| k == "e2e_results")
+            && matches!(&app.screen, Screen::Menu { .. })
+            && !RESULTS_PREVIEWED.with(|previewed| previewed.get())
+        {
+            RESULTS_PREVIEWED.with(|previewed| previewed.set(true));
+            app.mode = Mode::Cpu;
+            app.sel = (0, 1, 0);
+            app.screen = Screen::Results { winner: 0, cur: 0 };
+        }
         let jump = crate::query_params().iter().find(|(k, _)| k == "e2e_stage").and_then(|(_, v)| v.parse::<usize>().ok());
         if let (Some(stage), Screen::Story { .. }, Some((0, 0, _, 0, _))) = (jump, &app.screen, app.story_snapshot()) {
             app.story_jump_to_stage(stage);
@@ -103,6 +114,19 @@ mod web {
             app.story_epilogue_begin(app.sel.0, 0);
             if crate::query_params().iter().any(|(k, _)| k == "e2e_ally") {
                 app.story_ally_preview();
+            }
+        }
+        if matches!(app.screen, Screen::Cutscene { kind: 0, .. }) {
+            let clear_count = crate::query_params().iter().find_map(|(k, v)| {
+                (k == "e2e_arcade_clear").then(|| v.parse::<usize>().ok()).flatten()
+            });
+            if let Some(clears @ 0..=2) = clear_count {
+                app.boss_progression.clears = clears;
+                if let Some(boss) = app.boss_idx() {
+                    app.sel.1 = boss;
+                    app.arcade = Some((vec![boss], 0));
+                    app.screen = Screen::Results { winner: 0, cur: 0 };
+                }
             }
         }
         let god = god_requested();
@@ -171,7 +195,8 @@ mod web {
         let st = ume_shell::quad::stats();
         let gpu = format!("{{\"v\":{},\"dc\":{},\"up\":{},\"kb\":{},\"rf\":{:.3},\"if\":{:.3},\"resets\":{},\"tresets\":{}}}", st.vertices, st.draw_calls, st.uploads, st.upload_kb, st.rgba_fill, st.index_fill, st.rgba_resets, st.transient_resets);
         let json = format!(
-            "{{\"gpu\":{gpu},\"screen\":\"{}\",\"epilogue\":{epilogue},\"arcade\":{arcade},\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"roster\":{roster},\"import\":{import},\"wasm_mb\":{wasm_mb},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
+            "{{\"gpu\":{gpu},\"menu_cur\":{},\"screen\":\"{}\",\"epilogue\":{epilogue},\"arcade\":{arcade},\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"roster\":{roster},\"import\":{import},\"wasm_mb\":{wasm_mb},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
+            match &app.screen { Screen::Menu { cur } => *cur as i64, _ => -1 },
             screen_name(&app.screen),
             app.mode == Mode::Story,
             over,

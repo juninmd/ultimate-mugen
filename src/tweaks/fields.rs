@@ -6,11 +6,10 @@ pub const MENU_KEYS: [&str; 16] = [
     "team_simul", "team_tag", "mugen", "market", "controls", "settings", "replays", "quit",
 ];
 
-pub const SECTIONS: [(&str, &[&str]); 6] = [
+pub const SECTIONS: [(&str, &[&str]); 5] = [
     ("theme", &["preset", "background", "glow_bottom", "glow_left", "glow_right", "accent", "title", "info", "muted", "text"]),
     ("hud", &["p1_tint", "p2_tint", "bar_offset_y", "life", "life_low", "damage"]),
     ("accessibility", &["hud_opacity", "hud_scale", "colorblind", "reduce_motion", "title_crt"]),
-    ("touch", &["scale", "opacity", "left_handed"]),
     ("rules", &["rounds_to_win", "round_seconds", "life_percent", "game_speed"]),
     ("menu", &MENU_KEYS),
 ];
@@ -57,9 +56,6 @@ pub fn apply(section: &str, key: &str, v: &Value, t: &mut Tweaks, labels: &mut L
         ("hud", "bar_offset_y") => t.bar_offset_y = ranged(v, -4.0, 40.0).ok_or_else(|| bad_range("-4", "40"))? as f32,
         ("accessibility", "hud_opacity") => t.hud_opacity = ranged(v, 0.3, 1.0).ok_or_else(|| bad_range("0.3", "1.0"))? as f32,
         ("accessibility", "hud_scale") => t.hud_scale = ranged(v, 0.8, 1.25).ok_or_else(|| bad_range("0.8", "1.25"))? as f32,
-        ("touch", "scale") => t.touch_scale = ranged(v, 0.7, 1.5).ok_or_else(|| bad_range("0.7", "1.5"))? as f32,
-        ("touch", "opacity") => t.touch_opacity = ranged(v, 0.2, 1.0).ok_or_else(|| bad_range("0.2", "1.0"))? as f32,
-        ("touch", "left_handed") => t.touch_left_handed = v.as_bool().ok_or_else(|| format!("[{section}] `{key}` must be true or false"))?,
         ("accessibility", "colorblind") => t.colorblind = v.as_bool().ok_or_else(|| format!("[{section}] `{key}` must be true or false"))?,
         ("accessibility", "reduce_motion") => t.reduce_motion = v.as_bool().ok_or_else(|| format!("[{section}] `{key}` must be true or false"))?,
         ("accessibility", "title_crt") => t.title_crt = v.as_bool().ok_or_else(|| format!("[{section}] `{key}` must be true or false"))?,

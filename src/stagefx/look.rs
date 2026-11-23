@@ -86,7 +86,7 @@ pub(super) fn look(k: StageKind) -> Look {
             ripple: hx(0xff9a40, 1.0),
             wet: false,
         },
-        StageKind::Arena => Look {
+        StageKind::Arena | StageKind::Airport => Look {
             gloss: 0.14,
             wobble: 0.0,
             tint: [1.0, 0.98, 0.94],

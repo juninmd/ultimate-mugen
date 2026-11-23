@@ -64,7 +64,8 @@ impl Canvas {
 
     fn hard_fan(&mut self, points: &[Point], color: Color) {
         self.begin_shape();
-        for p in points { self.shape_vertex(*p, color); }
+        let v0 = Vertex::new([0.0, 0.0], self.white, crate::RGBA_SPRITE, color.0, [0.0; 4], 0.0);
+        for p in points { self.shape_vertices.push(Vertex { pos: *p, ..v0 }); }
         for i in 1..points.len() as u32 - 1 { self.shape_indices.extend_from_slice(&[0, i, i + 1]); }
         self.flush_shape();
     }
@@ -76,14 +77,16 @@ impl Canvas {
         let k = 1.0 / n as f32;
         let centroid = points.iter().fold([0.0, 0.0], |c, p| [c[0] + p[0] * k, c[1] + p[1] * k]);
         self.begin_shape();
+        let v_solid = Vertex::new([0.0, 0.0], self.white, crate::RGBA_SPRITE, color.0, [0.0; 4], 0.0);
+        let v_clear = Vertex::new([0.0, 0.0], self.white, crate::RGBA_SPRITE, clear(color).0, [0.0; 4], 0.0);
         for i in 0..n {
             let (prev, cur, next) = (points[(i + n - 1) % n], points[i], points[(i + 1) % n]);
             let (Some(e1), Some(e2)) = (outward_normal(prev, cur, centroid), outward_normal(cur, next, centroid)) else {
                 return self.hard_fan(points, color);
             };
             let d = corner_offset(e1, e2);
-            self.shape_vertex([cur[0] - d[0], cur[1] - d[1]], color);
-            self.shape_vertex([cur[0] + d[0], cur[1] + d[1]], clear(color));
+            self.shape_vertices.push(Vertex { pos: [cur[0] - d[0], cur[1] - d[1]], ..v_solid });
+            self.shape_vertices.push(Vertex { pos: [cur[0] + d[0], cur[1] + d[1]], ..v_clear });
         }
         let n = n as u32;
         for i in 1..n - 1 { self.shape_indices.extend_from_slice(&[0, 2 * i, 2 * i + 2]); }
@@ -99,8 +102,8 @@ impl Canvas {
         let (s, c) = rotation.sin_cos();
         let mut points = [[0.0f32; 2]; MAX_SEGMENTS];
         for (i, p) in points.iter_mut().take(n).enumerate() {
-            let t = i as f32 / n as f32 * std::f32::consts::TAU;
-            let (x, y) = (t.cos() * radii[0], t.sin() * radii[1]);
+            let (ts, tc) = (i as f32 / n as f32 * std::f32::consts::TAU).sin_cos();
+            let (x, y) = (tc * radii[0], ts * radii[1]);
             *p = [center[0] + x * c - y * s, center[1] + x * s + y * c];
         }
         self.convex(&points[..n], color);
@@ -119,14 +122,15 @@ impl Canvas {
 
     pub fn circle_lines(&mut self, center: Point, radius: f32, thickness: f32, color: Color) {
         let n = self.circle_segments;
-        let profile = Self::band_profile(thickness, color);
+        let white = self.white;
+        let profile = Self::band_profile(thickness, color)
+            .map(|(off, col)| (off, Vertex::new([0.0, 0.0], white, crate::RGBA_SPRITE, col.0, [0.0; 4], 0.0)));
         self.begin_shape();
         for i in 0..n {
-            let t = i as f32 / n as f32 * std::f32::consts::TAU;
-            let (c, s) = (t.cos(), t.sin());
-            for (offset, col) in profile {
+            let (s, c) = (i as f32 / n as f32 * std::f32::consts::TAU).sin_cos();
+            for (offset, vtpl) in profile {
                 let r = (radius + offset).max(0.0);
-                self.shape_vertex([center[0] + c * r, center[1] + s * r], col);
+                self.shape_vertices.push(Vertex { pos: [center[0] + c * r, center[1] + s * r], ..vtpl });
             }
         }
         for i in 0..n {

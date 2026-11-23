@@ -1,7 +1,8 @@
 //! Procedurally generated common effects (replaces fightfx.sff): hit sparks, guard sparks, super flash, dust.
-use crate::chardef::{AnimFrame, Animation, Blend, CharDef, Sprite};
+use crate::chardef::{AnimFrame, Animation, Blend, CharDef, ImageData, Sprite};
 use crate::raster::*;
 use std::f32::consts::PI;
+use std::panic::RefUnwindSafe;
 use std::sync::Arc;
 
 const S: f32 = 3.0;
@@ -152,78 +153,52 @@ fn super_flash(size: f32, t: f32) -> Pixmap {
     pm
 }
 
+type Art = Box<dyn Fn(f32, f32) -> Pixmap + Send + Sync + RefUnwindSafe>;
+
+fn add(d: &mut CharDef, with_images: bool, no: i32, size: f32, n: usize, ticks: i32, art: Art) {
+    let art = Arc::new(art);
+    let mut frames = vec![];
+    for i in 0..n {
+        let t = i as f32 / (n - 1).max(1) as f32;
+        let px = size * S;
+        let image = with_images.then(|| {
+            let art = art.clone();
+            ImageData::lazy(px as u32, px as u32, move || pixmap_to_image(&art(size, t)).rgba().clone())
+        });
+        d.sprites.insert((no, i as i32), Sprite { image, width: px, height: px, axis_x: px / 2.0, axis_y: px / 2.0, scale: 1.0 / S });
+        frames.push(AnimFrame {
+            group: no,
+            index: i as i32,
+            x: 0.0,
+            y: 0.0,
+            time: ticks,
+            flip_h: false,
+            flip_v: false,
+            blend: Blend::Add,
+            alpha: None,
+            xscale: 1.0,
+            yscale: 1.0,
+            angle: 0.0,
+            clsn1: vec![],
+            clsn2: vec![],
+        });
+    }
+    let mut a = Animation { id: no, frames, loop_start: 0, total_time: 0 };
+    a.compute_total();
+    d.anims.insert(no, a);
+}
+
 pub fn build_fx(with_images: bool) -> Arc<CharDef> {
     let mut d = CharDef::empty("fx");
-    let add = |d: &mut CharDef,
-               no: i32,
-               size: f32,
-               n: usize,
-               ticks: i32,
-               f: &dyn Fn(f32, f32) -> Pixmap| {
-        let mut frames = vec![];
-        for i in 0..n {
-            let t = i as f32 / (n - 1).max(1) as f32;
-            let px = size * S;
-            let image = if with_images {
-                Some(pixmap_to_image(&f(size, t)))
-            } else {
-                None
-            };
-            d.sprites.insert(
-                (no, i as i32),
-                Sprite {
-                    image,
-                    width: px,
-                    height: px,
-                    axis_x: px / 2.0,
-                    axis_y: px / 2.0,
-                    scale: 1.0 / S,
-                },
-            );
-            frames.push(AnimFrame {
-                group: no,
-                index: i as i32,
-                x: 0.0,
-                y: 0.0,
-                time: ticks,
-                flip_h: false,
-                flip_v: false,
-                blend: Blend::Add,
-                alpha: None,
-                xscale: 1.0,
-                yscale: 1.0,
-                angle: 0.0,
-                clsn1: vec![],
-                clsn2: vec![],
-            });
-        }
-        let mut a = Animation {
-            id: no,
-            frames,
-            loop_start: 0,
-            total_time: 0,
-        };
-        a.compute_total();
-        d.anims.insert(no, a);
-    };
     let w = |h| rgba(h, 1.0);
-    add(&mut d, 0, 40.0, 5, 2, &|s, t| {
-        spark(s, t, w("#ffffff"), w("#ffe08a"), w("#ffb347"), 0.8)
-    });
-    add(&mut d, 1, 56.0, 6, 2, &|s, t| {
-        spark(s, t, w("#ffffff"), w("#ffd06a"), w("#ff8c2a"), 0.9)
-    });
-    add(&mut d, 2, 84.0, 7, 2, &|s, t| {
-        spark(s, t, w("#ffffff"), w("#ffb84a"), w("#ff5a1f"), 1.0)
-    });
-    add(&mut d, 3, 84.0, 7, 2, &|s, t| {
-        spark(s, t, w("#ffffff"), w("#b8e0ff"), w("#5aa8ff"), 1.0)
-    });
-    add(&mut d, 40, 50.0, 5, 2, &|s, t| {
-        spark(s, t, w("#ffffff"), w("#8fd3ff"), w("#2d7dff"), 0.85)
-    });
-    add(&mut d, 30, 130.0, 8, 3, &super_flash);
-    add(&mut d, 120, 60.0, 6, 3, &dust);
+    let mut add = |no, size, n, ticks, art: Art| add(&mut d, with_images, no, size, n, ticks, art);
+    add(0, 40.0, 5, 2, Box::new(move |s, t| spark(s, t, w("#ffffff"), w("#ffe08a"), w("#ffb347"), 0.8)));
+    add(1, 56.0, 6, 2, Box::new(move |s, t| spark(s, t, w("#ffffff"), w("#ffd06a"), w("#ff8c2a"), 0.9)));
+    add(2, 84.0, 7, 2, Box::new(move |s, t| spark(s, t, w("#ffffff"), w("#ffb84a"), w("#ff5a1f"), 1.0)));
+    add(3, 84.0, 7, 2, Box::new(move |s, t| spark(s, t, w("#ffffff"), w("#b8e0ff"), w("#5aa8ff"), 1.0)));
+    add(40, 50.0, 5, 2, Box::new(move |s, t| spark(s, t, w("#ffffff"), w("#8fd3ff"), w("#2d7dff"), 0.85)));
+    add(30, 130.0, 8, 3, Box::new(super_flash));
+    add(120, 60.0, 6, 3, Box::new(dust));
     for (from, to) in [
         (4, 1),
         (5, 2),
@@ -240,4 +215,28 @@ pub fn build_fx(with_images: bool) -> Arc<CharDef> {
         d.anims.insert(from, a);
     }
     Arc::new(d)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn effect_art_is_drawn_on_first_read_at_the_declared_size() {
+        let fx = build_fx(true);
+        assert!(fx.sprites.values().all(|sprite| sprite.image.as_ref().is_some_and(|image| image.is_pending())));
+        for (key, sprite) in &fx.sprites {
+            let image = sprite.image.as_ref().unwrap();
+            assert_eq!(image.rgba().len(), image.w as usize * image.h as usize * 4, "sprite {key:?}");
+        }
+        for group in fx.sprites.keys().map(|key| key.0) {
+            let drawn = fx.sprites.iter().any(|(key, sprite)| key.0 == group && sprite.image.as_ref().is_some_and(|image| image.rgba().iter().any(|byte| *byte != 0)));
+            assert!(drawn, "effect {group} draws something");
+        }
+    }
+
+    #[test]
+    fn imageless_effects_have_no_art() {
+        assert!(build_fx(false).sprites.values().all(|sprite| sprite.image.is_none()));
+    }
 }

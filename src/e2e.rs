@@ -20,6 +20,7 @@ mod web {
             Screen::Controls => "controls",
             Screen::CharTuning { .. } => "char_tuning",
             Screen::StoryStudio { .. } => "story_studio",
+            Screen::EpilogueStudio { .. } => "epilogue_studio",
             Screen::Mugen { .. } => "mugen",
             Screen::Market => "market",
             Screen::Replays { .. } => "replays",

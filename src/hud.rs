@@ -1204,7 +1204,7 @@ fn glass(
 /// Round avatar on a soft character-coloured glow: head crop of the idle sprite (M.U.G.E.N.: the 9000,x portrait) with a transparent background.
 fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, frame: Color) {
     let col = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
-    if let Some((sp, img, full)) = f.def.portrait_pick() {
+    if let Some((sp, img, full)) = crate::model3d::hud_portrait(&f.def).or_else(|| f.def.portrait_pick()) {
         let tex = g.texture(&img, sp.scale >= 0.99);
         let (iw, ih) = (img.w as f32, img.h as f32);
         let src = Rect::new(0.0, 0.0, iw, ih);

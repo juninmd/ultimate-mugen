@@ -1,4 +1,5 @@
 use super::*;
+use crate::app::arcade::storyboard::After as ArcadeAfterStoryboard;
 
 impl App {
     pub(super) async fn results(&mut self) {
@@ -18,25 +19,24 @@ impl App {
             return;
         }
         // arcade progression
-        if self.mode == Mode::Arcade && winner == 0 && self.replaying.is_none() {
+        if arcade_auto_advance(self.mode, winner, self.replaying.is_some()) {
             let boss = self.boss_idx();
             let mut next_action = None;
-            if let Some((ladder, i)) = self.arcade.as_mut() {
-                *i += 1;
-                if *i < ladder.len() {
-                    let is_boss = Some(ladder[*i]) == boss;
-                    let boss_cnt = if is_boss {
-                        ladder[..=*i].iter().filter(|&&x| Some(x) == boss).count()
-                    } else {
-                        0
-                    };
-                    next_action = Some((*i, ladder[*i], is_boss, boss_cnt, false));
-                } else if *i == ladder.len()
-                    && !self.ending_shown
-                    && boss.is_some_and(|b| ladder.last() == Some(&b))
-                {
-                    self.ending_shown = true;
-                    next_action = Some((*i, 0, false, 0, true));
+            if let Some(run) = self.arcade.as_mut() {
+                if run.index < run.ladder.len() {
+                    run.index += 1;
+                    if run.index < run.ladder.len() {
+                        let is_boss = Some(run.ladder[run.index]) == boss;
+                        let boss_cnt = if is_boss {
+                            run.ladder[..=run.index].iter().filter(|&&x| Some(x) == boss).count()
+                        } else {
+                            0
+                        };
+                        next_action = Some((run.index, run.ladder[run.index], is_boss, boss_cnt, false));
+                    } else if !self.ending_shown && boss.is_some_and(|b| run.ladder.last() == Some(&b)) {
+                        self.ending_shown = true;
+                        next_action = Some((run.index, 0, false, 0, true));
+                    }
                 }
             }
             if let Some((idx, next_char, is_boss, boss_cnt, is_ending)) = next_action {
@@ -53,6 +53,9 @@ impl App {
                         })
                         .unwrap_or_default();
                     self.boss_progression.on_clear(&hero_id, &boss_entry_id);
+                    if self.start_route_storyboard_slot(idx, ArcadeAfterStoryboard::Ending) {
+                        return;
+                    }
                     self.screen = Screen::Cutscene {
                         kind: if boss_entry_id == "oboro" { 5 } else { 2 },
                         page: 0,
@@ -62,37 +65,32 @@ impl App {
                 }
                 self.sel.1 = next_char;
                 let st_spirit = self.reg.stages.iter().position(|s| s.id.contains("spirit"));
-                self.sel.2 = if boss_cnt >= 2 {
+                let route_stage = self.arcade.as_ref().and_then(|run| run.stage_override(idx));
+                self.sel.2 = route_stage.unwrap_or_else(|| if boss_cnt >= 2 {
                     st_spirit.unwrap_or(0)
                 } else if is_boss {
                     self.boss_stage_idx(next_char)
                 } else {
                     (idx * 3 + 1) % self.reg.stages.len()
-                };
+                });
                 if self.coop {
                     if let Some(t) = self.team.as_mut() {
                         t.members[1] = vec![next_char];
                     }
                 }
-                self.screen = match (is_boss, boss_cnt) {
-                    (true, 3..) => Screen::Cutscene {
-                        kind: 4,
-                        page: 0,
-                        t: 0.0,
-                    },
-                    (true, 2) => Screen::Cutscene {
-                        kind: 3,
-                        page: 0,
-                        t: 0.0,
-                    },
-                    (true, _) => Screen::Cutscene {
-                        kind: 1,
-                        page: 0,
-                        t: 0.0,
-                    },
-                    _ => Screen::Vs { t: 0.0, step: 0 },
-                };
+                let after = ArcadeAfterStoryboard::Fight { index: idx, is_boss, boss_count: boss_cnt };
+                if self.start_route_storyboard_slot(idx, after) {
+                    return;
+                }
+                self.continue_arcade_fight(idx, is_boss, boss_cnt);
                 return;
+            }
+            let final_slot = self.arcade.as_ref().map(|run| run.ladder.len());
+            if let Some(slot) = final_slot {
+                let after = ArcadeAfterStoryboard::Results { winner, cur };
+                if self.start_route_storyboard_slot(slot, after) {
+                    return;
+                }
             }
         }
         draw_rectangle(
@@ -108,7 +106,7 @@ impl App {
         let e = &self.reg.chars[w];
         self.results_panel(alpha(rgb(e.color), 1.0));
         let done =
-            self.mode == Mode::Arcade && self.arcade.as_ref().is_some_and(|(l, i)| *i >= l.len());
+            self.mode == Mode::Arcade && self.arcade.as_ref().is_some_and(|run| run.index >= run.ladder.len());
         let title = self.results_title(winner, w, done);
         let pal = if winner == 1 && self.sel.0 == self.sel.1 {
             2
@@ -182,8 +180,8 @@ impl App {
             match choice {
                 0 => {
                     self.replaying = None;
-                    if let Some((l, i)) = self.arcade.as_mut() {
-                        *i = (*i).min(l.len().saturating_sub(1));
+                    if let Some(run) = self.arcade.as_mut() {
+                        run.index = run.index.min(run.ladder.len().saturating_sub(1));
                     }
                     self.reset_team();
                     self.start_fight().await;
@@ -210,5 +208,23 @@ impl App {
                 }
             }
         }
+    }
+}
+
+fn arcade_auto_advance(mode: Mode, winner: usize, replaying: bool) -> bool {
+    mode == Mode::Arcade && winner == 0 && !replaying
+}
+
+#[cfg(test)]
+mod tests {
+    use super::arcade_auto_advance;
+    use crate::app::Mode;
+
+    #[test]
+    fn arcade_replays_do_not_advance_the_ladder() {
+        assert!(arcade_auto_advance(Mode::Arcade, 0, false));
+        assert!(!arcade_auto_advance(Mode::Arcade, 0, true));
+        assert!(!arcade_auto_advance(Mode::Arcade, 1, false));
+        assert!(!arcade_auto_advance(Mode::Story, 0, false));
     }
 }

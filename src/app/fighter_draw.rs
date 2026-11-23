@@ -106,6 +106,9 @@ impl App {
         fh: f32,
         mirror: bool,
     ) {
+        if crate::model3d::draw_fit(&d.id, anim, (t * 60.0) as i32, self.ui.x(cx), self.ui.y(bottom), fh * self.ui.s, mirror) {
+            return;
+        }
         let e = self.char_extent(d);
         let k = (fh / (e[1] - e[0])).min(fw / (e[3] - e[2])).min(6.0);
         let sgn = if mirror { -1.0 } else { 1.0 };

@@ -6,6 +6,9 @@ use crate::ui::*;
 
 mod ladder_bar;
 mod route;
+pub(super) mod storyboard;
+mod run;
+pub(crate) use run::ArcadeRun;
 
 impl App {
     pub(crate) fn playable(&self) -> Vec<usize> {
@@ -113,9 +116,13 @@ impl App {
             })
             .is_some();
         let routed = self.route_ladder(me, mate, &ladder, boss);
+        let mut route_stages = None;
+        let mut route_storyboards = None;
         let has_boss = has_boss && routed.is_none();
-        if let Some(route_ladder) = routed {
+        if let Some((route_ladder, stages, storyboards)) = routed {
             ladder = route_ladder;
+            route_stages = Some(stages);
+            route_storyboards = Some(storyboards);
         }
         self.sel = (me, ladder[0], self.sel.2);
         self.team = mate.map(|m| Team::new(vec![me, m], vec![ladder[0]], true));
@@ -124,7 +131,7 @@ impl App {
         } else {
             vec![]
         };
-        self.arcade = Some((ladder, 0));
+        self.arcade = Some(ArcadeRun::new(ladder, route_stages, route_storyboards));
         self.survival = None;
         self.ending_shown = false;
         if has_boss {
@@ -134,8 +141,33 @@ impl App {
                 t: 0.0,
             };
         } else {
+            let first_story = self.start_route_storyboard_slot(0, storyboard::After::FirstFight);
+            if !first_story {
+                self.begin_arcade_first_fight();
+            }
+        }
+    }
+
+    pub(crate) fn begin_arcade_first_fight(&mut self) {
+        if let Some(stage) = self.arcade.as_ref().and_then(|run| run.stage_override(0)) {
+            self.sel.2 = stage;
+            self.screen = Screen::Vs { t: 0.0, step: 0 };
+        } else {
             self.open_stages(1);
         }
+    }
+
+    pub(crate) fn continue_arcade_fight(&mut self, index: usize, is_boss: bool, boss_count: usize) {
+        self.screen = match (is_boss, boss_count) {
+            (true, 3..) => Screen::Cutscene { kind: 4, page: 0, t: 0.0 },
+            (true, 2) => Screen::Cutscene { kind: 3, page: 0, t: 0.0 },
+            (true, _) => Screen::Cutscene { kind: 1, page: 0, t: 0.0 },
+            _ if index == 0 && self.arcade.as_ref().and_then(|run| run.stage_override(0)).is_none() => {
+                self.open_stages(1);
+                return;
+            }
+            _ => Screen::Vs { t: 0.0, step: 0 },
+        };
     }
 
     pub(crate) fn draw_boss_toast(&mut self, dt: f32) {

@@ -3,6 +3,11 @@ pub enum Screen {
     Menu {
         cur: usize,
     },
+    StoryCheckpoint {
+        checkpoint: crate::story::checkpoint::Checkpoint,
+        hero: usize,
+        resume: bool,
+    },
     Select {
         cur: [usize; 2],
         picking: usize,
@@ -38,6 +43,12 @@ pub enum Screen {
     Controls,
     CharTuning {
         ch: usize,
+        cur: usize,
+    },
+    StoryStudio {
+        cur: usize,
+    },
+    EpilogueStudio {
         cur: usize,
     },
     Mugen {

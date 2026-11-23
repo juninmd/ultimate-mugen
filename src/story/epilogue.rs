@@ -1,19 +1,19 @@
+use super::epilogue_store::table;
 use super::stages::STAGES;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use std::sync::OnceLock;
 use ume_native::LocalText;
 
 #[path = "epilogue_tale.rs"]
 mod epilogue_tale;
 
-const BUNDLED_TEXT: &str = include_str!("../../assets/story/epilogues.json");
+pub(super) const BUNDLED_TEXT: &str = include_str!("../../assets/story/epilogues.json");
 pub const FILE: &str = "story-epilogues.json";
 pub const FALLBACK: &str = "*";
 pub const ROOFTOP_BEATS: usize = 2;
 
-#[derive(Clone, Debug, Default, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Epilogue {
     #[serde(default)]
     pub scene: String,
@@ -77,11 +77,6 @@ pub fn merged(custom: Option<Table>) -> Table {
     table
 }
 
-fn table() -> &'static Table {
-    static TABLE: OnceLock<Table> = OnceLock::new();
-    TABLE.get_or_init(|| merged(crate::storage::read(FILE).and_then(|text| parse(&text))))
-}
-
 pub fn pick<'a>(table: &'a Table, fighter_id: &str) -> Option<&'a Epilogue> {
     let id = fighter_id.strip_prefix("umf:").unwrap_or(fighter_id);
     table.get(id).or_else(|| table.get(FALLBACK))
@@ -106,12 +101,14 @@ pub fn of_with(fighter_id: &str, mercy: Option<bool>) -> Option<&'static Epilogu
 }
 
 pub fn final_boss(player_id: &str) -> &'static str {
-    let last = &STAGES[STAGES.len() - 1];
-    if last.boss == player_id {
-        last.alt_boss
-    } else {
-        last.boss
-    }
+    let (boss, alt_boss): (&'static str, &'static str) = match super::script::active().stages.last() {
+        Some(last) => (&last.boss, &last.alt_boss),
+        None => {
+            let last = &STAGES[STAGES.len() - 1];
+            (last.boss, last.alt_boss)
+        }
+    };
+    if boss == player_id { alt_boss } else { boss }
 }
 
 pub fn pick_named<'a>(table: &'a Table, fighter_id: &str, name: &str) -> Option<Cow<'a, Epilogue>> {

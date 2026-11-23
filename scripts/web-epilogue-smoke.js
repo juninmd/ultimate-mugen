@@ -21,7 +21,7 @@ const sceneLuminance = (page, buffer) => page.evaluate(async base64 => {
   await new Promise(ok => server.listen(0, '127.0.0.1', ok));
   const url = `http://127.0.0.1:${server.address().port}/index.html?e2e=1&e2e_epilogue=1${ally ? '&e2e_ally=1' : ''}`;
   const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
-  const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
+  const p = await b.newPage({ viewport: { width: 1280, height: 720 }, hasTouch: true });
   const problems = [];
   p.on('pageerror', e => { if (!/register_plugin/.test(e.message)) problems.push(`pageerror: ${e.message}`); });
   p.on('console', m => { if (/panicked|PanicHookInfo/.test(m.text())) problems.push(`console: ${m.text().slice(0, 200)}`); });
@@ -64,6 +64,18 @@ const sceneLuminance = (page, buffer) => page.evaluate(async base64 => {
   await capture('story-clear-rank.png');
   await key('Enter', 1500);
   const after = await state();
+  await p.goto(url);
+  await p.locator('#boot').waitFor({ state: 'detached', timeout: 45000 }).catch(() => {});
+  await p.waitForTimeout(12000);
+  await p.locator('#glcanvas').focus();
+  await reach(0, 'the touch target scene');
+  await p.waitForTimeout(2500);
+  await capture('epilogue-touch-before.png');
+  await p.touchscreen.tap(1160, 40);
+  await p.waitForTimeout(1500);
+  const touchSkip = await state();
+  if (!touchSkip || touchSkip.screen !== 'story' || touchSkip.epilogue !== 5) problems.push(`expanded touch target did not skip the epilogue (${touchSkip && `${touchSkip.screen}/${touchSkip.epilogue}`})`);
+  await capture('epilogue-touch-after.png');
   await b.close(); server.close();
   if (rooftop < 8) problems.push(`rooftop scene is black (mean luminance ${rooftop.toFixed(1)})`);
   if (home < 8) problems.push(`home scene is black (mean luminance ${home.toFixed(1)})`);

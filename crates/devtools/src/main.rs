@@ -1,5 +1,5 @@
 use std::path::{Path, PathBuf};
-use ume_devtools::{sff_cook, ability_reel, audit_moves, audit_sprites, debug_fight, homologate, knockdown_rate, fight_census, float_scan, motion, mugen_census, pack, roster_audit, story_npcs, thumbnails};
+use ume_devtools::{sff_cook, ability_reel, audit_moves, audit_sprites, debug_fight, frame_data, homologate, knockdown_rate, fight_census, float_scan, motion, mugen_census, pack, roster_audit, story_npcs, thumbnails};
 
 const USAGE: &str = "usage: ume-tools <command>\n\
   pack-sprites [out_root=web/dist] [--sprites dir]  pack assets/chars/sprites into web .pack files\n\
@@ -8,6 +8,7 @@ const USAGE: &str = "usage: ume-tools <command>\n\
   audit-moves [dir=assets/chars] [--json] static roster audit (inputs, cancels, throws, hit boxes)\n\
   audit-sprites --out <report.json> [--root <repo>]  native PNG inventory\n\
   debug-fight <char1> [char2] [--frames N] [--only-moves] [--json]  inspect frame data, triggers, clipboard and console trace\n\
+  frame-data <char> [--markdown] [--json]  export startup/active/recovery/advantage frame table\n\
   gen-story-npcs [chars=assets/chars]    regenerate assets/chars/npc_*.json (overwrites them)\n\
   mugen-census <zip-or-dir>...           count states, controllers, commands and actions of M.U.G.E.N packages\n\
   roster-audit [--chars dir] [--stages dir] [--out dir] [--limit N] [--fights N] [--only text] [--no-fights] [--fail-over severity]  severity report for every character and stage\n\
@@ -104,6 +105,17 @@ fn run(args: &[String]) -> Result<(), String> {
                 println!("{}", serde_json::to_string_pretty(&val).map_err(|e| e.to_string())?);
             } else {
                 print!("{}", debug_fight::format_text(&val));
+            }
+        }
+        Some("frame-data") => {
+            let Some(spec) = positional.first() else { return Err(USAGE.to_string()) };
+            let fd = frame_data::extract(spec)?;
+            if args.iter().any(|a| a == "--json") {
+                println!("{}", serde_json::to_string_pretty(&frame_data::to_json(&fd)).map_err(|e| e.to_string())?);
+            } else if args.iter().any(|a| a == "--markdown") {
+                print!("{}", frame_data::format_markdown(&fd));
+            } else {
+                print!("{}", frame_data::format_text(&fd));
             }
         }
         Some("fight-census") => {

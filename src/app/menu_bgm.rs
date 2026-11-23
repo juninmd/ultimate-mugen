@@ -14,10 +14,13 @@ fn theme_for(screen: &Screen) -> Option<u32> {
     match screen {
         Screen::Title
         | Screen::Menu { .. }
+        | Screen::StoryCheckpoint { .. }
         | Screen::Select { .. }
         | Screen::Stages { .. }
         | Screen::Controls
         | Screen::CharTuning { .. }
+        | Screen::StoryStudio { .. }
+        | Screen::EpilogueStudio { .. }
         | Screen::Mugen { .. }
         | Screen::Market
         | Screen::Tower { .. }

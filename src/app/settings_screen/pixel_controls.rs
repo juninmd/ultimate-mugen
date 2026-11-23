@@ -95,7 +95,7 @@ pub(super) fn draw_value(
     } else if !value.is_empty() {
         let plain = matches!(
             act,
-            Act::Keys | Act::CharTuning | Act::Guide | Act::CheckUpdate | Act::Reset
+            Act::Keys | Act::CharTuning | Act::StoryStudio | Act::Guide | Act::CheckUpdate | Act::Reset
         );
         let fits_controls =
             measure_text(value, Some(&ui.display), (22.0 * ui.s).max(9.0) as u16, 1.0).width

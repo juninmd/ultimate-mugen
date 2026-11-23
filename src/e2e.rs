@@ -14,11 +14,14 @@ mod web {
             Screen::Fight => "fight",
             Screen::Results { .. } => "results",
             Screen::Story { .. } => "story",
+            Screen::StoryCheckpoint { .. } => "story_checkpoint",
             Screen::Tower { .. } => "tower",
             Screen::ArenaSetup { .. } => "arena_setup",
             Screen::SurvivalOver { .. } => "survival_over",
             Screen::Controls => "controls",
             Screen::CharTuning { .. } => "char_tuning",
+            Screen::StoryStudio { .. } => "story_studio",
+            Screen::EpilogueStudio { .. } => "epilogue_studio",
             Screen::Mugen { .. } => "mugen",
             Screen::Market => "market",
             Screen::Replays { .. } => "replays",
@@ -51,6 +54,22 @@ mod web {
         if !ON.with(|on| *on) {
             return;
         }
+        let route_storyboard = crate::query_params().iter().any(|(k, _)| k == "e2e_arcade_storyboard");
+        if crate::query_params().iter().any(|(k, _)| k == "e2e_arcade_route" || k == "e2e_arcade_storyboard")
+            && matches!(&app.screen, Screen::Menu { .. })
+            && app.arcade.is_none()
+        {
+            let storyboard = if route_storyboard { "[[step]]\nstoryboard = \"chars/kfm/intro.def\"\n" } else { "" };
+            crate::storage::write(
+                "route_kaito.toml",
+                &format!("[route]\nid = \"e2e-stage-route\"\n{storyboard}[[step]]\nfight = {{ p2 = [\"bruno\"], stage = \"native:brazil\" }}\n"),
+            );
+            if let Some(hero) = app.reg.chars.iter().position(|fighter| fighter.id == "umf:kaito") {
+                app.mode = Mode::Arcade;
+                app.sel.0 = hero;
+                app.arcade_start(hero, None);
+            }
+        }
         let jump = crate::query_params().iter().find(|(k, _)| k == "e2e_stage").and_then(|(_, v)| v.parse::<usize>().ok());
         if let (Some(stage), Screen::Story { .. }, Some((0, 0, _, 0, _))) = (jump, &app.screen, app.story_snapshot()) {
             app.story_jump_to_stage(stage);
@@ -67,9 +86,17 @@ mod web {
         if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (prefight, &app.screen, app.story_snapshot()) {
             app.story_prefight_preview();
         }
+        if crate::query_params().iter().any(|(k, _)| k == "e2e_studio") {
+            app.studio_e2e_open();
+        }
         let defeat = crate::query_params().iter().any(|(k, _)| k == "e2e_defeat");
         if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (defeat, &app.screen, app.story_snapshot()) {
             app.story_defeat_preview();
+        }
+        let checkpoint = crate::query_params().iter().any(|(k, _)| k == "e2e_story_checkpoint");
+        if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (checkpoint, &app.screen, app.story_snapshot()) {
+            app.story_jump_to_boss();
+            app.story_win();
         }
         let ending = crate::query_params().iter().any(|(k, _)| k == "e2e_epilogue");
         if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (ending, &app.screen, app.story_snapshot()) {
@@ -123,13 +150,28 @@ mod web {
                 fighters.push_str(&fighter_json(f));
             }
         }
-        let story = app
-            .story_snapshot()
-            .map(|(stage, wave, credits, score, phase)| {
-                format!("{{\"stage\":{stage},\"wave\":{wave},\"credits\":{credits},\"score\":{score},\"phase\":\"{phase}\"}}")
-            })
-            .unwrap_or_else(|| "null".into());
+        let story = app.story_snapshot().map_or_else(|| "null".into(), |(stage, wave, credits, score, phase)| {
+            let (mercy, helper_pending, helper_cursor, helper_chosen) = app.story_decision_snapshot().unwrap_or((None, false, 0, false));
+            let mercy = match mercy { Some(true) => "true", Some(false) => "false", None => "null" };
+            format!("{{\"stage\":{stage},\"wave\":{wave},\"credits\":{credits},\"score\":{score},\"phase\":\"{phase}\",\"mercy\":{mercy},\"helper_pending\":{helper_pending},\"helper_cursor\":{helper_cursor},\"helper_chosen\":{helper_chosen}}}")
+        });
         let epilogue = app.story_epilogue_page().map_or("null".to_string(), |page| page.to_string());
+        let arcade = app.arcade.as_ref().map_or_else(
+            || "null".to_string(),
+            |run| {
+                let stage = app
+                    .reg
+                    .stages
+                    .get(app.sel.2)
+                    .map(|stage| format!("\"{}\"", stage.id.replace('"', "")))
+                    .unwrap_or_else(|| "null".into());
+                let (storyboard, scene) = match &app.screen {
+                    Screen::Cutscene { kind: 6, page, .. } => ("true", page.to_string()),
+                    _ => ("false", "null".into()),
+                };
+                format!("{{\"fight\":{},\"stage\":{stage},\"storyboard\":{storyboard},\"scene\":{scene}}}", run.index + 1)
+            },
+        );
         let roster = format!(
             "{{\"chars\":{},\"stages\":{},\"errors\":{},\"tail\":[{}]}}",
             app.reg.chars.len(),
@@ -142,7 +184,7 @@ mod web {
         let st = ume_shell::quad::stats();
         let gpu = format!("{{\"v\":{},\"dc\":{},\"up\":{},\"kb\":{},\"rf\":{:.3},\"if\":{:.3},\"resets\":{},\"tresets\":{}}}", st.vertices, st.draw_calls, st.uploads, st.upload_kb, st.rgba_fill, st.index_fill, st.rgba_resets, st.transient_resets);
         let json = format!(
-            "{{\"gpu\":{gpu},\"screen\":\"{}\",\"epilogue\":{epilogue},\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"roster\":{roster},\"import\":{import},\"wasm_mb\":{wasm_mb},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
+            "{{\"gpu\":{gpu},\"screen\":\"{}\",\"epilogue\":{epilogue},\"arcade\":{arcade},\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"roster\":{roster},\"import\":{import},\"wasm_mb\":{wasm_mb},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
             screen_name(&app.screen),
             app.mode == Mode::Story,
             over,

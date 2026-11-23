@@ -37,6 +37,18 @@ window.ume_fetch_asset = async (path) => {
   }
 };
 
+const LITTLE_ENDIAN = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
+
+function isOpaque(data) {
+  if (!LITTLE_ENDIAN) {
+    for (let i = 3; i < data.length; i += 4) if (data[i] !== 255) return false;
+    return true;
+  }
+  const words = new Uint32Array(data.buffer, data.byteOffset, data.length >> 2);
+  for (let i = 0; i < words.length; i++) if (words[i] >>> 24 !== 255) return false;
+  return true;
+}
+
 window.ume_decode_image = async (bytes) => {
   if (typeof createImageBitmap !== 'function' || typeof OffscreenCanvas !== 'function') return null;
   const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }), {
@@ -49,7 +61,7 @@ window.ume_decode_image = async (bytes) => {
     context.drawImage(bitmap, 0, 0);
     const image = context.getImageData(0, 0, bitmap.width, bitmap.height);
     const data = new Uint8Array(image.data.buffer);
-    for (let i = 3; i < data.length; i += 4) if (data[i] !== 255) return null;
+    if (!isOpaque(data)) return null;
     return { width: image.width, height: image.height, data };
   } finally {
     bitmap.close();

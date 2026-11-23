@@ -572,6 +572,7 @@ impl Match {
                 self.leave_intro_states();
             }
             2 => {
+                if self.round_time == 1 { self.leave_intro_states(); }
                 if self.round_time >= 50 && self.pause.is_none() && self.wins.iter().any(|&wins| wins > 0) { self.awaken_defeated_boss(); }
                 if !self.training && self.round_ticks > 0 && self.pause.is_none() && self.global_asserts & (gsf::TIMERFREEZE | gsf::ROUNDFREEZE) == 0 { self.timer = (self.timer - 1).max(0); }
                 let (root_buf, root_len) = self.root_index_buf();

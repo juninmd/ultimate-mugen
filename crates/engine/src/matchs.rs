@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod spawn; mod elixir; pub use elixir::{Elixir, ELIXIR_LIFE_FACTOR}; mod swarm; pub use swarm::{arena_tiles, Swarm, SWARM_MAX_TOTAL}; mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod knockdown; pub use knockdown::{KnockdownRule, KnockdownScope, DEFAULT_KNOCKDOWN_PRESET, KNOCKDOWN_PRESETS}; mod minus4; mod priority; mod telemetry; pub use telemetry::ComboTelemetry; mod types; mod unleash; mod walk;
+mod spawn; mod elixir; pub use elixir::{Elixir, ELIXIR_LIFE_FACTOR}; mod swarm; pub use swarm::{arena_tiles, Swarm, SWARM_MAX_TOTAL}; mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod clash; mod forms; mod guard; mod knockdown; pub use knockdown::{KnockdownRule, KnockdownScope, DEFAULT_KNOCKDOWN_PRESET, KNOCKDOWN_PRESETS}; mod minus4; mod priority; mod telemetry; pub use telemetry::ComboTelemetry; mod types; mod unleash; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -1054,7 +1054,7 @@ impl Match {
     }
 
     fn detect_hits(&mut self) {
-        self.detect_reversals();
+        self.detect_reversals(); self.detect_clashes();
         let mut pending = [(0usize, 0usize, (0.0f32, 0.0f32)); 8];
         let mut pending_len = 0;
         for a in 0..self.fighters.len() {

@@ -107,6 +107,7 @@ pub enum Event {
     Elixir { fighter: u32 },
     WallShatter { fighter: u32, side: usize, x: f32, y: f32, right_wall: bool, bonus_damage: f32 },
     PerfectGuard { fighter: u32, side: usize, healed: f32, meter: f32 },
+    Clash { a: u32, b: u32, x: f32, y: f32 },
     RoundStart(i32), Fight, RoundEnd(i32), MatchOver(usize),
 }
 

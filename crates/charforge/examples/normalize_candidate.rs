@@ -134,14 +134,8 @@ fn main() -> Result<(), String> {
             pixel[3] = 255;
         }
     }
-    let file = std::fs::File::create(output).map_err(|error| error.to_string())?;
-    let mut encoder = png::Encoder::new(file, 400, 400);
-    encoder.set_color(png::ColorType::Rgba);
-    encoder.set_depth(png::BitDepth::Eight);
-    let mut writer = encoder.write_header().map_err(|error| error.to_string())?;
-    writer
-        .write_image_data(&canvas.data)
-        .map_err(|error| error.to_string())?;
+    let encoded = ume_formats::png_encode::encode_rgba_png(400, 400, &canvas.data, 9);
+    std::fs::write(output, encoded).map_err(|error| error.to_string())?;
     println!("{report}");
     Ok(())
 }

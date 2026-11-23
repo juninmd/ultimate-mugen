@@ -287,7 +287,7 @@ fn portrait_of(d: &CharDef) -> Option<Sprite> {
             .filter(|s| {
                 s.image
                     .as_ref()
-                    .is_some_and(|i| i.rgba.as_chunks::<4>().0.iter().any(|p| p[3] > 0))
+                    .is_some_and(|i| i.rgba().as_chunks::<4>().0.iter().any(|p| p[3] > 0))
             })
             .cloned()
     };

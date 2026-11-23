@@ -1,7 +1,7 @@
 //! UMF → CharDef compiler: generates commands, [Statedef -1], move states, HitDefs and projectiles as CNS.
 use super::effects::{render_effect, FrameArt};
 use super::types::*;
-use ume_engine::chardef::{default_constants, AnimFrame, Animation, Blend, CharDef, MoveInfo, Source, Sprite};
+use ume_engine::chardef::{default_constants, AnimFrame, Animation, Blend, CharDef, MoveInfo, Source};
 use ume_engine::cns::parse_states;
 use ume_engine::commands::parse_command;
 use serde_json::Value;
@@ -84,8 +84,8 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
                 let raster = rendered.remove(&key).expect("frame rendered");
                 let (r, k) = (raster.base, (1, idx));
                 idx += 1;
-                for (group, variant) in raster.variants { sprites.insert((group, k.1), super::frame_raster::sprite_of(variant)); }
-                sprites.insert(k, Sprite { image: r.image, width: r.width, height: r.height, axis_x: r.axis_x, axis_y: r.axis_y, scale: r.scale });
+                for (group, variant) in raster.variants { sprites.insert((group, k.1), variant); }
+                sprites.insert(k, super::frame_raster::sprite_of(&r));
                 (k, r.hurt, r.hit)
             });
             let hurt = match &fr.hurt { Some(Value::String(s)) if s == "none" => vec![], Some(v @ Value::Array(_)) => serde_json::from_value(v.clone()).unwrap_or(entry.1.clone()), _ => entry.1.clone() };

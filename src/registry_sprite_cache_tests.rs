@@ -53,8 +53,8 @@ fn late_sprite_packs_replace_cached_native_definitions() {
     let refreshed = entry.load_preview(1).unwrap();
     assert!(!Arc::ptr_eq(&preview, &refreshed));
     assert_eq!(
-        refreshed.sprites[&(9000, 1)].image.as_ref().unwrap().rgba,
-        vec![255, 255, 255, 255].into()
+        refreshed.sprites[&(9000, 1)].image.as_ref().unwrap().rgba().as_slice(),
+        [255u8; 4]
     );
 
     let other = "unrelated_sprite_cache_regression";
@@ -69,8 +69,8 @@ fn late_sprite_packs_replace_cached_native_definitions() {
     .unwrap();
     let replaced = entry.load(1).unwrap();
     assert_eq!(
-        replaced.sprites[&(9000, 1)].image.as_ref().unwrap().rgba,
-        vec![0, 0, 0, 255].into()
+        replaced.sprites[&(9000, 1)].image.as_ref().unwrap().rgba().as_slice(),
+        [0u8, 0, 0, 255]
     );
 }
 

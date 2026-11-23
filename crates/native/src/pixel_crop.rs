@@ -90,8 +90,8 @@ mod tests {
     fn crops_to_content_plus_margin_and_reports_offset() {
         let c = crop(20, 20, canvas(20, 20, &[(5, 6), (8, 9)]));
         assert_eq!((c.image.w, c.image.h, c.left, c.top), (6, 6, 4.0, 5.0));
-        assert_eq!(&c.image.rgba[(1 * 6 + 1) * 4..(1 * 6 + 1) * 4 + 4], &[9, 8, 7, 255]);
-        assert_eq!(&c.image.rgba[(4 * 6 + 4) * 4..(4 * 6 + 4) * 4 + 4], &[9, 8, 7, 255]);
+        assert_eq!(&c.image.rgba()[(1 * 6 + 1) * 4..(1 * 6 + 1) * 4 + 4], &[9, 8, 7, 255]);
+        assert_eq!(&c.image.rgba()[(4 * 6 + 4) * 4..(4 * 6 + 4) * 4 + 4], &[9, 8, 7, 255]);
     }
 
     #[test]

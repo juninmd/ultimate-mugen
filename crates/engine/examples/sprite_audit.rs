@@ -21,7 +21,7 @@ fn main() {
                         Some(s) => {
                             let blank_sprite = match d.indexed.get(&key) {
                                 Some(ix) => ix.pixels.iter().all(|&p| p == 0),
-                                None => s.image.as_ref().is_none_or(|i| i.rgba.chunks(4).all(|p| p[3] == 0)),
+                                None => s.image.as_ref().is_none_or(|i| i.rgba().chunks(4).all(|p| p[3] == 0)),
                             };
                             if blank_sprite { blank += 1; if blank <= 3 { println!("   blank sprite {},{} {}x{} (anim {no})", fr.group, fr.index, s.width, s.height); } }
                         }

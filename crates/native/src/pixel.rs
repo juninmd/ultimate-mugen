@@ -1,4 +1,3 @@
-use super::pack::read_sprite;
 use super::recolor::Recolor;
 use super::effects::{art_res, FrameArt};
 use super::types::{NativeChar, NativeFrame};
@@ -6,7 +5,7 @@ use serde_json::Value;
 use std::{path::{Path, PathBuf}, sync::Arc};
 
 const SPRITE_ROOT: &str = "assets/chars/sprites";
-const BASE_STEM: &str = "01_idle";
+pub(super) const BASE_STEM: &str = "01_idle";
 const STAND_HURT: [f32; 4] = [-22.0, -96.0, 22.0, 0.0];
 const CROUCH_HURT: [f32; 4] = [-24.0, -64.0, 24.0, 0.0];
 const LYING_HURT: [f32; 4] = [-46.0, -26.0, 46.0, 0.0];
@@ -52,9 +51,7 @@ pub(super) fn sprite_roots(id: &str) -> Vec<PathBuf> {
 fn load_pose_with_source(roots: &[PathBuf], pose: &str, striking: bool, recolor: Option<&Recolor>, fit: bool) -> Option<(FrameArt, PathBuf)> {
     let lower = pose.to_ascii_lowercase();
     let stem = pose_stem(&lower);
-    [pose, stem, BASE_STEM, "idle"]
-        .iter()
-        .flat_map(|name| roots.iter().map(move |root| (root, name)))
+    super::variant_art::candidates(roots, pose, stem)
         .find_map(|(root, name)| read_render(root, name, &lower, stem, striking, recolor, fit).map(|render| (render, root.join(format!("{name}.png")))))
 }
 
@@ -74,7 +71,7 @@ pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
                     let lower = pose.to_ascii_lowercase();
                     let resolution = if stem == pose { "exact" } else if stem == BASE_STEM && !lower.starts_with("idle") { "idle-reuse" } else if stem == pose_stem(&lower) { "shared-pose" } else { "fallback-idle" };
                     let mut hasher = std::collections::hash_map::DefaultHasher::new();
-                    if let Some(image) = render.image { image.w.hash(&mut hasher); image.h.hash(&mut hasher); image.rgba.hash(&mut hasher); }
+                    if let Some(image) = render.image { image.w.hash(&mut hasher); image.h.hash(&mut hasher); image.rgba().hash(&mut hasher); }
                     serde_json::json!({"frame": index, "pose": pose, "resolution": resolution, "file": source, "pixelFingerprint": format!("{:016x}", hasher.finish())})
                 }
                 None => serde_json::json!({"frame": index, "pose": pose, "resolution": "missing"}),
@@ -87,13 +84,11 @@ pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
 }
 
 fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool, recolor: Option<&Recolor>, fit: bool) -> Option<FrameArt> {
-    let bytes = read_sprite(root, &format!("{name}.png"))?;
-    let dec = super::decode_cache::png(root, name, &bytes)?;
+    let (dec, meta) = super::variant_art::open(root, name)?;
     let mut rgba = dec.rgba.clone();
     let res = art_res().max(0.1);
-    let meta = read_sprite(root, "meta.json").map_or_else(|| Arc::new(Value::Null), |bytes| super::decode_cache::meta(root, &bytes));
     let frame = meta.get("frames").and_then(|frames| frames.get(name)).unwrap_or(&Value::Null);
-    let hair_region = frame.get("awakeningHair").and_then(|value| serde_json::from_value::<[u32; 4]>(value.clone()).ok());
+    let hair_region = super::variant_art::hair_region(frame);
     if let Some(recolor) = recolor.filter(|_| fit) { recolor.apply_in_region(Arc::make_mut(&mut rgba).as_mut_slice(), dec.width, hair_region); }
     let positive = |value: Option<&Value>| value.and_then(Value::as_f64).filter(|number| number.is_finite() && *number > 0.0 && *number <= f32::MAX as f64).map(|number| number as f32);
     let units = positive(frame.get("refHeight")).or_else(|| positive(meta.get("refHeight"))).unwrap_or(dec.height as f32).max(1.0);

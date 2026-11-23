@@ -100,7 +100,7 @@ fn opaque_box(d: &CharDef, key: (i32, i32), s: &ume_engine::chardef::Sprite) -> 
     let Some((iw, ih)) = dims else { return (0.0, 0.0, s.width, s.height) };
     if iw == 0 || ih == 0 { return (0.0, 0.0, s.width, s.height); }
     let visible = |x: usize, y: usize| match (&s.image, d.indexed.get(&key)) {
-        (Some(im), _) => im.rgba[(y * iw + x) * 4 + 3] > 16,
+        (Some(im), _) => im.rgba()[(y * iw + x) * 4 + 3] > 16,
         (None, Some(ix)) => ix.pixels.get(y * iw + x).is_some_and(|&p| p != 0),
         _ => false,
     };

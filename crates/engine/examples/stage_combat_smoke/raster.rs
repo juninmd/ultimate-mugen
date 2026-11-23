@@ -117,7 +117,7 @@ pub fn render_frame(m: &Match, st: &MugenStage, stage_name: &str, hits: i32) -> 
 
         blit_sprite(
             &mut rgba,
-            &img.rgba,
+            img.rgba(),
             img.w as usize,
             img.h as usize,
             draw_x,

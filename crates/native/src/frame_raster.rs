@@ -1,66 +1,64 @@
 use super::compile::render_frame;
 use super::forms::form_palette;
 use super::effects::FrameArt;
+use super::recolor::Recolor;
 use super::types::{NativeChar, NativeFrame};
 use ume_engine::chardef::Sprite;
 use serde_json::Value;
 use std::collections::HashMap;
+use std::sync::Arc;
 
 const FIRST_VARIANT_GROUP: i32 = 2;
 const MAX_WORKERS: usize = 8;
 
-pub(super) struct VariantPalettes(Vec<(i32, Value)>);
+pub(super) struct VariantPalettes {
+    colors: Option<Value>,
+    recolors: Vec<(i32, Option<Arc<Recolor>>)>,
+}
 
 impl VariantPalettes {
+    pub(super) fn empty(colors: Option<&Value>) -> Self {
+        VariantPalettes { colors: colors.cloned(), recolors: Vec::new() }
+    }
+
     pub(super) fn new(nc: &NativeChar, base: Option<&Value>, awakening: Option<&Value>, with_images: bool) -> Self {
-        let mut variants = VariantPalettes(Vec::new());
+        let mut variants = Self::empty(nc.art.style.get("colors"));
         if !with_images {
             return variants;
         }
         if let Some(palette) = awakening {
-            variants.assign(FIRST_VARIANT_GROUP, palette.clone());
+            variants.assign(FIRST_VARIANT_GROUP, palette);
         }
         let forms = nc.abilities.as_ref().map(|spec| spec.forms.as_slice()).unwrap_or_default();
         for (i, form) in forms.iter().enumerate() {
             if let Some(palette) = form_palette(form, base) {
-                variants.assign(FIRST_VARIANT_GROUP + i as i32, palette);
+                variants.assign(FIRST_VARIANT_GROUP + i as i32, &palette);
             }
         }
         variants
     }
 
-    fn assign(&mut self, group: i32, palette: Value) {
-        self.0.retain(|(g, _)| *g != group);
-        self.0.push((group, palette));
+    fn assign(&mut self, group: i32, palette: &Value) {
+        self.recolors.retain(|(g, _)| *g != group);
+        self.recolors.push((group, Recolor::new(self.colors.as_ref(), palette).map(Arc::new)));
     }
 }
 
 pub(super) struct FrameRaster {
     pub base: FrameArt,
-    pub variants: Vec<(i32, FrameArt)>,
+    pub variants: Vec<(i32, Sprite)>,
 }
 
-pub(super) fn sprite_of(render: FrameArt) -> Sprite {
-    Sprite { image: render.image, width: render.width, height: render.height, axis_x: render.axis_x, axis_y: render.axis_y, scale: render.scale }
+pub(super) fn sprite_of(render: &FrameArt) -> Sprite {
+    Sprite { image: render.image.clone(), width: render.width, height: render.height, axis_x: render.axis_x, axis_y: render.axis_y, scale: render.scale }
 }
 
 fn raster_frame(nc: &NativeChar, frame: &NativeFrame, with_images: bool, palette: Option<&Value>, variants: &VariantPalettes) -> FrameRaster {
     let base = render_frame(nc, frame, with_images, palette);
-    let recolored = if frame.effect.is_some() { &[][..] } else { variants.0.as_slice() };
-    // Variants keep only image and placement (`sprite_of`), so box fitting is skipped.
-    let variants = recolored.iter().map(|(group, palette)| {
-        let mut art = super::pixel::load_art(nc, frame, Some(palette), false).unwrap_or_else(|| render_frame(nc, frame, true, Some(palette)));
-        share_unchanged_pixels(&base, &mut art);
-        (*group, art)
-    }).collect();
+    let recolored = if frame.effect.is_some() { &[][..] } else { variants.recolors.as_slice() };
+    let source = recolored.iter().any(|(_, recolor)| recolor.is_some()).then(|| super::variant_art::locate(nc, frame)).flatten();
+    let variants = recolored.iter().map(|(group, recolor)| (*group, super::variant_art::sprite(&base, source.as_ref(), recolor.as_ref()))).collect();
     FrameRaster { base, variants }
-}
-
-fn share_unchanged_pixels(base: &FrameArt, variant: &mut FrameArt) {
-    let (Some(plain), Some(recolored)) = (&base.image, &variant.image) else { return };
-    if plain.w == recolored.w && plain.h == recolored.h && plain.rgba == recolored.rgba {
-        variant.image = base.image.clone();
-    }
 }
 
 fn worker_count(jobs: usize) -> usize {
@@ -100,41 +98,50 @@ pub(super) fn raster_frames(
 mod tests {
     use super::*;
 
+    fn kaito() -> NativeChar {
+        serde_json::from_str(include_str!("../../../assets/chars/kaito.json")).unwrap()
+    }
+
+    fn pixels(sprite: &Sprite) -> Option<(u32, u32, Arc<Vec<u8>>)> {
+        sprite.image.as_ref().map(|i| (i.w, i.h, i.rgba().clone()))
+    }
+
     #[test]
     fn a_later_palette_replaces_the_same_group() {
-        let mut variants = VariantPalettes(Vec::new());
-        variants.assign(2, Value::from("awakening"));
-        variants.assign(3, Value::from("second form"));
-        variants.assign(2, Value::from("first form"));
-        assert_eq!(variants.0.iter().map(|(group, _)| *group).collect::<Vec<_>>(), vec![3, 2]);
-        assert_eq!(variants.0[1].1, Value::from("first form"));
+        let fighter = kaito();
+        let mut variants = VariantPalettes::empty(fighter.art.style.get("colors"));
+        variants.assign(2, &Value::from("not a palette"));
+        variants.assign(3, &fighter.palettes[0]);
+        variants.assign(2, &fighter.palettes[0]);
+        assert_eq!(variants.recolors.iter().map(|(group, _)| *group).collect::<Vec<_>>(), vec![3, 2]);
+        assert!(variants.recolors[1].1.is_some(), "the later palette is the one kept");
     }
 
     #[test]
-    fn image_only_variants_match_the_fully_fitted_sprite() {
-        let fighter: NativeChar = serde_json::from_str(include_str!("../../../assets/chars/kaito.json")).unwrap();
+    fn lazy_variants_match_the_fully_fitted_sprite() {
+        let fighter = kaito();
         let frame: NativeFrame = serde_json::from_value(serde_json::json!({"pose": "punch1", "ticks": 1, "hit": {"part": "fist"}})).unwrap();
-        let mut variants = VariantPalettes(Vec::new());
-        variants.assign(2, fighter.palettes[0].clone());
-        let (_, fast) = raster_frame(&fighter, &frame, true, None, &variants).variants.remove(0);
-        let full = render_frame(&fighter, &frame, true, Some(&fighter.palettes[0]));
-        let (fast, full) = (sprite_of(fast), sprite_of(full));
-        let pixels = |s: &Sprite| s.image.as_ref().map(|i| (i.w, i.h, i.rgba.clone()));
-        assert_eq!(pixels(&fast), pixels(&full), "recolored pixels are unchanged");
-        assert_eq!((fast.width, fast.height, fast.axis_x, fast.axis_y, fast.scale), (full.width, full.height, full.axis_x, full.axis_y, full.scale));
+        let mut variants = VariantPalettes::empty(fighter.art.style.get("colors"));
+        variants.assign(2, &fighter.palettes[0]);
+        let (_, lazy) = raster_frame(&fighter, &frame, true, None, &variants).variants.remove(0);
+        assert!(lazy.image.as_ref().unwrap().is_pending(), "nothing is recolored until the sprite is drawn");
+        let full = sprite_of(&render_frame(&fighter, &frame, true, Some(&fighter.palettes[0])));
+        assert_eq!(pixels(&lazy), pixels(&full), "recolored pixels are unchanged");
+        assert_eq!((lazy.width, lazy.height, lazy.axis_x, lazy.axis_y, lazy.scale), (full.width, full.height, full.axis_x, full.axis_y, full.scale));
     }
 
     #[test]
-    fn a_variant_that_changes_no_pixel_reuses_the_base_image() {
-        let fighter: NativeChar = serde_json::from_str(include_str!("../../../assets/chars/kaito.json")).unwrap();
+    fn a_variant_that_changes_no_pixel_reuses_the_base_pixels() {
+        let fighter = kaito();
         let frame: NativeFrame = serde_json::from_value(serde_json::json!({"pose": "idle0", "ticks": 1})).unwrap();
-        let mut variants = VariantPalettes(Vec::new());
-        variants.assign(2, serde_json::json!({}));
-        variants.assign(3, fighter.palettes[0].clone());
+        let mut variants = VariantPalettes::empty(fighter.art.style.get("colors"));
+        variants.assign(2, &serde_json::json!({}));
+        variants.assign(3, &fighter.palettes[0]);
         let raster = raster_frame(&fighter, &frame, true, None, &variants);
-        let image = |group: i32| raster.variants.iter().find(|(g, _)| *g == group).and_then(|(_, art)| art.image.clone()).unwrap();
-        assert!(std::sync::Arc::ptr_eq(&image(2), raster.base.image.as_ref().unwrap()));
-        assert!(!std::sync::Arc::ptr_eq(&image(3), raster.base.image.as_ref().unwrap()));
+        let pixels = |group: i32| raster.variants.iter().find(|(g, _)| *g == group).and_then(|(_, sprite)| sprite.image.clone()).unwrap().rgba().clone();
+        let base = raster.base.image.as_ref().unwrap().rgba();
+        assert!(Arc::ptr_eq(&pixels(2), base));
+        assert!(!Arc::ptr_eq(&pixels(3), base));
     }
 
     #[test]

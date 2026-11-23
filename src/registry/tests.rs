@@ -145,7 +145,7 @@ fn mugen_stages_produce_cached_previews() {
         loop {
             if let Some(p) = reg.stage_preview(i) {
                 assert_eq!((p.w, p.h), (320, 180));
-                assert!(p.rgba.as_chunks::<4>().0.iter().any(|px| px[..3] != [20, 20, 30]));
+                assert!(p.rgba().as_chunks::<4>().0.iter().any(|px| px[..3] != [20, 20, 30]));
                 assert_eq!(reg.stage_preview(i).unwrap().id, p.id, "preview must be cached");
                 produced += 1;
                 break;

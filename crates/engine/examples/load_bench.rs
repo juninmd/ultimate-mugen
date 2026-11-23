@@ -31,15 +31,15 @@ fn pixel_checksum(def: &ume_engine::chardef::CharDef) -> u64 {
         key.0.to_le_bytes().into_iter().chain(key.1.to_le_bytes()).for_each(&mut mix);
         if let Some(image) = &sprite.image {
             image.w.to_le_bytes().into_iter().chain(image.h.to_le_bytes()).for_each(&mut mix);
-            image.rgba.iter().copied().for_each(&mut mix);
+            image.rgba().iter().copied().for_each(&mut mix);
         }
-        sprite.axis_x.to_bits().to_le_bytes().into_iter().chain(sprite.axis_y.to_bits().to_le_bytes()).for_each(&mut mix);
+        [sprite.axis_x, sprite.axis_y, sprite.width, sprite.height, sprite.scale].iter().flat_map(|v| v.to_bits().to_le_bytes()).for_each(&mut mix);
     }
     hash
 }
 
 fn resident_mb(def: &ume_engine::chardef::CharDef, keep: impl Fn(i32) -> bool) -> f64 {
     let mut seen = std::collections::HashSet::new();
-    let bytes: usize = def.sprites.iter().filter(|(key, _)| keep(key.0)).filter_map(|(_, sprite)| sprite.image.as_ref()).filter(|image| seen.insert(std::sync::Arc::as_ptr(image) as usize)).map(|image| image.rgba.len()).sum();
+    let bytes: usize = def.sprites.iter().filter(|(key, _)| keep(key.0)).filter_map(|(_, sprite)| sprite.image.as_ref()).filter(|image| !image.is_pending()).filter(|image| seen.insert(std::sync::Arc::as_ptr(image) as usize)).map(|image| image.rgba().len()).sum();
     bytes as f64 / 1_048_576.0
 }

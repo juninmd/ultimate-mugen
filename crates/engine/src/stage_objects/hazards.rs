@@ -1,11 +1,35 @@
-use super::ObjectEvent;
-use crate::matchs::Match;
+use super::{ObjectEvent, SHAKE_TICKS};
 use crate::fighter::GetHitVars;
+use crate::matchs::Match;
 
 const SLAM_SPEED_X: f32 = 2.6;
 const SLAM_SPEED_Y: f32 = 3.2;
+const CHAIN_FUSE_TICKS: i32 = 8;
 
 impl Match {
+    pub(super) fn step_fuses(&mut self) {
+        let len = self.objects.breakables.len();
+        for bi in 0..len {
+            let detonate = {
+                let b = &mut self.objects.breakables[bi];
+                if b.broken || b.fuse <= 0 {
+                    false
+                } else {
+                    b.fuse -= 1;
+                    b.shake = b.shake.max(2);
+                    b.fuse == 0
+                }
+            };
+            if detonate {
+                let (bx, life) = {
+                    let b = &self.objects.breakables[bi];
+                    (b.x, b.life.max(1.0))
+                };
+                self.damage_breakable(bi, life + 1.0, (bx, -26.0), 0);
+            }
+        }
+    }
+
     pub(super) fn slam_breakables(&mut self) {
         for fi in 0..self.fighters.len() {
             let f = &self.fighters[fi];
@@ -85,6 +109,37 @@ impl Match {
                     f.move_type = 'H';
                     self.change_state(fi, 5030, def);
                 }
+            }
+        }
+        let reach = radius * 1.15;
+        let splash = damage.max(45.0);
+        let len = self.objects.breakables.len();
+        for bi in 0..len {
+            let (in_range, is_hazard, bx) = {
+                let b = &self.objects.breakables[bi];
+                if b.broken {
+                    (false, false, 0.0)
+                } else {
+                    let dx = (b.x - x).abs();
+                    let dl = (b.lane - lane).abs();
+                    (
+                        dx <= reach + b.half_width && dl <= 24.0 + b.depth,
+                        b.blast_radius > 0.0,
+                        b.x,
+                    )
+                }
+            };
+            if !in_range {
+                continue;
+            }
+            if is_hazard {
+                let b = &mut self.objects.breakables[bi];
+                if b.fuse == 0 {
+                    b.fuse = CHAIN_FUSE_TICKS;
+                    b.shake = SHAKE_TICKS;
+                }
+            } else if self.objects.breakables[bi].rehit == 0 {
+                self.damage_breakable(bi, splash, (bx, -26.0), 0);
             }
         }
     }

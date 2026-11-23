@@ -11,6 +11,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Configuração e controles](Configuracao.md) | Jogadores | Arquivo `.cfg`, flags de linha de comando, variáveis de ambiente, controles |
 | [Adicionar conteúdo M.U.G.E.N](Conteudo-MUGEN.md) | Jogadores | Instalar personagens e cenários `.def`/`.zip` e validar |
 | [Mercado GitHub](Mercado.md) | Jogadores | Instalar personagens, cenários e músicas de qualquer repositório do GitHub |
+| [Lutadores 3D (protótipo)](Modelo3D.md) | Contribuidores | Lutador glTF com esqueleto desenhado no plano 2D da luta |
 | [Seleção de personagem](Character-Select.md) | Jogadores | Tela de seleção, retratos, equipes e atalhos |
 | [Modos de jogo](Modos-de-Jogo.md) | Jogadores | Arcade, equipes (Sequência, Paralelo, Tag) e suas regras |
 | [Easter Eggs durante as lutas](Easter-Eggs.md) | Jogadores | Marcos secretos de combate, cameos de cenário e interações de lore |

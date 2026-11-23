@@ -196,7 +196,7 @@ impl App {
             fighter.life = fighter.life_max;
             fighter.attack_mul *= meta.boss_attack_factor;
         }
-        sess.vfx.banner(text::boss_banner(), &text::stage_title(run.stage).to_string(), accent);
+        sess.vfx.banner(text::boss_banner(), &self.story_boss_sub(run), accent);
     }
 
     pub(crate) fn story_snapshot(&self) -> Option<(usize, usize, u8, i64, String)> {

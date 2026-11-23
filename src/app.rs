@@ -2091,6 +2091,7 @@ impl App {
                 }
                 return Ok(false);
             }
+            self.audio.warm_fight_sfx();
             self.audio.prepare_music(music).await;
         } else if !self.warm_step() {
             if wait {

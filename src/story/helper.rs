@@ -41,6 +41,14 @@ pub fn ally_page(name: &str) -> LocalText {
     )
 }
 
+pub fn joins(name: &str) -> String {
+    format!(
+        "{} {}",
+        name.to_uppercase(),
+        tr3("ENTRA NA LUTA", "JOINS THE FIGHT", "SE UNE A LA LUCHA")
+    )
+}
+
 pub fn step(cursor: usize, candidates: usize, forward: bool) -> usize {
     let slots = candidates + 1;
     if forward {
@@ -102,6 +110,11 @@ mod tests {
         for lang in ["en", "pt", "es"] {
             assert!(page.pick(lang).contains("Shion"));
         }
+    }
+
+    #[test]
+    fn joins_line_names_the_helper() {
+        assert!(joins("Shion").contains("SHION"));
     }
 
     #[test]

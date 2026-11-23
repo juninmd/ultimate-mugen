@@ -217,9 +217,9 @@ pub fn expand_to_rgba(sprite: LzSprite) -> (u32, u32, Vec<u8>) {
             for (slot, color) in table.iter_mut().zip(palette.chunks_exact(4)) {
                 *slot = u32::from_le_bytes([color[0], color[1], color[2], color[3]]);
             }
-            let mut rgba = Vec::with_capacity(indices.len() * 4);
-            for &index in &indices {
-                rgba.extend_from_slice(&table[index as usize].to_le_bytes());
+            let mut rgba = vec![0u8; indices.len() * 4];
+            for (pixel, &index) in rgba.chunks_exact_mut(4).zip(&indices) {
+                pixel.copy_from_slice(&table[index as usize].to_le_bytes());
             }
             (width, height, rgba)
         }

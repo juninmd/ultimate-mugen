@@ -568,6 +568,11 @@ impl MatchRenderer {
                         .idx(e.owner)
                         .map(|o| m.fighters[o].remap.as_slice())
                         .unwrap_or(&[]);
+                    let pal = if e.own_pal {
+                        None
+                    } else {
+                        m.idx(e.owner).map(|o| m.fighter_pal(o))
+                    };
                     if let Some(fr) = e.cur.frame() {
                         let p = e.world_pos(m.camera);
                         Self::draw_sprite(
@@ -584,6 +589,7 @@ impl MatchRenderer {
                                 add: e.add,
                                 vflip: e.vfacing < 0.0,
                                 remap,
+                                pal,
                                 alpha: e.alpha,
                                 angle: e.angle,
                                 ..Default::default()

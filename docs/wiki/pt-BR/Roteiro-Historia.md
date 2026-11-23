@@ -71,3 +71,7 @@ es = ["La red está bloqueada.", "Rompe el cortafuegos."]
 Ajustes → Jogabilidade → **Editor da História** edita a campanha ativa sem sair do jogo: créditos, vida recuperada por onda e por fase, vida e ataque do chefe e as quatro falas de cada fase no idioma atual. Cada mudança é validada, salva como TOML (`story-campaign.toml` no armazenamento do app, localStorage na web) e aplicada na hora. **Restaurar roteiro original** apaga a cópia salva.
 
 Ordem de busca da campanha: `UME_STORY_SCRIPT` → salvo pelo Editor → `story/campaign.toml`.
+
+### Editor de epílogos
+
+Editor da História → **Epílogos…** edita o final de qualquer lutador (ou do `*` padrão): título, fala do chefe e resposta do herói no telhado e cada página de narração, no idioma atual. As edições vão para `story-epilogues.toml` (uma tabela `["lutador"]` por epílogo editado, mesclada sobre o `epilogues.json` embutido); **Restaurar epílogo original** remove a edição. Um `●` no cabeçalho marca epílogo editado.

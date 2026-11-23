@@ -43,6 +43,9 @@ pub enum Screen {
     StoryStudio {
         cur: usize,
     },
+    EpilogueStudio {
+        cur: usize,
+    },
     Mugen {
         view: u8,
         page: usize,

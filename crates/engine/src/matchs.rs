@@ -52,7 +52,7 @@ pub struct Match {
     /// how many times an attacker was pushed back because the defender was cornered (diagnostics / tests)
     pub corner_pushes: u32,
     /// extra ticks the first round waits before "FIGHT!" so the fighters can face off / trade lines (0 = none)
-    pub intro_ticks: i32,
+    pub intro_ticks: i32, pub intro_skipped: bool,
     pub won_by_ko: bool, pub finish_window: i32,
     pub timer: i32, pub round_ticks: i32, pub wins: [i32; 2], pub rounds_to_win: i32, pub winner_side: i32, pub match_over: bool, pub training: bool,
     pub global_asserts: u32,
@@ -81,7 +81,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, zoom_request: None, warnings: vec![], view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            power_arena: false, arena_half: ARENA_HALF_WIDTH, swarm: None, elixir: None, team_simul: false, team_tag: false, lanes: Default::default(), objects: Default::default(), classic_pushbox: true, knockdown: KnockdownRule::default(), mutators: Default::default(), tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            power_arena: false, arena_half: ARENA_HALF_WIDTH, swarm: None, elixir: None, team_simul: false, team_tag: false, lanes: Default::default(), objects: Default::default(), classic_pushbox: true, knockdown: KnockdownRule::default(), mutators: Default::default(), tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, intro_skipped: false, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, shake_dir: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: DEFAULT_SEED, rand_state: Cell::new(DEFAULT_SEED), next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
             scratch_c1: Vec::with_capacity(16), scratch_c2: Vec::with_capacity(16),
@@ -505,7 +505,7 @@ impl Match {
         if self.zoffset0 != 0.0 { self.stage.zoffset = self.zoffset0 + (self.view_h - BASE_H) * self.ground_k; }
     }
     pub fn start_round(&mut self) {
-        self.round_state = 0; self.round_time = 0; self.timer = if self.round_ticks > 0 { self.round_ticks } else { 99 * 60 }; self.winner_side = -1; self.slow_mo = 0; self.won_by_ko = false;
+        self.round_state = 0; self.round_time = 0; self.intro_skipped = false; self.timer = if self.round_ticks > 0 { self.round_ticks } else { 99 * 60 }; self.winner_side = -1; self.slow_mo = 0; self.won_by_ko = false;
         self.first_attack = None;
         for f in self.fighters.iter_mut() { f.received_damage = 0.0; f.received_hits = 0; f.combo_count = 0; f.combo_damage = 0.0; f.combo_target = None; f.combo_timer = 0; }
         self.explods.clear(); self.projectiles.clear(); self.pause = None;
@@ -562,7 +562,7 @@ impl Match {
                 }
             }
             // MUGEN: "FIGHT!" waits while any player asserts the Intro flag (capped for safety)
-            1 if self.round_time > 60 + if self.round_no == 1 { self.intro_ticks } else { 0 } && (self.global_asserts & gsf::INTRO == 0 || self.round_time > 600) => {
+            1 if self.round_time > 60 + if self.round_no == 1 { self.intro_ticks } else { 0 } && (self.global_asserts & gsf::INTRO == 0 || self.intro_skipped || self.round_time > 600) => {
                 self.round_state = 2; self.round_time = 0;
                 self.announce = Some(Announce { text: "FIGHT!".into(), time: 50, total: 50, kind: AnnounceKind::Fight });
                 self.events.push(Event::Fight);
@@ -660,9 +660,7 @@ impl Match {
         }
         self.game_time += 1;
         if self.global_asserts & gsf::ROUNDFREEZE == 0 { self.round_time += 1; }
-        // any attack button skips the first-round face-off (inputs are recorded, so replays skip identically)
-        if self.round_state == 1 && self.round_no == 1 && self.intro_ticks > 0 && self.global_asserts & gsf::ROUNDNOTSKIP == 0 && self.round_time > 8 && self.round_time < 60 + self.intro_ticks
-            && inputs.iter().any(|b| b & (crate::input::k::A | crate::input::k::B | crate::input::k::C | crate::input::k::X | crate::input::k::Y | crate::input::k::Z) != 0) { self.round_time = 60 + self.intro_ticks; }
+        self.skip_intro_on_request(inputs);
         self.round_logic(); self.settle_intro_leftovers();
         self.global_asserts = 0;
         for p in [&mut self.all_palfx, &mut self.bg_palfx] { if p.as_ref().is_some_and(|fx| fx.expired()) { *p = None; } }

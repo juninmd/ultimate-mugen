@@ -5,7 +5,7 @@ use crate::hud::Hud;
 use crate::render::{Gfx, MatchRenderer};
 #[path = "session/kaito.rs"] mod kaito;
 #[path = "session/tension.rs"] mod tension;
-mod shortcut; pub mod debug_ctrl; pub mod dummy; pub mod dummy_tape; pub mod dummy_learn;
+mod shortcut; mod intro_skip; pub mod debug_ctrl; pub mod dummy; pub mod dummy_tape; pub mod dummy_learn;
 use crate::stages::Stage;
 use crate::ui::Ui;
 use crate::vfx::Vfx;
@@ -47,6 +47,7 @@ pub struct Session {
     /// inputs of every root slot for every simulated tick (the data a replay is rebuilt from)
     pub rec: Vec<Vec<u32>>,
     pub is_replay: bool,
+    pub auto_skip_intro: bool,
     flag_sounds: Vec<(u32, i32, bool, bool)>,
     speed: f32,
     /// initial RNG seed of the match (stored in replays so a recorded fight rebuilds identically)
@@ -169,6 +170,7 @@ impl Session {
             inputs: vec![],
             rec: vec![],
             is_replay: false,
+            auto_skip_intro: false,
             flag_sounds: vec![],
             speed: 1.0,
             seed,
@@ -257,6 +259,7 @@ impl Session {
                     let raw = c.player_bits(*s, self.duo);
                     let f = &self.m.fighters[fi];
                     let mut b = shortcut::take_slots(c, (*s).min(1), raw, &f.def.display_name, &f.def.commands, f.facing);
+                    b |= intro_skip::bits(&self.m, c, self.auto_skip_intro);
                     if tag && b & k::T != 0 {
                         b = (b & !k::T) | k::TAG;
                     }

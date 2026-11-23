@@ -19,7 +19,7 @@ pub(crate) const fn pool_cap() -> usize {
     if cfg!(any(target_os = "android", target_os = "ios")) {
         3
     } else if cfg!(target_arch = "wasm32") {
-        6
+        3
     } else {
         8
     }

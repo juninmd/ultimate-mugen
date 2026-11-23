@@ -101,12 +101,14 @@ pub fn of_with(fighter_id: &str, mercy: Option<bool>) -> Option<&'static Epilogu
 }
 
 pub fn final_boss(player_id: &str) -> &'static str {
-    let last = &STAGES[STAGES.len() - 1];
-    if last.boss == player_id {
-        last.alt_boss
-    } else {
-        last.boss
-    }
+    let (boss, alt_boss): (&'static str, &'static str) = match super::script::active().stages.last() {
+        Some(last) => (&last.boss, &last.alt_boss),
+        None => {
+            let last = &STAGES[STAGES.len() - 1];
+            (last.boss, last.alt_boss)
+        }
+    };
+    if boss == player_id { alt_boss } else { boss }
 }
 
 pub fn pick_named<'a>(table: &'a Table, fighter_id: &str, name: &str) -> Option<Cow<'a, Epilogue>> {

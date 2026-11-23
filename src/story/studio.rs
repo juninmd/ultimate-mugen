@@ -1,9 +1,10 @@
-use super::script::{self, CampaignMeta, LocalizedLines, StoryScript};
+use super::script::{self, CampaignMeta, LocalizedLines, LocalizedText, StoryScript};
 use super::script_source::STORE_KEY;
 use crate::i18n::Lang;
 
 pub const BEATS: usize = 4;
 pub const BEAT_MAX_CHARS: usize = 96;
+pub const TITLE_MAX_CHARS: usize = 28;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Rule {
@@ -84,6 +85,36 @@ pub fn set_beat(script: &mut StoryScript, stage: usize, beat: usize, lang: Lang,
         *slot = text.trim().chars().take(BEAT_MAX_CHARS).collect();
     }
     st.beats = LocalizedLines::Map { en, pt, es };
+}
+
+pub fn set_title(script: &mut StoryScript, stage: usize, lang: Lang, text: &str) {
+    let Some(st) = script.stages.get_mut(stage) else { return };
+    let clean: String = text.trim().chars().take(TITLE_MAX_CHARS).collect();
+    let mut map = [Lang::En, Lang::Pt, Lang::Es].map(|l| st.title.pick(l).to_string());
+    map[lang_slot(lang)] = clean;
+    let [en, pt, es] = map;
+    st.title = LocalizedText::Map { en, pt, es };
+}
+
+fn lang_slot(lang: Lang) -> usize {
+    match lang {
+        Lang::En => 0,
+        Lang::Pt => 1,
+        Lang::Es => 2,
+    }
+}
+
+pub fn cycle_boss(script: &mut StoryScript, stage: usize, roster: &[String], dir: i32) {
+    let Some(st) = script.stages.get_mut(stage) else { return };
+    if roster.is_empty() {
+        return;
+    }
+    let at = roster.iter().position(|id| *id == st.boss).unwrap_or(0) as i32;
+    let next = roster[(at + dir).rem_euclid(roster.len() as i32) as usize].clone();
+    if st.alt_boss == next {
+        st.alt_boss = st.boss.clone();
+    }
+    st.boss = next;
 }
 
 pub fn to_toml(script: &StoryScript) -> Result<String, String> {

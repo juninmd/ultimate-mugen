@@ -182,7 +182,8 @@ mod web {
         let st = ume_shell::quad::stats();
         let gpu = format!("{{\"v\":{},\"dc\":{},\"up\":{},\"kb\":{},\"rf\":{:.3},\"if\":{:.3},\"resets\":{},\"tresets\":{}}}", st.vertices, st.draw_calls, st.uploads, st.upload_kb, st.rgba_fill, st.index_fill, st.rgba_resets, st.transient_resets);
         let json = format!(
-            "{{\"gpu\":{gpu},\"screen\":\"{}\",\"epilogue\":{epilogue},\"arcade\":{arcade},\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"roster\":{roster},\"import\":{import},\"wasm_mb\":{wasm_mb},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
+            "{{\"gpu\":{gpu},\"menu_cur\":{},\"screen\":\"{}\",\"epilogue\":{epilogue},\"arcade\":{arcade},\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"roster\":{roster},\"import\":{import},\"wasm_mb\":{wasm_mb},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
+            match &app.screen { Screen::Menu { cur } => *cur as i64, _ => -1 },
             screen_name(&app.screen),
             app.mode == Mode::Story,
             over,

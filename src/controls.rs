@@ -1,12 +1,8 @@
-//! Input hub: keyboard maps, gamepads (with rumble), touch controls; menu navigation.
+//! Input hub: keyboard maps, gamepads (with rumble), the web virtual pad; menu navigation.
 use crate::gamepad::{PadInfo, PadKind, Pads};
 mod nav_keys;
 mod nav_repeat;
 mod touch;
-mod touch_layout;
-mod touch_style;
-mod touch_label;
-mod touch_nav;
 pub mod shortcuts;
 use crate::gfx::*;
 use crate::keybinds::KeyMap;
@@ -30,7 +26,7 @@ pub fn face(g: Glyphs, keys: &KeyMap, bit: u32) -> Face {
     let punch = bit & (k::X | k::Y | k::Z) != 0;
     match g {
         Glyphs::Touch => {
-            let t = touch_label::label(bit);
+            let t = touch::label(bit);
             Face::chip(
                 t,
                 if punch {
@@ -83,7 +79,7 @@ pub struct Controls {
     nav_repeat: nav_repeat::NavRepeat,
     pub menu_pressed: u32,
     pub touch: TouchPad,
-    pub nav: touch_nav::TouchNav,
+    pending_nav: u32,
     pub glyphs: Glyphs,
     pub shortcuts: Shortcuts,
 }
@@ -108,6 +104,13 @@ fn kb_bits(keys: &KeyMap, slot: usize, solo: bool) -> u32 {
     b
 }
 
+fn pad_nav(b: u32) -> u32 {
+    [(k::U, nav::UP), (k::D, nav::DOWN), (k::L, nav::LEFT), (k::R, nav::RIGHT), (k::A, nav::OK), (k::B, nav::BACK), (k::S, nav::START)]
+        .iter()
+        .filter(|(bit, _)| b & bit != 0)
+        .fold(0, |m, (_, n)| m | n)
+}
+
 /// Menu actions
 pub mod nav {
     pub const UP: u32 = 1;
@@ -129,7 +132,7 @@ impl Controls {
             nav_repeat: Default::default(),
             menu_pressed: 0,
             touch: TouchPad::new(touch),
-            nav: Default::default(),
+            pending_nav: 0,
             shortcuts: Shortcuts::load(),
             glyphs: if touch {
                 Glyphs::Touch
@@ -145,7 +148,6 @@ impl Controls {
         let had_pads = !self.pad_info.is_empty();
         self.pad_info = self.pads.update();
         self.touch.update();
-        self.nav.update(self.touch.enabled);
         let fallback = if self.touch.enabled {
             Glyphs::Touch
         } else {
@@ -190,31 +192,14 @@ impl Controls {
         if key(nav_keys::AUX) {
             m |= nav::AUX;
         }
-        for p in &self.pad_info {
-            let b = p.bits;
-            if b & k::U != 0 {
-                m |= nav::UP;
-            }
-            if b & k::D != 0 {
-                m |= nav::DOWN;
-            }
-            if b & k::L != 0 {
-                m |= nav::LEFT;
-            }
-            if b & k::R != 0 {
-                m |= nav::RIGHT;
-            }
-            if b & k::A != 0 {
-                m |= nav::OK;
-            }
-            if b & k::B != 0 {
-                m |= nav::BACK;
-            }
-            if b & k::S != 0 {
-                m |= nav::START;
-            }
+        for b in self.pad_info.iter().map(|p| p.bits).chain([self.touch.bits]) {
+            m |= pad_nav(b);
         }
-        self.menu_pressed = self.nav_repeat.pressed(m | self.nav.held(), get_frame_time());
+        m |= self.touch.nav | std::mem::take(&mut self.pending_nav);
+        self.menu_pressed = self.nav_repeat.pressed(m, get_frame_time());
+    }
+    pub fn press_nav(&mut self, bit: u32) {
+        self.pending_nav |= bit;
     }
     pub fn clear_macros(&mut self) {
         for q in self.touch.macro_q.iter_mut() {
@@ -241,10 +226,6 @@ impl Controls {
     pub fn rumble(&mut self, slot: usize, strong: f32, weak: f32, ms: u32) {
         if slot < self.pad_info.len() {
             self.pads.rumble(slot, strong, weak, ms);
-        }
-        #[cfg(target_arch = "wasm32")]
-        if slot == 0 && self.touch.enabled {
-            self.pads.rumble(0, strong, weak, ms);
         }
     }
 }

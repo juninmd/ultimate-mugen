@@ -113,7 +113,7 @@ impl crate::app::App {
         if is_mouse_button_pressed(MouseButton::Left) && chip.contains(p) {
             swallow_pointer();
             self.audio.sfx("back");
-            self.c.nav.press(nav::BACK);
+            self.c.press_nav(nav::BACK);
         }
     }
 

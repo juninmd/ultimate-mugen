@@ -648,7 +648,7 @@ impl Registry {
                 }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
-                    StageJob::ready(i, StageBuild { stage: (self.builtin_stages[*b].build)(), preview: None })
+                    StageJob::spawn_builtin(i, self.builtin_stages[*b].build.clone())
                 }
             }
             StageSrc::Mugen { vfs, def } => {

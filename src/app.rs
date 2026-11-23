@@ -1819,7 +1819,7 @@ impl App {
             if st == 0 && self.pending.jobs.is_empty() {
                 let keep: Vec<usize> = plan.iter().map(|p| p.2).collect();
                 self.reg.trim_cache(&keep);
-                self.pending = Pending::default();
+                self.pending = Pending { stage_job: Some(self.reg.prepare_stage(s)), ..Pending::default() };
                 let mut seen: Vec<(usize, i32)> = vec![];
                 for k in 0..n {
                     let key = (plan[k].2, self.pal_for(&plan, k));

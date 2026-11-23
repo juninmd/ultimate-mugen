@@ -75,3 +75,28 @@ fn cycling_the_boss_wraps_and_never_leaves_both_bosses_equal() {
     cycle_boss(&mut script, 0, &[], 1);
     assert_eq!(script.stages[0].boss, "c");
 }
+
+#[test]
+fn foes_per_wave_clamp_and_keep_the_wave_count() {
+    let mut script = StoryScript::default_campaign();
+    let waves = script.stages[0].waves.len();
+    for _ in 0..10 {
+        adjust_foes(&mut script, 0, 1);
+    }
+    assert_eq!(foe_range(&script, 0), (FOES_MAX, FOES_MAX));
+    for _ in 0..10 {
+        adjust_foes(&mut script, 0, -1);
+    }
+    assert_eq!(foe_range(&script, 0), (FOES_MIN, FOES_MIN));
+    assert_eq!(script.stages[0].waves.len(), waves);
+}
+
+#[test]
+fn added_foes_reuse_the_waves_own_roster() {
+    let mut script = StoryScript::default_campaign();
+    let before = script.stages[0].waves[0].clone();
+    adjust_foes(&mut script, 0, 1);
+    let after = &script.stages[0].waves[0];
+    assert_eq!(after.len(), before.len() + 1);
+    assert!(after.iter().all(|id| before.contains(id)));
+}

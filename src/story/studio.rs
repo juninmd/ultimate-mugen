@@ -117,6 +117,27 @@ pub fn cycle_boss(script: &mut StoryScript, stage: usize, roster: &[String], dir
     st.boss = next;
 }
 
+pub const FOES_MIN: usize = 1;
+pub const FOES_MAX: usize = 4;
+
+pub fn adjust_foes(script: &mut StoryScript, stage: usize, dir: i32) {
+    let Some(st) = script.stages.get_mut(stage) else { return };
+    for wave in st.waves.iter_mut() {
+        if dir > 0 && wave.len() < FOES_MAX {
+            if let Some(last) = wave.last().cloned() {
+                wave.push(last);
+            }
+        } else if dir < 0 && wave.len() > FOES_MIN {
+            wave.pop();
+        }
+    }
+}
+
+pub fn foe_range(script: &StoryScript, stage: usize) -> (usize, usize) {
+    let sizes = script.stage(stage).map(|st| st.waves.iter().map(Vec::len).collect::<Vec<_>>()).unwrap_or_default();
+    (sizes.iter().copied().min().unwrap_or(0), sizes.iter().copied().max().unwrap_or(0))
+}
+
 pub fn to_toml(script: &StoryScript) -> Result<String, String> {
     toml::to_string(script).map_err(|e| format!("story toml: {e}"))
 }

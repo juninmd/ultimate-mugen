@@ -6,7 +6,7 @@ pub async fn run(app: &mut App, dir: &str) {
     app.screen = Screen::StoryStudio { cur: 5 };
     screen(app, dir, "studio-lista", 20).await;
     app.studio = Some(crate::app::StudioState::open().editing("Wolf: Fique perto. Hoje a rua é nossa.", 1));
-    app.screen = Screen::StoryStudio { cur: 7 };
+    app.screen = Screen::StoryStudio { cur: 9 };
     screen(app, dir, "studio-editando", 20).await;
     app.studio = None;
     app.epi_studio = Some(crate::app::EpiState::open());

@@ -15,6 +15,7 @@
     { "name": "story", "shard": "ui", "script": "web-story-smoke.js", "args": ["{dist}"] },
     { "name": "epilogue", "shard": "ui", "script": "web-epilogue-smoke.js", "args": ["{dist}"] },
     { "name": "story-studio", "shard": "ui", "script": "web-studio-smoke.js", "args": ["{dist}"] },
+    { "name": "defeat-tip", "shard": "ui", "script": "web-defeat-tip-smoke.js", "args": ["{dist}"] },
     { "name": "prefight", "shard": "ui", "script": "web-prefight-smoke.js", "args": ["{dist}"] },
     { "name": "helper", "shard": "ui", "script": "web-helper-smoke.js", "args": ["{dist}"] },
     { "name": "team-7v7", "shard": "ui", "script": "web-team-smoke.js", "args": ["{dist}"] },

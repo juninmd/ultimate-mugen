@@ -39,6 +39,20 @@ window.ume_fetch_asset = async (path) => {
 
 const LITTLE_ENDIAN = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
 
+function headerProvesOpaque(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  if (bytes.length < 33 || view.getUint32(12) !== 0x49484452) return false;
+  const colorType = bytes[25];
+  if (colorType !== 0 && colorType !== 2 && colorType !== 3) return false;
+  for (let at = 8; at + 8 <= bytes.length; ) {
+    const type = view.getUint32(at + 4);
+    if (type === 0x74524e53) return false;
+    if (type === 0x49444154) return true;
+    at += 12 + view.getUint32(at);
+  }
+  return false;
+}
+
 function isOpaque(data) {
   if (!LITTLE_ENDIAN) {
     for (let i = 3; i < data.length; i += 4) if (data[i] !== 255) return false;
@@ -61,7 +75,7 @@ window.ume_decode_image = async (bytes) => {
     context.drawImage(bitmap, 0, 0);
     const image = context.getImageData(0, 0, bitmap.width, bitmap.height);
     const data = new Uint8Array(image.data.buffer);
-    if (!isOpaque(data)) return null;
+    if (!headerProvesOpaque(bytes) && !isOpaque(data)) return null;
     return { width: image.width, height: image.height, data };
   } finally {
     bitmap.close();

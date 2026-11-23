@@ -116,23 +116,23 @@
       },
       "colors": {
         "skin": "#f2d4bc",
-        "hair": "#14121c",
-        "eye": "#ff7ab8",
-        "top": "#16141e",
-        "top2": "#f8f2f6",
-        "trim": "#ff7ab8",
-        "pants": "#12101a",
-        "cloth": "#f8f2f6",
-        "belt": "#ff7ab8",
+        "hair": "#14151c",
+        "eye": "#c4d0e0",
+        "top": "#16171f",
+        "top2": "#f8f9fc",
+        "trim": "#ff8ac4",
+        "pants": "#14151c",
+        "cloth": "#f8f9fc",
+        "belt": "#d8dee9",
         "wrap": "#d8e0ec",
         "boot": "#eef2f8",
         "weapon": "#c8d8ec",
         "weapon2": "#f4fbff",
-        "hilt": "#ff7ab8",
+        "hilt": "#e8c468",
         "accent": "#ffd6eb",
         "energy": "#ff9ed0",
         "aura": "#ff85c0",
-        "undershirt": "#0e0c14"
+        "undershirt": "#0e0f14"
       },
       "undershirt": "undershirt",
       "arms": 0.95,
@@ -3093,19 +3093,19 @@
   },
   "palettes": [
     {
-      "top": "#16141e",
-      "pants": "#12101a",
-      "top2": "#f8f2f6",
-      "undershirt": "#0e0c14",
-      "cloth": "#f8f2f6",
-      "belt": "#ff7ab8",
-      "trim": "#ff7ab8",
-      "hair": "#14121c",
-      "eye": "#ff7ab8",
-      "boot": "#f8f2f6",
+      "top": "#16171f",
+      "pants": "#14151c",
+      "top2": "#f8f9fc",
+      "undershirt": "#0e0f14",
+      "cloth": "#f8f9fc",
+      "belt": "#d8dee9",
+      "trim": "#ff8ac4",
+      "hair": "#14151c",
+      "eye": "#c4d0e0",
+      "boot": "#f8f9fc",
       "energy": "#ff9ed0",
       "aura": "#ff85c0",
-      "hilt": "#ff7ab8",
+      "hilt": "#e8c468",
       "accent": "#ffd6eb"
     },
     {
@@ -3142,8 +3142,8 @@
     }
   ],
   "awakeningPalette": {
-    "hair": "#241428",
-    "eye": "#ff9ed0",
+    "hair": "#14151c",
+    "eye": "#ffd6eb",
     "energy": "#ffb8dc",
     "aura": "#ff85c0",
     "trim": "#ffb8dc"
@@ -3152,14 +3152,26 @@
     "fly": {
       "speed": 4.4,
       "cost": 40,
-      "input": "b+c"
+      "input": "b+c",
+      "upAnim": "jumpUp",
+      "downAnim": "jumpDown",
+      "fwdAnim": "jumpTop",
+      "backAnim": "jumpStart",
+      "sound": [
+        200,
+        2
+      ]
     },
     "teleport": {
       "cost": 200,
       "input": "a+b",
       "offset": 42,
       "invuln": 14,
-      "turn": true
+      "turn": true,
+      "sound": [
+        200,
+        2
+      ]
     },
     "superSpeed": {
       "mul": 1.9,
@@ -3169,10 +3181,18 @@
     "charge": {
       "auraColor": [
         255,
-        132,
-        192
+        138,
+        196
       ],
-      "shake": true
+      "shake": true,
+      "sound": [
+        200,
+        4
+      ],
+      "startSound": [
+        200,
+        5
+      ]
     },
     "forms": [
       {
@@ -3195,6 +3215,23 @@
             "input": "~D, DF, F, a+b",
             "kind": "special",
             "anim": "frostArc",
+            "afterimage": {
+              "at": 1,
+              "time": 26,
+              "length": 7,
+              "framegap": 2,
+              "trans": "add",
+              "palAdd": [
+                85,
+                12,
+                48
+              ],
+              "palMul": [
+                1.0,
+                0.74,
+                0.9
+              ]
+            },
             "projectile": [
               {
                 "at": 3,
@@ -3275,6 +3312,32 @@
               1,
               6
             ],
+            "afterimage": {
+              "at": 1,
+              "time": 26,
+              "length": 7,
+              "framegap": 2,
+              "trans": "add",
+              "palAdd": [
+                85,
+                12,
+                48
+              ],
+              "palMul": [
+                1.0,
+                0.74,
+                0.9
+              ]
+            },
+            "flash": {
+              "at": 2,
+              "time": 6,
+              "color": [
+                255,
+                186,
+                224
+              ]
+            },
             "hits": [
               {
                 "at": 2,
@@ -3333,6 +3396,98 @@
               }
             ],
             "cost": 400
+          },
+          {
+            "id": "senkei_blade_cage",
+            "name": "Senkei: Prisão das Mil Espadas",
+            "input": "D, D, y",
+            "kind": "special",
+            "anim": "strong",
+            "teleport": [
+              {
+                "at": 2,
+                "mode": "behind",
+                "offset": [
+                  36,
+                  0
+                ],
+                "turn": true
+              },
+              {
+                "at": 5,
+                "mode": "front",
+                "offset": [
+                  36,
+                  0
+                ],
+                "turn": true
+              }
+            ],
+            "afterimage": {
+              "at": 1,
+              "time": 26,
+              "length": 7,
+              "framegap": 2,
+              "trans": "add",
+              "palAdd": [
+                85,
+                12,
+                48
+              ],
+              "palMul": [
+                1.0,
+                0.74,
+                0.9
+              ]
+            },
+            "hits": [
+              {
+                "at": 3,
+                "damage": 52,
+                "level": "medium",
+                "hitstun": 20
+              },
+              {
+                "at": 6,
+                "damage": 78,
+                "level": "heavy",
+                "launch": true,
+                "knockback": [
+                  -3.5,
+                  -7.5
+                ]
+              }
+            ],
+            "shake": {
+              "at": 6,
+              "time": 12,
+              "ampl": 6,
+              "freq": 70
+            },
+            "sounds": [
+              {
+                "at": 1,
+                "snd": [
+                  200,
+                  2
+                ]
+              },
+              {
+                "at": 3,
+                "snd": [
+                  200,
+                  0
+                ]
+              },
+              {
+                "at": 6,
+                "snd": [
+                  200,
+                  1
+                ]
+              }
+            ],
+            "cost": 350
           }
         ],
         "replaceMoves": false
@@ -3351,6 +3506,83 @@
           }
         },
         "moves": [
+          {
+            "id": "hakuteiken_ascent",
+            "name": "Hakuteiken: Mergulho Alado",
+            "input": "~D, DF, F, y",
+            "kind": "special",
+            "when": "air",
+            "anim": "airKick",
+            "afterimage": {
+              "at": 1,
+              "time": 42,
+              "length": 10,
+              "framegap": 2,
+              "trans": "add",
+              "palAdd": [
+                110,
+                96,
+                104
+              ],
+              "palMul": [
+                1.0,
+                0.96,
+                0.98
+              ]
+            },
+            "flash": {
+              "at": 2,
+              "time": 6,
+              "color": [
+                255,
+                246,
+                252
+              ]
+            },
+            "moves": [
+              {
+                "at": 2,
+                "vel": [
+                  7.2,
+                  4.4
+                ]
+              }
+            ],
+            "hits": [
+              {
+                "at": 3,
+                "damage": 118,
+                "level": "heavy",
+                "knockback": [
+                  -5.0,
+                  -4.0
+                ]
+              }
+            ],
+            "shake": {
+              "at": 3,
+              "time": 12,
+              "ampl": 6,
+              "freq": 75
+            },
+            "sounds": [
+              {
+                "at": 1,
+                "snd": [
+                  200,
+                  5
+                ]
+              },
+              {
+                "at": 3,
+                "snd": [
+                  200,
+                  1
+                ]
+              }
+            ],
+            "cost": 300
+          },
           {
             "id": "shukei_hakuteiken",
             "name": "Shukei: Hakuteiken — Juízo Branco",
@@ -3380,7 +3612,17 @@
               "time": 42,
               "length": 10,
               "framegap": 2,
-              "trans": "add"
+              "trans": "add",
+              "palAdd": [
+                110,
+                96,
+                104
+              ],
+              "palMul": [
+                1.0,
+                0.96,
+                0.98
+              ]
             },
             "moves": [
               {
@@ -4647,6 +4889,48 @@
       ]
     },
     {
+      "id": "hado_1_sho",
+      "name": "Hadō #1: Shō (Impulso Espiritual)",
+      "input": "D, D, a",
+      "kind": "special",
+      "anim": "jab",
+      "flash": {
+        "at": 2,
+        "time": 4,
+        "color": [
+          232,
+          244,
+          255
+        ]
+      },
+      "hits": [
+        {
+          "at": 2,
+          "damage": 52,
+          "level": "heavy",
+          "knockback": [
+            -9.5,
+            -2.5
+          ]
+        }
+      ],
+      "shake": {
+        "at": 2,
+        "time": 8,
+        "ampl": 5,
+        "freq": 70
+      },
+      "sounds": [
+        {
+          "at": 2,
+          "snd": [
+            200,
+            2
+          ]
+        }
+      ]
+    },
+    {
       "id": "hado_4_byakurai",
       "name": "Hadō #4: Byakurai (Raio Pálido)",
       "input": "~D, DF, F, y",
@@ -4756,6 +5040,10 @@
         "removeTime": 110,
         "priority": 2
       },
+      "followUp": {
+        "to": "shunpo_senka",
+        "on": "hit"
+      },
       "sounds": [
         {
           "at": 2,
@@ -4774,7 +5062,7 @@
       "anim": "strong",
       "invuln": [
         1,
-        8
+        10
       ],
       "hits": [
         {
@@ -4782,7 +5070,7 @@
           "damage": 66,
           "level": "heavy",
           "knockback": [
-            -6.5,
+            -7.5,
             -2.0
           ]
         }
@@ -4795,6 +5083,12 @@
           245,
           255
         ]
+      },
+      "shake": {
+        "at": 3,
+        "time": 8,
+        "ampl": 4,
+        "freq": 60
       },
       "sounds": [
         {
@@ -4823,10 +5117,20 @@
       },
       "afterimage": {
         "at": 1,
-        "time": 20,
-        "length": 6,
+        "time": 26,
+        "length": 7,
         "framegap": 2,
-        "trans": "add"
+        "trans": "add",
+        "palAdd": [
+          85,
+          12,
+          48
+        ],
+        "palMul": [
+          1.0,
+          0.74,
+          0.9
+        ]
       },
       "hits": [
         {
@@ -4924,10 +5228,20 @@
       },
       "afterimage": {
         "at": 1,
-        "time": 34,
-        "length": 8,
+        "time": 26,
+        "length": 7,
         "framegap": 2,
-        "trans": "add"
+        "trans": "add",
+        "palAdd": [
+          85,
+          12,
+          48
+        ],
+        "palMul": [
+          1.0,
+          0.74,
+          0.9
+        ]
       },
       "projectile": [
         {
@@ -5062,10 +5376,20 @@
       },
       "afterimage": {
         "at": 1,
-        "time": 36,
-        "length": 9,
+        "time": 26,
+        "length": 7,
         "framegap": 2,
-        "trans": "add"
+        "trans": "add",
+        "palAdd": [
+          85,
+          12,
+          48
+        ],
+        "palMul": [
+          1.0,
+          0.74,
+          0.9
+        ]
       },
       "teleport": {
         "at": 2,

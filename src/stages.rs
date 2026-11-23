@@ -29,6 +29,8 @@ mod bamboo;
 mod plains;
 mod spirit;
 mod volcano;
+#[cfg(feature = "model3d")]
+mod airport;
 mod illustrations;
 mod catalog;
 mod mugen;

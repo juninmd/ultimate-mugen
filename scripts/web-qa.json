@@ -3,6 +3,7 @@
   "excluded": {
     "web-remote-smoke": "needs network access to GitHub",
     "web-import-probe": "needs a pack path argument, latency probe",
+    "web-airport-smoke": "manual evidence run for the 3D airport stage, prints frame timing and screenshots",
     "web-frame-probe": "manual profiling tool, not a pass/fail check",
     "web-story-checkpoint-smoke": "checkpoint test, runs after story mode",
     "web-story-playthrough": "long manual playthrough, not part of the PR gate",

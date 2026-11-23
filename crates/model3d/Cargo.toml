@@ -15,3 +15,7 @@ tiny-skia = "0.11"
 [[example]]
 name = "preview"
 path = "examples/preview.rs"
+
+[[example]]
+name = "airport"
+path = "examples/airport.rs"

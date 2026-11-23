@@ -10,7 +10,7 @@ impl StageReact {
             StageKind::Plains => self.plains_layer(i, cx, g),
             StageKind::Spirit => self.spirit_layer(i, cx, g),
             StageKind::Volcano => self.volcano_layer(i, cx, g),
-            StageKind::Arena | StageKind::Custom => {}
+            StageKind::Arena | StageKind::Airport | StageKind::Custom => {}
         }
         if i == 4 {
             self.floor_common(cx, g, m);
@@ -25,7 +25,7 @@ impl StageReact {
             StageKind::Plains => self.plains_front(cx, g),
             StageKind::Spirit => self.spirit_front(cx, g),
             StageKind::Volcano => self.volcano_front(cx, g),
-            StageKind::Arena | StageKind::Custom => {}
+            StageKind::Arena | StageKind::Airport | StageKind::Custom => {}
         }
         self.draw_bits(cx, g);
     }
@@ -42,7 +42,7 @@ impl StageReact {
             StageKind::Plains => (0.05, [1.03, 1.01, 0.97]),
             StageKind::Spirit => (0.15, [0.97, 1.02, 1.02]),
             StageKind::Volcano => (0.2, [1.05, 0.98, 0.94]),
-            StageKind::Arena => (0.1, [1.02, 1.0, 0.97]),
+            StageKind::Arena | StageKind::Airport => (0.1, [1.02, 1.0, 0.97]),
             StageKind::Custom => (0.0, [1.0; 3]),
         };
         p.vignette += v + self.flicker * 0.07 * gain.min(1.0);

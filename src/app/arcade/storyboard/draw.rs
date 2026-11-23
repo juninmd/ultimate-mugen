@@ -66,9 +66,9 @@ pub(super) fn draw(app: &mut App, playback: &Playback, scene_index: usize, time:
         .text(label, 26.0, 706.0, 13.0, hex("#ffcc33"), Align::Left, true);
     app.ui.text(
         &crate::i18n::tr3(
-            "A/Enter avança · Esc pula",
-            "A/Enter advances · Esc skips",
-            "A/Enter avanza · Esc omite",
+            "Toque/A/Enter avança · toque em Pular/Esc pula",
+            "Tap/A/Enter advances · tap Skip/Esc skips",
+            "Toque/A/Enter avanza · toca Saltar/Esc omite",
         ),
         1254.0,
         706.0,

@@ -45,7 +45,7 @@ Each `[[step]]` has exactly one of `fight`, `storyboard` or `action`.
 | `when` | Condition; the step runs only when true |
 | `else` | Same keys as a step body (`fight`, `storyboard`, `action`); runs when `when` is false |
 
-Storyboards between fights play before the next fight. A storyboard before the first fight replaces the built-in arcade opening; a final storyboard plays before the ending or the final results screen. Press confirm to advance a scene, or Back/Start to skip the current storyboard. If a storyboard file or its required sprite file cannot be loaded, the engine reports the path and continues the route.
+Storyboards between fights play before the next fight. A storyboard before the first fight replaces the built-in arcade opening; a final storyboard plays before the ending or the final results screen. Press confirm or tap anywhere to advance a scene, or Back/Start or tap **Skip** to skip the current storyboard. If a storyboard file or its required sprite file cannot be loaded, the engine reports the path and continues the route.
 
 The route is planned when arcade starts, assuming the player wins every fight, which is the only path a run can take. A lost fight ends the run as usual.
 

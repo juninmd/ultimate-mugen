@@ -45,7 +45,7 @@ Cada `[[step]]` tem exatamente um entre `fight`, `storyboard` ou `action`.
 | `when` | Condição; o passo só roda se for verdadeira |
 | `else` | Mesmas chaves do corpo de um passo (`fight`, `storyboard`, `action`); roda quando `when` é falso |
 
-Storyboards entre lutas são exibidos antes do próximo combate. Um storyboard antes da primeira luta substitui a abertura padrão do arcade; um storyboard final aparece antes do epílogo ou dos resultados finais. Pressione confirmar para avançar a cena, ou Voltar/Iniciar para pular o storyboard atual. Se o storyboard ou o arquivo de sprites necessário não puder ser carregado, a engine informa o caminho e continua a rota.
+Storyboards entre lutas são exibidos antes do próximo combate. Um storyboard antes da primeira luta substitui a abertura padrão do arcade; um storyboard final aparece antes do epílogo ou dos resultados finais. Pressione confirmar ou toque em qualquer lugar para avançar a cena, ou Voltar/Iniciar ou **Pular** para pular o storyboard atual. Se o storyboard ou o arquivo de sprites necessário não puder ser carregado, a engine informa o caminho e continua a rota.
 
 A rota é planejada quando o arcade começa, supondo que o jogador vence todas as lutas, que é o único caminho possível de uma partida. Perder uma luta encerra a partida como sempre.
 

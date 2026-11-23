@@ -1,6 +1,6 @@
 use crate::app::{App, Team};
 use crate::gfx::*;
-use crate::story::{helper, HelperPick, StoryRun};
+use crate::story::{helper, prefight, HelperPick, StoryRun};
 use crate::ui::*;
 
 impl App {
@@ -27,6 +27,14 @@ impl App {
         let squad: Vec<usize> = std::iter::once(hero).chain(helper).collect();
         self.team_pal = squad.iter().enumerate().map(|(k, _)| if k == 0 { self.side_pal(0) } else { 1 }).collect();
         self.team = Some(Team::new(squad, foes, true));
+    }
+
+    pub(crate) fn story_prefight_line(&self, run: &StoryRun) -> String {
+        let hero = self.reg.chars.get(self.sel.0).map_or("", |e| e.name.as_str());
+        let player = self.player_char_id();
+        let boss = self.story_char(run.stage_boss_id(&player)).map_or("", |i| self.reg.chars[i].name.as_str());
+        let (speaker, text) = prefight::line(run.prefight);
+        format!("{}: {}", prefight::speaker_name(speaker, hero, boss), prefight::fill(text, hero, boss))
     }
 
     pub(crate) fn story_helper_input(&mut self, run: &StoryRun, confirmed: bool) {

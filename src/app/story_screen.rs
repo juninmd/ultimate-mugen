@@ -1,7 +1,7 @@
 use crate::app::{App, Screen};
 use crate::controls::nav;
 use crate::gfx::*;
-use crate::story::{beats, choice, helper, text, Phase};
+use crate::story::{beats, choice, helper, prefight, text, Phase};
 use crate::ui::*;
 
 impl App {
@@ -15,8 +15,9 @@ impl App {
         if self.story_epilogue(&run, t, dt) {
             return;
         }
-        let choosing_helper = helper::pending(&run);
-        let deciding = choice::pending(&run) || choosing_helper;
+        let talking = prefight::pending(&run);
+        let choosing_helper = !talking && helper::pending(&run);
+        let deciding = !talking && (choice::pending(&run) || choosing_helper);
         if choosing_helper {
             let confirmed = self.c.pressed(nav::OK | nav::START) && t > 0.35;
             self.story_helper_input(&run, confirmed);
@@ -50,7 +51,9 @@ impl App {
             Phase::Intro => (
                 text::stage_label(run.stage),
                 text::stage_title(run.stage).to_string(),
-                if choosing_helper {
+                if talking {
+                    self.story_prefight_line(&run)
+                } else if choosing_helper {
                     helper::prompt().to_string()
                 } else if deciding {
                     choice::prompt().to_string()
@@ -107,7 +110,15 @@ impl App {
         let pulse = 0.65 + 0.35 * (t * 4.0).sin().abs();
         self.ui.text(prompt, VW / 2.0, 520.0, 22.0, Color::new(1.0, 1.0, 1.0, pulse), Align::Center, true);
         let confirmed = self.c.pressed(nav::OK | nav::START) && t > 0.35;
-        if !deciding && (confirmed || self.clicked_rect(0.0, 230.0, VW, 220.0)) {
+        if talking && (confirmed || self.clicked_rect(0.0, 230.0, VW, 220.0)) {
+            self.audio.sfx("select");
+            if let Some(run) = self.story.as_mut() {
+                run.prefight += 1;
+            }
+            self.screen = Screen::Story { t: 0.5 };
+            return;
+        }
+        if !deciding && !talking && (confirmed || self.clicked_rect(0.0, 230.0, VW, 220.0)) {
             self.audio.sfx("confirm");
             self.story_resume();
             return;

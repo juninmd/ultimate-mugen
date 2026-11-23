@@ -1,7 +1,7 @@
 use super::Vfx;
 use crate::story::objects::catalog;
 use ume_engine::matchs::Match;
-use ume_engine::stage_objects::ObjectEvent;
+use ume_engine::stage_objects::{ObjectEvent, StageZoneKind};
 
 const HEAL_COLOR: [f32; 3] = [0.5, 1.0, 0.55];
 const POWER_COLOR: [f32; 3] = [1.0, 0.86, 0.3];
@@ -159,6 +159,21 @@ impl Vfx {
                 ObjectEvent::GoalTimedOut => {
                     self.banner(crate::story::text::bonus_timeout(), "", [1.0, 0.5, 0.4]);
                     self.sfx.push("back");
+                }
+                ObjectEvent::ZoneTriggered { index, x, lane, .. } => {
+                    let color = m
+                        .objects
+                        .zones
+                        .get(index)
+                        .map(|z| match z.kind {
+                            StageZoneKind::Updraft { .. } => [0.55, 0.92, 1.0],
+                            StageZoneKind::PowerWell { .. } => POWER_COLOR,
+                            StageZoneKind::BurnHazard { .. } => [1.0, 0.36, 0.14],
+                            StageZoneKind::IceFloor { .. } => [0.7, 0.9, 1.0],
+                        })
+                        .unwrap_or(SCORE_COLOR);
+                    self.ring(x, lane - 14.0, 28.0, 0.28, 1.3, color);
+                    self.spark_burst(x, lane - 14.0, 1.0, 6, 1.6, color, 2.6);
                 }
             }
         }

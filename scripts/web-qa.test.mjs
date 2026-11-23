@@ -38,7 +38,7 @@ test('CI runs every shard of the manifest through the runner', () => {
 
 test('the browser flows named in the request stay covered', () => {
   const scripts = manifest.scenarios.map(s => s.script);
-  for (const needed of ['web-smoke.js', 'smoke-web.js', 'web-touch-smoke.js', 'web-touch-menu-smoke.js', 'web-match-smoke.js', 'web-mugen-smoke.js', 'web-fatal-smoke.js', 'web-preflight-smoke.js']) {
+  for (const needed of ['web-smoke.js', 'smoke-web.js', 'web-vpad-smoke.js', 'web-match-smoke.js', 'web-mugen-smoke.js', 'web-fatal-smoke.js', 'web-preflight-smoke.js']) {
     assert.ok(scripts.includes(needed), `${needed} dropped from web-qa.json`);
   }
   assert.ok(manifest.scenarios.some(s => s.env?.SMOKE_MOBILE === '1'), 'in-engine smoke no longer runs on a phone viewport');

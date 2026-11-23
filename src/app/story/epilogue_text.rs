@@ -53,11 +53,16 @@ impl App {
         }
         let total = beat.text.chars().count();
         let shown = ((t * TYPE_SPEED) as usize).min(total);
-        let typed: String = beat.text.chars().take(shown).collect();
         let italic = beat.speaker == Speaker::Narrator;
         let ink = if italic { hex("#e8e2f8") } else { WHITE };
-        let lines = crate::profile::wrap(&typed, 1040.0, |line| self.ui.measure(line, 22.0, false));
-        for (row, line) in lines.iter().enumerate() {
+        let wrapped = match self.epi_wrap.take() {
+            Some(cached) if cached.0 == beat.text => cached,
+            _ => {
+                let lines = crate::profile::wrap(&beat.text, 1040.0, |line| self.ui.measure(line, 22.0, false));
+                (beat.text.clone(), lines)
+            }
+        };
+        for (row, line) in crate::story::typewriter::reveal(&wrapped.1, shown).into_iter().enumerate() {
             self.ui.text(
                 line,
                 116.0,
@@ -68,6 +73,7 @@ impl App {
                 false,
             );
         }
+        self.epi_wrap = Some(wrapped);
         if shown >= total {
             let blink = 0.5 + 0.5 * (self.ui.t * 5.0).sin().abs();
             let tip = vec2(self.ui.x(1162.0), self.ui.y(BOX_Y + BOX_H - 16.0));

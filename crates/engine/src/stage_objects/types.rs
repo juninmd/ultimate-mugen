@@ -25,6 +25,7 @@ pub struct Breakable {
     pub blast_radius: f32,
     pub blast_damage: f32,
     pub blast_launch: [f32; 2],
+    pub fuse: i32,
     pub rehit: i32,
     pub shake: i32,
     pub broken: bool,
@@ -48,6 +49,7 @@ impl Breakable {
             blast_radius: 0.0,
             blast_damage: 0.0,
             blast_launch: [0.0, 0.0],
+            fuse: 0,
             rehit: 0,
             shake: 0,
             broken: false,
@@ -115,6 +117,12 @@ pub enum ObjectEvent {
         ticks_left: i32,
     },
     GoalTimedOut,
+    ZoneTriggered {
+        index: usize,
+        fighter: u32,
+        x: f32,
+        lane: f32,
+    },
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]

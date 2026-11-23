@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+// Minimal script runner for CI release checks
+// Runs all release-related scripts in the repo
+const { execSync } = require('child_process');
+const path = require('path');
+const fs = require('fs');
+
+// Change to repo root
+process.chdir(path.join(__dirname, '..'));
+
+try {
+  console.log('Running release-scripts...');
+  
+  // Run all .test.mjs scripts
+  const testScripts = fs.readdirSync('scripts')
+    .filter(file => file.endsWith('.test.mjs'));
+  
+  for (const script of testScripts) {
+    console.log(`Running ${script}...`);
+    execSync(`node --test scripts/${script}`, { stdio: 'inherit' });
+  }
+  
+  // Run file size check
+  console.log('Running file size check...');
+  execSync('node scripts/file-size.mjs', { stdio: 'inherit' });
+  
+  console.log('All release scripts passed!');
+} catch (error) {
+  console.error('Release scripts failed:', error.message);
+  process.exit(1);
+}

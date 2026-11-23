@@ -22,7 +22,7 @@ storyboard = "chars/kfm/intro.def"
 
 [[step]]
 repeat = 6
-fight = { order = 1 }
+fight = { order = 1, stage = "dojo" }
 
 [[step]]
 when = "consecutive_wins == 6"
@@ -38,11 +38,14 @@ Cada `[[step]]` tem exatamente um entre `fight`, `storyboard` ou `action`.
 | Chave | Significado |
 |---|---|
 | `fight` | `order` (1 pega o próximo oponente comum, 2 ou mais pega o chefe), `p2` (ids ou nomes, vale o primeiro que existir), `stage`, `winscreen` |
-| `storyboard` | Lido e validado, ainda não exibido: a engine avisa e continua |
+| `stage` | ID ou nome do cenário; `random` escolhe um cenário aleatório. A primeira luta pula a seleção de cenário quando a rota define um cenário. Um cenário desconhecido mantém a escolha automática normal. |
+| `storyboard` | Exibe um storyboard `.def` de um pacote MUGEN importado, incluindo camadas de imagem `.sff` e animações `.air`; os arquivos referenciados são resolvidos em relação ao storyboard |
 | `action` | `clear` encerra a rota |
 | `repeat` | De 1 a 99 vezes; `when` é verificado a cada repetição |
 | `when` | Condição; o passo só roda se for verdadeira |
 | `else` | Mesmas chaves do corpo de um passo (`fight`, `storyboard`, `action`); roda quando `when` é falso |
+
+Storyboards entre lutas são exibidos antes do próximo combate. Um storyboard antes da primeira luta substitui a abertura padrão do arcade; um storyboard final aparece antes do epílogo ou dos resultados finais. Pressione confirmar ou toque em qualquer lugar para avançar a cena, ou Voltar/Iniciar ou **Pular** para pular o storyboard atual. Se o storyboard ou o arquivo de sprites necessário não puder ser carregado, a engine informa o caminho e continua a rota.
 
 A rota é planejada quando o arcade começa, supondo que o jogador vence todas as lutas, que é o único caminho possível de uma partida. Perder uma luta encerra a partida como sempre.
 

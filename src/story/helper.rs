@@ -41,6 +41,14 @@ pub fn ally_page(name: &str) -> LocalText {
     )
 }
 
+pub fn joins(name: &str) -> String {
+    format!(
+        "{} {}",
+        name.to_uppercase(),
+        tr3("ENTRA NA LUTA", "JOINS THE FIGHT", "SE UNE A LA LUCHA")
+    )
+}
+
 pub fn step(cursor: usize, candidates: usize, forward: bool) -> usize {
     let slots = candidates + 1;
     if forward {
@@ -64,9 +72,9 @@ pub fn none_label() -> &'static str {
 
 pub fn hint() -> &'static str {
     tr3(
-        "Esquerda ou direita para escolher, confirmar para aceitar",
-        "Left or right to choose, confirm to accept",
-        "Izquierda o derecha para elegir, confirmar para aceptar",
+        "Esq/Dir ou toque nas laterais; confirme ou toque no nome",
+        "Left/right or tap sides; confirm or tap the name",
+        "Izq/Der o toca los lados; confirma o toca el nombre",
     )
 }
 
@@ -102,6 +110,11 @@ mod tests {
         for lang in ["en", "pt", "es"] {
             assert!(page.pick(lang).contains("Shion"));
         }
+    }
+
+    #[test]
+    fn joins_line_names_the_helper() {
+        assert!(joins("Shion").contains("SHION"));
     }
 
     #[test]

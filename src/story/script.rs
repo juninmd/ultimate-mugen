@@ -1,11 +1,10 @@
 use crate::i18n::Lang;
-use serde::Deserialize;
-use std::sync::OnceLock;
+use serde::{Deserialize, Serialize};
+use std::sync::RwLock;
 
 pub const DEFAULT_TOML: &str = include_str!("../../assets/story/default.toml");
-pub const OVERRIDE_PATH: &str = "story/campaign.toml";
 
-#[derive(Clone, Debug, PartialEq, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum LocalizedText {
     Plain(String),
@@ -40,7 +39,7 @@ impl LocalizedText {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum LocalizedLines {
     Plain(Vec<String>),
@@ -85,7 +84,7 @@ fn default_accent() -> [f32; 3] { [1.0, 0.72, 0.2] }
 fn default_lane_far() -> f32 { -20.0 }
 fn default_lane_near() -> f32 { 8.0 }
 
-#[derive(Clone, Debug, PartialEq, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct CampaignMeta {
     #[serde(default)]
     pub id: String,
@@ -120,7 +119,7 @@ impl Default for CampaignMeta {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct ScriptStage {
     pub arena: String,
     #[serde(default)]
@@ -139,7 +138,7 @@ pub struct ScriptStage {
     pub beats: LocalizedLines,
 }
 
-#[derive(Clone, Debug, PartialEq, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct StoryScript {
     #[serde(default)]
     pub campaign: CampaignMeta,
@@ -201,42 +200,28 @@ impl StoryScript {
     }
 }
 
-fn read_external_toml() -> Option<String> {
-    #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
-    {
-        if let Ok(path) = std::env::var("UME_STORY_SCRIPT") {
-            if !path.trim().is_empty() {
-                if let Ok(text) = std::fs::read_to_string(&path) {
-                    return Some(text);
-                }
-            }
-        }
-        if let Ok(text) = std::fs::read_to_string(OVERRIDE_PATH) {
-            return Some(text);
-        }
-        if let Ok(exe) = std::env::current_exe() {
-            if let Some(dir) = exe.parent() {
-                if let Ok(text) = std::fs::read_to_string(dir.join(OVERRIDE_PATH)) {
-                    return Some(text);
-                }
-            }
+static ACTIVE: RwLock<Option<&'static StoryScript>> = RwLock::new(None);
+
+fn load_initial() -> StoryScript {
+    if let Some(raw) = super::script_source::read_external_toml() {
+        if let Ok(mut custom) = StoryScript::parse(&raw) {
+            custom.custom_source = true;
+            return custom;
         }
     }
-    None
+    StoryScript::default_campaign()
 }
 
-static ACTIVE: OnceLock<StoryScript> = OnceLock::new();
-
 pub fn active() -> &'static StoryScript {
-    ACTIVE.get_or_init(|| {
-        if let Some(raw) = read_external_toml() {
-            if let Ok(mut custom) = StoryScript::parse(&raw) {
-                custom.custom_source = true;
-                return custom;
-            }
-        }
-        StoryScript::default_campaign()
-    })
+    if let Some(script) = *ACTIVE.read().unwrap() {
+        return script;
+    }
+    let mut slot = ACTIVE.write().unwrap();
+    *slot.get_or_insert_with(|| Box::leak(Box::new(load_initial())))
+}
+
+pub fn install(script: StoryScript) {
+    *ACTIVE.write().unwrap() = Some(Box::leak(Box::new(script)));
 }
 
 #[cfg(test)]

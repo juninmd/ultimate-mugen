@@ -240,6 +240,9 @@ impl Texture2D {
     pub fn size(&self) -> Vec2 { vec2(self.width(), self.height()) }
     pub fn set_filter(&self, _: FilterMode) {}
     pub fn is_resident(&self) -> bool { self.0.slot.get().is_some_and(|(g, _)| g == zone::generation(self.0.transient)) }
+    pub fn rewrite(&self, rgba: &[u8]) {
+        if rgba.len() == (self.0.w * self.0.h * 4) as usize && self.is_resident() { with(|f| if let Some((_, r)) = self.0.slot.get() { f.gpu.renderer.upload_rgba(&f.gpu.queue, r, rgba); note_upload(rgba.len() as u64); }); }
+    }
 }
 
 #[derive(Clone, Debug, Default)]

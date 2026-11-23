@@ -31,6 +31,7 @@ pub struct Tweaks {
     pub touch_scale: f32,
     pub touch_opacity: f32,
     pub touch_left_handed: bool,
+    pub touch_floating_stick: bool,
     pub rules: RuleOverrides,
 }
 
@@ -62,6 +63,7 @@ impl Default for Tweaks {
             touch_scale: 1.0,
             touch_opacity: 1.0,
             touch_left_handed: false,
+            touch_floating_stick: true,
             rules: RuleOverrides::default(),
         }
     }

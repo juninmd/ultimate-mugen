@@ -21,37 +21,54 @@ pub struct Rollback {
     pub game: Match,
     pub rollbacks: u64,
     pub resimulated: u64,
+    pub max_rollback_depth: u64,
     pub saves: VecDeque<(i32, u128)>,
 }
 
 const SAVE_HISTORY: usize = 256;
+const STACK_INPUT_CAP: usize = 8;
 
 impl Rollback {
     pub fn new(game: Match) -> Self {
-        Rollback { game, rollbacks: 0, resimulated: 0, saves: VecDeque::new() }
+        Rollback {
+            game,
+            rollbacks: 0,
+            resimulated: 0,
+            max_rollback_depth: 0,
+            saves: VecDeque::new(),
+        }
     }
 
     pub fn checksum_at(&self, frame: i32) -> Option<u128> {
         self.saves.iter().find(|(f, _)| *f == frame).map(|(_, c)| *c)
     }
 
-    pub fn handle<A: Clone + PartialEq + Eq + Hash + Debug + 'static>(&mut self, requests: Vec<GgrsRequest<Netplay<A>>>) -> Vec<Event> {
+    pub fn handle<A: Clone + PartialEq + Eq + Hash + Debug + 'static>(
+        &mut self,
+        requests: Vec<GgrsRequest<Netplay<A>>>,
+    ) -> Vec<Event> {
         let mut saves = std::mem::take(&mut self.saves);
         for r in &requests {
             if let GgrsRequest::LoadGameState { frame, .. } = r {
                 saves.retain(|(f, _)| *f <= *frame);
             }
         }
-        let stats = drive(&mut self.game, requests, |m, inputs, _| m.tick(inputs), |frame, sum| {
-            saves.retain(|(f, _)| *f < frame);
-            saves.push_back((frame, sum));
-            if saves.len() > SAVE_HISTORY {
-                saves.pop_front();
-            }
-        });
+        let stats = drive(
+            &mut self.game,
+            requests,
+            |m, inputs, _| m.tick(inputs),
+            |frame, sum| {
+                saves.retain(|(f, _)| *f < frame);
+                saves.push_back((frame, sum));
+                if saves.len() > SAVE_HISTORY {
+                    saves.pop_front();
+                }
+            },
+        );
         self.saves = saves;
         self.rollbacks += stats.rollbacks;
         self.resimulated += stats.resimulated;
+        self.max_rollback_depth = self.max_rollback_depth.max(stats.max_depth);
         std::mem::take(&mut self.game.events)
     }
 }
@@ -61,16 +78,28 @@ pub struct DriveStats {
     pub rollbacks: u64,
     pub resimulated: u64,
     pub advanced: u64,
+    pub max_depth: u64,
 }
 
-pub fn drive<A, T, S>(game: &mut Match, requests: Vec<GgrsRequest<Netplay<A>>>, mut tick: T, mut saved: S) -> DriveStats
+pub fn drive<A, T, S>(
+    game: &mut Match,
+    requests: Vec<GgrsRequest<Netplay<A>>>,
+    mut tick: T,
+    mut saved: S,
+) -> DriveStats
 where
     A: Clone + PartialEq + Eq + Hash + Debug + 'static,
     T: FnMut(&mut Match, &[u32], bool),
     S: FnMut(i32, u128),
 {
-    let advances = requests.iter().filter(|r| matches!(r, GgrsRequest::AdvanceFrame { .. })).count();
+    let advances = requests
+        .iter()
+        .filter(|r| matches!(r, GgrsRequest::AdvanceFrame { .. }))
+        .count();
     let mut stats = DriveStats::default();
+    let mut current_depth = 0u64;
+    let mut stack_keys = [0u32; STACK_INPUT_CAP];
+    let mut overflow_keys = Vec::new();
     for r in requests {
         match r {
             GgrsRequest::SaveGameState { cell, frame } => {
@@ -83,6 +112,7 @@ where
                 if let Some(m) = cell.load() {
                     *game = m;
                     stats.rollbacks += 1;
+                    current_depth = 0;
                 }
             }
             GgrsRequest::AdvanceFrame { inputs } => {
@@ -90,10 +120,20 @@ where
                 let newest = stats.advanced as usize == advances;
                 if stats.rollbacks > 0 && !newest {
                     stats.resimulated += 1;
+                    current_depth += 1;
+                    stats.max_depth = stats.max_depth.max(current_depth);
                 }
-                let keys: Vec<u32> = inputs.iter().map(|(i, _)| *i).collect();
                 game.events.clear();
-                tick(game, &keys, newest);
+                if inputs.len() <= STACK_INPUT_CAP {
+                    for (slot, (k, _)) in stack_keys.iter_mut().zip(inputs.iter()) {
+                        *slot = *k;
+                    }
+                    tick(game, &stack_keys[..inputs.len()], newest);
+                } else {
+                    overflow_keys.clear();
+                    overflow_keys.extend(inputs.iter().map(|(k, _)| *k));
+                    tick(game, &overflow_keys, newest);
+                }
             }
         }
     }

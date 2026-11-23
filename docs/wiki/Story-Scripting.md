@@ -65,3 +65,21 @@ es = ["La red está bloqueada.", "Rompe el cortafuegos."]
 
 - `title` and `beats` accept either a plain string / string list (used in all languages) or a `{ en, pt, es }` table.
 - `alt_boss` is used automatically when the player picks the stage's primary `boss`.
+
+## Story Studio (in-game editor)
+
+Settings → Gameplay → **Story Studio** edits the active campaign without leaving the game: credits, life regained per wave and per stage, boss life and attack, and the four dialogue lines of each stage in the current language. Every change is validated, saved as TOML (`story-campaign.toml` in the app storage, localStorage on the web) and applied immediately. **Restore original script** deletes the saved copy.
+
+Lookup order for the campaign: `UME_STORY_SCRIPT` → Story Studio save → `story/campaign.toml`.
+
+### Epilogue editor
+
+Story Studio → **Epilogues…** edits the ending of any fighter (or the `*` fallback): title, the boss line and hero reply on the rooftop, and each narration page, in the current language. Saves go to `story-epilogues.toml` (one `["fighter"]` table per edited epilogue, merged over the bundled `epilogues.json`); **Restore original epilogue** removes the override. A `●` in the header marks an edited epilogue.
+
+The epilogue editor's **Scene** row cycles the background (any stage with art) with Left/Right and saves immediately as `scene = "..."` in the TOML override.
+
+Story Studio also edits each stage's **name** (per language) and **boss** (Left/Right cycles through the installed fighters); the epilogue's final boss follows the last stage's boss. The **Foes per wave** row (Left/Right) sets 1 to 4 enemies in every wave of the stage.
+
+At the final boss introduction, choose **Spare** or **Finish** with Left/Right or by tapping the option. The choice selects the corresponding epilogue.
+
+After that choice, tap the sides of the helper picker to browse allies and tap the selected name to call them into the final fight.

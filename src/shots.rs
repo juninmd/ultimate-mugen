@@ -2,7 +2,7 @@
 use crate::app::{App, Mode, Screen, Team};
 use crate::gfx::*;
 use crate::shots::replay::replay_determinism;
-mod announce_tour; mod mugen_roster_tour; mod market_view_tour; mod loading_tour; mod stage_filter_tour; mod epilogue_tour; mod flag_tour; mod i18n_tour; mod ki_tour; mod menu_motion_tour; mod passive_tour; mod transform_tour; mod pause_tour; mod photo_tour; mod trials_tour; mod replay; mod results_tour; mod story_tour; mod story_loop_tour; mod theme_tour; mod umf_kit_tour; mod story_objects_tour; mod storymode_tour; mod suzume_tour; mod touch_tour; mod training_tour; mod rush_tour; mod arena_tour; mod keys_tour; mod roster_tour; mod player_card_tour; mod team7_tour;
+mod announce_tour; mod mugen_roster_tour; mod market_view_tour; mod loading_tour; mod stage_filter_tour; mod epilogue_tour; mod flag_tour; mod i18n_tour; mod ki_tour; mod menu_motion_tour; mod passive_tour; mod transform_tour; mod pause_tour; mod photo_tour; mod trials_tour; mod replay; mod results_tour; mod story_tour; mod story_loop_tour; mod theme_tour; mod umf_kit_tour; mod story_objects_tour; mod storymode_tour; mod suzume_tour; mod touch_tour; mod training_tour; mod rush_tour; mod arena_tour; mod keys_tour; mod roster_tour; mod player_card_tour; mod studio_tour; mod team7_tour;
 async fn frames(app: &mut App, n: usize) {
     for _ in 0..n {
         app.frame().await;
@@ -526,7 +526,7 @@ async fn story(app: &mut App, dir: &str) {
             ladder[others - 1],
             stage(app, "volcano"),
         );
-        app.arcade = Some((ladder, others - 1));
+        app.arcade = Some(crate::app::arcade::ArcadeRun::at(ladder, others - 1));
         app.ending_shown = false;
         app.screen = Screen::Results { winner: 0, cur: 0 };
         frames(app, 3).await;
@@ -606,7 +606,7 @@ async fn story(app: &mut App, dir: &str) {
         app.session = None;
     }
     app.sel = (find(app, "kaito"), find(app, "oboro"), 0);
-    app.arcade = Some((vec![find(app, "oboro")], 0));
+    app.arcade = Some(crate::app::arcade::ArcadeRun::new(vec![find(app, "oboro")], None, None));
     for (kind, page, name) in [
         (0u8, 1usize, "62-cutscene-opening"),
         (1, 3, "63-cutscene-boss"),
@@ -751,7 +751,7 @@ pub async fn run(app: &mut App, dir: &str) {
     }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("i18n") { i18n_tour::run(app, dir).await; return; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("pause") { return pause_tour::run(app, dir).await; } if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("touch") { return touch_tour::run(app, dir).await; } if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("training") { return training_tour::run(app, dir).await; } if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("rush") { return rush_tour::run(app, dir).await; } if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("keys") { return keys_tour::run(app, dir).await; }
-    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("results") { return results_tour::run(app, dir).await; } if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("ficha") { return player_card_tour::run(app, dir).await; }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("results") { return results_tour::run(app, dir).await; } if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("ficha") { return player_card_tour::run(app, dir).await; } if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("studio") { return studio_tour::run(app, dir).await; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("hud") { return hud_tour(app, dir).await; } if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("photo") { return photo_tour::run(app, dir).await; } if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("trials") { return trials_tour::run(app, dir).await; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("arena") { return arena_tour::run(app, dir).await; } if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("announce") { return announce_tour::run(app, dir).await; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("market") {

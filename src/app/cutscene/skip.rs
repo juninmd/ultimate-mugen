@@ -4,6 +4,7 @@ use crate::i18n::tr3;
 use crate::ui::*;
 
 pub(crate) const SKIP_BOX: (f32, f32, f32, f32) = (1000.0, 8.0, 150.0, 26.0);
+const SKIP_HIT_BOX: (f32, f32, f32, f32) = (985.0, 0.0, 180.0, 44.0);
 
 impl App {
     pub(crate) fn skip_chip(&mut self) -> bool {
@@ -24,7 +25,12 @@ impl App {
             Align::Center,
             false,
         );
-        self.tapped_in(x, y, w, h)
+        self.tapped_in(
+            SKIP_HIT_BOX.0,
+            SKIP_HIT_BOX.1,
+            SKIP_HIT_BOX.2,
+            SKIP_HIT_BOX.3,
+        )
     }
 
     pub(crate) fn tap_any(&self) -> bool {

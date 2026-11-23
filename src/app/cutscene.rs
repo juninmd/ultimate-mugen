@@ -60,6 +60,7 @@ impl App {
 
     pub(super) fn cutscene(&mut self) {
         let Screen::Cutscene { kind, mut page, mut t } = self.screen else { return; };
+        if kind == 6 { self.route_storyboard_screen(); return; }
         t += get_frame_time();
         let hero = self.sel.0;
         let Some(boss) = (if kind >= 5 || kind == 2 { Some(self.sel.1) } else { self.boss_idx() }) else { self.cutscene_done(kind); return; };
@@ -210,6 +211,7 @@ impl App {
     }
 
     pub(crate) fn cutscene_done(&mut self, kind: u8) {
+        if kind == 6 { self.route_storyboard_done(); return; }
         if kind == 0 {
             self.open_stages(1);
             return;

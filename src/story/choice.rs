@@ -10,9 +10,9 @@ pub fn pending(run: &StoryRun) -> bool {
 
 pub fn prompt() -> &'static str {
     tr3(
-        "Ele está de joelhos. Você decide o que acontece.",
-        "He is on his knees. Your call.",
-        "Está de rodillas. Tú decides.",
+        "Se o chefe cair, você vai poupá-lo?",
+        "If the boss falls, will you spare him?",
+        "Si el jefe cae, ¿le perdonarás la vida?",
     )
 }
 

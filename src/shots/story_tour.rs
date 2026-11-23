@@ -39,7 +39,7 @@ pub async fn run(app: &mut App, dir: &str) {
 
     app.mode = Mode::Arcade;
     app.sel = (kaito, oboro, stage(app, "volcano"));
-    app.arcade = Some(crate::app::arcade::ArcadeRun::new(vec![oboro, oboro, oboro], None));
+    app.arcade = Some(crate::app::arcade::ArcadeRun::new(vec![oboro, oboro, oboro], None, None));
     app.ending_shown = false;
 
     app.screen = Screen::Cutscene { kind: 0, page: 3, t: 5.0 };
@@ -68,7 +68,7 @@ pub async fn run(app: &mut App, dir: &str) {
     app.session = None;
     app.mode = Mode::Arcade;
     app.sel = (kaito, oboro, stage(app, "spirit"));
-    app.arcade = Some(crate::app::arcade::ArcadeRun::new(vec![oboro, oboro, oboro], None));
+    app.arcade = Some(crate::app::arcade::ArcadeRun::new(vec![oboro, oboro, oboro], None, None));
     app.ending_shown = false;
     app.screen = Screen::Results { winner: 0, cur: 0 };
     frames(app, 2).await;

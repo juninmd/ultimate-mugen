@@ -77,3 +77,5 @@ Lookup order for the campaign: `UME_STORY_SCRIPT` → Story Studio save → `sto
 Story Studio → **Epilogues…** edits the ending of any fighter (or the `*` fallback): title, the boss line and hero reply on the rooftop, and each narration page, in the current language. Saves go to `story-epilogues.toml` (one `["fighter"]` table per edited epilogue, merged over the bundled `epilogues.json`); **Restore original epilogue** removes the override. A `●` in the header marks an edited epilogue.
 
 The epilogue editor's **Scene** row cycles the background (any stage with art) with Left/Right and saves immediately as `scene = "..."` in the TOML override.
+
+Story Studio also edits each stage's **name** (per language) and **boss** (Left/Right cycles through the installed fighters); the epilogue's final boss follows the last stage's boss.

@@ -572,7 +572,6 @@ impl Match {
                 self.leave_intro_states();
             }
             2 => {
-                if self.round_time == 1 { self.leave_intro_states(); }
                 if self.round_time >= 50 && self.pause.is_none() && self.wins.iter().any(|&wins| wins > 0) { self.awaken_defeated_boss(); }
                 if !self.training && self.round_ticks > 0 && self.pause.is_none() && self.global_asserts & (gsf::TIMERFREEZE | gsf::ROUNDFREEZE) == 0 { self.timer = (self.timer - 1).max(0); }
                 let (root_buf, root_len) = self.root_index_buf();
@@ -664,7 +663,7 @@ impl Match {
         // any attack button skips the first-round face-off (inputs are recorded, so replays skip identically)
         if self.round_state == 1 && self.round_no == 1 && self.intro_ticks > 0 && self.global_asserts & gsf::ROUNDNOTSKIP == 0 && self.round_time > 8 && self.round_time < 60 + self.intro_ticks
             && inputs.iter().any(|b| b & (crate::input::k::A | crate::input::k::B | crate::input::k::C | crate::input::k::X | crate::input::k::Y | crate::input::k::Z) != 0) { self.round_time = 60 + self.intro_ticks; }
-        self.round_logic();
+        self.round_logic(); self.settle_intro_leftovers();
         self.global_asserts = 0;
         for p in [&mut self.all_palfx, &mut self.bg_palfx] { if p.as_ref().is_some_and(|fx| fx.expired()) { *p = None; } }
         let paused_by = self.pause.as_ref().map(|p| (p.by, p.move_time, p.is_super));

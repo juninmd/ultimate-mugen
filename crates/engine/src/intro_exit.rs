@@ -11,6 +11,10 @@ impl Match {
         self.change_engine_state(i, no);
     }
 
+    pub(crate) fn settle_intro_leftovers(&mut self) {
+        if self.round_state == 2 && self.round_time == 1 { self.leave_intro_states(); }
+    }
+
     pub(crate) fn leave_intro_states(&mut self) {
         for i in 0..self.fighters.len() {
             let f = &self.fighters[i];

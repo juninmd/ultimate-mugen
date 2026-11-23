@@ -18,7 +18,7 @@ impl Match {
     pub(crate) fn leave_intro_states(&mut self) {
         for i in 0..self.fighters.len() {
             let f = &self.fighters[i];
-            let intro_leftover = std::sync::Arc::ptr_eq(&f.st_def, &f.def) && !f.ctrl && f.alive && f.move_type == 'I' && (0..5000).contains(&f.state_no);
+            let intro_leftover = f.def.states.contains_key(&190) && std::sync::Arc::ptr_eq(&f.st_def, &f.def) && !f.ctrl && f.alive && f.move_type == 'I' && (0..5000).contains(&f.state_no);
             if !f.is_helper && ((190..=199).contains(&f.state_no) || intro_leftover) {
                 let def = self.fighters[i].def.clone();
                 self.change_state(i, 0, def);

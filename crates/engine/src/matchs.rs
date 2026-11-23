@@ -439,14 +439,14 @@ impl Match {
                 }
                 'A' => {
                     f.vel.y += f.c("movement.yaccel", 0.44) * f.lscl * gravity;
-                    if !f.lands_by_script() && f.pos.y >= f.ground_level && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; f.air_dashes = 0; land = true; }
+                    if !f.lands_by_script() && f.pos.y >= f.ground_level && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; f.air_dashes = 0; if f.move_type != 'H' || f.state_no == 5201 { land = true; } }
                 }
                 _ => {}
             }
             if f.slide_time > 0 { f.slide_time -= 1; }
             if f.move_type == 'H' && f.ghv.xaccel != 0.0 { f.vel.x += f.ghv.xaccel; }
         }
-        if land { self.fighters[i].ctrl = true; let d = self.fighters[i].def.clone(); self.change_state(i, 52, d); }
+        if land { let recovered = self.fighters[i].state_no == 5201; let d = self.fighters[i].def.clone(); self.change_state(i, 52, d); if recovered { self.fighters[i].ctrl = true; } }
     }
     fn rebind(&mut self) {
         for i in 0..self.fighters.len() {

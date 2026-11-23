@@ -35,6 +35,7 @@ fn load_char(dir_name: &str, def: &str) -> Option<Arc<ume_engine::chardef::CharD
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn test_dbz_characters_load_and_fight() {
     let root = chars_root();
     if !root.exists() {

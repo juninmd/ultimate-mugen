@@ -2,6 +2,7 @@ mod support;
 use support::gogeta::*;
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn intro_frames() {
     let (Some(d), Ok(out)) = (load(1), std::env::var("UME_EVIDENCE_DIR")) else {
         return;

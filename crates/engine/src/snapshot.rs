@@ -10,7 +10,7 @@ fn pm(img: &crate::chardef::ImageData) -> Option<Pixmap> {
     for (d, s) in p
         .data_mut()
         .chunks_exact_mut(4)
-        .zip(img.rgba.chunks_exact(4))
+        .zip(img.rgba().chunks_exact(4))
     {
         let a = s[3] as u32;
         d[0] = (s[0] as u32 * a / 255) as u8;

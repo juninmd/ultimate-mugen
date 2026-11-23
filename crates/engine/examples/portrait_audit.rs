@@ -47,7 +47,7 @@ fn main() {
                     let (visible, avg, max) = p
                         .image
                         .as_ref()
-                        .map(|i| stats(&i.rgba))
+                        .map(|i| stats(&i.rgba()))
                         .unwrap_or((0, 0.0, 0));
                     println!(
                         "{def:<32} {:>5.0}x{:<5.0} visible={visible:<6} lum avg={avg:>6.1} max={max:<3} decode={ms:5.2} ms",

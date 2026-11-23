@@ -20,7 +20,7 @@ impl<'a> SpriteMask<'a> {
     pub fn new(image: &'a ImageData, axis: [f32; 2], scale: f32, offset: [f32; 2]) -> Self {
         let res = art_res();
         SpriteMask {
-            alpha: &image.rgba,
+            alpha: image.rgba(),
             width: image.w as usize,
             height: image.h as usize,
             left: offset[0] - axis[0] * scale,

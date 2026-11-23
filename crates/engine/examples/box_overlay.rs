@@ -80,13 +80,13 @@ fn main() {
                         continue;
                     }
                     let i = (sy as usize * img.w as usize + sx as usize) * 4;
-                    let al = img.rgba[i + 3] as u32;
+                    let al = img.rgba()[i + 3] as u32;
                     if al < 40 {
                         continue;
                     }
                     let o = ((cy + y) * w + cx + x) * 4;
                     for c in 0..3 {
-                        buf[o + c] = ((img.rgba[i + c] as u32 * al
+                        buf[o + c] = ((img.rgba()[i + c] as u32 * al
                             + buf[o + c] as u32 * (255 - al))
                             / 255) as u8;
                     }

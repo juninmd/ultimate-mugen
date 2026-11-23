@@ -16,7 +16,7 @@ pub(crate) fn split_columns(image: &ImageData, chunk_width: u32) -> Vec<(u32, Ar
         let mut rgba = Vec::with_capacity(width as usize * image.h as usize * 4);
         for row in 0..image.h as usize {
             let start = row * row_bytes + x0 as usize * 4;
-            rgba.extend_from_slice(&image.rgba[start..start + width as usize * 4]);
+            rgba.extend_from_slice(&image.rgba()[start..start + width as usize * 4]);
         }
         chunks.push((x0, ImageData::new(width, image.h, rgba)));
         x0 += width;
@@ -108,7 +108,7 @@ mod tests {
                 let dst = (row * w as usize + *x0 as usize) * 4;
                 let src = row * c.w as usize * 4;
                 rebuilt[dst..dst + c.w as usize * 4]
-                    .copy_from_slice(&c.rgba[src..src + c.w as usize * 4]);
+                    .copy_from_slice(&c.rgba()[src..src + c.w as usize * 4]);
             }
         }
         assert_eq!(rebuilt, rgba);

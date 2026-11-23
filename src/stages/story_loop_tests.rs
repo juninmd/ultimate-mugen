@@ -70,8 +70,8 @@ fn layout_reproduces_the_static_strip_outside_seams_and_props() {
                     let from = (y * 2 + 1) * base.w as usize * 4 + source * 4;
                     let to = y * strip.w as usize * 4 + x as usize * 4;
                     for channel in 0..3 {
-                        let want = (base.rgba[from + channel] as f32 * grade[channel]).min(255.0);
-                        let got = strip.rgba[to + channel] as f32;
+                        let want = (base.rgba()[from + channel] as f32 * grade[channel]).min(255.0);
+                        let got = strip.rgba()[to + channel] as f32;
                         assert!((want - got).abs() <= 3.0, "{arena} x={x} y={y}");
                     }
                 }

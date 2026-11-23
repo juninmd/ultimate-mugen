@@ -5,6 +5,7 @@ pub mod passive_spec;
 pub mod profile;
 mod abilities;
 mod pixel_crop;
+mod variant_art;
 mod sprite_assets;
 mod embedded;
 mod armor;

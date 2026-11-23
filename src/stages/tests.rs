@@ -18,7 +18,7 @@ fn preview_of(layer_extra: &str) -> Vec<u8> {
             rgba,
         },
     );
-    mugen_preview(&st).unwrap().rgba.to_vec()
+    mugen_preview(&st).unwrap().rgba().to_vec()
 }
 
 fn red_pixels(rgba: &[u8]) -> Vec<(usize, usize)> {

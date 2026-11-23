@@ -154,13 +154,13 @@ mod tests {
         let base = try_load(&fighter, &frame, None).unwrap().image.unwrap();
         let swapped = try_load(&fighter, &frame, Some(&fighter.palettes[0])).unwrap().image.unwrap();
         assert_eq!((base.w, base.h), (swapped.w, swapped.h));
-        assert!(base.rgba.chunks_exact(4).zip(swapped.rgba.chunks_exact(4)).all(|(before, after)| before[3] == after[3]), "the silhouette is preserved");
+        assert!(base.rgba().chunks_exact(4).zip(swapped.rgba().chunks_exact(4)).all(|(before, after)| before[3] == after[3]), "the silhouette is preserved");
         let count = |rgba: &[u8], test: &dyn Fn(&[u8]) -> bool| rgba.chunks_exact(4).filter(|pixel| pixel[3] > 0 && test(pixel)).count();
         let teal = |pixel: &[u8]| pixel[1] as i32 > pixel[0] as i32 + 40 && pixel[2] as i32 > pixel[0] as i32 + 40;
         let red = |pixel: &[u8]| pixel[0] as i32 > pixel[1] as i32 + 40 && pixel[0] as i32 > pixel[2] as i32 + 40;
-        assert!(count(&base.rgba, &teal) > 1_000, "kaito's gi starts teal");
-        assert!(count(&swapped.rgba, &teal) * 20 < count(&base.rgba, &teal), "palette 2 removes the teal gi");
-        assert!(count(&swapped.rgba, &red) > count(&base.rgba, &red) + 1_000, "palette 2 paints the gi red");
+        assert!(count(base.rgba(), &teal) > 1_000, "kaito's gi starts teal");
+        assert!(count(swapped.rgba(), &teal) * 20 < count(base.rgba(), &teal), "palette 2 removes the teal gi");
+        assert!(count(swapped.rgba(), &red) > count(base.rgba(), &red) + 1_000, "palette 2 paints the gi red");
     }
 
     #[test]
@@ -170,7 +170,7 @@ mod tests {
         let plain = try_load(&fighter, &frame, None).unwrap().image.unwrap();
         let empty = serde_json::json!({});
         let same = try_load(&fighter, &frame, Some(&empty)).unwrap().image.unwrap();
-        assert_eq!(plain.rgba, same.rgba);
+        assert_eq!(plain.rgba(), same.rgba());
     }
 
     #[test]

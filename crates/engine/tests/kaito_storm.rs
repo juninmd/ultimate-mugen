@@ -105,7 +105,7 @@ fn awakened_native_sprites_recolor_only_the_hair_region() {
         let awakened = definition.sprites[&(2, frame.index)].image.as_ref().unwrap();
         let region: [u32; 4] = serde_json::from_value(metadata["frames"][pose]["awakeningHair"].clone()).unwrap();
         let (mut changed_inside, mut changed_outside) = (0, 0);
-        for (index, (a, b)) in normal.rgba.chunks_exact(4).zip(awakened.rgba.chunks_exact(4)).enumerate() {
+        for (index, (a, b)) in normal.rgba().chunks_exact(4).zip(awakened.rgba().chunks_exact(4)).enumerate() {
             if a == b { continue; }
             let (x, y) = (index as u32 % normal.w + left, index as u32 / normal.w + top);
             if (region[0]..region[2]).contains(&x) && (region[1]..region[3]).contains(&y) { changed_inside += 1; } else { changed_outside += 1; }

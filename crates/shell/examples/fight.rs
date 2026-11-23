@@ -26,7 +26,7 @@ fn draw_fighter(cache: &mut SpriteCache, gpu: &mut Gpu, canvas: &mut Canvas, m: 
     let def: &CharDef = &fi.anim_def;
     let Some(spr) = def.sprites.get(&(fr.group, fr.index)) else { return };
     let Some(img) = spr.image.as_ref() else { return };
-    let Some(src) = cache.get(gpu, img.id, img.w, img.h, &img.rgba) else { return };
+    let Some(src) = cache.get(gpu, img.id, img.w, img.h, img.rgba()) else { return };
     let (xs, ys) = (def.c("size.xscale", 1.0) as f32, def.c("size.yscale", 1.0) as f32);
     let kk = spr.scale * fi.lscl;
     let (kx, ky) = (kk * xs * fi.draw_scale[0] * fr.xscale, kk * ys * fi.draw_scale[1] * fr.yscale);

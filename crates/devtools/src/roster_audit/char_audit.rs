@@ -60,7 +60,7 @@ fn sprites(d: &CharDef, subject: &str, issues: &mut Vec<Issue>) {
                     }
                     let empty = match d.indexed.get(&key) {
                         Some(indexed) => indexed.pixels.iter().all(|p| *p == 0),
-                        None => sprite.image.as_ref().is_none_or(|image| image.rgba.chunks(4).all(|p| p[3] == 0)),
+                        None => sprite.image.as_ref().is_none_or(|image| image.rgba().chunks(4).all(|p| p[3] == 0)),
                     };
                     if empty {
                         blank.insert((*no, frame.group, frame.index));

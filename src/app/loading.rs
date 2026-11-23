@@ -56,7 +56,7 @@ impl App {
                 }
                 key.push_str(&f.def.id);
                 key.push(';');
-                let mut keys: Vec<(i32, i32)> = f.def.sprites.keys().copied().collect();
+                let mut keys: Vec<(i32, i32)> = f.def.sprites.iter().filter(|(_, sprite)| !sprite.image.as_ref().is_some_and(|image| image.is_pending())).map(|(key, _)| *key).collect();
                 keys.sort_unstable();
                 jobs.push((f.def.clone(), keys, 0));
             }

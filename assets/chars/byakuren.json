@@ -1273,6 +1273,34 @@
       ],
       "shake": {"at":9,"time":16,"ampl":8,"freq":70},
       "sounds": [{"at":1,"snd":[200,2]},{"at":2,"snd":[200,0]},{"at":9,"snd":[200,1]}]
+    },
+    {
+      "id": "hishou_sakura",
+      "name": "Hishō: Sakura Fubuki (Nevasca de Pétalas)",
+      "input": "~D, DB, B, b",
+      "kind": "special",
+      "anim": "frostArc",
+      "projectile": {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[7.2,-0.8],"offset":[50,-60],"damage":72,"level":"heavy","element":"wind","hits":2,"removeTime":120},
+      "sounds": [{"at":2,"snd":[200,4]}]
+    },
+    {
+      "id": "tenshi_hanafubuki",
+      "name": "Tenshi: Hana Fubuki (Tempestade Celeste)",
+      "input": "~D, DF, F, D, DF, F, x",
+      "kind": "super",
+      "cost": 1000,
+      "anim": "frostArc",
+      "invuln": [1,8],
+      "superPause": {"at":1,"time":26,"darken":true},
+      "flash": {"at":2,"time":10,"color":[255,178,218]},
+      "projectile": [
+        {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.4,-1],"offset":[50,-64],"damage":44,"level":"heavy","element":"wind","hits":2,"removeTime":150},
+        {"at":4,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.4,-0.3],"offset":[50,-52],"damage":44,"level":"heavy","element":"wind","hits":2,"removeTime":150},
+        {"at":5,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.4,0.4],"offset":[50,-42],"damage":48,"level":"heavy","element":"wind","hits":2,"removeTime":150},
+        {"at":6,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.4,1],"offset":[50,-32],"damage":44,"level":"heavy","element":"wind","hits":2,"removeTime":150}
+      ],
+      "shake": {"at":3,"time":16,"ampl":6,"freq":70},
+      "sounds": [{"at":1,"snd":[200,5]},{"at":3,"snd":[200,4]}]
     }
   ]
 }

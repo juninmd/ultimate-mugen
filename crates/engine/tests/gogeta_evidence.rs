@@ -17,6 +17,7 @@ fn safe(n: &str) -> String {
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn contact_sheets() {
     let (Some(d), Some(out)) = (load(1), out_dir()) else {
         return;

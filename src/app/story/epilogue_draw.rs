@@ -130,10 +130,7 @@ impl App {
 
     fn epilogue_wash(&self, y: f32, h: f32, top: Color, bottom: Color) {
         let corners = [(0.0, y), (VW, y), (VW, y + h), (0.0, y + h)];
-        let quad: Vec<Vec2> = corners
-            .iter()
-            .map(|&(a, b)| vec2(self.ui.x(a), self.ui.y(b)))
-            .collect();
+        let quad = corners.map(|(a, b)| vec2(self.ui.x(a), self.ui.y(b)));
         poly::grad_v(&quad, top, bottom);
     }
 

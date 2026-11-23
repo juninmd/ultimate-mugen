@@ -54,9 +54,17 @@ impl Atlas {
         Some(r)
     }
 
-    pub fn clear(&mut self) { self.fixed = Zone::default(); self.transient = Zone::default(); }
+    pub fn clear(&mut self) {
+        self.fixed.shelves.clear();
+        self.fixed.used_h = 0;
+        self.transient.shelves.clear();
+        self.transient.used_h = 0;
+    }
 
-    pub fn clear_transient(&mut self) { self.transient = Zone::default(); }
+    pub fn clear_transient(&mut self) {
+        self.transient.shelves.clear();
+        self.transient.used_h = 0;
+    }
 
     pub fn occupancy(&self) -> f32 {
         let used: u64 = self.fixed.shelves.iter().chain(&self.transient.shelves).map(|s| s.x as u64 * s.h as u64).sum();

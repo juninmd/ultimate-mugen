@@ -26,6 +26,7 @@ impl App {
     }
 
     pub(crate) fn holo_gate_draw(&mut self, p: f32, label: &str) -> bool {
+        self.reg.reap_streams();
         let plan = self.gate_plan();
         let slice = get_time();
         let mut cur = WARM_CURSOR.load(Relaxed).min(plan.len());
@@ -97,6 +98,7 @@ impl App {
         let mut done = 0;
         let mut shown = 0;
         while shown < plan.len() && get_time() - started < BUDGET_SECS {
+            self.reg.reap_streams();
             let slice = get_time();
             while done < plan.len() && get_time() - slice < SLICE_SECS {
                 self.warm_portrait(plan[done].2);
@@ -110,12 +112,14 @@ impl App {
         }
         let menu_label = tr3("Preparando o menu…", "Preparing the menu…", "Preparando el menú…");
         for item in 0..MENU.len() {
+            self.reg.reap_streams();
             self.menu_fighter_load(item, 1.0);
             self.ui.begin();
             self.menu_fighter_draw(item, 0.02, 0.0);
             self.holo_mosaic_screen(&plan, plan.len(), 1.0, menu_label);
             next_frame().await;
         }
+        self.reg.reap_streams();
         self.ui.begin();
         self.holo_mosaic_screen(&plan, plan.len(), 1.0, tr3("Pronto!", "Ready!", "¡Listo!"));
         next_frame().await;
@@ -125,7 +129,7 @@ impl App {
     fn warm_portrait(&self, index: usize) {
         let entry = &self.reg.chars[index];
         if entry.mugen {
-            entry.ensure_portrait();
+            entry.stream_portrait();
         } else {
             let _ = entry.tile_portrait(1);
         }

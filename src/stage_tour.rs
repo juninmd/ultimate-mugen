@@ -49,6 +49,7 @@ pub async fn run(app: &mut App, dir: &str) {
         ("mausoleum_halicarnassus", "marlow", "kaname"),
         ("colossus_rhodes", "jin", "akio"),
         ("lighthouse_alexandria", "volta", "shion"),
+        ("airport3d", "ichigo3d", "kaito"),
     ] {
         if only.as_deref().is_some_and(|o| o != st) {
             continue;

@@ -31,6 +31,25 @@ impl Section {
             .filter(move |(k, _)| k.eq_ignore_ascii_case(key))
             .map(|(_, v)| v.as_str())
     }
+
+    pub fn get_unquoted(&self, key: &str) -> Option<&str> {
+        self.get(key).map(unquote_str)
+    }
+
+    pub fn get_i32(&self, key: &str) -> Option<i32> {
+        self.get(key).and_then(parse_i32)
+    }
+
+    pub fn get_bool(&self, key: &str) -> Option<bool> {
+        let raw = unquote_str(self.get(key)?);
+        if raw.eq_ignore_ascii_case("true") || raw.eq_ignore_ascii_case("yes") || raw == "1" {
+            Some(true)
+        } else if raw.eq_ignore_ascii_case("false") || raw.eq_ignore_ascii_case("no") || raw == "0" {
+            Some(false)
+        } else {
+            None
+        }
+    }
 }
 
 /// Remove a `;` comment (ignoring `;` inside double quotes).
@@ -169,4 +188,33 @@ pub fn split_top(v: &str) -> Vec<String> {
     out.push(v[start..].trim().to_string());
     out
 }
+
+pub fn find_sections<'a>(secs: &'a [Section], name: &'a str) -> impl Iterator<Item = &'a Section> + 'a {
+    secs.iter().filter(move |s| s.lname.eq_ignore_ascii_case(name))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn typed_section_helpers_handle_quotes_booleans_and_ints() {
+        let ini = "\u{feff}[Info]\r\nname = \"Kaito ; Hero\" ; trailing comment\r\nlife = 1050\r\nactive = YES\r\ndisabled = 0\r\ninvalid = maybe\r\n[BG 1]\r\nid = 1\r\n[BG 1]\r\nid = 2\r\n";
+        let secs = parse_ini(ini);
+        let info = find_section(&secs, "info").expect("info section");
+        assert_eq!(info.get_unquoted("NAME"), Some("Kaito ; Hero"));
+        assert_eq!(info.get_i32("life"), Some(1050));
+        assert_eq!(info.get_bool("active"), Some(true));
+        assert_eq!(info.get_bool("disabled"), Some(false));
+        assert_eq!(info.get_bool("invalid"), None);
+        assert_eq!(find_sections(&secs, "bg 1").count(), 2);
+    }
+
+    #[test]
+    fn split_top_preserves_nested_parens_and_quoted_commas() {
+        let parts = split_top("clamp(1, 2), \"a,b\", [3, 4]");
+        assert_eq!(parts, vec!["clamp(1, 2)", "\"a,b\"", "[3, 4]"]);
+    }
+}
+
 

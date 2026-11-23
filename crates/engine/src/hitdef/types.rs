@@ -18,11 +18,15 @@ pub(super) fn animtype(s: &str) -> Option<i32> {
 }
 pub(super) fn priority_type(s: Option<&str>) -> i32 {
     s.and_then(|v| v.split(',').nth(1))
-        .map(|v| v.trim().to_ascii_lowercase())
-        .map_or(0, |v| match v.as_str() {
-            "miss" => 1,
-            "dodge" => 2,
-            _ => 0,
+        .map(str::trim)
+        .map_or(0, |v| {
+            if v.eq_ignore_ascii_case("miss") {
+                1
+            } else if v.eq_ignore_ascii_case("dodge") {
+                2
+            } else {
+                0
+            }
         })
 }
 

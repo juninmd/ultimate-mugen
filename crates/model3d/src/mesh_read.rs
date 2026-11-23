@@ -11,6 +11,7 @@ pub struct Primitive {
     pub color: [f32; 3],
     pub uvs: Vec<[f32; 2]>,
     pub texture: Option<usize>,
+    pub emissive: bool,
 }
 
 fn triples(data: Vec<f32>) -> Vec<[f32; 3]> {
@@ -30,6 +31,13 @@ fn texture_of(json: &Value, material: Option<u64>) -> Option<usize> {
     json["textures"].get(texture as usize)?["source"]
         .as_u64()
         .map(|s| s as usize)
+}
+
+fn emissive_of(json: &Value, material: Option<u64>) -> bool {
+    material
+        .and_then(|m| json["materials"].get(m as usize))
+        .and_then(|m| m["emissiveFactor"].as_array())
+        .is_some_and(|f| f.iter().any(|v| v.as_f64().unwrap_or(0.0) > 0.0))
 }
 
 fn base_color(json: &Value, material: Option<u64>) -> [f32; 3] {
@@ -108,6 +116,7 @@ pub fn read_primitives(src: &Source) -> Result<Vec<Primitive>, ModelError> {
                 color: base_color(src.json, p["material"].as_u64()),
                 uvs,
                 texture: texture_of(src.json, p["material"].as_u64()),
+                emissive: emissive_of(src.json, p["material"].as_u64()),
             });
         }
     }

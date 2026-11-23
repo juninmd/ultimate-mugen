@@ -66,7 +66,7 @@ fn layout_for(kind: StageKind) -> &'static [ArenaProp] {
                 hazard: true,
             },
         ],
-        StageKind::Plains | StageKind::Arena => &[
+        StageKind::Plains | StageKind::Arena | StageKind::Airport => &[
             ArenaProp {
                 kind: "crate",
                 x: -350.0,

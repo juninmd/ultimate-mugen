@@ -23,9 +23,7 @@ pub(super) fn draw(app: &mut App, playback: &Playback, scene_index: usize, time:
     if let Some(name) = scene.bg.as_deref() {
         super::sprite_draw::draw_background(app, playback, name, canvas, time);
     }
-    let mut layers: Vec<_> = scene.layers.iter().collect();
-    layers.sort_by_key(|layer| layer.element.layerno);
-    for layer in layers {
+    for layer in &scene.layers {
         let elapsed = time * 60.0 - layer.start_time as f32;
         if elapsed < 0.0 || layer.end_time.is_some_and(|end| time * 60.0 >= end as f32) {
             continue;

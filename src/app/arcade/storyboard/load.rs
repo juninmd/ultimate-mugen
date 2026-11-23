@@ -30,6 +30,7 @@ fn from_vfs(vfs: &Vfs, key: &str) -> Result<Playback, String> {
     let mut storyboard = storyboard;
     for (scene, meta) in storyboard.scenes.iter_mut().zip(scene_meta) {
         scene.layer_pos = meta.layer_pos;
+        scene.layers.sort_by_key(|layer| layer.element.layerno);
     }
     let mut sprites = HashSet::new();
     collect_references(&storyboard, &mut sprites);

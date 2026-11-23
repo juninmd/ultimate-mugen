@@ -126,3 +126,63 @@ fn unlocked_routes_run_before_the_original_commands() {
     assert!(parity::sim::run(&umf, &route).outcome.states.contains(&1000));
     let _ = std::fs::remove_dir_all(&out);
 }
+
+#[test]
+fn goku_vision_bundle_has_afterimage_trails_and_r_charge() {
+    let Ok(dir) = std::env::var("UME_GOKU_VISION_BUNDLE") else { return };
+    use ume_engine::common::{common_def, flat_stage};
+    use ume_engine::input::k;
+    use ume_engine::matchs::Match;
+    let def = Arc::new(bundle::compile(&bundle::load(std::path::Path::new(&dir)).unwrap(), 1, true).unwrap());
+    let duel = |def: &Arc<ume_engine::chardef::CharDef>| {
+        let mut m = Match::new(common_def(), None, flat_stage());
+        m.add_player(def.clone(), 0, 0, 1);
+        m.add_player(def.clone(), 1, 0, 2);
+        m.start_round();
+        for _ in 0..800 {
+            m.tick(&[0, 0]);
+            if m.round_state == 2 {
+                break;
+            }
+        }
+        m.fighters[1].life_max = 100000.0;
+        m.fighters[1].life = 100000.0;
+        m
+    };
+    let mut m = duel(&def);
+    m.fighters[0].power = 3000.0;
+    let d = m.fighters[0].def.clone();
+    m.change_state(0, 7500, d);
+    let mut ghosts = 0;
+    for _ in 0..60 {
+        m.tick(&[0, 0]);
+        ghosts = ghosts.max(m.fighters[0].after_image.as_ref().map_or(0, |a| a.trail.len()));
+    }
+    assert!(ghosts > 3, "Shunkan Ido leaves an afterimage trail when loaded from the bundle, got {ghosts}");
+    let mut m = duel(&def);
+    m.fighters[0].power = 0.0;
+    let mut charging = 0;
+    for _ in 0..40 {
+        m.tick(&[k::S, 0]);
+        charging += (m.fighters[0].state_no == 90200) as usize;
+    }
+    let held = m.fighters[0].power;
+    assert!(charging >= 30 && held >= 300.0, "holding R charges ki: {charging} ticks in 90200, power {held}");
+    for _ in 0..10 {
+        m.tick(&[0, 0]);
+    }
+    assert!(m.fighters[0].state_no != 90200 && m.fighters[0].ctrl, "releasing R returns control, state {}", m.fighters[0].state_no);
+    let mut m = duel(&def);
+    m.fighters[0].power = 1000.0;
+    m.fighters[0].pos.x = -60.0;
+    m.fighters[1].pos.x = 60.0;
+    let (mut skill, mut trail) = (0, 0);
+    for t in 0..40 {
+        m.tick(&[if t < 4 { k::X | k::Y } else { 0 }, 0]);
+        skill += (m.fighters[0].state_no == 90300) as usize;
+        trail = trail.max(m.fighters[0].after_image.as_ref().map_or(0, |a| a.trail.len()));
+    }
+    assert!(skill >= 15 && trail > 3, "x+y plays the After Image skill with a trail: {skill} ticks, trail {trail}");
+    assert!(m.fighters[0].pos.x > m.fighters[1].pos.x, "the skill ends behind the foe: {} vs {}", m.fighters[0].pos.x, m.fighters[1].pos.x);
+    assert!(m.fighters[0].power < 900.0, "the skill spends ki, power {}", m.fighters[0].power);
+}

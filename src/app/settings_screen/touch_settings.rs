@@ -23,7 +23,7 @@ impl App {
             self.audio.sfx("select");
         }
         if self.c.pressed(nav::DOWN) {
-            cur = (cur + 1).min(3);
+            cur = (cur + 1).min(4);
             self.audio.sfx("select");
         }
         if cur == 0 && dir != 0 {
@@ -73,6 +73,23 @@ impl App {
         let rows = [
             (
                 tr3(
+                    "Direcional flutuante",
+                    "Floating stick",
+                    "Direccional flotante",
+                ),
+                if prefs.touch_floating_stick {
+                    tr3("Ligado", "On", "Activado")
+                } else {
+                    tr3("Fixo", "Fixed", "Fijo")
+                },
+                tr3(
+                    "O direcional nasce onde o dedo toca",
+                    "The stick appears where your thumb lands",
+                    "El direccional aparece donde toca el dedo",
+                ),
+            ),
+            (
+                tr3(
                     "Controles para canhotos",
                     "Left-handed controls",
                     "Controles para zurdos",
@@ -116,24 +133,24 @@ impl App {
             ),
         ];
         for (i, (label, value, hint)) in rows.iter().enumerate() {
-            let y = 164.0 + i as f32 * 74.0;
+            let y = 164.0 + i as f32 * 62.0;
             let focused = cur == i + 1;
-            self.ui.adapted_row(88.0, y, VW - 176.0, 60.0, true);
+            self.ui.adapted_row(88.0, y, VW - 176.0, 52.0, true);
             if focused {
                 self.ui.adapted_highlight(
                     ("touch.row.x", "touch.row.y"),
                     88.0,
                     y,
                     VW - 176.0,
-                    60.0,
+                    52.0,
                 );
             }
             self.ui
-                .text(label, 110.0, y + 25.0, 22.0, WHITE, Align::Left, true);
+                .text(label, 110.0, y + 22.0, 22.0, WHITE, Align::Left, true);
             self.ui.text(
                 hint,
                 110.0,
-                y + 48.0,
+                y + 43.0,
                 14.0,
                 hex("#a49cc0"),
                 Align::Left,
@@ -142,13 +159,13 @@ impl App {
             self.ui.text(
                 value,
                 VW - 110.0,
-                y + 36.0,
+                y + 32.0,
                 22.0,
                 hex("#ffcc33"),
                 Align::Right,
                 true,
             );
-            if self.clicked_rect(88.0, y, VW - 176.0, 60.0) {
+            if self.clicked_rect(88.0, y, VW - 176.0, 52.0) {
                 cur = i + 1;
                 let p = self.ui.to_virtual(mouse_position().into());
                 let step = if p.x < VW * 0.5 { -1 } else { 1 };
@@ -202,12 +219,13 @@ impl App {
     fn adjust_touch(&mut self, row: usize, step: i32) {
         let mut prefs = crate::tweaks::current();
         match row {
-            0 => prefs.touch_left_handed = !prefs.touch_left_handed,
-            1 => {
+            0 => prefs.touch_floating_stick = !prefs.touch_floating_stick,
+            1 => prefs.touch_left_handed = !prefs.touch_left_handed,
+            2 => {
                 prefs.touch_scale =
                     (prefs.touch_scale + step as f32 * 0.1).clamp(TOUCH_SCALE_MIN, TOUCH_SCALE_MAX)
             }
-            2 => {
+            3 => {
                 prefs.touch_opacity =
                     (prefs.touch_opacity + step as f32 * 0.1).clamp(TOUCH_OPACITY_MIN, 1.0)
             }
@@ -217,6 +235,7 @@ impl App {
             prefs.touch_scale,
             prefs.touch_opacity,
             prefs.touch_left_handed,
+            prefs.touch_floating_stick,
         );
     }
 }

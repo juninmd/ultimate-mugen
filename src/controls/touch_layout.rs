@@ -9,6 +9,7 @@ pub struct Layout {
     pub toggle: Vec2,
     pub toggle_radius: f32,
     pub left_handed: bool,
+    pub zone: [f32; 4],
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -22,16 +23,19 @@ fn safe_insets() -> [f32; 4] {
 }
 
 pub fn compute() -> Layout {
-    let (w, h) = (screen_width(), screen_height());
     let tweaks = crate::tweaks::current();
-    let left_handed = tweaks.touch_left_handed;
-    let [_, right, bottom, left] = safe_insets();
+    Layout::build(screen_width(), screen_height(), safe_insets(), tweaks.touch_scale, tweaks.touch_left_handed)
+}
+
+impl Layout {
+    pub fn build(w: f32, h: f32, insets: [f32; 4], scale: f32, left_handed: bool) -> Layout {
+    let [_, right, bottom, left] = insets;
     let (cluster_edge, stick_edge) = if left_handed {
         (left, right)
     } else {
         (right, left)
     };
-    let r = (h * 0.075).clamp(20.0, 44.0) * tweaks.touch_scale;
+    let r = (h * 0.075).clamp(20.0, 44.0) * scale;
     let gap = r * 2.1;
     let small = r * 0.72;
     let small_gap = small * 2.3;
@@ -61,6 +65,11 @@ pub fn compute() -> Layout {
         toggle.x = w - toggle.x;
         stick.x = w - stick.x;
     }
+    let zone = if left_handed {
+        [w * 0.55, h * 0.25, w, h]
+    } else {
+        [0.0, h * 0.25, w * 0.45, h]
+    };
     Layout {
         pos,
         radius,
@@ -69,17 +78,12 @@ pub fn compute() -> Layout {
         toggle,
         toggle_radius: r * 0.5,
         left_handed,
+        zone,
     }
-}
+    }
 
-impl Layout {
     pub fn in_stick_zone(&self, p: Vec2) -> bool {
-        let (w, h) = (screen_width(), screen_height());
-        let side = if self.left_handed {
-            p.x > w * 0.55
-        } else {
-            p.x < w * 0.45
-        };
-        side && p.y > h * 0.25
+        let [x0, y0, x1, _] = self.zone;
+        p.x > x0 && p.x < x1.max(x0) && p.y > y0
     }
 }

@@ -110,6 +110,9 @@ mod tests {
         let (t, _, w) = parse("[touch]\nscale = 3\nleft_handed = \"yes\"\n");
         assert_eq!((t.touch_scale, t.touch_left_handed), (1.0, false));
         assert_eq!(w.len(), 2);
+        let (t, _, w) = parse("[touch]\nfloating_stick = false\n");
+        assert!(!t.touch_floating_stick && w.is_empty());
+        assert!(parse("").0.touch_floating_stick, "the floating stick is on by default");
     }
 
     #[test]

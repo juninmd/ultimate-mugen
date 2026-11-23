@@ -23,5 +23,5 @@ O teste de cobertura está em `crates/engine/tests/mugen_coverage_matrix.rs`. El
 ## Como verificar um nome novo
 
 1. Adicione o nome à lista correspondente em `mugen_coverage_matrix.rs`.
-2. Rode `cargo test -p ume-engine --test mugen_coverage_matrix`.
+2. Rode `cargo test -p ume-engine --test it mugen_coverage_matrix::`.
 3. Se falhar, implemente o controller ou trigger e documente em `CNS-Scripts.md`.

@@ -52,6 +52,6 @@ Durante um ataque que conectou (normal ou especial, não super), toque duas veze
 | Evento para a apresentação | `Event::Rush { fighter, side, guarded }` em `crates/engine/src/matchs/types.rs` |
 | Efeitos (anéis, brilho, faíscas, rótulo, brasas do Overdrive) | `src/vfx/rush.rs` |
 | Checksum de rollback | `overdrive`, `cooldown` e `cancels` em `crates/netplay/src/checksum.rs` |
-| Testes | `cargo test --release -p ume-engine --test rush_cancel` |
+| Testes | `cargo test --release -p ume-engine --test it rush_cancel::` |
 
 `rush_step` roda uma vez por tick de simulação depois da fase de entrada e não aloca (o rastro de afterimage só cresce quando há um cancelamento). Tudo é dado simples em `Fighter::rush`, então `Match` continua `Clone` e replays e rollback não mudam.

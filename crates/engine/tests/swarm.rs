@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 
 use support::{mugen_char, ticks};
 use ume_engine::matchs::{arena_tiles, Match, ARENA_HALF_WIDTH, SWARM_MAX_TOTAL};

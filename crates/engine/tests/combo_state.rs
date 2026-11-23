@@ -1,7 +1,7 @@
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::matchs::Match;
 
-mod support;
+use crate::support;
 use support::*;
 
 const STRIKER: &str = "

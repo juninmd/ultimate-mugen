@@ -5,7 +5,7 @@ Date: `2026-11-20` · Platform: Windows `x86_64` · Profile: `--release`
 ## 1. Live Engine Baseline Benchmarks
 
 ### Zero-Allocation Tick Gate (`tick_alloc`)
-- `cargo test -p ume-engine --release --test tick_alloc`: **PASS** (`2 passed, 0 failed`, `0.05s`)
+- `cargo test -p ume-engine --release --test it tick_alloc::`: **PASS** (`2 passed, 0 failed`, `0.05s`)
 - Confirms `Match::tick` performs **zero heap allocations** and maintains deterministic state for `ggrs` rollback and replays.
 
 ### Simulation Throughput (`native_tick_bench`)

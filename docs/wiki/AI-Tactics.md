@@ -23,7 +23,7 @@ Each reaction fires with probability `0.35 + 0.6 * skill` and sets a short coold
 | Win-rate spread | 24.7 pts | 23.2 pts |
 | Rounds with stuck fighter | 0 | 0 |
 
-Tests: `cargo test --release -p ume-engine --test ai_tactics` and the unit tests in `ai/tactics.rs`.
+Tests: `cargo test --release -p ume-engine --test it ai_tactics::` and the unit tests in `ai/tactics.rs`.
 
 ## Reading the rival (`ai/reading.rs`)
 

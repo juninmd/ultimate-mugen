@@ -61,9 +61,9 @@ The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the call
 | `cargo run --release -p ume-engine --example load_bench` | Native (UMF) compile time |
 | `cargo run --release -p ume-engine --example tick_bench -- [zip_or_dir] [seconds] [per_side]` | Simulation throughput (`ticks/s`) and latency percentiles (`p50`, `p99`, `max`, 16.6 ms frame budget %) |
 | `cargo run --release -p ume-engine --example sprite_mem -- <char_dir>...` | Sprite payload per fighter: sprites, index/RGBA atlas MB, largest sprite (sizes the warm-up budget) |
-| `cargo test -p ume-engine --release --test tick_alloc` | Zero allocations per simulation tick |
-| `cargo test -p ume-formats --release --test fuzz_resilience` | Mutation fuzzing across SFF v1/v2, SND, PCX, PNG, FNT, RLE8/RLE5/LZ5, AIR and INI decoders |
-| `cargo test -p ume-engine --release --test stress_resilience` | Hostile CNS expressions, recursive helper/explod/projectile floods, and 4v4 simul stress |
+| `cargo test -p ume-engine --release --test it tick_alloc::` | Zero allocations per simulation tick |
+| `cargo test -p ume-formats --release --test it fuzz_resilience::` | Mutation fuzzing across SFF v1/v2, SND, PCX, PNG, FNT, RLE8/RLE5/LZ5, AIR and INI decoders |
+| `cargo test -p ume-engine --release --test it stress_resilience::` | Hostile CNS expressions, recursive helper/explod/projectile floods, and 4v4 simul stress |
 | `UME_TOUR=perf --shots <dir>` | Full frame loop of a real CPU-vs-CPU match: simulation and draw time percentiles, vertices, draw calls, atlas uploads/fill and RSS, once per second |
 
 Reference (release): `kfm` went from 48.3 ms to 3.5 ms (13.8x faster), `kfm720` from 60.1 ms to 7.8 ms (7.7x faster). Simulation tick throughput reaches 235,000+ ticks/s at p50 0.004 ms (0.1% frame budget).

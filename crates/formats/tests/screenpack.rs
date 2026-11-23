@@ -1,4 +1,4 @@
-mod common;
+use crate::common;
 use common::*;
 use ume_formats::fnt::{decode_fnt, FontKind, Glyph};
 use ume_formats::screenpack::{load_screenpack, parse_fight, parse_select, parse_storyboard, parse_system, SelectSlot};

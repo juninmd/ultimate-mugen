@@ -166,7 +166,7 @@ Frames desenhados com sprites em pixel usam como caixa de golpe o `box` explíci
 - a hurtbox em pé tem `0.46 H` de largura (mediana do M.U.G.E.N `0.46 H`) e a agachada `0.67 H` de altura (mediana `0.67 H`);
 - um `box` explícito é usado como escrito, então mantenha-o dentro dessas proporções; a auditoria falha caso contrário.
 
-`cargo test --release -p ume-engine --test native_hitbox_audit` verifica todos os frames de golpe do elenco (altura, alcance, início, largura, acima da cabeça, abaixo do chão) e `native_normal_reach` imprime e compara alcance e dano dos quatro golpes normais em pé de cada lutador.
+`cargo test --release -p ume-engine --test it native_hitbox_audit::` verifica todos os frames de golpe do elenco (altura, alcance, início, largura, acima da cabeça, abaixo do chão) e `native_normal_reach` imprime e compara alcance e dano dos quatro golpes normais em pé de cada lutador.
 
 ### Nomes padrão
 
@@ -240,7 +240,7 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 
 **Finisher.** Um golpe com `"kind": "finisher"` (use `throw` ou `hits` para o efeito) só fica disponível após um nocaute (`RoundState = 3` e `WinKO`). Quando o round final termina em nocaute e o vencedor tem um finisher, o round espera até 6 segundos em "FINISH HIM" para o vencedor executá-lo; executar (ou o tempo acabar) encerra a espera. Elencos sem finisher não mudam.
 
-**Ultimate.** Um golpe cujo `id` começa com `ult_` é a ultimate do lutador, e todo lutador nativo declara uma (o comando é `~D, DF, F, D, DF, F, x+y`). O compilador gasta o medidor inteiro nela: `cost` passa a valer `3000` por padrão (as três barras do HUD), o golpe recebe 70 % de bônus de dano onde um `super` comum recebe 30 %, e o congelamento de super dura 75 ticks em vez de 55. `cargo test --release -p ume-engine --test native_ultimates` falha quando um lutador não tem ultimate, quando o custo não é de três barras, quando a ultimate não inicia pelo comando ou não drena o medidor, ou quando o dano medido fica abaixo de 380 ou não supera todos os supers do lutador.
+**Ultimate.** Um golpe cujo `id` começa com `ult_` é a ultimate do lutador, e todo lutador nativo declara uma (o comando é `~D, DF, F, D, DF, F, x+y`). O compilador gasta o medidor inteiro nela: `cost` passa a valer `3000` por padrão (as três barras do HUD), o golpe recebe 70 % de bônus de dano onde um `super` comum recebe 30 %, e o congelamento de super dura 75 ticks em vez de 55. `cargo test --release -p ume-engine --test it native_ultimates::` falha quando um lutador não tem ultimate, quando o custo não é de três barras, quando a ultimate não inicia pelo comando ou não drena o medidor, ou quando o dano medido fica abaixo de 380 ou não supera todos os supers do lutador.
 
 ### Traços de combate
 
@@ -250,7 +250,7 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 - **`armor`** (`hits` absorvidos, `threshold` opcional = dano acima do qual a armadura quebra). Do início até o último frame de acerto o golpe recebe 35 % de dano reduzido e não é interrompido; gastos os `hits`, o próximo golpe derruba normalmente.
 - **Cola de multi-hit.** Golpes com três ou mais `hits` empurram o alvo só um pouco a cada acerto exceto o último (a sequência inteira conecta) e projéteis perfurantes (4+ acertos) não empurram o alvo para fora do feixe. Defina `knockback` para desativar.
 
-Valide com `cargo test --release --test native_roster_lab -- --nocapture` (todo estado de ataque precisa conectar; imprime dano e alcance), `--test native_combo_routes` (todo cancel declarado encadeia de ponta a ponta) e `python scripts/audit_native_moves.py`.
+Valide com `cargo test --release --test it native_roster_lab:: -- --nocapture` (todo estado de ataque precisa conectar; imprime dano e alcance), `--test it native_combo_routes::` (todo cancel declarado encadeia de ponta a ponta) e `python scripts/audit_native_moves.py`.
 
 ### `hits[]`
 

@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 use support::mugen_char;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::fighter::{asf, HitDefData};

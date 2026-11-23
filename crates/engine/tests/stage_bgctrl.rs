@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 use std::sync::Arc;
 use support::{duel, mugen_char};
 use ume_engine::stage_bg::BgState;

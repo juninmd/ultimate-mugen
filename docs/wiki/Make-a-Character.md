@@ -75,8 +75,8 @@ More: [moves](UMF-Character.md#moves), [hits](UMF-Character.md#hits), [command s
 ## 5. Check it before you play
 
 ```bash
-cargo test --release -p ume-engine --test wiki_examples
-cargo test --release --test native_roster_lab -- --nocapture
+cargo test --release -p ume-engine --test it wiki_examples::
+cargo test --release --test it native_roster_lab:: -- --nocapture
 ```
 
 The first command checks the examples in this guide. The second plays every attack of the roster and prints damage and reach.

@@ -1,6 +1,6 @@
 //! INI / AIR / VFS / zip / stage tests (synthetic).
 
-mod common;
+use crate::common;
 use common::*;
 use ume_formats::air::{parse_air, Blend};
 use ume_formats::ini::{find_section, nums, parse_float, parse_ini, parse_int, split_top, strip_comment, unquote};

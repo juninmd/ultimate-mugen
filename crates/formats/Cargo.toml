@@ -2,6 +2,7 @@
 name = "ume-formats"
 version = "0.2.0"
 edition = "2021"
+autotests = false
 description = "M.U.G.E.N file format decoders (INI/DEF, AIR, SFF v1/v2, PCX, PNG, SND, ACT, zip VFS, stage .def)"
 license = "MIT"
 
@@ -12,3 +13,7 @@ path = "src/lib.rs"
 [dependencies]
 lz4_flex = { version = "0.14", default-features = false, features = ["std", "safe-encode", "safe-decode"] }
 miniz_oxide = "0.9"
+
+[[test]]
+name = "it"
+path = "tests/it.rs"

@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 
 use support::{duel, mugen_char, ticks};
 use ume_engine::matchs::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT};

@@ -75,8 +75,8 @@ Mais: [golpes](Personagem-UMF.md), [hits](Personagem-UMF.md) e [sintaxe de coman
 ## 5. Teste antes de jogar
 
 ```bash
-cargo test --release -p ume-engine --test wiki_examples
-cargo test --release --test native_roster_lab -- --nocapture
+cargo test --release -p ume-engine --test it wiki_examples::
+cargo test --release --test it native_roster_lab:: -- --nocapture
 ```
 
 O primeiro comando confere os exemplos deste guia. O segundo roda todos os ataques do elenco e mostra dano e alcance.

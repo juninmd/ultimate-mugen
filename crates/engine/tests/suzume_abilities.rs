@@ -1,6 +1,6 @@
 //! Integration and homologation test suite for Suzume with all new core features:
 //! fly, teleport, super speed, multi-transformations, move swaps, and character swap.
-mod support;
+use crate::support;
 use std::sync::Arc;
 use support::*;
 use ume_native::{compile_native, register_native, NativeChar};

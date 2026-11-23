@@ -1,6 +1,6 @@
 //! Port of the synthetic tests in tests/decoders.test.ts.
 
-mod common;
+use crate::common;
 use common::*;
 use ume_formats::act::{decode_act, encode_act};
 use ume_formats::pcx::{decode_pcx, decode_pcx_rle};

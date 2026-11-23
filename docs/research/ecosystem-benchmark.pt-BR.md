@@ -5,7 +5,7 @@ Data: `2026-11-20` · Plataforma: Windows `x86_64` · Perfil: `--release`
 ## 1. Benchmarks Reais do Motor (Baseline)
 
 ### Gate Zero-Allocation (`tick_alloc`)
-- `cargo test -p ume-engine --release --test tick_alloc`: **PASS** (`2 passed, 0 failed`, `0.05s`)
+- `cargo test -p ume-engine --release --test it tick_alloc::`: **PASS** (`2 passed, 0 failed`, `0.05s`)
 - Confirma que `Match::tick` executa **zero alocações de heap**, preservando determinismo para rollback `ggrs` e replays.
 
 ### Vazão da Simulação (`native_tick_bench`)

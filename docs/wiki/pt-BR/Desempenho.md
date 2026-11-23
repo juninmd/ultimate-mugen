@@ -58,9 +58,9 @@ O auxiliar é `ume_formats::par::map`. Na web (`wasm32`) ele roda na própria th
 | `cargo run --release -p ume-engine --example mugen_load_bench [zip] [execuções]` | Tempo de carga de personagem M.U.G.E.N (padrão: `elecbyte.zip` embutido) |
 | `cargo run --release -p ume-engine --example load_bench` | Tempo de compilação nativa (UMF) |
 | `cargo run --release -p ume-engine --example tick_bench -- [zip_ou_dir] [segundos] [por_lado]` | Taxa de simulação (`ticks/s`) e percentis de latência (`p50`, `p99`, `max`, % do orçamento de 16,6 ms) |
-| `cargo test -p ume-engine --release --test tick_alloc` | Zero alocações por tick de simulação |
-| `cargo test -p ume-formats --release --test fuzz_resilience` | Fuzzing por mutação em decodificadores SFF v1/v2, SND, PCX, PNG, FNT, RLE8/RLE5/LZ5, AIR e INI |
-| `cargo test -p ume-engine --release --test stress_resilience` | Expressões CNS hostis, floods recursivos de helper/explod/projétil e estresse 4v4 simul |
+| `cargo test -p ume-engine --release --test it tick_alloc::` | Zero alocações por tick de simulação |
+| `cargo test -p ume-formats --release --test it fuzz_resilience::` | Fuzzing por mutação em decodificadores SFF v1/v2, SND, PCX, PNG, FNT, RLE8/RLE5/LZ5, AIR e INI |
+| `cargo test -p ume-engine --release --test it stress_resilience::` | Expressões CNS hostis, floods recursivos de helper/explod/projétil e estresse 4v4 simul |
 | `UME_TOUR=perf --shots <dir>` | Laço de quadro real de uma luta CPU vs CPU: percentis de simulação e desenho, vértices, draw calls, uploads/preenchimento do atlas e RSS, uma vez por segundo |
 
 Referência (release): `kfm` caiu de 48,3 ms para 3,5 ms (13,8x mais rápido), `kfm720` de 60,1 ms para 7,8 ms (7,7x mais rápido). Taxa de simulação atinge 235.000+ ticks/s em p50 0,004 ms (0,1% do orçamento de frame).

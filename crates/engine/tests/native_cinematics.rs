@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 use serde_json::json;
 use std::sync::Arc;
 use support::*;

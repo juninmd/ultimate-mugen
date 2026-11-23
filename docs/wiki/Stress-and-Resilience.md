@@ -4,8 +4,8 @@
 
 | Area | Test | Command |
 |---|---|---|
-| Format parsers (SFF, AIR, INI/DEF/CNS/CMD, SND, ACT, PCX, PNG, zip, stage) | Deterministic mutation fuzzer seeded from the bundled kfm zip. Fails on any panic or any input slower than 1.5 s. | `UME_FUZZ_ITERS=4000 cargo test -p ume-formats --release --test fuzz` |
-| Spawner spam (Explod, Projectile, Helper every tick) | Tick cost stays bounded | `cargo test -p ume-engine --release --test stress -- --nocapture` |
+| Format parsers (SFF, AIR, INI/DEF/CNS/CMD, SND, ACT, PCX, PNG, zip, stage) | Deterministic mutation fuzzer seeded from the bundled kfm zip. Fails on any panic or any input slower than 1.5 s. | `UME_FUZZ_ITERS=4000 cargo test -p ume-formats --release --test it fuzz::` |
+| Spawner spam (Explod, Projectile, Helper every tick) | Tick cost stays bounded | `cargo test -p ume-engine --release --test it stress:: -- --nocapture` |
 | Hot paths | Built-in bench for SFF decode, AIR parse, CNS compile, char load, match tick with 2, 6 and 10 fighters | `cargo run -p ume-engine --release --example hotpath_bench` |
 | Rollback under latency | `crates/netplay/tests/rollback.rs` (in-memory sockets) | `cargo test -p ume-netplay` |
 

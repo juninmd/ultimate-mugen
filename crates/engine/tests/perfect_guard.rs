@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 use support::*;
 use ume_engine::fighter::HitDefData;
 use ume_engine::matchs::Event;

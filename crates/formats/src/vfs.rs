@@ -12,13 +12,9 @@ mod find;
 mod zip; mod zip_job;
 
 use archive::{File, Source};
-pub use find::{char_key, content_hash, find_char_defs, find_stage_defs, resolve, resolve_key, stage_key};
+pub use find::{char_key, content_hash, find_char_defs, find_stage_defs, resolve, resolve_key, resolve_prefix, stage_key};
 pub use {zip::{add_zip, add_zip_with_progress, ZipProgress}, zip_job::ZipJob};
 
-/// Recursively index every file under `dir` (keys relative to `dir`, under
-/// `prefix`). `.zip` files are indexed in place (their entries are keyed
-/// relative to the zip's folder); unreadable zips are indexed as plain files.
-/// File contents are not read.
 #[cfg(not(target_arch = "wasm32"))]
 pub fn add_dir(vfs: &mut Vfs, dir: &std::path::Path, prefix: &str) -> std::io::Result<usize> {
     fn walk(vfs: &mut Vfs, dir: &std::path::Path, rel: &str, n: &mut usize) -> std::io::Result<()> {
@@ -50,7 +46,6 @@ pub fn add_dir(vfs: &mut Vfs, dir: &std::path::Path, prefix: &str) -> std::io::R
     Ok(n)
 }
 
-/// A file payload borrowed from an in-memory entry or shared from a lazy read.
 pub enum VfsFile<'a> {
     Borrowed(&'a [u8]),
     Shared(Arc<Vec<u8>>),
@@ -120,7 +115,6 @@ impl PartialEq<&[u8]> for VfsFile<'_> {
     }
 }
 
-/// Keys: normalized (lowercase, `/`-separated, relative) paths.
 pub struct Vfs {
     files: BTreeMap<String, File>,
 }
@@ -164,7 +158,9 @@ impl Vfs {
             _ => file.bytes().map(VfsFile::Shared),
         }
     }
-    /// Content identity of an indexed file: length plus head/tail samples.
+    pub fn get_prefix(&self, key: &str, max_len: usize) -> Option<Vec<u8>> {
+        self.files.get(key)?.prefix(max_len)
+    }
     pub fn signature(&self, key: &str) -> Option<(u64, u64)> {
         self.files.get(key)?.signature()
     }

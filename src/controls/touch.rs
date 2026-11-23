@@ -2,19 +2,23 @@ use crate::gfx::*;
 use ume_engine::input::k;
 use super::{touch_layout, touch_style};
 
+mod fingers;
+use fingers::{Fingers, Sample};
+
 pub struct TouchPad {
     pub enabled: bool,
     pub bits: u32,
     pub macro_q: [std::collections::VecDeque<u32>; 2],
     touch_seen: bool,
+    fingers: Fingers,
     stick_center: Option<Vec2>,
     pub stick_pos: Vec2,
     pub began: Vec<Vec2>,
     pub pressed: [bool; BUTTONS],
     hold: [u8; BUTTONS],
     pub more_open: bool,
-    toggle_down: bool,
     idle_frames: u32,
+    age: [u8; BUTTONS],
 }
 
 pub const QUICK_SKILLS: usize = 4;
@@ -46,6 +50,9 @@ pub const TOUCH_BUTTONS: [(&str, u32); BUTTONS] = [
     ("DEFESA", k::GUARD),
 ];
 
+const MOUSE_ID: u64 = u64::MAX;
+const TAP_FRAMES: u8 = 3;
+
 impl TouchPad {
     pub fn new(enabled: bool) -> Self {
         TouchPad {
@@ -53,27 +60,49 @@ impl TouchPad {
             bits: 0,
             macro_q: Default::default(),
             touch_seen: false,
+            fingers: Fingers::default(),
             stick_center: None,
             stick_pos: Vec2::ZERO,
             began: Vec::new(),
             pressed: [false; BUTTONS],
             hold: [0; BUTTONS],
             more_open: false,
-            toggle_down: false,
             idle_frames: IDLE_FADE_FRAMES,
+            age: [0; BUTTONS],
         }
-    }
-    fn visible(&self, i: usize) -> bool {
-        i < CORE_BUTTONS || self.more_open
     }
     fn reset(&mut self) {
         self.began.clear();
         self.bits = 0;
+        self.fingers = Fingers::default();
         self.stick_center = None;
         self.stick_pos = Vec2::ZERO;
         self.pressed = [false; BUTTONS];
         self.hold = [0; BUTTONS];
-        self.toggle_down = false;
+        self.age = [0; BUTTONS];
+    }
+    fn samples(&mut self, dpi: f32) -> Vec<Sample> {
+        let touched = touches();
+        if !touched.is_empty() {
+            self.touch_seen = true;
+        }
+        self.began = touched
+            .iter()
+            .filter(|t| matches!(t.phase, TouchPhase::Started | TouchPhase::Ended))
+            .map(|t| t.position / dpi)
+            .collect();
+        let mut samples: Vec<Sample> = touched
+            .iter()
+            .map(|t| Sample {
+                id: t.id,
+                pos: t.position / dpi,
+                ended: matches!(t.phase, TouchPhase::Ended | TouchPhase::Cancelled),
+            })
+            .collect();
+        if samples.is_empty() && !self.touch_seen && is_mouse_button_down(MouseButton::Left) {
+            samples.push(Sample { id: MOUSE_ID, pos: mouse_position().into(), ended: false });
+        }
+        samples
     }
     pub fn update(&mut self) {
         if !touches().is_empty() {
@@ -84,87 +113,39 @@ impl TouchPad {
             return;
         }
         let lay = touch_layout::compute();
-        let dpi = dpi_scale().max(0.01);
-        let all: Vec<(Vec2, bool)> = touches()
-            .iter()
-            .map(|t| {
-                (
-                    t.position / dpi,
-                    matches!(t.phase, TouchPhase::Ended | TouchPhase::Cancelled),
-                )
-            })
-            .collect();
-        if !all.is_empty() {
-            self.touch_seen = true;
-        }
-        self.began = touches()
-            .iter()
-            .filter(|t| matches!(t.phase, TouchPhase::Started | TouchPhase::Ended))
-            .map(|t| t.position / dpi)
-            .collect();
-        let mut points = all;
-        if points.is_empty() && !self.touch_seen && is_mouse_button_down(MouseButton::Left) {
-            points.push((mouse_position().into(), false));
-        }
-        self.idle_frames = if points.is_empty() { self.idle_frames.saturating_add(1) } else { 0 };
-        let mut bits = 0;
-        self.pressed = [false; BUTTONS];
-        let mut stick_touch = None;
-        let mut toggle_held = false;
-        for h in self.hold.iter_mut() {
-            *h = h.saturating_sub(1);
-        }
-        for (p, ended) in &points {
-            if lay.toggle.distance(*p) < lay.toggle_radius * 1.6 {
-                toggle_held |= !ended;
-                continue;
-            }
-            let hit = (0..BUTTONS)
-                .filter(|i| self.visible(*i))
-                .map(|i| (i, lay.pos[i].distance(*p) / lay.radius[i]))
-                .filter(|(_, d)| *d < 1.25)
-                .min_by(|a, b| a.1.total_cmp(&b.1));
-            match hit {
-                Some((i, _)) => self.hold[i] = self.hold[i].max(if *ended { 3 } else { 1 }),
-                None if lay.in_stick_zone(*p) && !ended => stick_touch = Some(*p),
-                None => {}
-            }
-        }
-        if toggle_held && !self.toggle_down {
+        let samples = self.samples(dpi_scale().max(0.01));
+        let floating = crate::tweaks::current().touch_floating_stick;
+        let out = self.fingers.update(&samples, &lay, self.more_open, floating);
+        self.idle_frames = if samples.is_empty() { self.idle_frames.saturating_add(1) } else { 0 };
+        if out.toggle {
             self.more_open = !self.more_open;
             self.hold = [0; BUTTONS];
         }
-        self.toggle_down = toggle_held;
+        let mut bits = 0;
         for i in 0..BUTTONS {
-            if self.hold[i] > 0 {
+            self.hold[i] = self.hold[i].saturating_sub(1);
+            self.age[i] = if out.held[i] { self.age[i].saturating_add(1) } else { 0 };
+            if out.held[i] {
+                self.hold[i] = self.hold[i].max(1);
+            }
+            if out.released[i] {
+                self.hold[i] = self.hold[i].max(TAP_FRAMES.saturating_sub(self.age[i]));
+            }
+            self.pressed[i] = self.hold[i] > 0;
+            if self.pressed[i] {
                 bits |= TOUCH_BUTTONS[i].1;
-                self.pressed[i] = true;
             }
         }
-        let sr = lay.stick_radius;
-        if let Some(p) = stick_touch {
-            let c = *self.stick_center.get_or_insert(lay.stick);
-            let d = p - c;
-            let len = d.length();
-            self.stick_pos = if len > sr * 0.6 { d / len * sr * 0.6 } else { d };
-            if len > sr * 0.2 {
-                let a = d.y.atan2(d.x);
-                let oct = (a / (std::f32::consts::PI / 4.0)).round() as i32;
-                bits |= match oct {
-                    0 => k::R,
-                    1 => k::R | k::D,
-                    2 => k::D,
-                    3 => k::D | k::L,
-                    4 | -4 => k::L,
-                    -3 => k::U | k::L,
-                    -2 => k::U,
-                    -1 => k::U | k::R,
-                    _ => 0,
-                };
+        match out.stick {
+            Some(s) => {
+                self.stick_center = Some(s.origin);
+                self.stick_pos = s.offset;
+                bits |= s.bits;
             }
-        } else {
-            self.stick_center = None;
-            self.stick_pos = Vec2::ZERO;
+            None => {
+                self.stick_center = None;
+                self.stick_pos = Vec2::ZERO;
+            }
         }
         self.bits = bits;
     }
@@ -183,14 +164,14 @@ impl TouchPad {
     fn draw_pad(&self) {
         let lay = touch_layout::compute();
         let c = self.stick_center.unwrap_or(lay.stick);
-        touch_style::draw_stick(c, lay.stick_radius, self.stick_pos);
-        for i in (0..BUTTONS).filter(|i| self.visible(*i)) {
+        touch_style::draw_stick(c, lay.stick_radius, self.stick_pos, self.stick_center.is_some());
+        for i in (0..BUTTONS).filter(|i| i < &CORE_BUTTONS || self.more_open) {
             let base = touch_style::base_color(i);
             touch_style::draw_button(lay.pos[i], lay.radius[i], super::touch_label::button(TOUCH_BUTTONS[i]), base, self.pressed[i]);
         }
         let label = if self.more_open { "x" } else { "+" };
         let base = Color::new(0.6, 0.6, 0.65, 0.5);
-        touch_style::draw_button(lay.toggle, lay.toggle_radius, label, base, self.toggle_down);
+        touch_style::draw_button(lay.toggle, lay.toggle_radius, label, base, false);
     }
 }
 

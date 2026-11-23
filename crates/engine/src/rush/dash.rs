@@ -38,6 +38,7 @@ impl Match {
 
     pub(super) fn dash_cancel(&mut self, i: usize, target: i32) {
         self.add_power(i, -DASH_COST);
+        self.fighters[i].ctrl = true;
         let own = self.fighters[i].def.clone();
         self.change_state(i, target, own);
         let f = &mut self.fighters[i];

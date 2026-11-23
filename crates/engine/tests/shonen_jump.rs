@@ -40,6 +40,7 @@ fn load_char(dir_name: &str, def: &str) -> Option<Arc<ume_engine::chardef::CharD
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn test_shonen_jump_naruto_roster() {
     let root = chars_root();
     if !root.exists() {
@@ -84,6 +85,7 @@ fn test_shonen_jump_naruto_roster() {
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn test_shonen_jump_jojo_roster() {
     let root = chars_root();
     if !root.exists() {
@@ -120,6 +122,7 @@ fn test_shonen_jump_jojo_roster() {
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn test_shonen_jump_dbgt_roster() {
     let root = chars_root();
     if !root.exists() {
@@ -157,6 +160,7 @@ fn test_shonen_jump_dbgt_roster() {
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn test_shonen_jump_bleach_roster() {
     let root = chars_root();
     if !root.exists() {
@@ -201,6 +205,7 @@ fn test_shonen_jump_bleach_roster() {
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn test_shonen_jump_stages() {
     let stages_dir = stages_root();
     if !stages_dir.exists() {

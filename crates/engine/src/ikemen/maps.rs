@@ -15,16 +15,16 @@ impl MapStore {
     }
 
     pub fn set(&mut self, key: &str, v: f32, add: bool) {
-        if let Some((_, x)) = self.entries.iter_mut().find(|(k, _)| k == key) {
+        if let Some((_, x)) = self.entries.iter_mut().find(|(k, _)| k.eq_ignore_ascii_case(key)) {
             *x = if add { *x + v } else { v };
         } else if self.entries.len() < MAP_MAX_KEYS && key.len() <= MAP_MAX_KEY_LEN {
-            self.entries.push((key.to_string(), v));
+            self.entries.push((key.to_ascii_lowercase(), v));
         }
     }
 
     pub fn reset(&mut self, key: Option<&str>) {
         match key {
-            Some(k) => self.entries.retain(|(name, _)| name != k),
+            Some(k) => self.entries.retain(|(name, _)| !name.eq_ignore_ascii_case(k)),
             None => self.entries.clear(),
         }
     }
@@ -46,9 +46,9 @@ enum Scope {
     Parent,
 }
 
-fn map_key(sc: &Controller) -> Option<String> {
+fn map_key(sc: &Controller) -> Option<&str> {
     let raw = sc.raw("map")?;
-    let k = raw.trim().trim_matches('"').trim().to_ascii_lowercase();
+    let k = raw.trim().trim_matches('"').trim();
     (!k.is_empty()).then_some(k)
 }
 
@@ -98,13 +98,13 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
     let key = map_key(sc);
     match op {
         "mapreset" => {
-            if let Some(store) = store_for(m, i, scope) { store.reset(key.as_deref()); }
+            if let Some(store) = store_for(m, i, scope) { store.reset(key); }
         }
         _ => {
             let Some(key) = key else { return true };
             let v = m.num(i, sc, "value", 0.0, 0) as f32;
             let add = op == "mapadd" || m.num(i, sc, "type", 0.0, 0) as i32 == 1;
-            if let Some(store) = store_for(m, i, scope) { store.set(&key, v, add); }
+            if let Some(store) = store_for(m, i, scope) { store.set(key, v, add); }
         }
     }
     true

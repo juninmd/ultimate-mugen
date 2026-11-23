@@ -3,6 +3,7 @@ use std::collections::BTreeSet;
 use support::gogeta::*;
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn audit_has_no_unsupported_controllers_or_triggers() {
     let Some(d) = load(1) else { return };
     let diag = d.diagnostics();
@@ -22,6 +23,7 @@ fn audit_has_no_unsupported_controllers_or_triggers() {
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn every_palette_loads() {
     let Some(_) = load(1) else { return };
     for p in 1..=5 {
@@ -30,6 +32,7 @@ fn every_palette_loads() {
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn intro_bubble_lasts_until_fight() {
     let Some(d) = load(1) else { return };
     let mut m = ume_engine::matchs::Match::new(
@@ -69,6 +72,7 @@ fn intro_bubble_lasts_until_fight() {
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn coverage_report() {
     let (Some(d), Ok(out)) = (load(1), std::env::var("UME_EVIDENCE_DIR")) else {
         return;
@@ -138,6 +142,7 @@ fn coverage_report() {
 }
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn every_state_runs_and_returns() {
     let Some(d) = load(1) else { return };
     let mut stuck: Vec<(i32, i32, bool)> = vec![];

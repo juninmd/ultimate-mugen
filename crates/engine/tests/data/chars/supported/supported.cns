@@ -4,7 +4,7 @@ life = 1000
 [Statedef 0]
 type = S
 physics = S
-ctrl = 1
+
 
 [State 0, stand]
 type = VelSet
@@ -38,4 +38,4 @@ ground.velocity = -4
 type = ChangeState
 trigger1 = AnimTime = 0
 value = 0
-ctrl = 1
+

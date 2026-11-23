@@ -1,5 +1,6 @@
 use super::{Phase, StoryRun, STAGES};
 use crate::i18n::tr3;
+use ume_native::LocalText;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub enum HelperPick {
@@ -24,6 +25,20 @@ pub fn active(run: &StoryRun) -> Option<&str> {
         }
         _ => None,
     }
+}
+
+pub fn ally_page(name: &str) -> LocalText {
+    let line = |text: &str| text.replace("{name}", name);
+    LocalText(
+        [
+            ("en", "Dawn found {name} still standing at your side. Some victories are never won alone."),
+            ("pt", "O amanhecer encontrou {name} ainda de pé ao seu lado. Algumas vitórias nunca são sozinhas."),
+            ("es", "El amanecer encontró a {name} aún en pie a tu lado. Algunas victorias nunca se logran solo."),
+        ]
+        .into_iter()
+        .map(|(lang, text)| (lang.to_string(), line(text)))
+        .collect(),
+    )
 }
 
 pub fn step(cursor: usize, candidates: usize, forward: bool) -> usize {
@@ -79,6 +94,14 @@ mod tests {
         run.stage = STAGES.len() - 1;
         run.wave = run.stage_def().waves.len();
         assert_eq!(active(&run), Some("kaito"));
+    }
+
+    #[test]
+    fn ally_page_names_the_helper_in_every_language() {
+        let page = ally_page("Shion");
+        for lang in ["en", "pt", "es"] {
+            assert!(page.pick(lang).contains("Shion"));
+        }
     }
 
     #[test]

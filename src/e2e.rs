@@ -66,6 +66,9 @@ mod web {
         let ending = crate::query_params().iter().any(|(k, _)| k == "e2e_epilogue");
         if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (ending, &app.screen, app.story_snapshot()) {
             app.story_epilogue_begin(app.sel.0, 0);
+            if crate::query_params().iter().any(|(k, _)| k == "e2e_ally") {
+                app.story_ally_preview();
+            }
         }
         let god = god_requested();
         let mut fighters = String::new();

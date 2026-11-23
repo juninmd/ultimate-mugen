@@ -10,6 +10,12 @@ impl App {
         run.tally = Some(StageTally::new(0, 2000, 0.8));
     }
 
+    pub(crate) fn story_ally_preview(&mut self) {
+        if let Some(run) = self.story.as_mut() {
+            run.helper = crate::story::HelperPick::Chosen("shion".into());
+        }
+    }
+
     pub(crate) fn story_helper_preview(&mut self) {
         let Some(run) = self.story.as_mut() else { return };
         run.stage = crate::story::STAGES.len() - 1;

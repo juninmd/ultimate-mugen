@@ -16,3 +16,4 @@ pub mod roster_audit;
 pub mod debug_fight;
 pub mod knockdown_rate;
 pub mod fight_census;
+pub mod float_scan;

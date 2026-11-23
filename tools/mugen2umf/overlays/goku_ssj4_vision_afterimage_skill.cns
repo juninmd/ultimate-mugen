@@ -5,12 +5,12 @@ physics = N
 anim = 100
 velset = 0,0
 ctrl = 0
-poweradd = -200
+poweradd = -200 * 30 / 30
 
 [State 90300, Invulnerable]
 type = NotHitBy
 trigger1 = Time = 0
-value = SCA
+value = SA
 time = 18
 
 [State 90300, Sound]
@@ -32,7 +32,7 @@ palcontrast = 225,255,255
 [State 90300, Blink Behind Foe]
 type = PosAdd
 trigger1 = Time = 6
-x = P2Dist X + 40
+x = P2Dist X
 
 [State 90300, Face Foe]
 type = Turn
@@ -40,6 +40,6 @@ trigger1 = Time = 6
 
 [State 90300, Recover]
 type = ChangeState
-trigger1 = Time >= 20
+trigger1 = Time >= 30
 value = 0
 ctrl = 1

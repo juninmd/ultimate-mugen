@@ -18,6 +18,7 @@ fn theme_for(screen: &Screen) -> Option<u32> {
         | Screen::Stages { .. }
         | Screen::Controls
         | Screen::CharTuning { .. }
+        | Screen::StoryStudio { .. }
         | Screen::Mugen { .. }
         | Screen::Market
         | Screen::Tower { .. }

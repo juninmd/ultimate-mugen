@@ -4,6 +4,10 @@ pub(super) const ILLUSTRATION_IDS: [&str; 7] = [
     "dojo", "neon", "bamboo", "plains", "spirit", "volcano", "brazil",
 ];
 
+pub fn scene_ids() -> Vec<&'static str> {
+    ILLUSTRATION_IDS.iter().chain(wonders::WONDER_IDS.iter()).copied().collect()
+}
+
 pub(crate) fn decode_illustration(bytes: &[u8]) -> Result<Arc<ImageData>, String> {
     let png = ume_formats::png::decode_png(bytes).map_err(|e| e.to_string())?;
     let rgba = png.rgba.ok_or("expected truecolor stage PNG")?;

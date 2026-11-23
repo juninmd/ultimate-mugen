@@ -1,5 +1,7 @@
 use crate::fighter::Fighter;
 
+const AIRBORNE_HIT_LIMIT: i32 = 360;
+
 impl Fighter {
     pub(crate) fn lands_by_script(&self) -> bool {
         self.physics == 'N'
@@ -27,7 +29,7 @@ impl Fighter {
         free && self.move_type == 'H'
             && (5000..5200).contains(&self.state_no)
             && self.state_no != 5110
-            && self.state_time > 900
+            && self.state_time > if self.pos.y < self.ground_level - 1.0 { AIRBORNE_HIT_LIMIT } else { 900 }
             && self.hit_pause <= 0
             && self.hit_shake <= 0
     }

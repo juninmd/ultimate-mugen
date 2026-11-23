@@ -30,7 +30,7 @@ mod render; mod power_arena; mod power_arena_elixir;
 mod replays; mod photo; mod trials;
 mod route;
 mod screenpack;
-mod session;
+mod session; mod fx_cache;
 mod lite; mod settings;
 mod settings_labels;
 mod shots;

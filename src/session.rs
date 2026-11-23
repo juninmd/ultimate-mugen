@@ -13,7 +13,6 @@ use std::sync::Arc;
 use ume_engine::ai::Ai;
 use ume_engine::chardef::{CharDef, Source};
 use ume_engine::common::common_def;
-use ume_engine::fx::build_fx;
 use ume_engine::input::{k, InputSource};
 use ume_engine::matchs::{Event, Match};
 pub enum Pilot {
@@ -57,7 +56,6 @@ pub struct Session {
     pub net: Option<crate::netlink::NetLink>,
 }
 
-thread_local! { static FX: Arc<CharDef> = build_fx(true); }
 
 impl Session {
     /// Netplay settings a replay stores; the browser and mobile builds never open a socket.
@@ -85,7 +83,7 @@ impl Session {
         single_round: bool,
         life: [f32; 2],
     ) -> Self {
-        let fx = FX.with(|f| f.clone());
+        let fx = crate::fx_cache::shared();
         let mut m = Match::new(common_def(), Some(fx), stage.info.clone());
         if let crate::stages::StageArt::Mugen(bg) = &stage.art {
             m.bg = Some(ume_engine::stage_bg::BgState::new(bg.stage.clone()));

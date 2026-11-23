@@ -3,6 +3,7 @@ use std::collections::BTreeSet;
 use support::gogeta::*;
 
 #[test]
+#[ignore = "needs external MUGEN characters or UME_EVIDENCE_DIR; run with --ignored"]
 fn sweep() {
     let Some(d) = load(1) else { return };
     let mut p2_all: BTreeSet<i32> = BTreeSet::new();

@@ -18,6 +18,8 @@ mod hud;
 mod stage_card;
 #[path = "story/clear_preview.rs"]
 mod clear_preview;
+#[path = "story/decision_snapshot.rs"]
+mod decision_snapshot;
 
 use crate::app::{App, Mode, Screen, Team};
 use crate::session::Session;
@@ -197,11 +199,6 @@ impl App {
             fighter.attack_mul *= meta.boss_attack_factor;
         }
         sess.vfx.banner(text::boss_banner(), &self.story_boss_sub(run), accent);
-    }
-
-    pub(crate) fn story_snapshot(&self) -> Option<(usize, usize, u8, i64, String)> {
-        let run = self.story.as_ref()?;
-        Some((run.stage, run.wave, run.credits, run.score, format!("{:?}", run.phase)))
     }
 
     pub(crate) fn story_jump_to_stage(&mut self, stage: usize) {

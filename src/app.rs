@@ -13,7 +13,7 @@ use std::sync::Arc;
 use ume_engine::ai::Ai;
 use ume_engine::chardef::CharDef;
 
-mod arcade;
+pub(crate) mod arcade;
 mod cutscene;
 mod fight_seed;
 mod keyedit; pub(crate) mod keyedit_note;
@@ -143,7 +143,7 @@ pub struct App {
     pub ai_level: i32,
     pub sel: (usize, usize, usize),
     pub session: Option<Session>,
-    pub arcade: Option<(Vec<usize>, usize)>,
+    pub arcade: Option<arcade::ArcadeRun>,
     pub boss_progression: crate::boss::BossProgression,
     pause: pause::PauseState,
     pub debug_boxes: bool,
@@ -1858,7 +1858,7 @@ impl App {
                 && self
                     .arcade
                     .as_ref()
-                    .is_some_and(|(l, i)| *i + 1 == l.len() && l.last() == Some(&r));
+                    .is_some_and(|run| run.index + 1 == run.ladder.len() && run.ladder.last() == Some(&r));
             if is_boss_match {
                 if let crate::registry::Src::Native(nc) = &self.reg.chars[r].src {
                     let mut boss_nc = (**nc).clone();
@@ -1897,10 +1897,10 @@ impl App {
             let stage = self.pending.stage.take().ok_or("stage")?;
             let teams = std::mem::take(&mut self.pending.defs);
             let boss_phase = if self.mode == Mode::Arcade {
-                self.arcade.as_ref().map(|(l, i)| {
+                self.arcade.as_ref().map(|run| {
                     let b = self.boss_idx();
-                    if Some(l.get(*i).copied().unwrap_or(usize::MAX)) == b {
-                        l[..=*i].iter().filter(|&&x| Some(x) == b).count()
+                    if Some(run.ladder.get(run.index).copied().unwrap_or(usize::MAX)) == b {
+                        run.ladder[..=run.index].iter().filter(|&&x| Some(x) == b).count()
                     } else { 0 }
                 }).unwrap_or(0)
             } else { 0 };
@@ -1916,8 +1916,8 @@ impl App {
                 8
             } else {
                 match &self.arcade {
-                    Some((_, i)) if self.mode == Mode::Arcade => {
-                        (2 + *i as i32 + self.ai_level / 3).min(8)
+                    Some(run) if self.mode == Mode::Arcade => {
+                        (2 + run.index as i32 + self.ai_level / 3).min(8)
                     }
                     _ => self.ai_level,
                 }

@@ -6,6 +6,8 @@ use crate::ui::*;
 
 mod ladder_bar;
 mod route;
+mod run;
+pub(crate) use run::ArcadeRun;
 
 impl App {
     pub(crate) fn playable(&self) -> Vec<usize> {
@@ -113,9 +115,11 @@ impl App {
             })
             .is_some();
         let routed = self.route_ladder(me, mate, &ladder, boss);
+        let mut route_stages = None;
         let has_boss = has_boss && routed.is_none();
-        if let Some(route_ladder) = routed {
+        if let Some((route_ladder, stages)) = routed {
             ladder = route_ladder;
+            route_stages = Some(stages);
         }
         self.sel = (me, ladder[0], self.sel.2);
         self.team = mate.map(|m| Team::new(vec![me, m], vec![ladder[0]], true));
@@ -124,7 +128,7 @@ impl App {
         } else {
             vec![]
         };
-        self.arcade = Some((ladder, 0));
+        self.arcade = Some(ArcadeRun::new(ladder, route_stages));
         self.survival = None;
         self.ending_shown = false;
         if has_boss {
@@ -133,6 +137,9 @@ impl App {
                 page: 0,
                 t: 0.0,
             };
+        } else if let Some(stage) = self.arcade.as_ref().and_then(|run| run.stage_override(0)) {
+            self.sel.2 = stage;
+            self.screen = Screen::Vs { t: 0.0, step: 0 };
         } else {
             self.open_stages(1);
         }

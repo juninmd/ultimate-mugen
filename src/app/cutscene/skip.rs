@@ -34,7 +34,7 @@ impl App {
                 .any(|t| t.phase == TouchPhase::Started)
     }
 
-    fn tapped_in(&self, x: f32, y: f32, w: f32, h: f32) -> bool {
+    pub(crate) fn tapped_in(&self, x: f32, y: f32, w: f32, h: f32) -> bool {
         let inside = |p: Vec2| {
             let v = self.ui.to_virtual(p);
             v.x >= x && v.x <= x + w && v.y >= y && v.y <= y + h

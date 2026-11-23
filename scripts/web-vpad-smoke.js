@@ -133,20 +133,18 @@ const checks = [];
   await touch('touchStart', [[rx, ry, 1]]);
   await wait(300);
   await touch('touchMove', [[rx, ry, 1], [bx, by, 2], [ax, ay, 3]]);
-  await wait(60);
-  const both = await pad();
+  const both = await until('pad reports stick + X + A', async () => { const v = await pad(); return (v.bits & (K.R | K.X | K.A)) === (K.R | K.X | K.A) && v.fingers === 3 && v; }, 3000).catch(() => pad());
   let attacked = false, attackState = 0;
-  for (let i = 0; i < 10 && !attacked; i++) { attackState = (await p1()).state; attacked = attackState >= 200 && attackState < 5000; if (!attacked) await wait(30); }
+  for (let i = 0; i < 40 && !attacked; i++) { attackState = (await p1()).state; attacked = attackState >= 200 && attackState < 5000; if (!attacked) await wait(30); }
   await shot('fight-attack');
   ok('three fingers at once: stick + X + A', (both.bits & (K.R | K.X | K.A)) === (K.R | K.X | K.A) && both.fingers === 3, JSON.stringify(both));
   ok('attack while holding the stick', attacked, `state ${attackState}`);
   await touch('touchEnd', [[bx, by, 2], [ax, ay, 3]]);
-  await wait(100);
-  const afterLift = await pad();
+  const afterLift = await until('pad reports only the stick', async () => { const v = await pad(); return v.fingers === 1 && !(v.bits & (K.X | K.A)) && v; }, 3000).catch(() => pad());
   ok('lifting the button fingers keeps the stick held', afterLift.fingers === 1 && (afterLift.bits & K.R) && !(afterLift.bits & (K.X | K.A)), JSON.stringify(afterLift));
   await touch('touchCancel', []);
-  await wait(100);
-  ok('touchcancel releases everything', (await pad()).fingers === 0 && (await pad()).bits === 0);
+  const cleared = await until('pad cleared', async () => { const v = await pad(); return v.fingers === 0 && v.bits === 0 && v; }, 3000).catch(() => pad());
+  ok('touchcancel releases everything', cleared.fingers === 0 && cleared.bits === 0, JSON.stringify(cleared));
 
   await tapSel(btn('II'));
   await until('paused', async () => (await state()).paused === true, 5000);

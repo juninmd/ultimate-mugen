@@ -1,4 +1,40 @@
 use super::{Event, Match};
+use crate::chardef::Box4;
+use crate::fighter::asf;
+
+pub const GUARD_THREAT_MARGIN: f32 = 30.0;
+
+fn bounds(boxes: &[Box4]) -> Option<Box4> {
+    let first = *boxes.first()?;
+    Some(boxes[1..].iter().fold(first, |a, b| [a[0].min(b[0]), a[1].min(b[1]), a[2].max(b[2]), a[3].max(b[3])]))
+}
+
+fn gap(a0: f32, a1: f32, b0: f32, b1: f32) -> f32 {
+    (a0.max(b0) - a1.min(b1)).max(0.0)
+}
+
+fn reaches(attack: &[Box4], body: &[Box4], margin: f32) -> bool {
+    let (Some(a), Some(d)) = (bounds(attack), bounds(body)) else { return false };
+    gap(a[0], a[2], d[0], d[2]) <= margin && gap(a[1], a[3], d[1], d[3]) <= margin
+}
+
+impl Match {
+    pub fn in_guard_threat(&self, i: usize) -> bool {
+        let me = &self.fighters[i];
+        let body = me.boxes(2);
+        for (enemy, e) in self.fighters.iter().enumerate() {
+            if e.side == me.side || e.destroyed || !e.alive || e.ikemen.standby || e.has_assert(asf::UNGUARDABLE) || !self.same_lane(i, enemy) { continue; }
+            if e.move_type != 'A' || !e.hitdef_active { continue; }
+            let Some(h) = &e.hitdef else { continue };
+            if h.guardflag.is_empty() || (e.pos.x - me.pos.x).abs() > h.guard_dist * e.lscl { continue; }
+            if reaches(&e.boxes(1), &body, GUARD_THREAT_MARGIN * me.lscl) { return true; }
+        }
+        self.projectiles.iter().any(|p| {
+            p.side != me.side && !p.dying && !p.hitdef.guardflag.is_empty() && (p.pos.x - me.pos.x).abs() <= p.guard_dist
+                && reaches(&Match::proj_boxes(p, 1), &body, GUARD_THREAT_MARGIN * me.lscl)
+        })
+    }
+}
 
 pub const GUARD_TIME_DIVISOR: i32 = 3;
 pub const PERFECT_GUARD_HEAL_RATIO: f32 = 0.015;

@@ -373,7 +373,7 @@ impl Match {
         if st == 'A' {
             let guard_blocked = self.fighters[i].has_assert(asf::NOAIRGUARD);
             let guard_input = cmd(self, "holdback") || self.fighters[i].has_assert(asf::AUTOGUARD) || self.fighters[i].guard_button;
-            if guard_input && !guard_blocked && self.in_guard_dist(i) && !(120..=155).contains(&s) {
+            if guard_input && !guard_blocked && self.in_guard_threat(i) && !(120..=155).contains(&s) {
                 let own = self.fighters[i].def.clone();
                 self.change_state(i, 120, own);
                 return;
@@ -383,7 +383,7 @@ impl Match {
             let guard_blocked = self.fighters[i].has_assert(if st == 'S' { asf::NOSTANDGUARD } else { asf::NOCROUCHGUARD });
             let guard_input = cmd(self, "holdback") || self.fighters[i].has_assert(asf::AUTOGUARD) || self.fighters[i].guard_button;
             if self.builtin_guard_exit(i, s, guard_input) { return; }
-            if guard_input && !guard_blocked && self.in_guard_dist(i) && !(120..=155).contains(&s) { let own = self.fighters[i].def.clone(); self.change_state(i, 120, own); return; }
+            if guard_input && !guard_blocked && self.in_guard_threat(i) && !(120..=155).contains(&s) { let own = self.fighters[i].def.clone(); self.change_state(i, 120, own); return; }
             if st == 'S' {
                 if cmd(self, "holdup") && !self.fighters[i].has_assert(asf::NOJUMP) { let own = self.fighters[i].def.clone(); self.change_state(i, 40, own); return; }
                 if cmd(self, "holddown") && s != 10 && s != 11 && !self.fighters[i].has_assert(asf::NOCROUCH) { let own = self.fighters[i].def.clone(); self.change_state(i, 10, own); return; }

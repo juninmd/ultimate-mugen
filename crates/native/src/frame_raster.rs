@@ -48,8 +48,19 @@ fn raster_frame(nc: &NativeChar, frame: &NativeFrame, with_images: bool, palette
     let base = render_frame(nc, frame, with_images, palette);
     let recolored = if frame.effect.is_some() { &[][..] } else { variants.0.as_slice() };
     // Variants keep only image and placement (`sprite_of`), so box fitting is skipped.
-    let variants = recolored.iter().map(|(group, palette)| (*group, super::pixel::load_art(nc, frame, Some(palette), false).unwrap_or_else(|| render_frame(nc, frame, true, Some(palette))))).collect();
+    let variants = recolored.iter().map(|(group, palette)| {
+        let mut art = super::pixel::load_art(nc, frame, Some(palette), false).unwrap_or_else(|| render_frame(nc, frame, true, Some(palette)));
+        share_unchanged_pixels(&base, &mut art);
+        (*group, art)
+    }).collect();
     FrameRaster { base, variants }
+}
+
+fn share_unchanged_pixels(base: &FrameArt, variant: &mut FrameArt) {
+    let (Some(plain), Some(recolored)) = (&base.image, &variant.image) else { return };
+    if plain.w == recolored.w && plain.h == recolored.h && plain.rgba == recolored.rgba {
+        variant.image = base.image.clone();
+    }
 }
 
 fn worker_count(jobs: usize) -> usize {
@@ -111,6 +122,19 @@ mod tests {
         let pixels = |s: &Sprite| s.image.as_ref().map(|i| (i.w, i.h, i.rgba.clone()));
         assert_eq!(pixels(&fast), pixels(&full), "recolored pixels are unchanged");
         assert_eq!((fast.width, fast.height, fast.axis_x, fast.axis_y, fast.scale), (full.width, full.height, full.axis_x, full.axis_y, full.scale));
+    }
+
+    #[test]
+    fn a_variant_that_changes_no_pixel_reuses_the_base_image() {
+        let fighter: NativeChar = serde_json::from_str(include_str!("../../../assets/chars/kaito.json")).unwrap();
+        let frame: NativeFrame = serde_json::from_value(serde_json::json!({"pose": "idle0", "ticks": 1})).unwrap();
+        let mut variants = VariantPalettes(Vec::new());
+        variants.assign(2, serde_json::json!({}));
+        variants.assign(3, fighter.palettes[0].clone());
+        let raster = raster_frame(&fighter, &frame, true, None, &variants);
+        let image = |group: i32| raster.variants.iter().find(|(g, _)| *g == group).and_then(|(_, art)| art.image.clone()).unwrap();
+        assert!(std::sync::Arc::ptr_eq(&image(2), raster.base.image.as_ref().unwrap()));
+        assert!(!std::sync::Arc::ptr_eq(&image(3), raster.base.image.as_ref().unwrap()));
     }
 
     #[test]

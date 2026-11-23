@@ -16,7 +16,7 @@ fn main() {
         let pv = ume_native::compile_native_preview(&nc, 1);
         let pms = t.elapsed().as_secs_f64() * 1000.0;
         tot += ms;
-        println!("{:10} full {:6.0} ms ({} sprites) · preview {:5.0} ms ({} sprites) · pixels {:016x}", nc.id, ms, d.sprites.len(), pms, pv.sprites.len(), if checksum { pixel_checksum(&d) } else { 0 });
+        println!("{:10} full {:6.0} ms ({} sprites) · preview {:5.0} ms ({} sprites) · pixels {:016x} · resident {:.1} MB (variants {:.1} MB)", nc.id, ms, d.sprites.len(), pms, pv.sprites.len(), if checksum { pixel_checksum(&d) } else { 0 }, resident_mb(&d, |_| true), resident_mb(&d, |g| g >= 2 && g < 9000));
     }
     println!("total {tot:.0} ms");
 }
@@ -36,4 +36,10 @@ fn pixel_checksum(def: &ume_engine::chardef::CharDef) -> u64 {
         sprite.axis_x.to_bits().to_le_bytes().into_iter().chain(sprite.axis_y.to_bits().to_le_bytes()).for_each(&mut mix);
     }
     hash
+}
+
+fn resident_mb(def: &ume_engine::chardef::CharDef, keep: impl Fn(i32) -> bool) -> f64 {
+    let mut seen = std::collections::HashSet::new();
+    let bytes: usize = def.sprites.iter().filter(|(key, _)| keep(key.0)).filter_map(|(_, sprite)| sprite.image.as_ref()).filter(|image| seen.insert(std::sync::Arc::as_ptr(image) as usize)).map(|image| image.rgba.len()).sum();
+    bytes as f64 / 1_048_576.0
 }

@@ -10,6 +10,8 @@ pub mod objects;
 pub mod objects_art;
 pub mod objects_textures;
 mod run;
+mod script_source;
+pub mod studio;
 pub mod script;
 mod stages;
 mod tally;

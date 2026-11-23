@@ -19,6 +19,7 @@ mod web {
             Screen::SurvivalOver { .. } => "survival_over",
             Screen::Controls => "controls",
             Screen::CharTuning { .. } => "char_tuning",
+            Screen::StoryStudio { .. } => "story_studio",
             Screen::Mugen { .. } => "mugen",
             Screen::Market => "market",
             Screen::Replays { .. } => "replays",
@@ -66,6 +67,9 @@ mod web {
         let prefight = crate::query_params().iter().any(|(k, _)| k == "e2e_prefight");
         if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (prefight, &app.screen, app.story_snapshot()) {
             app.story_prefight_preview();
+        }
+        if crate::query_params().iter().any(|(k, _)| k == "e2e_studio") {
+            app.studio_e2e_open();
         }
         let ending = crate::query_params().iter().any(|(k, _)| k == "e2e_epilogue");
         if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (ending, &app.screen, app.story_snapshot()) {

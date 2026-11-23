@@ -85,7 +85,6 @@ impl App {
         if let Some(run) = self.story.as_mut() {
             run.epilogue = page;
         }
-        reset_textures();
         self.screen = Screen::Story { t: 0.0 };
     }
 

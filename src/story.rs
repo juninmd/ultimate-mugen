@@ -1,6 +1,7 @@
 pub mod beats;
 pub mod choice;
 pub mod epilogue;
+pub mod helper;
 pub mod epilogue_music;
 pub mod epilogue_pose;
 pub mod objects;
@@ -12,6 +13,7 @@ mod stages;
 mod tally;
 pub mod text;
 
+pub use helper::HelperPick;
 pub use run::{Next, Phase, StoryRun};
 pub use script::active as active_script;
 pub use tally::StageTally;

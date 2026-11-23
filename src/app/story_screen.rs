@@ -1,7 +1,7 @@
 use crate::app::{App, Screen};
 use crate::controls::nav;
 use crate::gfx::*;
-use crate::story::{beats, choice, text, Phase};
+use crate::story::{beats, choice, helper, text, Phase};
 use crate::ui::*;
 
 impl App {
@@ -15,8 +15,12 @@ impl App {
         if self.story_epilogue(&run, t, dt) {
             return;
         }
-        let deciding = choice::pending(&run);
-        if deciding {
+        let choosing_helper = helper::pending(&run);
+        let deciding = choice::pending(&run) || choosing_helper;
+        if choosing_helper {
+            let confirmed = self.c.pressed(nav::OK | nav::START) && t > 0.35;
+            self.story_helper_input(&run, confirmed);
+        } else if deciding {
             if self.c.pressed(nav::LEFT) {
                 self.decide_mercy(true);
             } else if self.c.pressed(nav::RIGHT) {
@@ -46,7 +50,9 @@ impl App {
             Phase::Intro => (
                 text::stage_label(run.stage),
                 text::stage_title(run.stage).to_string(),
-                if deciding {
+                if choosing_helper {
+                    helper::prompt().to_string()
+                } else if deciding {
                     choice::prompt().to_string()
                 } else {
                     beats::stage_beat(run.stage, beats::beat_index(t)).to_string()
@@ -80,7 +86,9 @@ impl App {
             hex("#d8d0f0")
         };
         self.ui.text(&line, VW / 2.0, 410.0, 20.0, line_color, Align::Center, false);
-        if deciding {
+        if choosing_helper {
+            self.draw_story_helper_pick(&run, accent_color);
+        } else if deciding {
             self.ui.text(choice::hint(), VW / 2.0, 470.0, 20.0, WHITE, Align::Center, false);
             self.ui.text(choice::spare_label(), VW * 0.3, 510.0, 26.0, hex("#8fe3a8"), Align::Center, true);
             self.ui.text(choice::finish_label(), VW * 0.7, 510.0, 26.0, hex("#ff7a6b"), Align::Center, true);

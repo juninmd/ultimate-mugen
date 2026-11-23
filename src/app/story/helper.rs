@@ -1,0 +1,72 @@
+use crate::app::{App, Team};
+use crate::gfx::*;
+use crate::story::{helper, HelperPick, StoryRun};
+use crate::ui::*;
+
+impl App {
+    pub(crate) fn story_helper_candidates(&self, run: &StoryRun) -> Vec<usize> {
+        let hero = self.sel.0;
+        let player = self.player_char_id();
+        let boss = run.stage_boss_id(&player);
+        (0..self.reg.chars.len())
+            .filter(|&i| {
+                let entry = &self.reg.chars[i];
+                let id = entry.id.strip_prefix("umf:").unwrap_or(&entry.id);
+                i != hero
+                    && id != boss
+                    && !entry.mugen
+                    && !entry.boss
+                    && !entry.broken.get()
+                    && !id.starts_with("npc_")
+            })
+            .collect()
+    }
+
+    pub(super) fn story_assemble_team(&mut self, run: &StoryRun, hero: usize, foes: Vec<usize>) {
+        let helper = helper::active(run).and_then(|id| self.story_char(id));
+        let squad: Vec<usize> = std::iter::once(hero).chain(helper).collect();
+        self.team_pal = squad.iter().enumerate().map(|(k, _)| if k == 0 { self.side_pal(0) } else { 1 }).collect();
+        self.team = Some(Team::new(squad, foes, true));
+    }
+
+    pub(crate) fn story_helper_input(&mut self, run: &StoryRun, confirmed: bool) {
+        let candidates = self.story_helper_candidates(run);
+        let mut cursor = run.helper_cursor.min(candidates.len());
+        let mut moved = false;
+        if self.c.pressed(crate::controls::nav::LEFT) || self.clicked_rect(0.0, 440.0, VW * 0.3, 120.0) {
+            cursor = helper::step(cursor, candidates.len(), false);
+            moved = true;
+        } else if self.c.pressed(crate::controls::nav::RIGHT) || self.clicked_rect(VW * 0.7, 440.0, VW * 0.3, 120.0) {
+            cursor = helper::step(cursor, candidates.len(), true);
+            moved = true;
+        }
+        let accept = confirmed || self.clicked_rect(VW * 0.3, 440.0, VW * 0.4, 120.0);
+        let Some(run) = self.story.as_mut() else { return };
+        run.helper_cursor = cursor;
+        if moved {
+            self.audio.sfx("select");
+        } else if accept {
+            run.helper = match cursor.checked_sub(1).and_then(|k| candidates.get(k)) {
+                Some(&i) => {
+                    let id = self.reg.chars[i].id.clone();
+                    HelperPick::Chosen(id.strip_prefix("umf:").unwrap_or(&id).to_string())
+                }
+                None => HelperPick::Declined,
+            };
+            self.audio.sfx("confirm");
+        }
+    }
+
+    pub(crate) fn draw_story_helper_pick(&self, run: &StoryRun, accent: Color) {
+        let candidates = self.story_helper_candidates(run);
+        let cursor = run.helper_cursor.min(candidates.len());
+        let label = match cursor.checked_sub(1).and_then(|k| candidates.get(k)) {
+            Some(&i) => self.reg.chars[i].name.to_uppercase(),
+            None => helper::none_label().to_string(),
+        };
+        self.ui.text(helper::hint(), VW / 2.0, 462.0, 16.0, WHITE, Align::Center, false);
+        self.ui.text("<", VW * 0.22, 510.0, 34.0, accent, Align::Center, true);
+        self.ui.text(">", VW * 0.78, 510.0, 34.0, accent, Align::Center, true);
+        self.ui.text(&label, VW / 2.0, 510.0, 30.0, WHITE, Align::Center, true);
+    }
+}

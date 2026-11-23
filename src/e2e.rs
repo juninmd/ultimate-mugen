@@ -67,6 +67,10 @@ mod web {
         if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (prefight, &app.screen, app.story_snapshot()) {
             app.story_prefight_preview();
         }
+        let defeat = crate::query_params().iter().any(|(k, _)| k == "e2e_defeat");
+        if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (defeat, &app.screen, app.story_snapshot()) {
+            app.story_defeat_preview();
+        }
         let ending = crate::query_params().iter().any(|(k, _)| k == "e2e_epilogue");
         if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (ending, &app.screen, app.story_snapshot()) {
             app.story_epilogue_begin(app.sel.0, 0);

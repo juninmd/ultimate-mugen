@@ -38,6 +38,7 @@ pub struct StoryRun {
     pub epilogue: usize,
     pub mercy: Option<bool>,
     pub helper: HelperPick,
+    pub prefight: usize,
     pub helper_cursor: usize,
     pub tally: Option<StageTally>,
 }
@@ -56,6 +57,7 @@ impl Default for StoryRun {
             epilogue: 0,
             mercy: None,
             helper: HelperPick::Pending,
+            prefight: 0,
             helper_cursor: 0,
             tally: None,
         }

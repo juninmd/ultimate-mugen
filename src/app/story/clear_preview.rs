@@ -22,6 +22,15 @@ impl App {
         run.wave = run.stage_wave_count();
         run.phase = Phase::Intro;
         run.mercy = Some(false);
+        run.prefight = crate::story::prefight::PAGES;
+        self.story_prepare_fight();
+    }
+
+    pub(crate) fn story_prefight_preview(&mut self) {
+        let Some(run) = self.story.as_mut() else { return };
+        run.stage = crate::story::STAGES.len() - 1;
+        run.wave = run.stage_wave_count();
+        run.phase = Phase::Intro;
         self.story_prepare_fight();
     }
 }

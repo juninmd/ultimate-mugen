@@ -718,5 +718,35 @@
         "es": "Sin embargo, en algún punto del Camino de la Tormenta, nuevas chispas ya desafiaban la oscuridad, y Oboro sonrió esperando el siguiente acto."
       }
     ]
+  },
+  "byakuren": {
+    "scene": "spirit",
+    "title": {
+      "en": "A Thousand Petals, One Silence",
+      "pt": "Mil Pétalas, Um Silêncio",
+      "es": "Mil Pétalos, Un Silencio"
+    },
+    "boss": {
+      "en": "A blade of petals... and my eclipse scatters like blossoms in the wind?",
+      "pt": "Uma lâmina de pétalas... e o meu eclipse se dispersa como flores ao vento?",
+      "es": "Una hoja de pétalos... ¿y mi eclipse se dispersa como flores al viento?"
+    },
+    "reply": {
+      "en": "Spring does not hate the winter, Oboro. It simply arrives.",
+      "pt": "A primavera não odeia o inverno, Oboro. Ela apenas chega.",
+      "es": "La primavera no odia al invierno, Oboro. Simplemente llega."
+    },
+    "pages": [
+      {
+        "en": "Above the Spirit Gate the sakura bloomed out of season, and the Scarlet Eclipse never rose again.",
+        "pt": "Acima do Portão dos Espíritos, as cerejeiras floresceram fora de época, e o Eclipse Escarlate nunca mais se ergueu.",
+        "es": "Sobre el Portal Espiritual los cerezos florecieron fuera de temporada, y el Eclipse Escarlata no volvió a alzarse."
+      },
+      {
+        "en": "Byakuren sheathed the blade and returned to the House of Sakuraba, the petals still falling behind him.",
+        "pt": "Byakuren embainhou a lâmina e voltou à Casa Sakuraba, com as pétalas ainda caindo atrás de si.",
+        "es": "Byakuren envainó la hoja y regresó a la Casa Sakuraba, con los pétalos aún cayendo a su espalda."
+      }
+    ]
   }
 }

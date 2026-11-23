@@ -127,6 +127,7 @@ impl App {
                 }
             }
             _ => {
+                if matches!(next, Next::Finished) && self.boss_progression.on_story_clear().is_some() { self.audio.sfx("unlock"); }
                 self.audio.stop_music();
                 self.session = None;
                 self.screen = Screen::Story { t: 0.0 };

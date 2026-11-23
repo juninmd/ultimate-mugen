@@ -23,3 +23,9 @@ Speed fighter: `Lightning Palm` (`shunko`, `~D, DB, B, y`, three-hit teleport st
 ## Shion Kurogane (Zaraki-style)
 
 Brute with a greatsword: `Reckless Reiatsu Swing` (`reckless`, `D, D, x`, two-hit armor) and a rage passive from 50% life (up to 1.5x) on top of the existing time enrage.
+
+## Byakuren Sakuraba (Secret Story Mode Unlock — Full Byakuya-Inspired Fighter)
+Unlocked automatically upon clearing Story Mode (`stats.story.clear >= 1` in `assets/routes/unlocks.toml`). Features a dedicated sakura-blossom & black-shihakusho pixel-art sprite set (`assets/chars/sprites/byakuren/`), 6 original synthesized WAV sound effects (`snd_200_0..5.wav`), and exploits the full UMF 2.0 engine:
+- **Core Abilities**: Air-Walk (`fly`), *Shunpo* (`teleport`), *Senka* (`superSpeed`), *Reiatsu Charge* (`charge`), and *Utsusemi* autonomous petal clone (`helpers.clones`).
+- **Kido & Shikai**: *Chire, Sakuramai* (ground + air), *Hadō #4: Byakurai*, *Hadō #33: Sōkatsui*, *Bakudō #61: Rikujōkōrō*, *Bakudō #81: Dankū*, and *Shunpo: Senka* behind-teleport strike.
+- **2-Stage Bankai Transformations**: Form 1 (*Bankai: Mil Pétalas da Sombra* — unlocks *Kageyoshi: Petal Wave* & *Gokei: Blossom Dome*) and Form 2 (*Shukei: Hakuteiken* — unlocks the 2-bar White Emperor ultimate).

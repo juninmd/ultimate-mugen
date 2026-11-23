@@ -1,0 +1,96 @@
+{
+  "frames": {
+    "01_idle": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
+    "02_attack1": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
+    "03_attack2": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
+    "04_special": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
+    "05_projectile": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
+    "06_victory": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
+    "15_power0": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
+    "16_power1": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
+    "walk0": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
+    "walk1": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
+    "run0": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
+    "crouch": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
+    "jumpUp": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    }
+  },
+  "refHeight": 362,
+  "sounds": [
+    [
+      200,
+      0
+    ],
+    [
+      200,
+      1
+    ],
+    [
+      200,
+      2
+    ],
+    [
+      200,
+      3
+    ],
+    [
+      200,
+      4
+    ],
+    [
+      200,
+      5
+    ]
+  ]
+}

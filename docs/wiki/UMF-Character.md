@@ -189,7 +189,7 @@ Frames drawn from pixel sprites take their strike box from the explicit `box` wh
 - the standing hurtbox is `0.46 H` wide (M.U.G.E.N median `0.46 H`) and the crouching one `0.67 H` tall (M.U.G.E.N median `0.67 H`);
 - an explicit `box` is used as written, so keep it inside those proportions; the audit fails otherwise.
 
-`cargo test --release -p ume-engine --test native_hitbox_audit` checks every strike frame of the roster (height, reach, start, width, above the head, under the floor), and `native_normal_reach` prints and compares the reach and damage of the four stand normals of every fighter.
+`cargo test --release -p ume-engine --test it native_hitbox_audit::` checks every strike frame of the roster (height, reach, start, width, above the head, under the floor), and `native_normal_reach` prints and compares the reach and damage of the four stand normals of every fighter.
 
 ### Standard names
 
@@ -265,7 +265,7 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 
 **Finisher.** A move with `"kind": "finisher"` (use `throw` or `hits` for the effect) is only available after a KO (`RoundState = 3` and `WinKO`). When the final round ends by KO and the winner has a finisher, the round waits up to 6 seconds on "FINISH HIM" for the winner to perform it; performing it (or the timeout) ends the wait. Rosters with no finisher are unaffected.
 
-**Ultimate.** A move whose `id` starts with `ult_` is the fighter's ultimate, and every native fighter declares one (the command is `~D, DF, F, D, DF, F, x+y`). The compiler spends the whole meter on it: `cost` defaults to `3000` (the three bars drawn by the HUD), the move gets a 70 % damage bonus where a normal `super` gets 30 %, and its super freeze lasts 75 ticks instead of 55. `cargo test --release -p ume-engine --test native_ultimates` fails when a fighter has no ultimate, when the cost is not three bars, when the ultimate does not start from its command or drains the meter, or when the measured damage is below 380 or not above every one of the fighter's supers.
+**Ultimate.** A move whose `id` starts with `ult_` is the fighter's ultimate, and every native fighter declares one (the command is `~D, DF, F, D, DF, F, x+y`). The compiler spends the whole meter on it: `cost` defaults to `3000` (the three bars drawn by the HUD), the move gets a 70 % damage bonus where a normal `super` gets 30 %, and its super freeze lasts 75 ticks instead of 55. `cargo test --release -p ume-engine --test it native_ultimates::` fails when a fighter has no ultimate, when the cost is not three bars, when the ultimate does not start from its command or drains the meter, or when the measured damage is below 380 or not above every one of the fighter's supers.
 
 ### Combat traits
 
@@ -275,7 +275,7 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 - **`armor`** (`hits` absorbed, optional `threshold` = damage above which the armor breaks). From move start until the last hit frame the move takes 35 % chip damage and is not interrupted; once `hits` are spent the next hit staggers normally.
 - **Multi-hit glue.** Moves with three or more `hits` push the target away only a little on every hit except the last (so the whole string connects) and piercing projectiles (4+ hits) do not shove the target out of the beam. Set `knockback` explicitly to opt out.
 
-Validate with `cargo test --release --test native_roster_lab -- --nocapture` (every attack state must connect; prints damage and reach per move), `--test native_combo_routes` (every declared cancel chains end to end) and `python scripts/audit_native_moves.py`.
+Validate with `cargo test --release --test it native_roster_lab:: -- --nocapture` (every attack state must connect; prints damage and reach per move), `--test it native_combo_routes::` (every declared cancel chains end to end) and `python scripts/audit_native_moves.py`.
 
 ### `hits[]`
 

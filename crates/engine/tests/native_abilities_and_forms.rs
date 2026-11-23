@@ -1,6 +1,6 @@
 //! Integration and homologation tests for flight, teleport, super speed,
 //! multi-transformations, body part vs full body changes, move swapping, and character swap.
-mod support;
+use crate::support;
 use std::sync::Arc;
 use support::*;
 use ume_native::{

@@ -176,7 +176,7 @@ Referência (4 núcleos, release): `kfm720` carrega em **27 ms** (antes 85 ms), 
 
 ```bash
 cargo run --release -p ume-engine --example mugen_load_bench   # tempo de carga M.U.G.E.N
-cargo test -p ume-engine --release --test tick_alloc           # zero alocações por tick
+cargo test -p ume-engine --release --test it tick_alloc::           # zero alocações por tick
 ```
 
 Detalhes na [página de Desempenho da wiki](docs/wiki/pt-BR/Desempenho.md).

@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 
 use support::{duel, mugen_char, ticks};
 use ume_engine::matchs::{Event, Match, ARENA_PLATFORMS, ELIXIR_LIFE_FACTOR};

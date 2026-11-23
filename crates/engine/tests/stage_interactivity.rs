@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 use support::*;
 use ume_engine::stage_objects::{Breakable, ObjectEvent, PickupSpec, PICKUP_ARM_TICKS};
 

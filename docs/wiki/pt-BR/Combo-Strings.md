@@ -22,7 +22,7 @@ Apertar o mesmo botão de ataque de novo depois de acertar encadeia o próximo g
 | `x` agachado | `cjab` > `cjab2` |
 | `x` no ar | `ajab` > `ajab2` |
 
-O `speed` do lutador (> 1 encurta cada frame) e a velocidade de andar/correr para frente subiram em todo o elenco; o chefe final acompanha para continuar mais rápido. A velocidade de recuo não mudou. Validado por `cargo test --release -p ume-engine --test native_same_button_chains`.
+O `speed` do lutador (> 1 encurta cada frame) e a velocidade de andar/correr para frente subiram em todo o elenco; o chefe final acompanha para continuar mais rápido. A velocidade de recuo não mudou. Validado por `cargo test --release -p ume-engine --test it native_same_button_chains::`.
 
 ## Variantes de projétil
 

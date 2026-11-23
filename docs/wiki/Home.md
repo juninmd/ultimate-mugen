@@ -97,7 +97,7 @@ Compatibility plans and architecture decisions are in [`docs/ROADMAP.md`](../ROA
 
 ## Compatibility status
 
-The progress toward Ikemen GO v1.0.0 parity is tracked in [issue #135](https://github.com/juninmd/ultimate-mugen/issues/135), with one issue per missing controller, trigger or feature. The lists of supported controllers, triggers and redirections in [CNS scripts](CNS-Scripts.md) are checked against the engine by `cargo test -p ume-engine --test wiki_sync`: a listed name the engine does not handle, an implemented name that is not listed, or a mismatch between the English and Portuguese pages fails the test. Every character load also reports the controllers, triggers and parameters it uses that the engine ignores (see "Load diagnostics" in the same page).
+The progress toward Ikemen GO v1.0.0 parity is tracked in [issue #135](https://github.com/juninmd/ultimate-mugen/issues/135), with one issue per missing controller, trigger or feature. The lists of supported controllers, triggers and redirections in [CNS scripts](CNS-Scripts.md) are checked against the engine by `cargo test -p ume-engine --test it wiki_sync::`: a listed name the engine does not handle, an implemented name that is not listed, or a mismatch between the English and Portuguese pages fails the test. Every character load also reports the controllers, triggers and parameters it uses that the engine ignores (see "Load diagnostics" in the same page).
 
 ## Acknowledgments
 

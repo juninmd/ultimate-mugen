@@ -93,7 +93,7 @@ These things cannot be done with files today. Each one is a feature gap, not a b
 ## Test
 
 ```bash
-cargo test --release -p ume-engine --test wiki_examples
+cargo test --release -p ume-engine --test it wiki_examples::
 UME_SHOTS_ONLY=stages cargo run --release -- --shots out/   # screenshots of every stage
 ```
 

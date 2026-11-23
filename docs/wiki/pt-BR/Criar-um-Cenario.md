@@ -93,7 +93,7 @@ Estas coisas não podem ser feitas só com arquivos hoje. Cada uma é uma lacuna
 ## Teste
 
 ```bash
-cargo test --release -p ume-engine --test wiki_examples
+cargo test --release -p ume-engine --test it wiki_examples::
 UME_SHOTS_ONLY=stages cargo run --release -- --shots out/   # capturas de todos os cenários
 ```
 

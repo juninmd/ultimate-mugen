@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 use support::gogeta::*;
 use ume_engine::input::InputSource;
 

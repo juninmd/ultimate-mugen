@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 use support::*;
 use ume_engine::input::k;
 use ume_native::{compile_native, parse_char};

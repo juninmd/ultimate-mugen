@@ -38,7 +38,7 @@ O leitor recusa arquivos incompletos ou com trechos maiores que a contagem decla
 
 O replay alimenta as entradas gravadas por `Pilot::Replay`; a simulação é determinística, então a luta é
 reconstruída exatamente. Um teste de ida e volta grava 1200 ticks, recarrega o arquivo e compara o checksum final
-(`cargo test -p ume-engine --test replay_roundtrip`).
+(`cargo test -p ume-engine --test it replay_roundtrip::`).
 
 Teclas do navegador:
 

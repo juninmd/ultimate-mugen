@@ -11,7 +11,7 @@ const dist = path.resolve(opt('dist', 'web/dist'));
 const outRoot = path.resolve(opt('out', 'web-qa-report'));
 const jobs = Math.max(1, Number(opt('jobs', 1)));
 const manifest = loadManifest();
-const scenarios = select(manifest, { shard: opt('shard'), only: opt('only') });
+const scenarios = select(manifest, { shard: opt('shard'), only: opt('only'), part: opt('part') });
 const guard = path.join(__dirname, 'web-guard.js');
 
 const run = scenario => new Promise(done => {
@@ -57,7 +57,7 @@ const run = scenario => new Promise(done => {
     while (queue.length) results.push(await run(queue.shift()));
   }));
   results.sort((a, b) => a.name.localeCompare(b.name));
-  const markdown = summaryMarkdown(results, { shard: opt('shard') });
+  const markdown = summaryMarkdown(results, { shard: opt('shard') || (opt('part') && `part ${opt('part')}`) });
   fs.writeFileSync(path.join(outRoot, 'summary.md'), markdown);
   fs.writeFileSync(path.join(outRoot, 'summary.json'), JSON.stringify(results, null, 2));
   if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown);

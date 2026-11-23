@@ -4,8 +4,8 @@
 
 | Área | Teste | Comando |
 |---|---|---|
-| Parsers (SFF, AIR, INI/DEF/CNS/CMD, SND, ACT, PCX, PNG, zip, stage) | Fuzzer determinístico por mutação, usando o zip do kfm como semente. Falha em qualquer panic ou entrada acima de 1,5 s. | `UME_FUZZ_ITERS=4000 cargo test -p ume-formats --release --test fuzz` |
-| Spam de Explod, Projectile e Helper a cada tick | Custo do tick continua limitado | `cargo test -p ume-engine --release --test stress -- --nocapture` |
+| Parsers (SFF, AIR, INI/DEF/CNS/CMD, SND, ACT, PCX, PNG, zip, stage) | Fuzzer determinístico por mutação, usando o zip do kfm como semente. Falha em qualquer panic ou entrada acima de 1,5 s. | `UME_FUZZ_ITERS=4000 cargo test -p ume-formats --release --test it fuzz::` |
+| Spam de Explod, Projectile e Helper a cada tick | Custo do tick continua limitado | `cargo test -p ume-engine --release --test it stress:: -- --nocapture` |
 | Caminhos quentes | Bench embutido: SFF, AIR, CNS, carga de personagem, tick com 2, 6 e 10 lutadores | `cargo run -p ume-engine --release --example hotpath_bench` |
 | Rollback com latência | `crates/netplay/tests/rollback.rs` | `cargo test -p ume-netplay` |
 

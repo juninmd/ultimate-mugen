@@ -1,5 +1,5 @@
 //! Homologation tests for UMF 2.0 declarative traits: armor, parry, timestop, burst, flight.
-mod support;
+use crate::support;
 use support::*;
 use ume_native::{compile_native, NativeChar, NativeMove, ArmorSpec, ParrySpec};
 

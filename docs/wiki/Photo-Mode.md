@@ -37,4 +37,4 @@ Desktop builds write `photos/ultimate-mugen-<milliseconds>.png` next to the exec
 
 ## Verification
 
-`UME_SHOTS_ONLY=photo xvfb-run -a target/release/ultimate-mugen --shots <dir> --res 1280x720 --mute` writes the pause screen, a clean frame, the HUD frame, the four filters and a wide shot. Tests: `cargo test -p ume-engine --test photo_camera` and the `photo` unit tests in the root crate.
+`UME_SHOTS_ONLY=photo xvfb-run -a target/release/ultimate-mugen --shots <dir> --res 1280x720 --mute` writes the pause screen, a clean frame, the HUD frame, the four filters and a wide shot. Tests: `cargo test -p ume-engine --test it photo_camera::` and the `photo` unit tests in the root crate.

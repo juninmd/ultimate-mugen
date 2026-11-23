@@ -23,5 +23,5 @@ The coverage guard lives in `crates/engine/tests/mugen_coverage_matrix.rs`. It c
 ## How to check a new name
 
 1. Add it to the matching list in `mugen_coverage_matrix.rs`.
-2. Run `cargo test -p ume-engine --test mugen_coverage_matrix`.
+2. Run `cargo test -p ume-engine --test it mugen_coverage_matrix::`.
 3. If it fails, implement the controller or trigger and document it in `CNS-Scripts.md`.

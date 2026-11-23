@@ -18,7 +18,7 @@ Every native fighter (the 16 roster fighters and the 5 Story NPCs) has a signatu
 | Garan, Sylene, Kaito, Volta, Spitfire | Elemental: every hit carries fire, ice, wind or lightning stun | `string_b` > `string_c` > element special |
 | Garan, Lian, Jin, Suzume, Phantom, Razor | Ground-bounce finisher for a follow-up juggle | `string_c` |
 
-Validated by `cargo test --release -p ume-engine --test native_combo_routes` (every declared cancel chains on contact), `native_roster_lab` and `native_hitbox_audit`.
+Validated by `cargo test --release -p ume-engine --test it native_combo_routes::` (every declared cancel chains on contact), `native_roster_lab` and `native_hitbox_audit`.
 
 ## Same-button mini combos
 
@@ -32,7 +32,7 @@ Pressing the same attack button again after a hit chains into the next move, wit
 | crouch `x` | `cjab` > `cjab2` |
 | air `x` | `ajab` > `ajab2` |
 
-Fighter `speed` (> 1 shortens every timed frame) and forward walk/run velocity were raised roster-wide; the final boss is scaled with it so it stays faster. Back-walk speeds are unchanged. Validated by `cargo test --release -p ume-engine --test native_same_button_chains`.
+Fighter `speed` (> 1 shortens every timed frame) and forward walk/run velocity were raised roster-wide; the final boss is scaled with it so it stays faster. Back-walk speeds are unchanged. Validated by `cargo test --release -p ume-engine --test it native_same_button_chains::`.
 
 ## Projectile variants
 

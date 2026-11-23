@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 use std::sync::Arc;
 use support::gogeta::{load, Duel};
 use support::render;

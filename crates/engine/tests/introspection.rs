@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 use support::*;
 use ume_engine::chardef::safe_expr;
 use ume_engine::diagnostics::{audit_cns, Category};

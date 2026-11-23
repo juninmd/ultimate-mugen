@@ -11,7 +11,7 @@ mapped to `~D, DF, F, D, DF, F, x+y`. The compiler treats it as a finisher:
 
 ## Measured damage
 
-`cargo test --release -p ume-engine --test native_ultimates -- --nocapture` drives each ultimate
+`cargo test --release -p ume-engine --test it native_ultimates:: -- --nocapture` drives each ultimate
 from its real command on a full meter, at six distances, against a mirror opponent, and compares
 it with every one-bar super of the same fighter. Damage below is the best of the six distances;
 the test prints the whole spread, so a projectile ultimate reads lower at point blank and reaches
@@ -54,8 +54,8 @@ Every ultimate drains all 3000 power when it starts.
 ## Reproduce
 
 ```sh
-cargo test --release -p ume-engine --test native_ultimates -- --nocapture
-cargo test --release -p ume-engine --test native_roster_lab -- --nocapture
+cargo test --release -p ume-engine --test it native_ultimates:: -- --nocapture
+cargo test --release -p ume-engine --test it native_roster_lab:: -- --nocapture
 UME_TOUR=clips UME_CHARS=suzume,oboro,akio UME_CLIP_STRIDE=4 ultimate-mugen --shots <dir> --res 1280x720 --mute
 ume-tools ability-reel <dir> <out> 640 64 12 --no-normals
 UME_SHOTS_ONLY=pause ultimate-mugen --shots <dir> --res 1280x720 --mute

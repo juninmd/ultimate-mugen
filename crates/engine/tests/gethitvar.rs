@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 use support::*;
 use ume_engine::expr::{parse, Expr};
 use ume_engine::fighter::{Bind, BindKind};

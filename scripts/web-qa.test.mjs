@@ -29,12 +29,21 @@ test('no web smoke script can be forgotten: it runs in a scenario or is excluded
   for (const [name, reason] of Object.entries(manifest.excluded)) assert.ok(reason.length > 3, `${name} needs a reason`);
 });
 
-test('CI runs every shard of the manifest through the runner', () => {
+test('CI runs every scenario through the runner parts', () => {
   assert.match(ci, /node scripts\/web-qa\.js/);
-  const matrix = ci.match(/shard: \[([^\]]+)\]/);
-  assert.ok(matrix, 'ci.yml has no shard matrix');
-  const listed = matrix[1].split(',').map(x => x.trim());
-  assert.deepEqual([...listed].sort(), [...lib.shardsOf(manifest)].sort());
+  const matrix = ci.match(/part: \[([^\]]+)\]/);
+  assert.ok(matrix, 'ci.yml has no part matrix');
+  const parts = matrix[1].split(',').map(x => Number(x.trim()));
+  assert.deepEqual(parts, parts.map((_, i) => i + 1));
+  const seen = parts.flatMap(i => lib.select(manifest, { part: `${i}/${parts.length}` }).map(s => s.name));
+  assert.deepEqual(seen.sort(), manifest.scenarios.map(s => s.name).sort());
+});
+
+test('partition balances by weight and is deterministic', () => {
+  const sc = ['a', 'b', 'c', 'd'].map(name => ({ name }));
+  const bins = lib.partition(sc, 2, { a: 100, b: 60, c: 40, d: 10 });
+  assert.deepEqual(bins.map(b => b.map(s => s.name)), [['a', 'd'], ['b', 'c']]);
+  assert.throws(() => lib.select({ scenarios: sc }, { part: '3/2' }), /bad --part/);
 });
 
 test('the browser flows named in the request stay covered', () => {

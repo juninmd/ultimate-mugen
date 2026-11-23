@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 use std::sync::Arc;
 use ume_engine::chardef::CharDef;
 use ume_engine::common::{common_def, flat_stage};

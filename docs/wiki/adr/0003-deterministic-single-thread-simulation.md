@@ -13,4 +13,4 @@ Rollback netplay (ggrs) and replays need the same inputs to give the same fight 
 
 ## Consequences
 
-Netplay, replays and tests share one simulation. Performance work targets loading, rendering and data layout instead of parallelizing the tick. `cargo test -p ume-engine --release --test tick_alloc` guards the allocation rule.
+Netplay, replays and tests share one simulation. Performance work targets loading, rendering and data layout instead of parallelizing the tick. `cargo test -p ume-engine --release --test it tick_alloc::` guards the allocation rule.

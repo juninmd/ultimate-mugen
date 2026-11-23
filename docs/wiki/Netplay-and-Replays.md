@@ -98,7 +98,7 @@ Replay decoding bounds files to 16 MiB, 500,000 runs and 2,000,000 total frames 
 
 Replaying feeds the recorded inputs through `Pilot::Replay`; the simulation is deterministic, so the fight is
 rebuilt exactly. A round-trip test records 1200 ticks, reloads the file and compares the final state checksum
-(`cargo test -p ume-engine --test replay_roundtrip`).
+(`cargo test -p ume-engine --test it replay_roundtrip::`).
 
 Browser keys:
 

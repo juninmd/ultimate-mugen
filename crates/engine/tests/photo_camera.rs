@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 use support::*;
 use ume_engine::photo_camera::{frame, unframe, PhotoView, CLOSE_MAX, FAR_MAX, PAN_Y_LIMIT};
 

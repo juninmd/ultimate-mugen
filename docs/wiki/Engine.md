@@ -25,7 +25,7 @@ Tick flow: inputs → `Match::tick` → for each fighter, `[Statedef -3/-2/-1]` 
 2. `n(m, "param", default)` reads a numeric parameter; `n2(m, "param", default, index)` reads the Nth value; `sc.has("param", 0)` tests presence; `sc.raw("param")` returns the text.
 3. Add the field in `fighter.rs` if you need new state.
 4. Write a test in `crates/engine/tests/combat_logic.rs` calling `ume_engine::controllers::run`.
-5. List the name in `CNS-Scripts.md` and `pt-BR/Scripts-CNS.md`. `cargo test -p ume-engine --test wiki_sync` fails for an implemented controller that is not listed and for a listed one that is not implemented. Return `true` from the module's `run` (or fall through to the last branch) so the load diagnostics do not report it as unsupported.
+5. List the name in `CNS-Scripts.md` and `pt-BR/Scripts-CNS.md`. `cargo test -p ume-engine --test it wiki_sync::` fails for an implemented controller that is not listed and for a listed one that is not implemented. Return `true` from the module's `run` (or fall through to the last branch) so the load diagnostics do not report it as unsupported.
 
 ## Add a trigger
 
@@ -47,7 +47,7 @@ Put the decoder in `crates/formats/src/<format>.rs`, export it in `lib.rs` and t
 |---|---|
 | `cargo test --workspace --release` | Everything |
 | `cargo test -p ume-engine --test kfm` | Reference Kung Fu Man |
-| `cargo test -p ume-engine --test combat_logic` | Combat rules |
+| `cargo test -p ume-engine --test it combat_logic::` | Combat rules |
 | `cargo test -p ume-formats` | Decoders |
 | `cargo clippy --workspace -- -D warnings` | Lint |
 | `node scripts/web-smoke.js web/dist` | Web build in Chromium |

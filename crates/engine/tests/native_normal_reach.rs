@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 use std::collections::HashMap;
 use std::sync::Arc;
 use support::*;

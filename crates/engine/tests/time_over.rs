@@ -1,4 +1,4 @@
-mod support;
+use crate::support;
 use support::*;
 
 fn timed_duel(ticks_total: i32) -> ume_engine::matchs::Match {

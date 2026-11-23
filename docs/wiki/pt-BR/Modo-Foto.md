@@ -37,4 +37,4 @@ No desktop, `photos/ultimate-mugen-<milissegundos>.png` ao lado do executável, 
 
 ## Verificação
 
-`UME_SHOTS_ONLY=photo xvfb-run -a target/release/ultimate-mugen --shots <dir> --res 1280x720 --mute` grava a pausa, o quadro limpo, o quadro com HUD, os quatro filtros e um plano aberto. Testes: `cargo test -p ume-engine --test photo_camera` e os testes `photo` do crate raiz.
+`UME_SHOTS_ONLY=photo xvfb-run -a target/release/ultimate-mugen --shots <dir> --res 1280x720 --mute` grava a pausa, o quadro limpo, o quadro com HUD, os quatro filtros e um plano aberto. Testes: `cargo test -p ume-engine --test it photo_camera::` e os testes `photo` do crate raiz.

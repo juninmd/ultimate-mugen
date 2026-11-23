@@ -1,7 +1,7 @@
 //! Content we do not control must never abort the simulation: M.U.G.E.N. packs ship inverted camera bounds, inverted
 //! lane limits and life values a character script can push out of order. `f32::clamp(min > max)` panics, and in the
 //! browser build a panic inside the frame loop kills the whole page (`RuntimeError: unreachable executed`).
-mod support;
+use crate::support;
 use support::*;
 
 const CNS: &str = "\n[Statedef -1]\ntype = S\nmovetype = I\nphysics = S\nanim = 0\nctrl = 1\n\n[State -1, idle]\ntype = ChangeState\ntrigger1 = 1\nvalue = 0\n";

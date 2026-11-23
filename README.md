@@ -176,7 +176,7 @@ Reference (4 cores, release): `kfm720` loads in **27 ms** (was 85 ms), `kfm` in 
 
 ```bash
 cargo run --release -p ume-engine --example mugen_load_bench   # M.U.G.E.N load time
-cargo test -p ume-engine --release --test tick_alloc           # zero allocations per tick
+cargo test -p ume-engine --release --test it tick_alloc::           # zero allocations per tick
 ```
 
 Details in the [Performance wiki page](docs/wiki/Performance.md).

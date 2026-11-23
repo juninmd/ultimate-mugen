@@ -52,6 +52,6 @@ During a connected attack (normal, special, not a super), double tap up within 3
 | Event for the presentation | `Event::Rush { fighter, side, guarded }` in `crates/engine/src/matchs/types.rs` |
 | Effects (rings, glow, sparks, tag, Overdrive embers) | `src/vfx/rush.rs` |
 | Rollback checksum | `overdrive`, `cooldown` and `cancels` in `crates/netplay/src/checksum.rs` |
-| Tests | `cargo test --release -p ume-engine --test rush_cancel` |
+| Tests | `cargo test --release -p ume-engine --test it rush_cancel::` |
 
 `rush_step` runs once per simulation tick after the input phase and is allocation-free (the afterimage trail only grows when a cancel happens). Everything is plain data on `Fighter::rush`, so `Match` stays `Clone` and replays and rollback are unaffected.

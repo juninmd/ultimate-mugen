@@ -1,4 +1,5 @@
 use super::*;
+use crate::app::arcade::storyboard::After as ArcadeAfterStoryboard;
 
 impl App {
     pub(super) async fn results(&mut self) {
@@ -22,21 +23,20 @@ impl App {
             let boss = self.boss_idx();
             let mut next_action = None;
             if let Some(run) = self.arcade.as_mut() {
-                run.index += 1;
                 if run.index < run.ladder.len() {
-                    let is_boss = Some(run.ladder[run.index]) == boss;
-                    let boss_cnt = if is_boss {
-                        run.ladder[..=run.index].iter().filter(|&&x| Some(x) == boss).count()
-                    } else {
-                        0
-                    };
-                    next_action = Some((run.index, run.ladder[run.index], is_boss, boss_cnt, false));
-                } else if run.index == run.ladder.len()
-                    && !self.ending_shown
-                    && boss.is_some_and(|b| run.ladder.last() == Some(&b))
-                {
-                    self.ending_shown = true;
-                    next_action = Some((run.index, 0, false, 0, true));
+                    run.index += 1;
+                    if run.index < run.ladder.len() {
+                        let is_boss = Some(run.ladder[run.index]) == boss;
+                        let boss_cnt = if is_boss {
+                            run.ladder[..=run.index].iter().filter(|&&x| Some(x) == boss).count()
+                        } else {
+                            0
+                        };
+                        next_action = Some((run.index, run.ladder[run.index], is_boss, boss_cnt, false));
+                    } else if !self.ending_shown && boss.is_some_and(|b| run.ladder.last() == Some(&b)) {
+                        self.ending_shown = true;
+                        next_action = Some((run.index, 0, false, 0, true));
+                    }
                 }
             }
             if let Some((idx, next_char, is_boss, boss_cnt, is_ending)) = next_action {
@@ -53,6 +53,9 @@ impl App {
                         })
                         .unwrap_or_default();
                     self.boss_progression.on_clear(&hero_id, &boss_entry_id);
+                    if self.start_route_storyboard_slot(idx, ArcadeAfterStoryboard::Ending) {
+                        return;
+                    }
                     self.screen = Screen::Cutscene {
                         kind: 5,
                         page: 0,
@@ -75,25 +78,19 @@ impl App {
                         t.members[1] = vec![next_char];
                     }
                 }
-                self.screen = match (is_boss, boss_cnt) {
-                    (true, 3..) => Screen::Cutscene {
-                        kind: 4,
-                        page: 0,
-                        t: 0.0,
-                    },
-                    (true, 2) => Screen::Cutscene {
-                        kind: 3,
-                        page: 0,
-                        t: 0.0,
-                    },
-                    (true, _) => Screen::Cutscene {
-                        kind: 1,
-                        page: 0,
-                        t: 0.0,
-                    },
-                    _ => Screen::Vs { t: 0.0, step: 0 },
-                };
+                let after = ArcadeAfterStoryboard::Fight { index: idx, is_boss, boss_count: boss_cnt };
+                if self.start_route_storyboard_slot(idx, after) {
+                    return;
+                }
+                self.continue_arcade_fight(idx, is_boss, boss_cnt);
                 return;
+            }
+            let final_slot = self.arcade.as_ref().map(|run| run.ladder.len());
+            if let Some(slot) = final_slot {
+                let after = ArcadeAfterStoryboard::Results { winner, cur };
+                if self.start_route_storyboard_slot(slot, after) {
+                    return;
+                }
             }
         }
         draw_rectangle(

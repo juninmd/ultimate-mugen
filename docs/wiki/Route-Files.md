@@ -39,11 +39,13 @@ Each `[[step]]` has exactly one of `fight`, `storyboard` or `action`.
 |---|---|
 | `fight` | `order` (1 picks the next regular opponent, 2 or more picks the boss), `p2` (fighter ids or names, first match wins), `stage`, `winscreen` |
 | `stage` | Stage id or name; `random` chooses a random stage. The first fight skips stage select when its route names a stage. An unknown stage keeps the normal automatic choice. |
-| `storyboard` | Parsed and validated, not played yet: the engine reports it and continues |
+| `storyboard` | Plays a `.def` storyboard from an imported MUGEN pack, including its `.sff` image layers and `.air` animations; referenced files resolve relative to the storyboard |
 | `action` | `clear` ends the route |
 | `repeat` | 1 to 99 times; `when` is checked on every repetition |
 | `when` | Condition; the step runs only when true |
 | `else` | Same keys as a step body (`fight`, `storyboard`, `action`); runs when `when` is false |
+
+Storyboards between fights play before the next fight. A storyboard before the first fight replaces the built-in arcade opening; a final storyboard plays before the ending or the final results screen. Press confirm to advance a scene, or Back/Start to skip the current storyboard. If a storyboard file or its required sprite file cannot be loaded, the engine reports the path and continues the route.
 
 The route is planned when arcade starts, assuming the player wins every fight, which is the only path a run can take. A lost fight ends the run as usual.
 

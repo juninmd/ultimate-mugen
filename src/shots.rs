@@ -606,7 +606,7 @@ async fn story(app: &mut App, dir: &str) {
         app.session = None;
     }
     app.sel = (find(app, "kaito"), find(app, "oboro"), 0);
-    app.arcade = Some(crate::app::arcade::ArcadeRun::new(vec![find(app, "oboro")], None));
+    app.arcade = Some(crate::app::arcade::ArcadeRun::new(vec![find(app, "oboro")], None, None));
     for (kind, page, name) in [
         (0u8, 1usize, "62-cutscene-opening"),
         (1, 3, "63-cutscene-boss"),

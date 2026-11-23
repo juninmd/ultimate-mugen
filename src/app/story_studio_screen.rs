@@ -8,7 +8,8 @@ const RULE_ROWS: usize = RULES.len();
 const STAGE_ROW: usize = RULE_ROWS;
 const BEAT_ROW: usize = STAGE_ROW + 1;
 const RESET_ROW: usize = BEAT_ROW + BEATS;
-const ROWS: usize = RESET_ROW + 1;
+const EPILOGUE_ROW: usize = RESET_ROW + 1;
+const ROWS: usize = EPILOGUE_ROW + 1;
 const ROW_TOP: f32 = 142.0;
 const ROW_H: f32 = 40.0;
 const VALUE_W: f32 = 700.0;
@@ -131,6 +132,10 @@ impl App {
                 st.note = tr3("Roteiro original restaurado", "Original script restored", "Guion original restaurado").into();
                 self.audio.sfx("cancel");
             }
+            EPILOGUE_ROW if ok => {
+                self.epi_studio = None;
+                self.screen = Screen::EpilogueStudio { cur: 0 };
+            }
             _ => {}
         }
         cur
@@ -176,6 +181,7 @@ impl App {
                 let name = st.script.stage_title(st.stage, lang);
                 (tr3("Fase", "Stage", "Fase").into(), format!("‹ {}/{} · {} ›", st.stage + 1, st.script.stages.len().max(1), name))
             }
+            EPILOGUE_ROW => (tr3("Epílogos…", "Epilogues…", "Epílogos…").into(), "›".into()),
             RESET_ROW => (tr3("Restaurar roteiro original", "Restore original script", "Restaurar guion original").into(), String::new()),
             c => {
                 let n = c - BEAT_ROW;

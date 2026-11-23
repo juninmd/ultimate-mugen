@@ -587,7 +587,7 @@ impl App {
             }
         }
 
-        if matches!(self.screen, Screen::CharTuning { .. } | Screen::StoryStudio { .. }) {
+        if matches!(self.screen, Screen::CharTuning { .. } | Screen::StoryStudio { .. } | Screen::EpilogueStudio { .. }) {
             return;
         }
         if matches!(self.screen, Screen::Controls) {

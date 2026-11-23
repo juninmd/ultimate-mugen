@@ -1,6 +1,8 @@
 pub mod beats;
 pub mod choice;
 pub mod epilogue;
+pub mod epilogue_edit;
+pub mod epilogue_store;
 pub mod helper;
 pub mod prefight;
 pub mod rank;

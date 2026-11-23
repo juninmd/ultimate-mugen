@@ -53,13 +53,15 @@ mod web {
         if !ON.with(|on| *on) {
             return;
         }
-        if crate::query_params().iter().any(|(k, _)| k == "e2e_arcade_route")
+        let route_storyboard = crate::query_params().iter().any(|(k, _)| k == "e2e_arcade_storyboard");
+        if crate::query_params().iter().any(|(k, _)| k == "e2e_arcade_route" || k == "e2e_arcade_storyboard")
             && matches!(&app.screen, Screen::Menu { .. })
             && app.arcade.is_none()
         {
+            let storyboard = if route_storyboard { "[[step]]\nstoryboard = \"chars/kfm/intro.def\"\n" } else { "" };
             crate::storage::write(
                 "route_kaito.toml",
-                "[route]\nid = \"e2e-stage-route\"\n[[step]]\nfight = { p2 = [\"bruno\"], stage = \"native:brazil\" }\n",
+                &format!("[route]\nid = \"e2e-stage-route\"\n{storyboard}[[step]]\nfight = {{ p2 = [\"bruno\"], stage = \"native:brazil\" }}\n"),
             );
             if let Some(hero) = app.reg.chars.iter().position(|fighter| fighter.id == "umf:kaito") {
                 app.mode = Mode::Arcade;
@@ -145,7 +147,11 @@ mod web {
                     .get(app.sel.2)
                     .map(|stage| format!("\"{}\"", stage.id.replace('"', "")))
                     .unwrap_or_else(|| "null".into());
-                format!("{{\"fight\":{},\"stage\":{stage}}}", run.index + 1)
+                let (storyboard, scene) = match &app.screen {
+                    Screen::Cutscene { kind: 6, page, .. } => ("true", page.to_string()),
+                    _ => ("false", "null".into()),
+                };
+                format!("{{\"fight\":{},\"stage\":{stage},\"storyboard\":{storyboard},\"scene\":{scene}}}", run.index + 1)
             },
         );
         let roster = format!(

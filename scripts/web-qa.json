@@ -13,6 +13,7 @@
     { "name": "market-portraits", "shard": "ui", "script": "web-market-smoke.js", "args": ["{dist}"] },
     { "name": "arcade-click", "shard": "ui", "script": "web-arcade-smoke.js", "args": ["{dist}"] },
     { "name": "arcade-route-stage", "shard": "ui", "script": "web-route-stage-smoke.js", "args": ["{dist}"] },
+    { "name": "arcade-route-storyboard", "shard": "ui", "script": "web-route-storyboard-smoke.js", "args": ["{dist}"] },
     { "name": "story", "shard": "ui", "script": "web-story-smoke.js", "args": ["{dist}"] },
     { "name": "epilogue", "shard": "ui", "script": "web-epilogue-smoke.js", "args": ["{dist}"] },
     { "name": "story-studio", "shard": "ui", "script": "web-studio-smoke.js", "args": ["{dist}"] },

@@ -87,13 +87,14 @@ impl Batch {
         let (mut u1, mut v1) = ((q.src.x + q.src.w) as f32 / aw, (q.src.y + q.src.h) as f32 / ah);
         if q.flip_h { std::mem::swap(&mut u0, &mut u1); }
         if q.flip_v { std::mem::swap(&mut v0, &mut v1); }
-        let add = [q.add[0], q.add[1], q.add[2], 0.0];
+        let v00 = Vertex::new([x, y], [u0, v0], q.palette, q.mul, [q.add[0], q.add[1], q.add[2], 0.0], 0.0);
+        let (x1, y1) = (x + w, y + h);
         let base = self.vertices.len() as u32;
         self.vertices.extend_from_slice(&[
-            Vertex::new([x, y], [u0, v0], q.palette, q.mul, add, 0.0),
-            Vertex::new([x + w, y], [u1, v0], q.palette, q.mul, add, 0.0),
-            Vertex::new([x + w, y + h], [u1, v1], q.palette, q.mul, add, 0.0),
-            Vertex::new([x, y + h], [u0, v1], q.palette, q.mul, add, 0.0),
+            v00,
+            Vertex { pos: [x1, y], uv: [u1, v0], ..v00 },
+            Vertex { pos: [x1, y1], uv: [u1, v1], ..v00 },
+            Vertex { pos: [x, y1], uv: [u0, v1], ..v00 },
         ]);
         self.indices.extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
         self.max_index = self.max_index.max(base + 3);

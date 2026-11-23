@@ -1,0 +1,47 @@
+const fs = require('fs'), path = require('path');
+const { staticServer } = require('./web-smoke-server');
+const { chromium } = require('playwright');
+const dir = path.resolve(process.argv[2] || path.join(__dirname, '..', 'web', 'dist'));
+const shotDir = process.env.WEB_SMOKE_SHOTS;
+const types = { '.html': 'text/html', '.js': 'text/javascript', '.wasm': 'application/wasm', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.zip': 'application/zip' };
+const server = staticServer(dir, types);
+(async () => {
+  await new Promise(ok => server.listen(0, '127.0.0.1', ok));
+  const url = `http://127.0.0.1:${server.address().port}/index.html?e2e=1&e2e_studio=1`;
+  const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
+  const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
+  const problems = [];
+  p.on('pageerror', e => { if (!/register_plugin/.test(e.message)) problems.push(`pageerror: ${e.message}`); });
+  p.on('console', m => { if (/panicked|PanicHookInfo/.test(m.text())) problems.push(`console: ${m.text().slice(0, 200)}`); });
+  await p.goto(url);
+  await p.locator('#boot').waitFor({ state: 'detached', timeout: 45000 }).catch(() => {});
+  await p.locator('#glcanvas').focus();
+  if (shotDir) fs.mkdirSync(shotDir, { recursive: true });
+  const frames = n => p.evaluate(n => new Promise(done => { const step = i => (i ? requestAnimationFrame(() => step(i - 1)) : done()); step(n); }), n);
+  const key = async (k, wait = 400) => { await p.keyboard.down(k); await frames(2); await p.keyboard.up(k); await frames(4); await p.waitForTimeout(wait); };
+  const state = () => p.evaluate(() => { try { return JSON.parse(globalThis.__ume_state || 'null'); } catch { return null; } });
+  const saved = () => p.evaluate(() => localStorage.getItem('ume.story-campaign.toml') || '');
+  const deadline = Date.now() + 60000;
+  let s = await state();
+  while ((!s || s.screen !== 'story_studio') && Date.now() < deadline) { await key('Enter', 600); s = await state(); }
+  if (!s || s.screen !== 'story_studio') problems.push(`studio never opened (${JSON.stringify(s)})`);
+  await key('ArrowRight');
+  const afterCredits = await saved();
+  if (!/credits = 4/.test(afterCredits)) problems.push(`credits change was not saved as TOML: ${afterCredits.slice(0, 120)}`);
+  for (let i = 0; i < 6; i++) await key('ArrowDown', 150);
+  await key('Enter');
+  await p.keyboard.type(' PLAYWRIGHT-LINE', { delay: 40 });
+  await frames(4);
+  if (shotDir) fs.writeFileSync(path.join(shotDir, 'studio-web-editing.png'), await p.screenshot());
+  await key('Enter');
+  const afterLine = await saved();
+  if (!afterLine.includes('PLAYWRIGHT-LINE')) problems.push('edited dialogue line was not saved');
+  if (shotDir) fs.writeFileSync(path.join(shotDir, 'studio-web-saved.png'), await p.screenshot());
+  await p.goto(url.replace('&e2e_studio=1', ''));
+  await p.locator('#boot').waitFor({ state: 'detached', timeout: 45000 }).catch(() => {});
+  const persisted = await saved();
+  if (!persisted.includes('PLAYWRIGHT-LINE')) problems.push('saved script did not survive a reload');
+  await b.close(); server.close();
+  if (problems.length) { console.error('WEB STUDIO SMOKE FAILED\n' + problems.join('\n')); process.exit(1); }
+  console.log('WEB STUDIO SMOKE OK');
+})().catch(e => { console.error('SCRIPT FAIL', e); process.exit(2); });

@@ -65,3 +65,9 @@ es = ["La red está bloqueada.", "Rompe el cortafuegos."]
 
 - `title` e `beats` aceitam tanto texto simples / lista simples (usados em todos os idiomas) quanto tabela `{ en, pt, es }`.
 - `alt_boss` entra automaticamente caso o jogador escolha o `boss` principal da fase.
+
+## Editor da História (dentro do jogo)
+
+Ajustes → Jogabilidade → **Editor da História** edita a campanha ativa sem sair do jogo: créditos, vida recuperada por onda e por fase, vida e ataque do chefe e as quatro falas de cada fase no idioma atual. Cada mudança é validada, salva como TOML (`story-campaign.toml` no armazenamento do app, localStorage na web) e aplicada na hora. **Restaurar roteiro original** apaga a cópia salva.
+
+Ordem de busca da campanha: `UME_STORY_SCRIPT` → salvo pelo Editor → `story/campaign.toml`.

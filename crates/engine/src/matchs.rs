@@ -1549,6 +1549,7 @@ impl Match {
         let mut h = Fighter::new(id, root.def.clone(), f.side, f.player_no);
         h.is_helper = true;
         h.helper_id = self.num(i, sc, "id", 0.0, 0) as i32;
+        h.ikemen.helper_name = sc.raw("name").map(|s| s.trim().trim_matches('"').into());
         h.parent = Some(f.id); h.root = root.id;
         h.key_ctrl = num(self, "keyctrl", 0.0, 0) != 0.0;
         h.pause_move_time = if num(self, "pausemove", 0.0, 0) != 0.0 { 999_999 } else { num(self, "pausemovetime", 0.0, 0) as i32 };

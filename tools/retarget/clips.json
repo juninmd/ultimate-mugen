@@ -1,0 +1,39 @@
+{
+  "sources": {
+    "ual1": "Animation Library[Standard]/Godot/AnimationLibrary_Godot_Standard.glb",
+    "ual2": "Universal Animation Library 2 [Standard]/Unreal-Godot/UAL2_Standard.glb"
+  },
+  "clips": [
+    ["Idle", "ual1", "Sword_Idle"],
+    ["Walk", "ual1", "Walk_Loop"],
+    ["Run", "ual1", "Sprint_Loop"],
+    ["JumpStart", "ual1", "Jump_Start"],
+    ["JumpLoop", "ual1", "Jump_Loop"],
+    ["Land", "ual1", "Jump_Land"],
+    ["Crouch", "ual1", "Crouch_Idle_Loop"],
+    ["Guard", "ual2", "Sword_Block"],
+    ["HitLight", "ual1", "Hit_Chest"],
+    ["HitHead", "ual1", "Hit_Head"],
+    ["HitHeavy", "ual2", "Hit_Knockback"],
+    ["Down", "ual1", "Death01"],
+    ["GetUp", "ual2", "LayToIdle"],
+    ["SlashA", "ual2", "Sword_Regular_A"],
+    ["SlashB", "ual2", "Sword_Regular_B"],
+    ["SlashC", "ual2", "Sword_Regular_C"],
+    ["SlashCombo", "ual2", "Sword_Regular_Combo"],
+    ["SlashHeavy", "ual1", "Sword_Attack"],
+    ["DashSlash", "ual2", "Sword_Dash_RM"],
+    ["Getsuga", "ual2", "OverhandThrow"],
+    ["Cero", "ual1", "Spell_Simple_Shoot"],
+    ["Charge", "ual1", "Spell_Simple_Idle_Loop"],
+    ["Jab", "ual1", "Punch_Jab"],
+    ["Cross", "ual1", "Punch_Cross"],
+    ["Hook", "ual2", "Melee_Hook"],
+    ["Roll", "ual1", "Roll"],
+    ["Shunpo", "ual2", "NinjaJump_Start"],
+    ["AirIdle", "ual2", "NinjaJump_Idle_Loop"],
+    ["Slide", "ual2", "Slide_Loop"],
+    ["Win", "ual2", "Idle_FoldArms_Loop"],
+    ["Taunt", "ual2", "Yes"]
+  ]
+}

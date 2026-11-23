@@ -16,7 +16,7 @@ mod match_stats;
 mod panic_report;
 #[cfg(not(target_arch = "wasm32"))]
 mod native_import;
-mod menu_art;
+mod menu_art; mod model3d;
 mod moves_tour;
 mod mugen_tour;
 #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]

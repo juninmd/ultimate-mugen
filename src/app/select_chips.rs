@@ -3,8 +3,8 @@ use super::*;
 
 const X0: f32 = 430.0;
 const W: f32 = 98.0;
-const FILTER_W: f32 = 84.0;
-const GAP: f32 = 6.0;
+const FILTER_W: f32 = 74.0;
+const GAP: f32 = 4.0;
 const H: f32 = 26.0;
 const FILTER_Y: f32 = 12.0;
 const SORT_Y: f32 = 44.0;
@@ -67,7 +67,7 @@ impl App {
         }
         let view = self.char_view();
         if self.sel_filter != 0 && view.len() == self.playable().len() {
-            if self.sel_filter >= super::select_marks::FILTER_FAVORITES {
+            if (super::select_marks::FILTER_FAVORITES..=super::select_marks::FILTER_RECENT).contains(&self.sel_filter) {
                 self.msg = crate::i18n::tr3(
                     "Nenhum lutador aqui ainda: [F] favorita, escolher um lutador o põe em recentes",
                     "Nothing here yet: [F] adds a favorite, picking a fighter adds it to recent",

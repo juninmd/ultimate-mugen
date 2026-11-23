@@ -113,7 +113,7 @@ pub(super) fn insert_voices(d: &mut CharDef, nc: &NativeChar) {
     d.sounds.insert((1000, 3), include_bytes!("../../../assets/chars/voices/kaito/awake.wav").to_vec());
 }
 
-pub(super) fn anim_numbers(nc: &NativeChar) -> std::collections::HashMap<String, i32> {
+pub fn anim_numbers(nc: &NativeChar) -> std::collections::HashMap<String, i32> {
     let mut anim_no = std::collections::HashMap::new();
     let mut used = std::collections::HashSet::new();
     for (name, a) in nc.anims.iter() {

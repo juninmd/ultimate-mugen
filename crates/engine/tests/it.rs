@@ -77,6 +77,7 @@ mod native_exotic_companions;
 mod native_exotic_mechanics;
 mod native_finisher;
 mod native_hitbox_audit;
+mod native_hold_release;
 mod native_input_moves;
 mod native_kits;
 mod native_kits_extends;

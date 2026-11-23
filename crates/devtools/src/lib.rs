@@ -18,3 +18,4 @@ pub mod knockdown_rate;
 pub mod fight_census;
 pub mod float_scan;
 pub mod frame_data;
+pub mod stage_audit;

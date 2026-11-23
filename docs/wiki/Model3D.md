@@ -1,33 +1,37 @@
-# 3D fighters (prototype)
+# 3D fighters
 
-Status: isolated prototype, not wired into the game. Crate `crates/model3d` (`ume-model3d`); removing the workspace member and the crate directory reverts it completely.
+Status: shipped behind the Cargo feature `model3d`, on by default. Rollback: remove `model3d` from `default` in the root `Cargo.toml`; the game then draws the 2D donor sprites and hides the 3D category.
 
 ## Principle
 
-The simulation stays 2D. Hitboxes, physics, state machine and rollback never read the model. A 3D fighter is only a way to draw the same `stateno` and `statetime` the 2D fighter would use, so a 3D fighter can fight a 2D one.
+The simulation stays 2D. Hitboxes, physics, state machine and rollback never read the model. A 3D fighter is a UMF fighter (`assets/chars3d/<id>.json`, usually `extends` a native kit) whose drawing is replaced by a GLB model, so a 3D fighter fights a 2D one with the same rules. Light mode (`lite::scale() < 1`) falls back to the 2D sprites.
 
 ## Pipeline
 
-1. `Model::from_glb` parses a `.glb` (own parser over `serde_json`, no new dependency): nodes, skins, meshes, animations (linear and step; cubic spline is rejected).
-2. `StateMap` (JSON) maps MUGEN state numbers (ranges) to clip name, loop flag and speed; unknown states use the fallback clip.
-3. `Model::pose_for_state(map, stateno, statetime, &mut Posed)` samples the clip at `statetime / 60 * speed` and skins on the CPU. It is a pure function of its inputs, so it is rollback safe. `Posed` is reused between frames.
-4. `Model::project` applies an orthographic camera on the fight plane (x right, y up, depth only sorts), flips for `Facing`, shades each face with one directional light and returns back-to-front `Triangle`s in screen pixels.
+1. `Model::from_glb` parses a `.glb` (own parser over `serde_json`, PNG textures through `png`): nodes, skins, meshes, materials, animations.
+2. `StateMap` (JSON) maps native anim names (`anims`) or MUGEN state ranges (`states`) to a clip, loop flag and speed.
+3. The pose is a pure function of `anim_no`/`anim_elapsed` (or `stateno`/`statetime`), skinned on the CPU, so it is rollback safe.
+4. `Model::project` uses an orthographic camera on the fight plane, flat Lambert shading and back-to-front triangles, drawn through `ume_shell::quad::draw_mesh` batched by texture. No GPU pipeline change.
 
-The triangles are meant to be pushed through `ume_shell::quad::draw_mesh` (per-vertex color, no texture), so no GPU pipeline change is needed and the web build keeps its single batch.
+## In the game
 
-## State map
+- `src/model3d.rs` is the facade (`draw`, `draw_fit`, `is_3d`, `portrait`); `src/model3d/specs.rs` lists the models.
+- Fight: one line in `render.rs`. Select, versus and results panels: `draw_fit` inside `draw_char_fit`. Tiles and loading use `portrait`.
+- The select screen has a `3D` category.
+- The awakened form swaps to the second model (Ichigo: Hollow Total).
 
-```json
-{ "fallback": { "clip": "Survey" },
-  "states": [ { "from": 20, "to": 21, "clip": "Walk", "loop": true, "speed": 1.0 } ] }
-```
+## Asset tools
 
-## Preview
+`tools/retarget` (Python, stdlib only):
+- `retarget.py <clips dir> <source.glb> <out.glb> <rig>` bakes the clips listed in `clips.json` onto a rig from `rigs.json`.
+- `autorig.py <mesh.glb> <clips dir> <out.glb>` fits a skeleton and skin weights to an unrigged mesh.
+- Portrait: `cargo run -p ume-model3d --example portrait -- <model.glb> <states.json> <out.png>`.
+- Voices: `tools/voices/generate.py <id>` adds the fighter to `voices.bank` and keeps the other banks.
 
-`cargo run -p ume-model3d --example preview -- crates/model3d/tests/data/Fox.glb crates/model3d/tests/data/fox_states.json out.png`
+## Ichigo moves
 
-## Limits and next steps
+Jumps: `D, U` or `U, U` super jump (also in the air), two air jumps, three air dashes. Specials: Getsuga Tenshou, Shunpo, Shunpo Rush, Hollow Cero, Getsuga Juujishou, Kuro Getsuga, Hollow Rampage; Hollow Total adds Cero Oscuras.
 
-- No textures yet (base color factor or a default tint).
-- Fixture `Fox.glb` is CC-BY 4.0 (see `crates/model3d/tests/data/ATTRIBUTION.md`) and is not shipped.
-- Next: feature flag `model3d` (off by default) in the app, a `model` field in UMF, light mode falls back to 2D sprites, 3D stage background with parallax.
+## Credits
+
+See `assets/model3d/ATTRIBUTION.md`.

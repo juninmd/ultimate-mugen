@@ -33,6 +33,7 @@ toml_edit = "=0.25.19"
 symphonia = { version = "=0.5.5", default-features = false, features = ["ogg", "vorbis", "mp3", "flac", "wav", "pcm", "adpcm"] }
 
 [features]
+default = ["model3d"]
 model3d = ["dep:ume-model3d"]
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
@@ -67,6 +68,8 @@ opt-level = 3
 [profile.web.package.ume-formats]
 opt-level = 3
 [profile.web.package.ume-render]
+opt-level = 3
+[profile.web.package.ume-model3d]
 opt-level = 3
 [profile.web.package.tiny-skia]
 opt-level = 3

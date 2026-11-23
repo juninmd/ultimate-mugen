@@ -89,12 +89,22 @@ impl Source<'_> {
                     .ok_or(ModelError::Missing("bufferView"))? as usize,
             )
             .ok_or(ModelError::OutOfRange("bufferView"))?;
-        let base = view["byteOffset"].as_u64().unwrap_or(0) as usize
-            + acc["byteOffset"].as_u64().unwrap_or(0) as usize;
+        let base = (view["byteOffset"].as_u64().unwrap_or(0) as usize)
+            .checked_add(acc["byteOffset"].as_u64().unwrap_or(0) as usize)
+            .ok_or(ModelError::OutOfRange("accessor bounds"))?;
         let stride = view["byteStride"]
             .as_u64()
             .map(|s| s as usize)
             .unwrap_or(size * lanes);
+        let span = count
+            .checked_sub(1)
+            .map_or(Some(0), |last| last.checked_mul(stride))
+            .and_then(|v| v.checked_add(size * lanes))
+            .and_then(|v| v.checked_add(base))
+            .ok_or(ModelError::OutOfRange("accessor bounds"))?;
+        if count > 0 && span > self.bin.len() {
+            return Err(ModelError::OutOfRange("accessor bounds"));
+        }
         let mut out = Vec::with_capacity(count * lanes);
         for item in 0..count {
             for lane in 0..lanes {
@@ -116,5 +126,27 @@ impl Source<'_> {
             .into_iter()
             .map(|v| v as u32)
             .collect())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn read(count: u64, stride: u64) -> Result<(Vec<f32>, usize), ModelError> {
+        let json = serde_json::json!({
+            "accessors": [{"bufferView": 0, "componentType": 5126, "type": "VEC3", "count": count}],
+            "bufferViews": [{"buffer": 0, "byteOffset": 0, "byteLength": 12, "byteStride": stride}]
+        });
+        let bin = [0u8; 12];
+        Source { json: &json, bin: &bin }.floats(0)
+    }
+
+    #[test]
+    fn forged_counts_and_strides_are_rejected_before_allocating() {
+        assert!(read(1, 12).is_ok());
+        assert!(read(1_000_000_000, 12).is_err());
+        assert!(read(u64::MAX, 12).is_err());
+        assert!(read(2, u64::MAX).is_err());
     }
 }

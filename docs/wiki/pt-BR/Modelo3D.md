@@ -1,21 +1,33 @@
-# Lutadores 3D (protótipo)
+# Lutadores 3D
 
-Status: protótipo isolado, não ligado ao jogo. Crate `crates/model3d` (`ume-model3d`); remover o membro do workspace e a pasta reverte tudo.
+Status: entregue atrás da feature `model3d` do Cargo, ligada por padrão. Rollback: tirar `model3d` de `default` no `Cargo.toml` raiz; o jogo volta a desenhar os sprites 2D do doador e esconde a categoria 3D.
 
 ## Princípio
 
-A simulação continua 2D. Hitboxes, física, máquina de estados e rollback nunca leem o modelo. O lutador 3D só desenha o mesmo `stateno` e `statetime` que o 2D usaria, então um 3D pode lutar contra um 2D.
+A simulação continua 2D. Hitboxes, física, máquina de estados e rollback nunca leem o modelo. Um lutador 3D é um lutador UMF (`assets/chars3d/<id>.json`, normalmente com `extends` de um kit nativo) cujo desenho é trocado por um modelo GLB, então um lutador 3D luta contra um 2D com as mesmas regras. O modo leve (`lite::scale() < 1`) volta para os sprites 2D.
 
 ## Pipeline
 
-1. `Model::from_glb` lê `.glb` (parser próprio sobre `serde_json`, sem dependência nova): nós, skins, malhas e animações (linear e step; cubic spline é rejeitado).
-2. `StateMap` (JSON) mapeia números de estado MUGEN (faixas) para clipe, loop e velocidade; estados desconhecidos usam o clipe padrão.
-3. `Model::pose_for_state` amostra o clipe em `statetime / 60 * speed` e aplica skinning na CPU. É função pura das entradas, seguro para rollback.
-4. `Model::project` usa câmera ortográfica no plano da luta, espelha por `Facing`, sombreia cada face com uma luz direcional e devolve `Triangle`s de trás para frente em pixels.
+1. `Model::from_glb` lê o `.glb` (parser próprio sobre `serde_json`, texturas PNG via `png`).
+2. `StateMap` (JSON) liga nomes de anim nativos (`anims`) ou faixas de estado MUGEN (`states`) a um clipe, loop e velocidade.
+3. A pose é função pura de `anim_no`/`anim_elapsed` (ou `stateno`/`statetime`), skinning na CPU, seguro para rollback.
+4. `Model::project` usa câmera ortográfica no plano da luta, sombreamento Lambert e triângulos de trás para frente, desenhados com `ume_shell::quad::draw_mesh` agrupados por textura.
 
-Os triângulos vão para `ume_shell::quad::draw_mesh` (cor por vértice), sem mudar o pipeline de GPU nem o lote único do web.
+## No jogo
 
-## Limites e próximos passos
+- `src/model3d.rs` é a fachada (`draw`, `draw_fit`, `is_3d`, `portrait`); `src/model3d/specs.rs` lista os modelos.
+- Luta: uma linha em `render.rs`. Painéis de seleção, versus e resultado: `draw_fit` dentro de `draw_char_fit`. Tiles e loading usam `portrait`.
+- A seleção tem a categoria `3D`.
+- A forma despertada troca para o segundo modelo (Ichigo: Hollow Total).
 
-- Sem texturas ainda. O fixture `Fox.glb` é CC-BY 4.0 e não é distribuído.
-- Próximo: feature flag `model3d` (desligada), campo `model` no UMF, fallback 2D no modo leve, cenário 3D com paralaxe.
+## Ferramentas
+
+`tools/retarget` (Python, só stdlib): `retarget.py` aplica os clipes de `clips.json` num rig de `rigs.json`; `autorig.py` cria esqueleto e pesos para malha sem rig. Retrato: `cargo run -p ume-model3d --example portrait`. Vozes: `tools/voices/generate.py <id>` (mantém os outros bancos).
+
+## Golpes do Ichigo
+
+Pulos: `D, U` ou `U, U` super pulo (também no ar), dois pulos aéreos, três dashes aéreos. Especiais: Getsuga Tenshou, Shunpo, Shunpo Rush, Hollow Cero, Getsuga Juujishou, Kuro Getsuga, Hollow Rampage; Hollow Total adiciona Cero Oscuras.
+
+## Créditos
+
+Veja `assets/model3d/ATTRIBUTION.md`.

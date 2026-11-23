@@ -7,7 +7,7 @@ use crate::mesh_read::{read_primitives, Primitive};
 use crate::pose::globals;
 use crate::skeleton_read::{read_nodes, read_skins, Node, Skin};
 use crate::skin::{joint_matrices, skin_vertices};
-use crate::state_map::{clip_time, StateMap};
+use crate::state_map::{clip_time, ClipBinding, StateMap};
 
 pub struct Model {
     pub(crate) nodes: Vec<Node>,
@@ -76,10 +76,13 @@ impl Model {
         }
     }
 
-    pub fn pose_for_state(&self, map: &StateMap, stateno: i32, state_ticks: i32, out: &mut Posed) {
-        let binding = map.resolve(stateno);
+    pub fn pose_binding(&self, binding: &ClipBinding, ticks: i32, out: &mut Posed) {
         let clip = self.clip_index(&binding.clip);
         let duration = clip.map(|c| self.clips[c].duration).unwrap_or(0.0);
-        self.pose(clip, clip_time(binding, state_ticks, duration), out);
+        self.pose(clip, clip_time(binding, ticks, duration), out);
+    }
+
+    pub fn pose_for_state(&self, map: &StateMap, stateno: i32, state_ticks: i32, out: &mut Posed) {
+        self.pose_binding(map.resolve(stateno), state_ticks, out);
     }
 }

@@ -18,6 +18,7 @@ struct Range {
 #[derive(Clone, Debug)]
 pub struct StateMap {
     ranges: Vec<Range>,
+    anims: Vec<(String, ClipBinding)>,
     fallback: ClipBinding,
 }
 
@@ -47,10 +48,19 @@ impl StateMap {
                 binding: binding(s)?,
             });
         }
+        let mut anims = Vec::new();
+        for (name, value) in v["anims"].as_object().into_iter().flatten() {
+            anims.push((name.clone(), binding(value)?));
+        }
         Ok(StateMap {
             ranges,
+            anims,
             fallback: binding(&v["fallback"])?,
         })
+    }
+
+    pub fn resolve_anim(&self, anim: &str) -> Option<&ClipBinding> {
+        self.anims.iter().find(|(name, _)| name == anim).map(|(_, b)| b)
     }
 
     pub fn resolve(&self, stateno: i32) -> &ClipBinding {

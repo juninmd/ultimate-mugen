@@ -11,7 +11,7 @@ fn draw(pix: &mut Pixmap, tris: &[ume_model3d::Triangle]) {
         pb.close();
         let Some(path) = pb.finish() else { continue };
         let mut paint = Paint::default();
-        paint.set_color_rgba8(t.color[0], t.color[1], t.color[2], 255);
+        paint.set_color_rgba8(t.colors[0][0], t.colors[0][1], t.colors[0][2], 255);
         pix.fill_path(
             &path,
             &paint,
@@ -20,7 +20,7 @@ fn draw(pix: &mut Pixmap, tris: &[ume_model3d::Triangle]) {
             None,
         );
         let mut edge = Paint::default();
-        edge.set_color_rgba8(t.color[0], t.color[1], t.color[2], 255);
+        edge.set_color_rgba8(t.colors[0][0], t.colors[0][1], t.colors[0][2], 255);
         pix.stroke_path(
             &path,
             &edge,

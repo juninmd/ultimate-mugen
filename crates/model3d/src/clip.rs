@@ -94,14 +94,14 @@ pub fn read_clips(src: &Source) -> Result<Vec<Clip>, ModelError> {
 
 fn bracket(times: &[f32], t: f32) -> (usize, usize, f32) {
     let last = times.len() - 1;
-    if t <= times[0] {
+    if t.is_nan() || t <= times[0] {
         return (0, 0, 0.0);
     }
     if t >= times[last] {
         return (last, last, 0.0);
     }
     let hi = times.partition_point(|&x| x <= t);
-    let lo = hi - 1;
+    let lo = hi.saturating_sub(1);
     (
         lo,
         hi,
@@ -130,5 +130,14 @@ impl Track {
                 std::array::from_fn(|n| v[n])
             }
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn nan_time_samples_the_first_key() {
+        assert_eq!(super::bracket(&[0.0, 1.0, 2.0], f32::NAN), (0, 0, 0.0));
+        assert_eq!(super::bracket(&[f32::NAN, 1.0], 0.5).0, 0);
     }
 }

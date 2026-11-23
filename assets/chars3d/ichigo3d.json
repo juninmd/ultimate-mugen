@@ -1,12 +1,926 @@
 {
-  "format": "umf/2",
-  "id": "ichigo3d",
-  "extends": "kaito",
-  "spriteSet": "kaito",
-  "name": "Ichigo 3D",
-  "series": "3D Prototype",
-  "author": "Ultimate MUGEN",
-  "description": "Shinigami substitute drawn from a 3D glTF model on the 2D fight plane. Simulation, hitboxes and rollback are the 2D ones.",
-  "color": "#e8731a",
-  "country": "Japão"
+ "format": "umf/2",
+ "id": "ichigo3d",
+ "extends": "kaito",
+ "spriteSet": "kaito",
+ "name": "Ichigo Kurosaki",
+ "series": "Originais 3D",
+ "author": "Ultimate MUGEN",
+ "description": "Substitute shinigami with Bankai released and Hollow mask on. Extremely fast, hits hard and fires Getsuga Tenshou. Awakening turns him into the full Hollow.",
+ "color": "#e8731a",
+ "country": "Japão",
+ "element": "neutral",
+ "winQuote": "Não importa quem venha. Eu protejo todos com esta lâmina.",
+ "intro": "Bankai. Tensa Zangetsu.",
+ "taunt": "Isso é tudo? Nem precisei da máscara inteira.",
+ "form": "Hollow Total",
+ "speed": 1.25,
+ "stats": {
+  "airDashes": 3,
+  "life": 1000,
+  "power": 3000,
+  "attack": 128,
+  "defense": 92,
+  "walk": [
+   5.8,
+   3.6
+  ],
+  "run": [
+   11,
+   6
+  ],
+  "jump": [
+   -9.2,
+   -3.2,
+   0,
+   3.4
+  ],
+  "airJumps": 2,
+  "height": 100,
+  "width": [
+   16,
+   15
+  ]
+ },
+ "abilities": {
+  "fly": {
+   "speed": 5,
+   "cost": 30,
+   "input": "b+c"
+  },
+  "forms": [
+   {
+    "id": "ichigo_vasto",
+    "name": "Hollow Total",
+    "cost": 1000,
+    "attack": 1.5,
+    "defense": 1.3,
+    "moves": [
+     {
+      "id": "vasto_cero",
+      "name": "Cero Oscuras",
+      "input": "~D, DF, F, a+b",
+      "kind": "special",
+      "anim": "gale",
+      "cost": 300,
+      "projectile": {
+       "at": 3,
+       "anim": "ceroFx",
+       "hitAnim": "getsugaHit",
+       "speed": [
+        13,
+        0
+       ],
+       "offset": [
+        48,
+        -66
+       ],
+       "damage": 26,
+       "hits": 10,
+       "level": "heavy",
+       "removeTime": 70,
+       "priority": 7,
+       "missTime": 2,
+       "element": "neutral"
+      },
+      "quake": [
+       {
+        "at": 3,
+        "time": 18,
+        "amp": 4
+       }
+      ]
+     }
+    ],
+    "replaceMoves": false
+   }
+  ]
+ },
+ "anims": {
+  "getsugaFx": {
+   "frames": [
+    {
+     "effect": {
+      "type": "slash",
+      "size": 40,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 0.0
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "slash",
+      "size": 40,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 1.1
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "slash",
+      "size": 40,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 2.2
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "slash",
+      "size": 40,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 3.3
+     },
+     "ticks": 3
+    }
+   ]
+  },
+  "getsugaBigFx": {
+   "frames": [
+    {
+     "effect": {
+      "type": "slash",
+      "size": 76,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 0.0
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "slash",
+      "size": 76,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 1.1
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "slash",
+      "size": 76,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 2.2
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "slash",
+      "size": 76,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 3.3
+     },
+     "ticks": 3
+    }
+   ]
+  },
+  "getsugaWhiteFx": {
+   "frames": [
+    {
+     "effect": {
+      "type": "slash",
+      "size": 46,
+      "color": "#e8f4ff",
+      "color2": "#7fd4ff",
+      "phase": 0.0
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "slash",
+      "size": 46,
+      "color": "#e8f4ff",
+      "color2": "#7fd4ff",
+      "phase": 1.1
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "slash",
+      "size": 46,
+      "color": "#e8f4ff",
+      "color2": "#7fd4ff",
+      "phase": 2.2
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "slash",
+      "size": 46,
+      "color": "#e8f4ff",
+      "color2": "#7fd4ff",
+      "phase": 3.3
+     },
+     "ticks": 3
+    }
+   ]
+  },
+  "ceroFx": {
+   "frames": [
+    {
+     "effect": {
+      "type": "beam",
+      "size": 18,
+      "color": "#ff1030",
+      "color2": "#ffe0e6",
+      "phase": 0.0,
+      "length": 300
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "beam",
+      "size": 18,
+      "color": "#ff1030",
+      "color2": "#ffe0e6",
+      "phase": 1.1,
+      "length": 300
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "beam",
+      "size": 18,
+      "color": "#ff1030",
+      "color2": "#ffe0e6",
+      "phase": 2.2,
+      "length": 300
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "beam",
+      "size": 18,
+      "color": "#ff1030",
+      "color2": "#ffe0e6",
+      "phase": 3.3,
+      "length": 300
+     },
+     "ticks": 3
+    }
+   ]
+  },
+  "reiatsuFx": {
+   "frames": [
+    {
+     "effect": {
+      "type": "darkfire",
+      "size": 44,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 0.0
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "darkfire",
+      "size": 44,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 1.1
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "darkfire",
+      "size": 44,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 2.2
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "darkfire",
+      "size": 44,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 3.3
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "darkfire",
+      "size": 44,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 4.4
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "darkfire",
+      "size": 44,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 5.5
+     },
+     "ticks": 2
+    }
+   ]
+  },
+  "getsugaHit": {
+   "frames": [
+    {
+     "effect": {
+      "type": "burst",
+      "size": 30,
+      "color": "#ff2440",
+      "color2": "#ffe0e6",
+      "phase": 0.0
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "burst",
+      "size": 30,
+      "color": "#ff2440",
+      "color2": "#ffe0e6",
+      "phase": 1.1
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "burst",
+      "size": 30,
+      "color": "#ff2440",
+      "color2": "#ffe0e6",
+      "phase": 2.2
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "burst",
+      "size": 30,
+      "color": "#ff2440",
+      "color2": "#ffe0e6",
+      "phase": 3.3
+     },
+     "ticks": 2
+    }
+   ]
+  }
+ },
+ "moves": [
+  {
+   "id": "jab",
+   "name": "Zangetsu Flick",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 34,
+     "level": "light",
+     "hitstun": 13
+    }
+   ]
+  },
+  {
+   "id": "strong",
+   "name": "Bankai Cleave",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 66,
+     "level": "medium",
+     "hitstun": 18
+    }
+   ]
+  },
+  {
+   "id": "lkick",
+   "name": "Hollow Kick",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 42,
+     "level": "light",
+     "hitstun": 14
+    }
+   ]
+  },
+  {
+   "id": "hkick",
+   "name": "Tensa Arc",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 82,
+     "level": "heavy",
+     "knockback": [
+      -4,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gale",
+   "name": "Getsuga Tenshou",
+   "input": "~D, DF, F, x",
+   "projectile": {
+    "anim": "getsugaFx",
+    "hitAnim": "getsugaHit",
+    "speed": [
+     8.5,
+     0
+    ],
+    "offset": [
+     52,
+     -64
+    ],
+    "damage": 92,
+    "hits": 2,
+    "level": "heavy",
+    "knockback": [
+     -5,
+     -2
+    ],
+    "removeTime": 70,
+    "element": "neutral",
+    "at": 3
+   },
+   "vfx": [
+    {
+     "at": 2,
+     "anim": "reiatsuFx",
+     "offset": [
+      0,
+      -50
+     ],
+     "time": 10,
+     "follow": true
+    }
+   ]
+  },
+  {
+   "id": "gale_slow",
+   "remove": true
+  },
+  {
+   "id": "gale_low",
+   "remove": true
+  },
+  {
+   "id": "gale_high",
+   "remove": true
+  },
+  {
+   "id": "gale_barrage",
+   "name": "Getsuga Barrage",
+   "input": "~D, DF, F, b",
+   "anim": "gale",
+   "projectile": {
+    "anim": "getsugaFx",
+    "hitAnim": "getsugaHit",
+    "speed": [
+     9,
+     0
+    ],
+    "offset": [
+     52,
+     -64
+    ],
+    "damage": 40,
+    "hits": 1,
+    "level": "heavy",
+    "knockback": [
+     -5,
+     -2
+    ],
+    "removeTime": 70,
+    "element": "neutral",
+    "repeat": {
+     "count": 3,
+     "every": 3,
+     "offsetStep": [
+      0,
+      -14
+     ],
+     "speedStep": [
+      0.6,
+      0
+     ]
+    },
+    "at": 3
+   }
+  },
+  {
+   "id": "ex_gale",
+   "name": "Getsuga Tenshou EX",
+   "projectile": {
+    "anim": "getsugaBigFx",
+    "hitAnim": "getsugaHit",
+    "speed": [
+     9.5,
+     0
+    ],
+    "offset": [
+     56,
+     -70
+    ],
+    "damage": 46,
+    "hits": 4,
+    "level": "heavy",
+    "knockback": [
+     -5,
+     -2
+    ],
+    "removeTime": 70,
+    "element": "neutral",
+    "at": 3
+   }
+  },
+  {
+   "id": "dragon",
+   "name": "Tsukiyomi Rising",
+   "projectile": {
+    "anim": "getsugaFx",
+    "hitAnim": "getsugaHit",
+    "speed": [
+     5.5,
+     -4.5
+    ],
+    "offset": [
+     40,
+     -80
+    ],
+    "damage": 70,
+    "hits": 2,
+    "level": "heavy",
+    "knockback": [
+     -5,
+     -2
+    ],
+    "removeTime": 70,
+    "element": "neutral",
+    "at": 3
+   }
+  },
+  {
+   "id": "stormrush",
+   "name": "Shunpo Rush",
+   "blink": {
+    "at": 2,
+    "to": "front",
+    "gap": 30
+   },
+   "moves": [
+    {
+     "at": 2,
+     "vel": [
+      9,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "vel": [
+      7,
+      0
+     ]
+    },
+    {
+     "at": 5,
+     "vel": [
+      3,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tide",
+   "name": "Shunpo",
+   "input": "~D, DB, B, b",
+   "blink": {
+    "at": 1,
+    "to": "behind",
+    "gap": 34
+   },
+   "hits": [
+    {
+     "at": 2,
+     "damage": 58,
+     "level": "heavy",
+     "knockback": [
+      -4,
+      -2
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tempest",
+   "name": "Hollow Cero",
+   "input": "~D, DB, B, a",
+   "anim": "gale",
+   "hits": null,
+   "moves": null,
+   "projectile": {
+    "at": 3,
+    "anim": "ceroFx",
+    "hitAnim": "getsugaHit",
+    "speed": [
+     11,
+     0
+    ],
+    "offset": [
+     48,
+     -66
+    ],
+    "damage": 22,
+    "hits": 6,
+    "level": "medium",
+    "removeTime": 60,
+    "priority": 5,
+    "missTime": 2,
+    "element": "neutral"
+   },
+   "quake": [
+    {
+     "at": 3,
+     "time": 10,
+     "amp": 2
+    }
+   ]
+  },
+  {
+   "id": "typhoon",
+   "name": "Getsuga Juujishou",
+   "anim": "triad",
+   "hits": null,
+   "projectile": [
+    {
+     "anim": "getsugaBigFx",
+     "hitAnim": "getsugaHit",
+     "speed": [
+      7,
+      -1.2
+     ],
+     "offset": [
+      52,
+      -80
+     ],
+     "damage": 30,
+     "hits": 5,
+     "level": "heavy",
+     "knockback": [
+      -5,
+      -2
+     ],
+     "removeTime": 70,
+     "element": "neutral",
+     "at": 3
+    },
+    {
+     "anim": "getsugaBigFx",
+     "hitAnim": "getsugaHit",
+     "speed": [
+      7,
+      1.2
+     ],
+     "offset": [
+      52,
+      -50
+     ],
+     "damage": 30,
+     "hits": 5,
+     "level": "heavy",
+     "knockback": [
+      -5,
+      -2
+     ],
+     "removeTime": 70,
+     "element": "neutral",
+     "at": 3
+    }
+   ],
+   "quake": [
+    {
+     "at": 4,
+     "time": 16,
+     "amp": 3
+    }
+   ]
+  },
+  {
+   "id": "triad",
+   "name": "Kuro Getsuga",
+   "projectile": [
+    {
+     "anim": "getsugaBigFx",
+     "hitAnim": "getsugaHit",
+     "speed": [
+      6,
+      0
+     ],
+     "offset": [
+      56,
+      -66
+     ],
+     "damage": 34,
+     "hits": 8,
+     "level": "heavy",
+     "knockback": [
+      -5,
+      -2
+     ],
+     "removeTime": 110,
+     "element": "neutral",
+     "priority": 7,
+     "missTime": 3,
+     "hitflag": "MAFP",
+     "at": 3
+    }
+   ],
+   "quake": [
+    {
+     "at": 4,
+     "time": 20,
+     "amp": 4
+    }
+   ],
+   "vfx": [
+    {
+     "at": 1,
+     "anim": "reiatsuFx",
+     "offset": [
+      0,
+      -50
+     ],
+     "time": 24,
+     "follow": true,
+     "scale": 1.6
+    }
+   ]
+  },
+  {
+   "id": "ult_triad",
+   "name": "Hollow Rampage",
+   "blink": [
+    {
+     "at": 2,
+     "to": "behind",
+     "gap": 30
+    },
+    {
+     "at": 4,
+     "to": "front",
+     "gap": 30
+    }
+   ],
+   "projectile": [
+    {
+     "anim": "getsugaBigFx",
+     "hitAnim": "getsugaHit",
+     "speed": [
+      3,
+      0
+     ],
+     "offset": [
+      40,
+      -66
+     ],
+     "damage": 36,
+     "hits": 10,
+     "level": "heavy",
+     "knockback": [
+      -5,
+      -2
+     ],
+     "removeTime": 120,
+     "element": "neutral",
+     "priority": 8,
+     "missTime": 2,
+     "hitflag": "MAFP",
+     "at": 3
+    },
+    {
+     "anim": "ceroFx",
+     "hitAnim": "getsugaHit",
+     "speed": [
+      12,
+      0
+     ],
+     "offset": [
+      48,
+      -70
+     ],
+     "damage": 20,
+     "hits": 8,
+     "level": "heavy",
+     "knockback": [
+      -5,
+      -2
+     ],
+     "removeTime": 70,
+     "element": "neutral",
+     "priority": 8,
+     "missTime": 2,
+     "hitflag": "MAFP",
+     "at": 3
+    }
+   ],
+   "quake": [
+    {
+     "at": 2,
+     "time": 30,
+     "amp": 5
+    }
+   ],
+   "vfx": [
+    {
+     "at": 1,
+     "anim": "reiatsuFx",
+     "offset": [
+      0,
+      -50
+     ],
+     "time": 40,
+     "follow": true,
+     "scale": 2.0
+    }
+   ]
+  },
+  {
+   "id": "superjump",
+   "name": "Shunpo Leap",
+   "input": "U, U",
+   "kind": "movement",
+   "anim": "jumpUp",
+   "airPhysics": true,
+   "hits": [],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      2.4,
+      -14.5
+     ]
+    }
+   ]
+  },
+  {
+   "id": "superjump_low",
+   "name": "Shunpo Rise",
+   "input": "D, U",
+   "kind": "movement",
+   "anim": "jumpUp",
+   "airPhysics": true,
+   "hits": [],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      2.4,
+      -14.5
+     ]
+    }
+   ]
+  },
+  {
+   "id": "superjump_air",
+   "name": "Shunpo Sky Step",
+   "input": "U, U",
+   "kind": "movement",
+   "when": "air",
+   "anim": "jumpUp",
+   "airPhysics": true,
+   "hits": [],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      2.4,
+      -13
+     ]
+    }
+   ]
+  }
+ ]
 }

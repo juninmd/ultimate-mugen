@@ -1,0 +1,283 @@
+{
+ "sources": {
+  "ual1": {
+   "hips": "DEF-hips",
+   "spine1": "DEF-spine.001",
+   "spine2": "DEF-spine.002",
+   "spine3": "DEF-spine.003",
+   "neck": "DEF-neck",
+   "head": "DEF-head",
+   "shoulderL": "DEF-shoulder.L",
+   "upperArmL": "DEF-upper_arm.L",
+   "forearmL": "DEF-forearm.L",
+   "handL": "DEF-hand.L",
+   "fingerL": "DEF-f_middle.01.L",
+   "shoulderR": "DEF-shoulder.R",
+   "upperArmR": "DEF-upper_arm.R",
+   "forearmR": "DEF-forearm.R",
+   "handR": "DEF-hand.R",
+   "fingerR": "DEF-f_middle.01.R",
+   "thighL": "DEF-thigh.L",
+   "shinL": "DEF-shin.L",
+   "footL": "DEF-foot.L",
+   "toeL": "DEF-toe.L",
+   "thighR": "DEF-thigh.R",
+   "shinR": "DEF-shin.R",
+   "footR": "DEF-foot.R",
+   "toeR": "DEF-toe.R"
+  },
+  "ual2": {
+   "hips": "pelvis",
+   "spine1": "spine_01",
+   "spine2": "spine_02",
+   "spine3": "spine_03",
+   "neck": "neck_01",
+   "head": "Head",
+   "shoulderL": "clavicle_l",
+   "upperArmL": "upperarm_l",
+   "forearmL": "lowerarm_l",
+   "handL": "hand_l",
+   "fingerL": "middle_01_l",
+   "shoulderR": "clavicle_r",
+   "upperArmR": "upperarm_r",
+   "forearmR": "lowerarm_r",
+   "handR": "hand_r",
+   "fingerR": "middle_01_r",
+   "thighL": "thigh_l",
+   "shinL": "calf_l",
+   "footL": "foot_l",
+   "toeL": "ball_l",
+   "thighR": "thigh_r",
+   "shinR": "calf_r",
+   "footR": "foot_r",
+   "toeR": "ball_r"
+  }
+ },
+ "ichigo3d": {
+  "root": 26,
+  "delta": {
+   "96": "hips",
+   "27": "spine1",
+   "28": "spine3",
+   "29": "neck",
+   "30": "head"
+  },
+  "direction": [
+   [
+    39,
+    40,
+    "shoulderL",
+    "upperArmL"
+   ],
+   [
+    40,
+    41,
+    "upperArmL",
+    "forearmL"
+   ],
+   [
+    41,
+    42,
+    "forearmL",
+    "handL"
+   ],
+   [
+    65,
+    66,
+    "shoulderR",
+    "upperArmR"
+   ],
+   [
+    66,
+    67,
+    "upperArmR",
+    "forearmR"
+   ],
+   [
+    67,
+    68,
+    "forearmR",
+    "handR"
+   ],
+   [
+    130,
+    131,
+    "thighL",
+    "shinL"
+   ],
+   [
+    131,
+    132,
+    "shinL",
+    "footL"
+   ],
+   [
+    132,
+    133,
+    "footL",
+    "toeL"
+   ],
+   [
+    126,
+    127,
+    "thighR",
+    "shinR"
+   ],
+   [
+    127,
+    128,
+    "shinR",
+    "footR"
+   ],
+   [
+    128,
+    129,
+    "footR",
+    "toeR"
+   ]
+  ],
+  "follow": [
+   [
+    106,
+    130,
+    0.6
+   ],
+   [
+    110,
+    130,
+    0.5
+   ],
+   [
+    114,
+    126,
+    0.6
+   ],
+   [
+    118,
+    126,
+    0.5
+   ]
+  ],
+  "relative": [
+   [
+    42,
+    41,
+    40,
+    "handL",
+    "forearmL",
+    "upperArmL"
+   ],
+   [
+    68,
+    67,
+    66,
+    "handR",
+    "forearmR",
+    "upperArmR"
+   ]
+  ]
+ },
+ "hollow3d": {
+  "root": "DEF-hips",
+  "delta": {
+   "DEF-spine.001": "spine1",
+   "DEF-spine.002": "spine2",
+   "DEF-spine.003": "spine3",
+   "DEF-neck": "neck",
+   "DEF-head": "head",
+   "DEF-hips": "hips"
+  },
+  "direction": [
+   [
+    "DEF-shoulder.L",
+    "DEF-upper_arm.L",
+    "shoulderL",
+    "upperArmL"
+   ],
+   [
+    "DEF-upper_arm.L",
+    "DEF-forearm.L",
+    "upperArmL",
+    "forearmL"
+   ],
+   [
+    "DEF-thigh.L",
+    "DEF-shin.L",
+    "thighL",
+    "shinL"
+   ],
+   [
+    "DEF-shin.L",
+    "DEF-foot.L",
+    "shinL",
+    "footL"
+   ],
+   [
+    "DEF-foot.L",
+    "DEF-toe.L",
+    "footL",
+    "toeL"
+   ],
+   [
+    "DEF-shoulder.R",
+    "DEF-upper_arm.R",
+    "shoulderR",
+    "upperArmR"
+   ],
+   [
+    "DEF-upper_arm.R",
+    "DEF-forearm.R",
+    "upperArmR",
+    "forearmR"
+   ],
+   [
+    "DEF-thigh.R",
+    "DEF-shin.R",
+    "thighR",
+    "shinR"
+   ],
+   [
+    "DEF-shin.R",
+    "DEF-foot.R",
+    "shinR",
+    "footR"
+   ],
+   [
+    "DEF-foot.R",
+    "DEF-toe.R",
+    "footR",
+    "toeR"
+   ],
+   [
+    "DEF-forearm.L",
+    "DEF-hand.L",
+    "forearmL",
+    "handL"
+   ],
+   [
+    "DEF-forearm.R",
+    "DEF-hand.R",
+    "forearmR",
+    "handR"
+   ]
+  ],
+  "relative": [
+   [
+    "DEF-hand.L",
+    "DEF-forearm.L",
+    "DEF-upper_arm.L",
+    "handL",
+    "forearmL",
+    "upperArmL"
+   ],
+   [
+    "DEF-hand.R",
+    "DEF-forearm.R",
+    "DEF-upper_arm.R",
+    "handR",
+    "forearmR",
+    "upperArmR"
+   ]
+  ]
+ }
+}

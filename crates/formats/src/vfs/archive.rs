@@ -55,6 +55,21 @@ impl File {
         Some(data)
     }
 
+    pub(super) fn prefix(&self, max_len: usize) -> Option<Vec<u8>> {
+        match &self.source {
+            Source::Bytes(data) => Some(data[..data.len().min(max_len)].to_vec()),
+            #[cfg(not(target_arch = "wasm32"))]
+            Source::Disk(path) => {
+                if let Some(hit) = self.cache.lock().unwrap_or_else(|e| e.into_inner()).as_ref() {
+                    return Some(hit[..hit.len().min(max_len)].to_vec());
+                }
+                let mut file = std::fs::File::open(&**path).ok()?;
+                read_at(&mut file, 0, max_len)
+            }
+            Source::Zip { .. } => None,
+        }
+    }
+
     /// Cheap content identity: length plus head/tail samples, never a full read
     /// of a multi-megabyte bank. Used to deduplicate imported packs.
     pub(super) fn signature(&self) -> Option<(u64, u64)> {

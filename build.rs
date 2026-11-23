@@ -53,6 +53,16 @@ fn main() {
             p.display().to_string()
         );
     }
+    if env::var_os("CARGO_FEATURE_MODEL3D").is_some() {
+        let dir3d = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/chars3d");
+        println!("cargo:rerun-if-changed={}", dir3d.display());
+        let mut found: Vec<_> = fs::read_dir(&dir3d).into_iter().flatten().filter_map(|e| e.ok()).map(|e| e.path()).filter(|p| p.extension().is_some_and(|x| x == "json")).collect();
+        found.sort();
+        for p in found {
+            let id = p.file_stem().unwrap().to_string_lossy().to_string();
+            out += &format!("    ({id:?}, include_str!({:?})),\n", p.display().to_string());
+        }
+    }
     out += "];\n";
     fs::write(
         Path::new(&env::var("OUT_DIR").unwrap()).join("chars_gen.rs"),

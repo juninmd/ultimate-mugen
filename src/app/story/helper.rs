@@ -1,6 +1,6 @@
 use crate::app::{App, Team};
 use crate::gfx::*;
-use crate::story::{helper, prefight, HelperPick, StoryRun};
+use crate::story::{text, helper, prefight, HelperPick, StoryRun};
 use crate::ui::*;
 
 impl App {
@@ -35,6 +35,17 @@ impl App {
         let boss = self.story_char(run.stage_boss_id(&player)).map_or("", |i| self.reg.chars[i].name.as_str());
         let (speaker, text) = prefight::line(run.prefight);
         format!("{}: {}", prefight::speaker_name(speaker, hero, boss), prefight::fill(text, hero, boss))
+    }
+
+    pub(super) fn story_boss_sub(&self, run: &StoryRun) -> String {
+        let title = text::stage_title(run.stage).to_string();
+        let ally = helper::active(run)
+            .and_then(|id| self.story_char(id))
+            .map(|i| self.reg.chars[i].name.as_str());
+        match ally {
+            Some(name) => format!("{title} · {}", helper::joins(name)),
+            None => title,
+        }
     }
 
     pub(crate) fn story_helper_input(&mut self, run: &StoryRun, confirmed: bool) {

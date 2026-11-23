@@ -56,6 +56,10 @@ mod load_plan;
 mod stage_select;
 mod fighter_draw;
 mod menu_screen;
+mod story_studio_screen;
+mod epilogue_studio_screen;
+pub(crate) use story_studio_screen::StudioState;
+pub(crate) use epilogue_studio_screen::EpiState;
 mod player_card_card; pub(crate) mod player_card_edit; mod player_card_lists; mod player_card_screen;
 mod title_screen;
 use select_category::CATEGORY_COUNT;
@@ -210,6 +214,8 @@ pub struct App {
     replay_list: Vec<crate::replays::Entry>,
     pub(crate) player: crate::player_card::Record,
     pub(crate) card_edit: Option<player_card_edit::CardEdit>,
+    pub(crate) studio: Option<story_studio_screen::StudioState>,
+    pub(crate) epi_studio: Option<epilogue_studio_screen::EpiState>,
     replay_problems: Vec<String>,
     replay_rename: Option<String>,
     replay_confirm: bool,
@@ -388,6 +394,8 @@ impl App {
             replay_list: vec![],
             player: crate::player_card::Record::load(),
             card_edit: None,
+            studio: None,
+            epi_studio: None,
             replay_problems: vec![],
             replay_rename: None,
             replay_confirm: false,
@@ -506,6 +514,8 @@ impl App {
             Screen::Results { .. } => self.results().await,
             Screen::Controls => self.controls_screen(),
             Screen::CharTuning { .. } => self.char_tuning_screen(),
+            Screen::StoryStudio { .. } => self.story_studio_screen(),
+            Screen::EpilogueStudio { .. } => self.epilogue_studio_screen(),
             Screen::Mugen { .. } => self.mugen_screen(),
             Screen::Market => self.market_screen(),
             Screen::Story { .. } => self.story_screen(dt).await,
@@ -2081,6 +2091,7 @@ impl App {
                 }
                 return Ok(false);
             }
+            self.audio.warm_fight_sfx();
             self.audio.prepare_music(music).await;
         } else if !self.warm_step() {
             if wait {

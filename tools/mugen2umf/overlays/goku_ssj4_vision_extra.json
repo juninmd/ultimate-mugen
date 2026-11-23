@@ -1,1 +1,1 @@
-{"mugenRoutes":[{"id":"charge_ki","input":"/s","state":90200,"name":"Charge Ki (R)"}]}
+{"mugenRoutes":[{"id":"charge_ki","input":"/s","state":90200,"name":"Charge Ki (R)"},{"id":"after_image","input":"x+y","state":90300,"cost":200,"name":"After Image"}]}

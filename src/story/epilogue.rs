@@ -1,19 +1,19 @@
+use super::epilogue_store::table;
 use super::stages::STAGES;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use std::sync::OnceLock;
 use ume_native::LocalText;
 
 #[path = "epilogue_tale.rs"]
 mod epilogue_tale;
 
-const BUNDLED_TEXT: &str = include_str!("../../assets/story/epilogues.json");
+pub(super) const BUNDLED_TEXT: &str = include_str!("../../assets/story/epilogues.json");
 pub const FILE: &str = "story-epilogues.json";
 pub const FALLBACK: &str = "*";
 pub const ROOFTOP_BEATS: usize = 2;
 
-#[derive(Clone, Debug, Default, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Epilogue {
     #[serde(default)]
     pub scene: String,
@@ -75,11 +75,6 @@ pub fn merged(custom: Option<Table>) -> Table {
     let mut table = parse(BUNDLED_TEXT).unwrap_or_default();
     table.extend(custom.unwrap_or_default());
     table
-}
-
-fn table() -> &'static Table {
-    static TABLE: OnceLock<Table> = OnceLock::new();
-    TABLE.get_or_init(|| merged(crate::storage::read(FILE).and_then(|text| parse(&text))))
 }
 
 pub fn pick<'a>(table: &'a Table, fighter_id: &str) -> Option<&'a Epilogue> {

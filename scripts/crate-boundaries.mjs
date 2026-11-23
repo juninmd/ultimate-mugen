@@ -12,6 +12,7 @@ export const FORBIDDEN = {
   render: ['ume-engine', 'ume-shell', 'ume-netplay', 'ume-market', 'winit', 'ggrs'],
   shell: ['ume-engine', 'ume-netplay', 'ume-market', 'ggrs'],
   netplay: ['ume-render', 'ume-shell', 'ume-market', 'wgpu', 'winit'],
+  model3d: ['ume-engine', 'ume-native', 'ume-render', 'ume-shell', 'ume-netplay', 'ume-market', 'ume-formats', 'wgpu', 'winit', 'ggrs'],
   market: ['ume-engine', 'ume-render', 'ume-shell', 'ume-netplay', 'wgpu', 'winit', 'ggrs'],
 };
 

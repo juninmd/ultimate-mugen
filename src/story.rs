@@ -1,6 +1,8 @@
 pub mod beats;
 pub mod choice;
 pub mod epilogue;
+pub mod epilogue_edit;
+pub mod epilogue_store;
 pub mod helper;
 pub mod prefight;
 pub mod rank;
@@ -11,6 +13,8 @@ pub mod objects;
 pub mod objects_art;
 pub mod objects_textures;
 mod run;
+mod script_source;
+pub mod studio;
 pub mod script;
 mod stages;
 mod tally;

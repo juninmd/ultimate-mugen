@@ -1,0 +1,404 @@
+{
+ "fallback": {
+  "clip": "Idle",
+  "loop": true
+ },
+ "states": [],
+ "anims": {
+  "idle": {
+   "clip": "Idle",
+   "loop": true,
+   "speed": 1.0
+  },
+  "turn": {
+   "clip": "Idle",
+   "loop": true,
+   "speed": 1.0
+  },
+  "walk": {
+   "clip": "Walk",
+   "loop": true,
+   "speed": 1.3
+  },
+  "walkBack": {
+   "clip": "Walk",
+   "loop": true,
+   "speed": 0.9
+  },
+  "crouchStart": {
+   "clip": "Crouch",
+   "loop": true,
+   "speed": 1.0
+  },
+  "crouch": {
+   "clip": "Crouch",
+   "loop": true,
+   "speed": 1.0
+  },
+  "crouchEnd": {
+   "clip": "Crouch",
+   "loop": true,
+   "speed": 1.0
+  },
+  "crouchTurn": {
+   "clip": "Crouch",
+   "loop": true,
+   "speed": 1.0
+  },
+  "jumpStart": {
+   "clip": "JumpStart",
+   "loop": false,
+   "speed": 1.6
+  },
+  "jumpUp": {
+   "clip": "JumpLoop",
+   "loop": true,
+   "speed": 1.0
+  },
+  "jumpFwd": {
+   "clip": "JumpLoop",
+   "loop": true,
+   "speed": 1.0
+  },
+  "jumpBack": {
+   "clip": "JumpLoop",
+   "loop": true,
+   "speed": 1.0
+  },
+  "jumpDown": {
+   "clip": "JumpLoop",
+   "loop": true,
+   "speed": 1.0
+  },
+  "land": {
+   "clip": "Land",
+   "loop": false,
+   "speed": 1.8
+  },
+  "run": {
+   "clip": "Run",
+   "loop": true,
+   "speed": 1.2
+  },
+  "hop": {
+   "clip": "Roll",
+   "loop": false,
+   "speed": 1.6
+  },
+  "guardStart": {
+   "clip": "Guard",
+   "loop": false,
+   "speed": 1.5
+  },
+  "crouchGuardStart": {
+   "clip": "Guard",
+   "loop": false,
+   "speed": 1.5
+  },
+  "airGuardStart": {
+   "clip": "Guard",
+   "loop": false,
+   "speed": 1.5
+  },
+  "guard": {
+   "clip": "Guard",
+   "loop": false,
+   "speed": 1.5
+  },
+  "crouchGuard": {
+   "clip": "Guard",
+   "loop": false,
+   "speed": 1.5
+  },
+  "airGuard": {
+   "clip": "Guard",
+   "loop": false,
+   "speed": 1.5
+  },
+  "guardEnd": {
+   "clip": "Guard",
+   "loop": false,
+   "speed": 1.5
+  },
+  "guardHit": {
+   "clip": "Guard",
+   "loop": false,
+   "speed": 1.5
+  },
+  "crouchGuardHit": {
+   "clip": "Guard",
+   "loop": false,
+   "speed": 1.5
+  },
+  "airGuardHit": {
+   "clip": "Guard",
+   "loop": false,
+   "speed": 1.5
+  },
+  "hitLight": {
+   "clip": "HitLight",
+   "loop": false,
+   "speed": 1.4
+  },
+  "hitLowLight": {
+   "clip": "HitLight",
+   "loop": false,
+   "speed": 1.4
+  },
+  "hitCrouch": {
+   "clip": "HitLight",
+   "loop": false,
+   "speed": 1.4
+  },
+  "hitMedium": {
+   "clip": "HitHead",
+   "loop": false,
+   "speed": 1.4
+  },
+  "hitLowMedium": {
+   "clip": "HitHead",
+   "loop": false,
+   "speed": 1.4
+  },
+  "hitHeavy": {
+   "clip": "HitHeavy",
+   "loop": false,
+   "speed": 1.2
+  },
+  "hitLowHeavy": {
+   "clip": "HitHeavy",
+   "loop": false,
+   "speed": 1.2
+  },
+  "hitAir": {
+   "clip": "HitHeavy",
+   "loop": false,
+   "speed": 1.2
+  },
+  "fall": {
+   "clip": "HitHeavy",
+   "loop": false,
+   "speed": 1.2
+  },
+  "bounce": {
+   "clip": "HitHeavy",
+   "loop": false,
+   "speed": 1.2
+  },
+  "bounceAir": {
+   "clip": "HitHeavy",
+   "loop": false,
+   "speed": 1.2
+  },
+  "trip": {
+   "clip": "HitHeavy",
+   "loop": false,
+   "speed": 1.2
+  },
+  "lieDown": {
+   "clip": "Down",
+   "loop": false,
+   "speed": 1.3
+  },
+  "dead": {
+   "clip": "Down",
+   "loop": false,
+   "speed": 1.3
+  },
+  "lose": {
+   "clip": "Down",
+   "loop": false,
+   "speed": 1.3
+  },
+  "getUp": {
+   "clip": "GetUp",
+   "loop": false,
+   "speed": 2.0
+  },
+  "airRecover": {
+   "clip": "GetUp",
+   "loop": false,
+   "speed": 2.0
+  },
+  "win": {
+   "clip": "Win",
+   "loop": true,
+   "speed": 1.0
+  },
+  "draw": {
+   "clip": "Taunt",
+   "loop": false,
+   "speed": 1.0
+  },
+  "intro": {
+   "clip": "Taunt",
+   "loop": false,
+   "speed": 1.0
+  },
+  "powerUp": {
+   "clip": "Charge",
+   "loop": true,
+   "speed": 1.0
+  },
+  "jab": {
+   "clip": "SlashA",
+   "loop": false,
+   "speed": 2.0
+  },
+  "cjab": {
+   "clip": "SlashA",
+   "loop": false,
+   "speed": 2.0
+  },
+  "ajab": {
+   "clip": "SlashA",
+   "loop": false,
+   "speed": 2.0
+  },
+  "chain_jab2": {
+   "clip": "SlashA",
+   "loop": false,
+   "speed": 2.0
+  },
+  "chain_cjab2": {
+   "clip": "SlashA",
+   "loop": false,
+   "speed": 2.0
+  },
+  "chain_ajab2": {
+   "clip": "SlashA",
+   "loop": false,
+   "speed": 2.0
+  },
+  "strong": {
+   "clip": "SlashB",
+   "loop": false,
+   "speed": 1.8
+  },
+  "chain_strong2": {
+   "clip": "SlashB",
+   "loop": false,
+   "speed": 1.8
+  },
+  "chain_jab3": {
+   "clip": "SlashB",
+   "loop": false,
+   "speed": 1.8
+  },
+  "lkick": {
+   "clip": "SlashC",
+   "loop": false,
+   "speed": 1.8
+  },
+  "chain_lkick2": {
+   "clip": "SlashC",
+   "loop": false,
+   "speed": 1.8
+  },
+  "chain_lkick3": {
+   "clip": "SlashC",
+   "loop": false,
+   "speed": 1.8
+  },
+  "hkick": {
+   "clip": "SlashHeavy",
+   "loop": false,
+   "speed": 1.6
+  },
+  "akick": {
+   "clip": "SlashHeavy",
+   "loop": false,
+   "speed": 1.6
+  },
+  "rise": {
+   "clip": "SlashHeavy",
+   "loop": false,
+   "speed": 1.6
+  },
+  "riseEx": {
+   "clip": "SlashHeavy",
+   "loop": false,
+   "speed": 1.6
+  },
+  "dragonPunch": {
+   "clip": "SlashHeavy",
+   "loop": false,
+   "speed": 1.6
+  },
+  "kangarooKick": {
+   "clip": "SlashHeavy",
+   "loop": false,
+   "speed": 1.6
+  },
+  "clk": {
+   "clip": "Slide",
+   "loop": false,
+   "speed": 1.5
+  },
+  "sweep": {
+   "clip": "Slide",
+   "loop": false,
+   "speed": 1.5
+  },
+  "gale": {
+   "clip": "Getsuga",
+   "loop": false,
+   "speed": 1.5
+  },
+  "galeEx": {
+   "clip": "Getsuga",
+   "loop": false,
+   "speed": 1.5
+  },
+  "triad": {
+   "clip": "Getsuga",
+   "loop": false,
+   "speed": 1.5
+  },
+  "tempest": {
+   "clip": "Cero",
+   "loop": false,
+   "speed": 1.4
+  },
+  "super": {
+   "clip": "SlashCombo",
+   "loop": false,
+   "speed": 1.3
+  },
+  "triadUlt": {
+   "clip": "SlashCombo",
+   "loop": false,
+   "speed": 1.3
+  },
+  "stringA": {
+   "clip": "SlashCombo",
+   "loop": false,
+   "speed": 1.3
+  },
+  "stringB": {
+   "clip": "SlashCombo",
+   "loop": false,
+   "speed": 1.3
+  },
+  "stringC": {
+   "clip": "SlashCombo",
+   "loop": false,
+   "speed": 1.3
+  },
+  "stormRush": {
+   "clip": "DashSlash",
+   "loop": false,
+   "speed": 1.6
+  },
+  "tide": {
+   "clip": "Shunpo",
+   "loop": false,
+   "speed": 2.0
+  },
+  "stormToss": {
+   "clip": "Hook",
+   "loop": false,
+   "speed": 1.5
+  }
+ }
+}

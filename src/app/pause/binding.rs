@@ -17,6 +17,13 @@ pub fn fresh_slot(held: u32, prev: u32) -> Option<usize> {
     k::SLOTS.iter().position(|bit| fresh & bit != 0)
 }
 
+pub fn ok_slot(shortcuts: &Shortcuts, fighter: &str, command: &str) -> usize {
+    shortcuts
+        .slot_of(fighter, command)
+        .or_else(|| (0..k::SLOTS.len()).find(|i| shortcuts.command(fighter, *i).is_none()))
+        .unwrap_or(0)
+}
+
 pub fn toggle(shortcuts: &mut Shortcuts, fighter: &str, slot: usize, command: &str) -> Bound {
     let cleared = shortcuts.slot_of(fighter, command) == Some(slot);
     shortcuts.assign(fighter, slot, command);
@@ -30,6 +37,15 @@ pub fn toggle(shortcuts: &mut Shortcuts, fighter: &str, slot: usize, command: &s
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ok_binds_to_the_first_free_slot_and_toggles_a_bound_move() {
+        let mut sc = Shortcuts::default();
+        assert_eq!(ok_slot(&sc, "f", "a"), 0);
+        sc.assign("f", 0, "a");
+        assert_eq!(ok_slot(&sc, "f", "b"), 1);
+        assert_eq!(ok_slot(&sc, "f", "a"), 0, "a bound move targets its own slot so OK clears it");
+    }
 
     #[test]
     fn keyboard_digits_map_to_slots() {

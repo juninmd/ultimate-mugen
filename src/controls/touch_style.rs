@@ -50,15 +50,16 @@ pub fn base_color(i: usize) -> Color {
     }
 }
 
-pub fn draw_stick(c: Vec2, sr: f32, knob: Vec2) {
-    let base_tint = Color::new(1.0, 1.0, 1.0, 0.56);
-    let knob_tint = Color::new(1.0, 1.0, 1.0, 0.74);
+pub fn draw_stick(c: Vec2, sr: f32, knob: Vec2, active: bool) {
+    let boost = if active { 1.0 } else { 0.78 };
+    let base_tint = Color::new(1.0, 1.0, 1.0, 0.56 * boost);
+    let knob_tint = Color::new(1.0, 1.0, 1.0, if active { 0.95 } else { 0.74 });
     if !STICK_BASE.with(|texture| draw_skin(texture, c, sr, base_tint)) {
         draw_circle(c.x, c.y, sr, Color::new(1.0, 1.0, 1.0, 0.1));
         draw_circle_lines(c.x, c.y, sr, 2.5, base_tint);
     }
     let center = c + knob;
-    let radius = sr * 0.42;
+    let radius = sr * if active { 0.46 } else { 0.42 };
     if !STICK_KNOB.with(|texture| draw_skin(texture, center, radius, knob_tint)) {
         draw_circle(center.x, center.y, radius, Color::new(1.0, 1.0, 1.0, 0.45));
         draw_circle_lines(center.x, center.y, radius, 2.0, knob_tint);
@@ -66,6 +67,7 @@ pub fn draw_stick(c: Vec2, sr: f32, knob: Vec2) {
 }
 
 pub fn draw_button(p: Vec2, rr: f32, label: &str, base: Color, pressed: bool) {
+    let rr = if pressed { rr * 1.08 } else { rr };
     let fill = if pressed {
         Color::new(1.0, 1.0, 1.0, 0.6)
     } else {

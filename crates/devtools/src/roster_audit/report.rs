@@ -5,7 +5,6 @@ use std::path::Path;
 
 const WASM_ATLAS_PIXELS: u64 = 2048 * 2048;
 const LOAD_SLOW_MS: u128 = 2500;
-const TICK_SLOW_US: f64 = 900.0;
 
 pub fn perf_note(char: &CharResult) -> Option<Issue> {
     if char.sprite_pixels > WASM_ATLAS_PIXELS {

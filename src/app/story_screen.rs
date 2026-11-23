@@ -69,7 +69,7 @@ impl App {
             Phase::Victory => (
                 text::story_clear().to_string(),
                 text::score_line(run.score),
-                String::new(),
+                crate::story::rank::line(crate::story::rank::of_run(&run)),
             ),
             Phase::Defeated => (
                 if run.can_continue() { text::knocked_out() } else { text::game_over() }.to_string(),

@@ -1,5 +1,6 @@
 use super::ObjectEvent;
 use crate::matchs::Match;
+use crate::fighter::GetHitVars;
 
 const SLAM_SPEED_X: f32 = 2.6;
 const SLAM_SPEED_Y: f32 = 3.2;
@@ -72,10 +73,18 @@ impl Match {
             if launch[0] != 0.0 || launch[1] != 0.0 {
                 f.vel.x = dir * launch[0].abs() * falloff;
                 f.vel.y = launch[1] * falloff;
-                if launch[1] < -0.5 {
-                    f.state_type = 'A';
-                }
                 f.hit_shake = f.hit_shake.max(6);
+                if launch[1] < -0.5 {
+                    let def = f.def.clone();
+                    f.ghv = GetHitVars::default();
+                    f.ghv.fall = true;
+                    f.ghv.yaccel = f.c("movement.yaccel", 0.44);
+                    f.ghv.xvel = f.vel.x;
+                    f.ghv.yvel = f.vel.y;
+                    f.ctrl = false;
+                    f.move_type = 'H';
+                    self.change_state(fi, 5030, def);
+                }
             }
         }
     }

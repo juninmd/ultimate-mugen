@@ -35,9 +35,7 @@ pub fn set_art_res(r: f32) {
 pub fn art_res() -> f32 {
     ART_RES_X100.load(std::sync::atomic::Ordering::Relaxed) as f32 / 100.0
 }
-fn res() -> f64 {
-    art_res() as f64
-}
+use super::effect_res::res;
 const PI: f64 = std::f64::consts::PI;
 
 // ------------------------------------------------------------------ math
@@ -1146,15 +1144,17 @@ pub fn render_effect(effect: &Value, with_images: bool, palette: Option<&Value>)
     );
     let nohit = gt(e, "nohit");
     let boxes = if nohit { vec![] } else { vec![to_box4(&body)] };
-    let mut image = None;
-    if with_images {
-        if let Some(mut ctx) = Ctx::new(width as u32, height as u32) {
+    let image = with_images.then(|| {
+        let (e, ty, r) = (e.clone(), ty.to_string(), res());
+        let (w, h) = ((width as u32).max(1), (height as u32).max(1));
+        ImageData::lazy(w, h, move || super::effect_res::with_res(r, || {
+            let Some(mut ctx) = Ctx::new(w, h) else { return Arc::new(vec![0; w as usize * h as usize * 4]) };
             ctx.translate(axis_x, axis_y);
             ctx.scale(res(), res());
-            draw_effect(&mut ctx, ty, size, ph, col, col2, e);
-            image = Some(to_image(ctx.pm));
-        }
-    }
+            draw_effect(&mut ctx, &ty, size, ph, col, col2, &e);
+            to_image(ctx.pm).rgba().clone()
+        }))
+    });
     FrameArt {
         image,
         width: width as f32,

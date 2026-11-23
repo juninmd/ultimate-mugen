@@ -26,9 +26,9 @@ pub fn finish_label() -> &'static str {
 
 pub fn hint() -> &'static str {
     tr3(
-        "Esquerda ou direita para escolher",
-        "Left or right to choose",
-        "Izquierda o derecha para elegir",
+        "Use esquerda/direita ou toque em uma opção",
+        "Use left/right or tap an option",
+        "Usa izquierda/derecha o toca una opción",
     )
 }
 

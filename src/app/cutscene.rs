@@ -125,7 +125,7 @@ impl App {
         self.ui.gradient_v(0.0, 560.0, 1280.0, 160.0, Color::new(fl.r, fl.g, fl.b, 0.0), fl);
         let pt = self.preview_t;
         let hd = self.reg.chars[hero].peek(1).or_else(|| self.reg.chars[hero].load_preview(1).ok());
-        let bd = if self.reg.chars[boss].mugen { None } else { self.reg.chars[boss].load(1).ok() };
+        let bd = if kind == 0 || self.reg.chars[boss].mugen { None } else { self.reg.chars[boss].load(1).ok() };
         if kind == 4 || kind == 5 {
             battle::draw_battle_effects(self, t, page, kind == 5, &hd, &bd, hc, bc);
         } else {

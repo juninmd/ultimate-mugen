@@ -21,12 +21,6 @@ impl App {
         if choosing_helper {
             let confirmed = self.c.pressed(nav::OK | nav::START) && t > 0.35;
             self.story_helper_input(&run, confirmed);
-        } else if deciding {
-            if self.c.pressed(nav::LEFT) {
-                self.decide_mercy(true);
-            } else if self.c.pressed(nav::RIGHT) {
-                self.decide_mercy(false);
-            }
         }
         let accent = run.stage_accent();
         let accent_color = Color::new(accent[0], accent[1], accent[2], 1.0);
@@ -93,8 +87,16 @@ impl App {
             self.draw_story_helper_pick(&run, accent_color);
         } else if deciding {
             self.ui.text(choice::hint(), VW / 2.0, 470.0, 20.0, WHITE, Align::Center, false);
-            self.ui.text(choice::spare_label(), VW * 0.3, 510.0, 26.0, hex("#8fe3a8"), Align::Center, true);
-            self.ui.text(choice::finish_label(), VW * 0.7, 510.0, 26.0, hex("#ff7a6b"), Align::Center, true);
+            let spare = self.mercy_button(VW * 0.3, choice::spare_label(), hex("#8fe3a8"));
+            let finish = self.mercy_button(VW * 0.7, choice::finish_label(), hex("#ff7a6b"));
+            if spare || self.c.pressed(nav::LEFT) {
+                self.decide_mercy(true);
+                return;
+            }
+            if finish || self.c.pressed(nav::RIGHT) {
+                self.decide_mercy(false);
+                return;
+            }
         } else if run.phase == Phase::Intro {
             self.draw_story_boss_profile(&run, accent_color, reveal);
         }
@@ -128,6 +130,15 @@ impl App {
             return;
         }
         self.screen = Screen::Story { t: t + dt };
+    }
+
+    fn mercy_button(&self, center: f32, label: &str, accent: Color) -> bool {
+        let (x, y, w, h) = (center - 132.0, 484.0, 264.0, 52.0);
+        let emphasis = if self.hover_rect(x, y, w, h) { 0.3 } else { 0.14 };
+        self.ui.rect(x, y, w, h, alpha(accent, emphasis));
+        self.ui.rect_lines(x, y, w, h, 1.5, alpha(accent, 0.75));
+        self.ui.text(label, center, y + 33.0, 20.0, accent, Align::Center, true);
+        self.tapped_in(x, y, w, h)
     }
 
     fn decide_mercy(&mut self, mercy: bool) {

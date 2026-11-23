@@ -30,9 +30,9 @@ impl App {
             let confirmed = self.c.pressed(nav::OK | nav::START) && t > 0.35;
             self.story_helper_input(&run, confirmed);
         } else if deciding {
-            if self.c.pressed(nav::LEFT) {
+            if self.c.pressed(nav::LEFT) || self.tapped_in(VW * 0.18, 484.0, VW * 0.24, 56.0) {
                 self.decide_mercy(true);
-            } else if self.c.pressed(nav::RIGHT) {
+            } else if self.c.pressed(nav::RIGHT) || self.tapped_in(VW * 0.58, 484.0, VW * 0.24, 56.0) {
                 self.decide_mercy(false);
             }
         }

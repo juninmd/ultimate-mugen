@@ -79,3 +79,5 @@ Story Studio → **Epilogues…** edits the ending of any fighter (or the `*` fa
 The epilogue editor's **Scene** row cycles the background (any stage with art) with Left/Right and saves immediately as `scene = "..."` in the TOML override.
 
 Story Studio also edits each stage's **name** (per language) and **boss** (Left/Right cycles through the installed fighters); the epilogue's final boss follows the last stage's boss. The **Foes per wave** row (Left/Right) sets 1 to 4 enemies in every wave of the stage.
+
+At the final boss introduction, choose **Spare** or **Finish** with Left/Right or by tapping the option. The choice selects the corresponding epilogue.

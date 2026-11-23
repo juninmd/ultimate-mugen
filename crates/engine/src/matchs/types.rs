@@ -105,6 +105,7 @@ pub enum Event {
     Cinema { fighter: u32, bars: f32, slow: i32, invert: bool, lines: f32, flash: [u8; 3] },
     /// the fighter with this id reached the top of the Power Arena first and drank the elixir
     Elixir { fighter: u32 },
+    WallShatter { fighter: u32, side: usize, x: f32, y: f32, right_wall: bool, bonus_damage: f32 },
     RoundStart(i32), Fight, RoundEnd(i32), MatchOver(usize),
 }
 

@@ -18,6 +18,8 @@ mod hud;
 mod stage_card;
 #[path = "story/clear_preview.rs"]
 mod clear_preview;
+#[path = "story/decision_snapshot.rs"]
+mod decision_snapshot;
 
 use crate::app::{App, Mode, Screen, Team};
 use crate::session::Session;
@@ -51,6 +53,8 @@ fn story_scroll(sess: &mut Session, def: &crate::story::StageDef, fight: usize) 
     }
 }
 
+#[path = "story/checkpoint_menu.rs"]
+mod checkpoint_menu;
 impl App {
     pub(super) fn story_char(&self, id: &str) -> Option<usize> {
         (0..self.reg.chars.len()).find(|&i| {
@@ -62,16 +66,6 @@ impl App {
     pub(super) fn story_foes(&self, run: &StoryRun) -> Vec<usize> {
         let player = self.player_char_id();
         run.foes(&player).into_iter().filter_map(|id| self.story_char(id)).collect()
-    }
-
-    pub(crate) fn story_begin(&mut self, me: usize) {
-        self.story = Some(StoryRun::default());
-        self.survival = None;
-        self.arcade = None;
-        self.sel.0 = me;
-        self.ending_shown = false;
-        self.story_prepare_fight();
-        self.screen = Screen::Story { t: 0.0 };
     }
 
     pub(crate) fn story_enabled(&self) -> bool {
@@ -121,6 +115,7 @@ impl App {
         let remaining = self.story_remaining_life();
         let Some(run) = self.story.as_mut() else { return };
         let next = run.won_fight(gained, remaining);
+        crate::story::checkpoint::record(next, run, &self.reg.chars[self.sel.0].key, self.pal[0]);
         match next {
             Next::Wave if !crate::story::prefight::pending(run) => {
                 if self.story_advance_in_place() {
@@ -197,11 +192,6 @@ impl App {
             fighter.attack_mul *= meta.boss_attack_factor;
         }
         sess.vfx.banner(text::boss_banner(), &self.story_boss_sub(run), accent);
-    }
-
-    pub(crate) fn story_snapshot(&self) -> Option<(usize, usize, u8, i64, String)> {
-        let run = self.story.as_ref()?;
-        Some((run.stage, run.wave, run.credits, run.score, format!("{:?}", run.phase)))
     }
 
     pub(crate) fn story_jump_to_stage(&mut self, stage: usize) {

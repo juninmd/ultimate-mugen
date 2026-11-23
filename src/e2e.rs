@@ -14,6 +14,7 @@ mod web {
             Screen::Fight => "fight",
             Screen::Results { .. } => "results",
             Screen::Story { .. } => "story",
+            Screen::StoryCheckpoint { .. } => "story_checkpoint",
             Screen::Tower { .. } => "tower",
             Screen::ArenaSetup { .. } => "arena_setup",
             Screen::SurvivalOver { .. } => "survival_over",
@@ -92,6 +93,11 @@ mod web {
         if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (defeat, &app.screen, app.story_snapshot()) {
             app.story_defeat_preview();
         }
+        let checkpoint = crate::query_params().iter().any(|(k, _)| k == "e2e_story_checkpoint");
+        if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (checkpoint, &app.screen, app.story_snapshot()) {
+            app.story_jump_to_boss();
+            app.story_win();
+        }
         let ending = crate::query_params().iter().any(|(k, _)| k == "e2e_epilogue");
         if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (ending, &app.screen, app.story_snapshot()) {
             app.story_epilogue_begin(app.sel.0, 0);
@@ -131,12 +137,11 @@ mod web {
                 fighters.push_str(&fighter_json(f));
             }
         }
-        let story = app
-            .story_snapshot()
-            .map(|(stage, wave, credits, score, phase)| {
-                format!("{{\"stage\":{stage},\"wave\":{wave},\"credits\":{credits},\"score\":{score},\"phase\":\"{phase}\"}}")
-            })
-            .unwrap_or_else(|| "null".into());
+        let story = app.story_snapshot().map_or_else(|| "null".into(), |(stage, wave, credits, score, phase)| {
+            let (mercy, helper_pending) = app.story_decision_snapshot().unwrap_or((None, false));
+            let mercy = match mercy { Some(true) => "true", Some(false) => "false", None => "null" };
+            format!("{{\"stage\":{stage},\"wave\":{wave},\"credits\":{credits},\"score\":{score},\"phase\":\"{phase}\",\"mercy\":{mercy},\"helper_pending\":{helper_pending}}}")
+        });
         let epilogue = app.story_epilogue_page().map_or("null".to_string(), |page| page.to_string());
         let arcade = app.arcade.as_ref().map_or_else(
             || "null".to_string(),

@@ -15,25 +15,31 @@ pub(crate) struct EpiState {
     ids: Vec<String>,
     edit: Option<String>,
     note: String,
+    cache: Epilogue,
+    edited: bool,
 }
 
 impl EpiState {
     pub(crate) fn open() -> Self {
-        Self { fighter: 0, ids: epilogue_store::ids(), edit: None, note: String::new() }
+        let mut state = Self { fighter: 0, ids: epilogue_store::ids(), edit: None, note: String::new(), cache: Epilogue::default(), edited: false };
+        state.refresh();
+        state
+    }
+
+    fn refresh(&mut self) {
+        self.cache = epilogue_store::table().get(self.id()).cloned().unwrap_or_default();
+        self.edited = epilogue_store::has_override(self.id());
     }
 
     pub(crate) fn editing(mut self, text: &str, id: &str) -> Self {
         self.fighter = self.ids.iter().position(|k| k == id).unwrap_or(0);
         self.edit = Some(text.into());
+        self.refresh();
         self
     }
 
     fn id(&self) -> &str {
         self.ids.get(self.fighter).map(String::as_str).unwrap_or("*")
-    }
-
-    fn epilogue(&self) -> Epilogue {
-        epilogue_store::table().get(self.id()).cloned().unwrap_or_default()
     }
 }
 
@@ -51,7 +57,7 @@ impl App {
         let Screen::EpilogueStudio { mut cur } = self.screen else { return };
         let mut st = self.epi_studio.take().unwrap_or_else(EpiState::open);
         let lang = crate::i18n::get();
-        let fields = edit::fields(&st.epilogue());
+        let fields = edit::fields(&st.cache);
         let last = fields.len() + 1;
         cur = cur.min(last);
         if st.edit.is_some() {
@@ -85,6 +91,7 @@ impl App {
                     Ok(()) => tr3("Salvo e aplicado na hora", "Saved and applied right away", "Guardado y aplicado al instante").into(),
                     Err(e) => e,
                 };
+                st.refresh();
                 self.audio.sfx("select");
             }
         }
@@ -109,6 +116,7 @@ impl App {
         if cur == 0 && dir != 0 {
             let n = st.ids.len().max(1) as i32;
             st.fighter = (st.fighter as i32 + dir).rem_euclid(n) as usize;
+            st.refresh();
             self.audio.sfx("select");
             return 0;
         }
@@ -117,11 +125,12 @@ impl App {
                 Ok(()) => tr3("Epílogo original restaurado", "Original epilogue restored", "Epílogo original restaurado").into(),
                 Err(e) => e,
             };
+            st.refresh();
             self.audio.sfx("cancel");
         } else if ok && cur >= 1 {
             let lang = crate::i18n::get();
             if let Some(field) = fields.get(cur - 1) {
-                st.edit = Some(edit::read(&st.epilogue(), *field, lang.code()));
+                st.edit = Some(edit::read(&st.cache, *field, lang.code()));
                 self.audio.sfx("confirm");
             }
         }
@@ -130,10 +139,10 @@ impl App {
 
     fn draw_epilogue_studio(&mut self, st: &EpiState, fields: &[Field], cur: usize, lang: Lang) {
         crate::screen_art::ScreenArt::Lab.background(&self.ui);
-        let mark = if epilogue_store::has_override(st.id()) { "●" } else { "" };
+        let mark = if st.edited { "●" } else { "" };
         self.ui.adapted_header(tr3("EDITOR DE EPÍLOGOS", "EPILOGUE STUDIO", "EDITOR DE EPÍLOGOS"), &format!("{} {mark}", st.id()), VW);
         let rows = fields.len() + 2;
-        let epilogue = st.epilogue();
+        let epilogue = &st.cache;
         for i in 0..rows {
             let y = ROW_TOP + i as f32 * ROW_H;
             let focused = i == cur;
@@ -152,7 +161,7 @@ impl App {
                         let skip = buf.chars().count().saturating_sub(SHOWN_TAIL);
                         format!("{}{}_", if skip > 0 { "…" } else { "" }, buf.chars().skip(skip).collect::<String>())
                     }
-                    _ => edit::read(&epilogue, field, lang.code()),
+                    _ => edit::read(epilogue, field, lang.code()),
                 };
                 (field_label(field), text)
             };

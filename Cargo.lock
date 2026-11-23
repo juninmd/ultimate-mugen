@@ -3087,6 +3087,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ume-model3d"
+version = "0.2.0"
+dependencies = [
+ "serde_json",
+ "tiny-skia",
+]
+
+[[package]]
 name = "ume-native"
 version = "0.2.0"
 dependencies = [

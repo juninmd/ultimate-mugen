@@ -1,6 +1,5 @@
-mod support;
 use std::sync::Arc;
-use support::*;
+use crate::support::*;
 use ume_engine::fighter::HitDefData;
 use ume_engine::input::k;
 use ume_engine::matchs::Match;

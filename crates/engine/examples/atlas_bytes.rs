@@ -15,7 +15,7 @@ fn main() {
         let (mut bytes, mut n) = (0u64, 0u64);
         for s in def.sprites.values() {
             let Some(im) = s.image.as_ref() else { continue };
-            if seen.insert(im.id) { if !dup.insert((im.w, im.h, im.rgba.iter().fold(0u64, |h, b| h.wrapping_mul(1099511628211).wrapping_add(*b as u64 + 1)))) { dup_bytes += im.w as u64 * im.h as u64 * 4; } bytes += im.w as u64 * im.h as u64 * 4; n += 1; }
+            if seen.insert(im.id) { if !dup.insert((im.w, im.h, im.rgba().iter().fold(0u64, |h, b| h.wrapping_mul(1099511628211).wrapping_add(*b as u64 + 1)))) { dup_bytes += im.w as u64 * im.h as u64 * 4; } bytes += im.w as u64 * im.h as u64 * 4; n += 1; }
         }
         println!("{:10} {:5} images {:8.1} MB  avg {:6.1} KB  duplicate {:6.1} MB", nc.id, n, bytes as f64 / 1e6, bytes as f64 / n.max(1) as f64 / 1e3, dup_bytes as f64 / 1e6);
         total += bytes; count += n;

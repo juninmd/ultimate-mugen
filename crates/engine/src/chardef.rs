@@ -3,35 +3,18 @@ use crate::commands::CommandDef;
 use crate::expr::{parse, parse_list, Expr, Node};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::Ordering;
 use std::sync::{Arc, Mutex};
 pub use ume_formats::air::{AnimFrame, Animation, Blend, Box4};
 
 mod constants;
 pub use constants::default_constants;
+mod image;
+pub use image::ImageData;
+use image::IMG_ID;
 mod portrait;
 pub use portrait::portrait_pixels_usable;
 
-static IMG_ID: AtomicU64 = AtomicU64::new(1);
-
-/// RGBA image owned by the engine (uploaded to a GPU texture by the renderer, cached by `id`).
-#[derive(Debug)]
-pub struct ImageData {
-    pub w: u32,
-    pub h: u32,
-    pub rgba: Arc<Vec<u8>>,
-    pub id: u64,
-}
-impl ImageData {
-    pub fn new(w: u32, h: u32, rgba: impl Into<Arc<Vec<u8>>>) -> Arc<Self> {
-        Arc::new(ImageData {
-            w,
-            h,
-            rgba: rgba.into(),
-            id: IMG_ID.fetch_add(1, Ordering::Relaxed),
-        })
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct Sprite {
@@ -355,12 +338,12 @@ impl CharDef {
                 let key = (group, index);
                 let Some(sprite) = self.sprites.get(&key) else { continue };
                 let Some(image) = self.rgba_sprite(key) else { continue };
-                if portrait_pixels_usable(&image.rgba) { return Some((sprite.clone(), image, full)); }
+                if portrait_pixels_usable(image.rgba()) { return Some((sprite.clone(), image, full)); }
             }
             let key = idle?;
             let sprite = self.sprites.get(&key)?;
             let image = self.rgba_sprite(key)?;
-            portrait_pixels_usable(&image.rgba).then(|| (sprite.clone(), image, false))
+            portrait_pixels_usable(image.rgba()).then(|| (sprite.clone(), image, false))
         }).clone()
     }
 }

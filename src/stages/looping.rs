@@ -129,8 +129,8 @@ mod tests {
         let images = frames("great_wall");
         assert_eq!(images.len(), KEYFRAME_COUNT * 2);
         assert!(images.iter().all(|frame| (frame.w, frame.h) == (1672, 941)));
-        assert!(images.windows(2).all(|pair| pair[0].rgba != pair[1].rgba));
-        assert_ne!(images.first().unwrap().rgba, images.last().unwrap().rgba);
+        assert!(images.windows(2).all(|pair| pair[0].rgba() != pair[1].rgba()));
+        assert_ne!(images.first().unwrap().rgba(), images.last().unwrap().rgba());
     }
 
     #[test]

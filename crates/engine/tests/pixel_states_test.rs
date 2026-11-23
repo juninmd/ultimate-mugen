@@ -40,7 +40,7 @@ fn frame_sprite(def: &CharDef, anim: i32, frame: usize) -> &Sprite {
 fn opaque_floor_offset(sprite: &Sprite) -> f32 {
     let image = sprite.image.as_deref().expect("sprite image");
     let bottom = image
-        .rgba
+        .rgba()
         .as_chunks::<4>()
         .0
         .iter()
@@ -77,7 +77,7 @@ fn every_fighter_with_a_sprite_folder_draws_it() {
         );
         assert!(
             portrait
-                .rgba
+                .rgba()
                 .as_chunks::<4>()
                 .0
                 .iter()
@@ -111,19 +111,19 @@ fn state_animations_use_their_own_art() {
         ];
         for (label, anim, frame) in states {
             assert_ne!(
-                frame_art(&def, anim, frame).rgba,
-                idle.rgba,
+                frame_art(&def, anim, frame).rgba(),
+                idle.rgba(),
                 "{id}: {label} must not reuse the idle sprite"
             );
         }
         assert_ne!(
-            frame_art(&def, 196, 0).rgba,
-            frame_art(&def, 196, 2).rgba,
+            frame_art(&def, 196, 0).rgba(),
+            frame_art(&def, 196, 2).rgba(),
             "{id}: transformation must progress"
         );
         assert_eq!(
-            frame_art(&def, 5150, 0).rgba,
-            frame_art(&def, 5110, 0).rgba,
+            frame_art(&def, 5150, 0).rgba(),
+            frame_art(&def, 5110, 0).rgba(),
             "{id}: dead and lie down share the knocked-out art"
         );
         for (anim, frame) in [(5000, 0), (5050, 0), (5110, 0), (196, 2)] {
@@ -153,19 +153,19 @@ fn alternate_palettes_recolour_the_sprite_art() {
         );
         assert!(
             before
-                .rgba
+                .rgba()
                 .chunks_exact(4)
-                .zip(after.rgba.chunks_exact(4))
+                .zip(after.rgba().chunks_exact(4))
                 .all(|(a, b)| a[3] == b[3]),
             "{id}: the palette swap keeps the silhouette"
         );
         let changed = before
-            .rgba
+            .rgba()
             .chunks_exact(4)
-            .zip(after.rgba.chunks_exact(4))
+            .zip(after.rgba().chunks_exact(4))
             .filter(|(a, b)| a[..3] != b[..3])
             .count();
-        let opaque = before.rgba.chunks_exact(4).filter(|pixel| pixel[3] > 0).count();
+        let opaque = before.rgba().chunks_exact(4).filter(|pixel| pixel[3] > 0).count();
         assert!(
             changed * 4 > opaque,
             "{id}: palette 2 must repaint a meaningful part of the fighter ({changed} of {opaque})"

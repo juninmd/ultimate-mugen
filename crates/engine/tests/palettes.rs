@@ -127,7 +127,7 @@ fn remappal_recolors_through_the_palette_table() {
     let d = remap_char();
     assert!(d.remapped((0, 0), &[]).is_none());
     let img = d.remapped((0, 0), &[((1, 1), (1, 2))]).expect("remapped image");
-    assert_eq!(&img.rgba[..], &[0, 0, 0, 0, 200, 0, 0, 255]);
+    assert_eq!(&img.rgba()[..], &[0, 0, 0, 0, 200, 0, 0, 255]);
     assert_eq!(d.remap_palette((0, 0), &[((1, 1), (1, 2))]).map(|p| p[4]), Some(200));
     assert!(d.remap_palette((0, 0), &[((1, 1), (1, 1))]).is_none());
     let again = d.remapped((0, 0), &[((1, 1), (1, 2))]).unwrap();

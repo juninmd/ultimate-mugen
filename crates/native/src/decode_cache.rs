@@ -10,6 +10,7 @@ pub(super) struct Decoded {
     pub width: u32,
     pub height: u32,
     pub rgba: Arc<Vec<u8>>,
+    pub bounds: Option<[usize; 4]>,
 }
 
 type Key = (PathBuf, String);
@@ -39,7 +40,8 @@ pub(super) fn png(root: &Path, name: &str, bytes: &Arc<Vec<u8>>) -> Option<Arc<D
     static STORE: OnceLock<Mutex<HashMap<Key, Entry<Decoded>>>> = OnceLock::new();
     cached(&STORE, root, name, bytes, |b| {
         let (width, height, rgba) = sprite_rgba(b)?;
-        Some(Decoded { width, height, rgba: Arc::new(rgba) })
+        let bounds = super::pixel_crop::content_box(width as usize, height as usize, &rgba);
+        Some(Decoded { width, height, rgba: Arc::new(rgba), bounds })
     })
 }
 
@@ -48,7 +50,7 @@ pub(super) fn thumbnail(root: &Path, name: &str, bytes: &Arc<Vec<u8>>, shrink: i
     cached(&STORE, root, name, bytes, |b| {
         let (full_width, full_height, full) = sprite_rgba(b)?;
         let (width, height, rgba) = shrink(full_width, full_height, &full);
-        Some(Decoded { width, height, rgba: Arc::new(rgba) })
+        Some(Decoded { width, height, rgba: Arc::new(rgba), bounds: None })
     })
 }
 

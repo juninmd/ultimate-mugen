@@ -12,9 +12,16 @@ pub struct Triangle {
     pub points: [[f32; 2]; 3],
     pub depth: f32,
     pub color: [u8; 4],
+    pub uv: [[f32; 2]; 3],
+    pub texture: Option<usize>,
 }
 
 const LIGHT: [f32; 3] = [-0.35, 0.65, 0.68];
+
+fn wrapped_uv(uv: [[f32; 2]; 3]) -> [[f32; 2]; 3] {
+    let shift = [0, 1].map(|axis| ((uv[0][axis] + uv[1][axis] + uv[2][axis]) / 3.0).floor());
+    uv.map(|p| [0, 1].map(|axis| (p[axis] - shift[axis]).clamp(0.002, 0.998)))
+}
 
 fn cross(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
     [
@@ -82,6 +89,11 @@ impl Model {
                     points: [to_screen(a), to_screen(b), to_screen(d)],
                     depth: (a[2] + b[2] + d[2]) / 3.0,
                     color: shade(a, b, d, prim.color),
+                    uv: wrapped_uv(
+                        [tri[0], tri[1], tri[2]]
+                            .map(|i| prim.uvs.get(i as usize).copied().unwrap_or([0.0; 2])),
+                    ),
+                    texture: prim.texture,
                 });
             }
         }

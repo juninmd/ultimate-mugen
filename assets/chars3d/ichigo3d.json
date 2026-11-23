@@ -1,0 +1,12 @@
+{
+  "format": "umf/2",
+  "id": "ichigo3d",
+  "extends": "kaito",
+  "spriteSet": "kaito",
+  "name": "Ichigo 3D",
+  "series": "3D Prototype",
+  "author": "Ultimate MUGEN",
+  "description": "Shinigami substitute drawn from a 3D glTF model on the 2D fight plane. Simulation, hitboxes and rollback are the 2D ones.",
+  "color": "#e8731a",
+  "country": "Japão"
+}

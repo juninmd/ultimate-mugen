@@ -9,6 +9,8 @@ pub struct Primitive {
     pub weights: Vec<[f32; 4]>,
     pub indices: Vec<u32>,
     pub color: [f32; 3],
+    pub uvs: Vec<[f32; 2]>,
+    pub texture: Option<usize>,
 }
 
 fn triples(data: Vec<f32>) -> Vec<[f32; 3]> {
@@ -21,7 +23,19 @@ fn quads(data: Vec<f32>) -> Vec<[f32; 4]> {
         .collect()
 }
 
+fn texture_of(json: &Value, material: Option<u64>) -> Option<usize> {
+    let texture = json["materials"].get(material? as usize)?["pbrMetallicRoughness"]
+        ["baseColorTexture"]["index"]
+        .as_u64()?;
+    json["textures"].get(texture as usize)?["source"]
+        .as_u64()
+        .map(|s| s as usize)
+}
+
 fn base_color(json: &Value, material: Option<u64>) -> [f32; 3] {
+    if texture_of(json, material).is_some() {
+        return [1.0; 3];
+    }
     let factor = material
         .and_then(|m| json["materials"].get(m as usize))
         .and_then(|m| m["pbrMetallicRoughness"]["baseColorFactor"].as_array());
@@ -69,6 +83,15 @@ pub fn read_primitives(src: &Source) -> Result<Vec<Primitive>, ModelError> {
                 Some(a) => quads(src.floats(a as usize)?.0),
                 None => Vec::new(),
             };
+            let uvs = match attrs["TEXCOORD_0"].as_u64() {
+                Some(a) => src
+                    .floats(a as usize)?
+                    .0
+                    .chunks_exact(2)
+                    .map(|c| [c[0], c[1]])
+                    .collect(),
+                None => Vec::new(),
+            };
             let indices = match p["indices"].as_u64() {
                 Some(a) => src.indices(a as usize)?,
                 None => (0..positions.len() as u32).collect(),
@@ -83,6 +106,8 @@ pub fn read_primitives(src: &Source) -> Result<Vec<Primitive>, ModelError> {
                 weights,
                 indices,
                 color: base_color(src.json, p["material"].as_u64()),
+                uvs,
+                texture: texture_of(src.json, p["material"].as_u64()),
             });
         }
     }

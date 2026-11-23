@@ -1,0 +1,11 @@
+{
+  "format": "umf/2",
+  "id": "fox3d",
+  "extends": "kaito",
+  "spriteSet": "kaito",
+  "name": "Fox 3D",
+  "series": "3D Prototype",
+  "author": "Ultimate MUGEN",
+  "description": "Prototype fighter drawn from a 3D glTF model on the 2D fight plane. Simulation, hitboxes and rollback are the 2D ones.",
+  "color": "#d98a3d"
+}

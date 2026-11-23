@@ -87,3 +87,23 @@ fn projection_fits_requested_height_and_flips_with_facing() {
     assert!(mean(&right) * mean(&left) < 0.0 || (mean(&right) - mean(&left)).abs() > 1.0);
     assert!(right.windows(2).all(|w| w[0].depth <= w[1].depth));
 }
+
+#[test]
+fn textures_decode_and_uvs_stay_inside_the_image() {
+    let m = fox();
+    assert!(m
+        .images
+        .iter()
+        .flatten()
+        .any(|i| i.width > 0 && i.rgba.len() == (i.width * i.height * 4) as usize));
+    let cam = Camera::fit_height(&m, 100.0);
+    let mut posed = Posed::default();
+    m.pose(Some(0), 0.1, &mut posed);
+    let mut tris = Vec::new();
+    m.project(&posed, &cam, Facing::Right, [0.0, 0.0], &mut tris);
+    assert!(tris.iter().all(|t| t.texture.is_some()));
+    assert!(tris
+        .iter()
+        .flat_map(|t| t.uv.iter().flatten())
+        .all(|&v| (0.0..=1.0).contains(&v)));
+}

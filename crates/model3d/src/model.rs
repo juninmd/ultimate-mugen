@@ -2,6 +2,7 @@ use crate::accessor::Source;
 use crate::clip::{read_clips, Clip};
 use crate::error::ModelError;
 use crate::glb;
+use crate::image_read::{read_images, Image};
 use crate::mesh_read::{read_primitives, Primitive};
 use crate::pose::globals;
 use crate::skeleton_read::{read_nodes, read_skins, Node, Skin};
@@ -13,6 +14,7 @@ pub struct Model {
     pub(crate) skins: Vec<Skin>,
     pub(crate) primitives: Vec<Primitive>,
     pub clips: Vec<Clip>,
+    pub images: Vec<Option<Image>>,
 }
 
 #[derive(Default)]
@@ -36,6 +38,7 @@ impl Model {
             skins: read_skins(&src)?,
             primitives,
             clips: read_clips(&src)?,
+            images: read_images(&src),
         })
     }
 

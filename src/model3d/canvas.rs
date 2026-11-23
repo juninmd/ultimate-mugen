@@ -26,14 +26,35 @@ thread_local! {
     static CANVASES: RefCell<HashMap<(String, bool, usize), Canvas>> = RefCell::new(HashMap::new());
 }
 
-pub(super) fn present(b: &mut Binding, key: (&str, bool, usize), at: Placement) {
+pub(super) struct Drawn {
+    pub texture: Texture2D,
+    pub corner: [f32; 2],
+    pub size: f32,
+}
+
+impl Drawn {
+    pub fn draw(&self, offset: [f32; 2], tint: Color) {
+        draw_texture_ex(
+            &self.texture,
+            self.corner[0] + offset[0],
+            self.corner[1] + offset[1],
+            tint,
+            DrawTextureParams {
+                dest_size: Some(vec2(self.size, self.size)),
+                ..Default::default()
+            },
+        );
+    }
+}
+
+pub(super) fn present(b: &mut Binding, key: (&str, bool, usize), at: Placement) -> Drawn {
     let render_scale = at.screen_scale.min(EDGE as f32 * FILL / b.height);
     let mut camera = b.camera;
     camera.pixels_per_unit *= render_scale;
     let origin = [EDGE as f32 / 2.0, EDGE as f32 * FEET];
     b.model
         .project(&b.posed, &camera, at.facing, origin, &mut b.triangles);
-    CANVASES.with(|cache| {
+    let drawn = CANVASES.with(|cache| {
         let mut cache = cache.borrow_mut();
         let samples = if crate::lite::scale() < 1.0 {
             1
@@ -66,15 +87,11 @@ pub(super) fn present(b: &mut Binding, key: (&str, bool, usize), at: Placement) 
             }
         };
         let dest = EDGE as f32 * at.screen_scale / render_scale;
-        draw_texture_ex(
-            &texture,
-            at.feet[0] - dest / 2.0,
-            at.feet[1] - dest * FEET,
-            WHITE,
-            DrawTextureParams {
-                dest_size: Some(vec2(dest, dest)),
-                ..Default::default()
-            },
-        );
+        Drawn {
+            texture,
+            corner: [at.feet[0] - dest / 2.0, at.feet[1] - dest * FEET],
+            size: dest,
+        }
     });
+    drawn
 }

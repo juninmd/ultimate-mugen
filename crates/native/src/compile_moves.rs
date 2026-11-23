@@ -75,6 +75,7 @@ pub(super) fn compile_moves(nc: &NativeChar, anim_no: &HashMap<String, i32>, blo
             pid += 1;
         }
         cns += &super::move_fx::follow_up_cns(m, sid, m.follow_up.as_ref().and_then(|f| plan.sid_of(&f.to)));
+        cns += &super::hold_release::cns(m, sid, &plan, commands);
         if when != "air" {
             if m.teleport.is_some() && when != "fly" { cns += &format!("[State {sid}, end_air]\ntype = ChangeState\ntrigger1 = AnimTime = 0 && Pos Y < 0\nvalue = 50\nctrl = 1\n\n"); }
             cns += &format!("[State {sid}, end]\ntype = ChangeState\ntrigger1 = AnimTime = 0\nvalue = {}\nctrl = 1\n\n", match when { "crouch" => 11, "fly" => super::abilities::FLY_STATE, _ => 0 });

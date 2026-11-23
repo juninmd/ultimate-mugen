@@ -24,7 +24,7 @@ pub(super) fn draw(
             feet: [center_x, bottom],
             samples: 2,
         };
-        canvas::present(b, (id, false, FIT_SLOT + mirror as usize), at);
+        canvas::present(b, (id, false, FIT_SLOT + mirror as usize), at).draw([0.0, 0.0], crate::gfx::WHITE);
     })
     .is_some()
 }

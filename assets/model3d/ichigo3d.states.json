@@ -6,12 +6,12 @@
  "states": [],
  "anims": {
   "idle": {
-   "clip": "Idle",
+   "clip": "BankaiIdle",
    "loop": true,
    "speed": 1.0
   },
   "turn": {
-   "clip": "Idle",
+   "clip": "BankaiIdle",
    "loop": true,
    "speed": 1.0
   },
@@ -86,54 +86,54 @@
    "speed": 1.6
   },
   "guardStart": {
-   "clip": "Guard",
+   "clip": "GuardBlock",
    "loop": false,
-   "speed": 1.5
+   "speed": 1.0
   },
   "crouchGuardStart": {
-   "clip": "Guard",
+   "clip": "GuardBlock",
    "loop": false,
-   "speed": 1.5
+   "speed": 1.0
   },
   "airGuardStart": {
-   "clip": "Guard",
+   "clip": "GuardBlock",
    "loop": false,
-   "speed": 1.5
+   "speed": 1.0
   },
   "guard": {
-   "clip": "Guard",
+   "clip": "GuardBlock",
    "loop": false,
-   "speed": 1.5
+   "speed": 1.0
   },
   "crouchGuard": {
-   "clip": "Guard",
+   "clip": "GuardBlock",
    "loop": false,
-   "speed": 1.5
+   "speed": 1.0
   },
   "airGuard": {
-   "clip": "Guard",
+   "clip": "GuardBlock",
    "loop": false,
-   "speed": 1.5
+   "speed": 1.0
   },
   "guardEnd": {
-   "clip": "Guard",
+   "clip": "GuardBlock",
    "loop": false,
-   "speed": 1.5
+   "speed": 1.0
   },
   "guardHit": {
-   "clip": "Guard",
+   "clip": "GuardHit",
    "loop": false,
-   "speed": 1.5
+   "speed": 1.0
   },
   "crouchGuardHit": {
-   "clip": "Guard",
+   "clip": "GuardHit",
    "loop": false,
-   "speed": 1.5
+   "speed": 1.0
   },
   "airGuardHit": {
-   "clip": "Guard",
+   "clip": "GuardHit",
    "loop": false,
-   "speed": 1.5
+   "speed": 1.0
   },
   "hitLight": {
    "clip": "HitLight",
@@ -221,8 +221,8 @@
    "speed": 2.0
   },
   "win": {
-   "clip": "Win",
-   "loop": true,
+   "clip": "PointSword",
+   "loop": false,
    "speed": 1.0
   },
   "draw": {
@@ -231,59 +231,59 @@
    "speed": 1.0
   },
   "intro": {
-   "clip": "Taunt",
+   "clip": "PointSword",
    "loop": false,
    "speed": 1.0
   },
   "powerUp": {
-   "clip": "Charge",
+   "clip": "GetsugaCharge",
    "loop": true,
    "speed": 1.0
   },
   "jab": {
-   "clip": "SlashA",
+   "clip": "Slash1",
    "loop": false,
-   "speed": 2.0
+   "speed": 1.0
   },
   "cjab": {
-   "clip": "SlashA",
+   "clip": "Slash1",
    "loop": false,
-   "speed": 2.0
+   "speed": 1.0
   },
   "ajab": {
-   "clip": "SlashA",
+   "clip": "Slash1",
    "loop": false,
-   "speed": 2.0
+   "speed": 1.0
   },
   "chain_jab2": {
-   "clip": "SlashA",
+   "clip": "Slash1",
    "loop": false,
-   "speed": 2.0
+   "speed": 1.7
   },
   "chain_cjab2": {
-   "clip": "SlashA",
+   "clip": "Slash1",
    "loop": false,
-   "speed": 2.0
+   "speed": 1.7
   },
   "chain_ajab2": {
-   "clip": "SlashA",
+   "clip": "Slash1",
    "loop": false,
-   "speed": 2.0
+   "speed": 1.7
   },
   "strong": {
-   "clip": "SlashB",
+   "clip": "Slash2",
    "loop": false,
-   "speed": 1.8
+   "speed": 1.0
   },
   "chain_strong2": {
-   "clip": "SlashB",
+   "clip": "Slash2",
    "loop": false,
-   "speed": 1.8
+   "speed": 2.3
   },
   "chain_jab3": {
-   "clip": "SlashB",
+   "clip": "Slash2",
    "loop": false,
-   "speed": 1.8
+   "speed": 1.9
   },
   "lkick": {
    "clip": "SlashC",
@@ -301,14 +301,14 @@
    "speed": 1.8
   },
   "hkick": {
-   "clip": "SlashHeavy",
+   "clip": "Slash3",
    "loop": false,
-   "speed": 1.6
+   "speed": 1.0
   },
   "akick": {
-   "clip": "SlashHeavy",
+   "clip": "Slash3",
    "loop": false,
-   "speed": 1.6
+   "speed": 1.0
   },
   "rise": {
    "clip": "SlashHeavy",
@@ -341,24 +341,24 @@
    "speed": 1.5
   },
   "gale": {
-   "clip": "Getsuga",
+   "clip": "GetsugaRelease",
    "loop": false,
-   "speed": 1.5
+   "speed": 1.0
   },
   "galeEx": {
-   "clip": "Getsuga",
+   "clip": "GetsugaRelease",
    "loop": false,
-   "speed": 1.5
+   "speed": 1.25
   },
   "triad": {
-   "clip": "Getsuga",
+   "clip": "Juujishou",
    "loop": false,
-   "speed": 1.5
+   "speed": 1.0
   },
   "tempest": {
    "clip": "Cero",
    "loop": false,
-   "speed": 1.4
+   "speed": 1.03
   },
   "super": {
    "clip": "SlashCombo",
@@ -366,9 +366,9 @@
    "speed": 1.3
   },
   "triadUlt": {
-   "clip": "SlashCombo",
+   "clip": "Juujishou",
    "loop": false,
-   "speed": 1.3
+   "speed": 1.0
   },
   "stringA": {
    "clip": "SlashCombo",
@@ -386,19 +386,29 @@
    "speed": 1.3
   },
   "stormRush": {
-   "clip": "DashSlash",
+   "clip": "ShunpoDash",
    "loop": false,
-   "speed": 1.6
+   "speed": 1.0
   },
   "tide": {
-   "clip": "Shunpo",
+   "clip": "ShunpoStrike",
    "loop": false,
-   "speed": 2.0
+   "speed": 1.0
   },
   "stormToss": {
    "clip": "Hook",
    "loop": false,
    "speed": 1.5
+  },
+  "getsugaCharge": {
+   "clip": "GetsugaCharge",
+   "loop": true,
+   "speed": 1.0
+  },
+  "ceroCharge": {
+   "clip": "CeroCharge",
+   "loop": true,
+   "speed": 1.0
   }
  }
 }

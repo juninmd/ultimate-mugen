@@ -158,6 +158,8 @@ impl Fighter {
     }
     /// Change animation; `from` is the CharDef providing the animation (own, or state owner for ChangeAnim2).
     pub fn change_anim(&mut self, no: i32, from: &Arc<CharDef>, elem: i32) {
+        let own = self.def.clone();
+        let from = if !Arc::ptr_eq(from, &own) && from.id == own.id { &own } else { from };
         if no != self.anim_no { self.prev_anim = self.anim_no; }
         let mut real = if from.anims.contains_key(&no) { Some(no) } else { None };
         if real.is_none() { real = crate::anim_fallback::anim_fallback(no).iter().copied().find(|a| from.anims.contains_key(a)); }

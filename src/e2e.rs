@@ -78,6 +78,19 @@ mod web {
                 app.story_ally_preview();
             }
         }
+        if matches!(app.screen, Screen::Cutscene { kind: 0, .. }) {
+            let clear_count = crate::query_params().iter().find_map(|(k, v)| {
+                (k == "e2e_arcade_clear").then(|| v.parse::<usize>().ok()).flatten()
+            });
+            if let Some(clears @ 0..=2) = clear_count {
+                app.boss_progression.clears = clears;
+                if let Some(boss) = app.boss_idx() {
+                    app.sel.1 = boss;
+                    app.arcade = Some((vec![boss], 0));
+                    app.screen = Screen::Results { winner: 0, cur: 0 };
+                }
+            }
+        }
         let god = god_requested();
         let mut fighters = String::new();
         let mut over = -1i64;

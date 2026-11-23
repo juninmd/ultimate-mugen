@@ -28,15 +28,17 @@ pub fn script_for(kind: u8, hero_id: &str, hero: &str, hero_quote: &str, boss: &
     let clean_boss = boss.strip_prefix("umf:").unwrap_or(boss).to_lowercase();
     match kind {
         0 => story::opening_script(hero_id, hero),
-        1 => {
+        1 | 2 => {
             if clean_boss.contains("garan") || clean_boss.contains("valdric") {
                 let boss_key = if clean_boss.contains("garan") { "garan" } else { "valdric" };
-                crate::boss::dialogue::script(1, hero, hero_quote, boss_key, boss, boss_line)
+                crate::boss::dialogue::script(kind, hero, hero_quote, boss_key, boss, boss_line)
                     .into_iter()
                     .map(|p| Page { who: p.who, text: p.text })
                     .collect()
-            } else {
+            } else if kind == 1 {
                 story::preboss_script(hero_id, boss, boss_line)
+            } else {
+                endings::ending_script(hero_id, hero, hero_quote)
             }
         }
         3 => story::awakening_script(hero_id, hero),
@@ -60,7 +62,7 @@ impl App {
         let Screen::Cutscene { kind, mut page, mut t } = self.screen else { return; };
         t += get_frame_time();
         let hero = self.sel.0;
-        let Some(boss) = self.boss_idx() else { self.cutscene_done(kind); return; };
+        let Some(boss) = (if kind >= 5 || kind == 2 { Some(self.sel.1) } else { self.boss_idx() }) else { self.cutscene_done(kind); return; };
         let (hero_id, hero_name) = (self.reg.chars[hero].id.clone(), self.reg.chars[hero].name.clone());
         let boss_name = self.reg.chars[boss].name.clone();
         let script = script_for(kind, &hero_id, &hero_name, &self.native_quote(hero, false), &boss_name, &self.native_quote(boss, true));

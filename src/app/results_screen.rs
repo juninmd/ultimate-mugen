@@ -18,7 +18,7 @@ impl App {
             return;
         }
         // arcade progression
-        if self.mode == Mode::Arcade && winner == 0 {
+        if self.mode == Mode::Arcade && winner == 0 && self.replaying.is_none() {
             let boss = self.boss_idx();
             let mut next_action = None;
             if let Some((ladder, i)) = self.arcade.as_mut() {
@@ -54,7 +54,7 @@ impl App {
                         .unwrap_or_default();
                     self.boss_progression.on_clear(&hero_id, &boss_entry_id);
                     self.screen = Screen::Cutscene {
-                        kind: 5,
+                        kind: if boss_entry_id == "oboro" { 5 } else { 2 },
                         page: 0,
                         t: 0.0,
                     };

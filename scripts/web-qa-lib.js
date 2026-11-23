@@ -7,9 +7,34 @@ const loadManifest = file => JSON.parse(fs.readFileSync(file || manifestPath, 'u
 
 const shardsOf = manifest => [...new Set(manifest.scenarios.map(s => s.shard))];
 
-const select = (manifest, { shard, only } = {}) => {
+const weightsPath = path.join(__dirname, 'web-qa-weights.json');
+const DEFAULT_WEIGHT = 60;
+
+const loadWeights = file => {
+  try { return JSON.parse(fs.readFileSync(file || weightsPath, 'utf8')); } catch { return {}; }
+};
+
+const partition = (scenarios, count, weights = {}) => {
+  const bins = Array.from({ length: count }, () => ({ load: 0, items: [] }));
+  const w = s => weights[s.name] ?? DEFAULT_WEIGHT;
+  const ordered = [...scenarios].sort((a, b) => w(b) - w(a) || a.name.localeCompare(b.name));
+  for (const s of ordered) {
+    const bin = bins.reduce((best, b) => (b.load < best.load ? b : best));
+    bin.items.push(s);
+    bin.load += w(s);
+  }
+  return bins.map(b => b.items);
+};
+
+const select = (manifest, { shard, only, part, weights } = {}) => {
   const names = only ? new Set(only.split(',')) : null;
-  return manifest.scenarios.filter(s => (!shard || s.shard === shard) && (!names || names.has(s.name)));
+  let list = manifest.scenarios.filter(s => (!shard || s.shard === shard) && (!names || names.has(s.name)));
+  if (part) {
+    const [index, count] = part.split('/').map(Number);
+    if (!(index >= 1 && count >= index)) throw new Error(`bad --part ${part}, expected i/N`);
+    list = partition(list, count, weights ?? loadWeights())[index - 1];
+  }
+  return list;
 };
 
 const expandArgs = (args, vars) => (args || []).map(a => a.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? ''));
@@ -32,4 +57,4 @@ const summaryMarkdown = (results, meta = {}) => {
   return [...head, ...rows, ...details, ''].join('\n');
 };
 
-module.exports = { loadManifest, shardsOf, select, expandArgs, tail, problemLines, summaryMarkdown };
+module.exports = { loadManifest, loadWeights, partition, shardsOf, select, expandArgs, tail, problemLines, summaryMarkdown };

@@ -4,7 +4,7 @@ Every pull request plays the real wasm build in headless Chromium, in parallel s
 
 ## What runs
 
-`scripts/web-qa.json` lists the scenarios; `scripts/web-qa.js` runs one shard of them. CI job `web-qa` (matrix, `fail-fast: false`):
+`scripts/web-qa.json` lists the scenarios; `scripts/web-qa.js` runs one shard of them. CI job `web-qa` (matrix of 8 `part`s, `fail-fast: false`, `--jobs 2`). Scenarios are spread over the parts by the durations in `scripts/web-qa-weights.json` (60 s when a scenario is not listed), so a new scenario needs no CI edit. `--shard <name>` still selects one group of the table below:
 
 | Shard | Scenarios |
 |---|---|
@@ -44,7 +44,7 @@ Software GL is slow: keep `--jobs` at 1 or 2 locally. For a one-off page add `?d
 1. Write `scripts/web-<name>-smoke.js` that takes the dist folder as its first argument and exits non-zero on failure.
 2. Add it to `scripts/web-qa.json` with a shard, or list it under `excluded` with the reason (network, manual tool).
 
-`scripts/web-qa.test.mjs` fails when a `web-*-smoke.js` is neither covered nor excluded, or when the shards in the manifest and in `ci.yml` differ.
+`scripts/web-qa.test.mjs` fails when a `web-*-smoke.js` is neither covered nor excluded, or when the `part` matrix in `ci.yml` does not cover every scenario exactly once.
 
 ## Visual tour
 

@@ -82,3 +82,46 @@ pub fn parse_int(s: &str) -> Option<i64> {
 pub(crate) fn parse_i32(s: &str) -> Option<i32> {
     parse_int(s).map(|v| v.clamp(i32::MIN as i64, i32::MAX as i64) as i32)
 }
+
+pub fn parse_f32_or(s: Option<&str>, default: f32) -> f32 {
+    match s.and_then(parse_float) {
+        Some(v) if v.is_finite() => v as f32,
+        _ => default,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_float_matches_js_prefix_and_exponent_semantics() {
+        assert_eq!(parse_float(" \u{feff} -3.5e2px"), Some(-350.0));
+        assert_eq!(parse_float(".25abc"), Some(0.25));
+        assert_eq!(parse_float("12e+foo"), Some(12.0));
+        assert_eq!(parse_float("+Infinity"), Some(f64::INFINITY));
+        assert_eq!(parse_float("-Infinity"), Some(f64::NEG_INFINITY));
+        assert_eq!(parse_float("."), None);
+        assert_eq!(parse_float("abc"), None);
+    }
+
+    #[test]
+    fn parse_int_and_i32_handle_hex_signs_and_saturation() {
+        assert_eq!(parse_int("  0x1f_tail"), Some(31));
+        assert_eq!(parse_int("-0X10"), Some(-16));
+        assert_eq!(parse_int("+42px"), Some(42));
+        assert_eq!(parse_int("99999999999999999999999"), Some(i64::MAX));
+        assert_eq!(parse_i32("999999999999"), Some(i32::MAX));
+        assert_eq!(parse_i32("-999999999999"), Some(i32::MIN));
+        assert_eq!(parse_int("0x"), None);
+    }
+
+    #[test]
+    fn parse_f32_or_rejects_non_finite_values() {
+        assert_eq!(parse_f32_or(Some("2.5"), 1.0), 2.5);
+        assert_eq!(parse_f32_or(Some("Infinity"), 1.0), 1.0);
+        assert_eq!(parse_f32_or(Some("bad"), 1.0), 1.0);
+        assert_eq!(parse_f32_or(None, 1.0), 1.0);
+    }
+}
+

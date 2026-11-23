@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
 const { staticServer } = require('./web-smoke-server');
 
 const saveKey = 'ume.story-checkpoint.json';
-const out = process.env.STORY_CHECKPOINT_SHOTS;
+const out = process.env.STORY_CHECKPOINT_SHOTS || process.env.WEB_SMOKE_SHOTS;
 const server = staticServer(process.argv[2] || 'web/dist', {
   '.html': 'text/html', '.js': 'text/javascript', '.wasm': 'application/wasm', '.png': 'image/png',
 });
@@ -62,6 +62,7 @@ const server = staticServer(process.argv[2] || 'web/dist', {
     const restored = (await state()).story;
     assert.deepEqual(restored, {
       stage: saved.stage, wave: 0, credits: saved.credits, score: saved.score, phase: 'Intro',
+      mercy: null, helper_pending: false, helper_cursor: 0, helper_chosen: false,
     });
     await shot('03-resumed-stage');
 

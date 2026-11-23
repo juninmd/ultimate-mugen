@@ -6,8 +6,9 @@ pub enum Value {
     Text(String),
 }
 
-pub const KNOWN_VARIABLES: [&str; 7] = [
+pub const KNOWN_VARIABLES: [&str; 8] = [
     "stats.arcade.clear",
+    "stats.story.clear",
     "consecutive_wins",
     "match_no",
     "mode",

@@ -1,0 +1,17 @@
+[9s] story|4.0.Intro.3.null.false.0.false score=0 fighters=
+[13s] vs|4.0.Intro.3.null.false.0.false score=0 fighters=
+[17s] fight|4.0.Intro.3.null.false.0.false score=0 fighters=s0:1000/1000 s1:110/110 s1:90/90 s1:100/100
+[17s] paused in fight, resuming
+[66s] fight|4.1.Intro.3.null.false.0.false score=2650 fighters=s0:1000/1000 s1:120/120 s1:90/90 s1:90/90
+[83s] fight|4.2.Intro.3.null.false.0.false score=5650 fighters=s0:1000/1000 s1:120/120 s1:110/110 s1:100/100 s1:90/90
+[134s] fight|4.3.Intro.3.null.false.0.false score=10150 fighters=s0:1000/1000 s1:90/90 s1:90/90 s1:90/90 s1:100/100
+[190s] story|4.4.Intro.3.null.false.0.false score=14850 fighters=
+[196s] story|4.4.Intro.3.true.true.0.false score=14850 fighters=
+[199s] story|4.4.Intro.3.true.true.1.false score=14850 fighters=
+[201s] story|4.4.Intro.3.true.false.1.true score=14850 fighters=
+[206s] vs|4.4.Intro.3.true.false.1.true score=14850 fighters=
+[210s] fight|4.4.Intro.3.true.false.1.true score=14850 fighters=s0:1000/1000 s1:1680/1680 s0:1000/1000
+[210s] paused in fight, resuming
+[238s] story|4.0.Victory.3.true.false.1.true score=35500 fighters=
+[270s] menu|- score=- fighters=
+[272s] RETURNED TO MENU

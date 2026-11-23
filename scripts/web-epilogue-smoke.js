@@ -61,6 +61,7 @@ const sceneLuminance = (page, buffer) => page.evaluate(async base64 => {
   await p.waitForTimeout(1500);
   await capture('epilogue-end.png');
   await key('Enter', 1500);
+  await capture('story-clear-rank.png');
   await key('Enter', 1500);
   const after = await state();
   await b.close(); server.close();

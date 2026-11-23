@@ -41,6 +41,7 @@ pub enum StageKind {
     Spirit,
     Volcano,
     Arena,
+    Airport,
     #[default]
     Custom,
 }

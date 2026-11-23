@@ -3,8 +3,6 @@ use super::parse::{parse, DEFAULT_TEXT};
 use crate::settings::Rules;
 use std::sync::{Mutex, OnceLock};
 
-mod touch;
-pub use touch::update_touch;
 
 const FILE: &str = "tweaks.toml";
 const POLL_SECONDS: f32 = 1.0;

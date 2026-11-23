@@ -1,5 +1,5 @@
 // Globals imported by the wasm module: Gamepad API (buttons/sticks), DualShock/DualSense/Xbox vibration,
-// touch detection and the MUGEN .zip import button (packs persisted in IndexedDB).
+// and the MUGEN .zip import button (packs persisted in IndexedDB).
 (function () {
   const K = { U: 1, D: 2, L: 4, R: 8, a: 16, b: 32, c: 64, x: 128, y: 256, z: 512, s: 1024, d: 2048, w: 4096, t: 16384, s1: 524288, s2: 1048576, s3: 2097152, s4: 4194304 };
   const held = new Map();
@@ -10,24 +10,6 @@
   const keepCursor = (e) => { cursor.x = e.clientX; cursor.y = e.clientY; };
   window.addEventListener('pointermove', keepCursor, true);
   window.addEventListener('pointerdown', keepCursor, true);
-  // The engine reads pointerType/pointerId/offsetX from every pointer event, so a MouseEvent disguised
-  // as a pointer event (pointerType undefined) crashes the wasm glue in passStringToWasm0.
-  const touchPointers = new Map();
-  const trackTouch = (e) => {
-    if (e.pointerType === 'touch' && (e.target.id === 'glcanvas' || touchPointers.has(e.pointerId))) touchPointers.set(e.pointerId, e);
-  };
-  window.addEventListener('pointerdown', trackTouch, true);
-  window.addEventListener('pointermove', (e) => { if (touchPointers.has(e.pointerId)) trackTouch(e); }, true);
-  for (const type of ['pointerup', 'pointercancel']) {
-    window.addEventListener(type, (e) => touchPointers.delete(e.pointerId), true);
-  }
-  const grabTouch = (e) => {
-    if (e.pointerType !== 'touch' || e.target.id !== 'glcanvas') return;
-    try { e.target.setPointerCapture(e.pointerId); } catch (err) {}
-  };
-  window.addEventListener('pointerdown', grabTouch, true);
-  const stopPan = (e) => { if (e.target.id === 'glcanvas' && e.cancelable) e.preventDefault(); };
-  for (const type of ['touchstart', 'touchmove']) window.addEventListener(type, stopPan, { capture: true, passive: false });
   function pointerUp(source = cursor) {
     const init = { bubbles: true, cancelable: true, button: 0, buttons: 0, pointerId: source.pointerId ?? 1, pointerType: source.pointerType ?? 'mouse', isPrimary: source.isPrimary ?? true, clientX: source.clientX ?? cursor.x, clientY: source.clientY ?? cursor.y };
     const e = typeof PointerEvent === 'function' ? new PointerEvent('pointerup', init) : new MouseEvent('pointerup', init);
@@ -41,8 +23,6 @@
     for (const [code, e] of held) c.dispatchEvent(new KeyboardEvent('keyup', { code, key: e.key, keyCode: e.keyCode, bubbles: true }));
     held.clear();
     try { c.dispatchEvent(new MouseEvent('mouseup', { button: 0, buttons: 0, bubbles: true })); } catch (e) {}
-    for (const pointer of touchPointers.values()) c.dispatchEvent(pointerUp(pointer));
-    touchPointers.clear();
     try { c.dispatchEvent(pointerUp()); } catch (e) {}
   }
   window.addEventListener('keydown', (e) => { if (e.code) held.set(e.code, { key: e.key, keyCode: e.keyCode }); }, true);
@@ -77,7 +57,6 @@
     try {
       if (a && a.playEffect) await a.playEffect(a.type || 'dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: weak });
       else if (a && a.pulse) await a.pulse(Math.max(strong, weak), ms);
-      else if (navigator.vibrate && ('ontouchstart' in window)) navigator.vibrate(ms);
     } catch {}
   }
   window.ume_gp_count = () => pads().length;
@@ -94,17 +73,7 @@
   };
   window.ume_storage_get = (k) => { try { return localStorage.getItem('ume.' + k) || ''; } catch (e) { return ''; } };
   window.ume_storage_set = (k, v) => { try { localStorage.setItem('ume.' + k, v); } catch (e) {} };
-  if (/[?&]debug=1/.test(window.location?.search || '')) {
-    const box = document.createElement('pre');
-    box.style.cssText = 'position:fixed;left:4px;bottom:4px;z-index:20;margin:0;padding:4px 6px;font:11px monospace;color:#9fe;background:rgba(0,0,0,.7);pointer-events:none;white-space:pre-wrap';
-    document.addEventListener('DOMContentLoaded', () => document.body.appendChild(box));
-    const seen = { pointerdown: 0, pointercancel: 0, touchstart: 0, last: '-' };
-    for (const type of ['pointerdown', 'pointercancel', 'touchstart']) {
-      window.addEventListener(type, (e) => { seen[type]++; seen.last = `${type} ${e.pointerType || ''} ${e.target.id || e.target.tagName}`; box.textContent = `touch=${window.ume_is_touch()} dpr=${window.devicePixelRatio} ${innerWidth}x${innerHeight}\n${JSON.stringify(seen)}`; }, true);
-    }
-  }
   window.ume_dpr = () => window.devicePixelRatio || 1;
-  window.ume_is_touch = () => (('ontouchstart' in window) || navigator.maxTouchPoints > 0 || /[?&]touch=1/.test(location.search)) ? 1 : 0;
 
   let insets = null;
   const readInsets = () => {

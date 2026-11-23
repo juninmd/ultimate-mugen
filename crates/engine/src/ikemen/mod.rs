@@ -23,6 +23,7 @@ pub struct IkemenState {
     pub stun_by_hit: bool,
     pub standby: bool,
     pub rescued: u32,
+    pub helper_name: Option<Box<str>>,
 }
 
 impl IkemenState {
@@ -30,7 +31,7 @@ impl IkemenState {
         let life = def.c("data.life", 1000.0) as f32;
         let dizzy_max = def.c("data.dizzypoints", life as f64) as f32;
         let guard_max = def.c("data.guardpoints", life as f64) as f32;
-        IkemenState { map: MapStore::default(), red_life: life, dizzy_points: dizzy_max, dizzy_max, guard_points: guard_max, guard_max, dizzy: false, guard_break: false, stun_by_hit: false, standby: false, rescued: 0 }
+        IkemenState { map: MapStore::default(), red_life: life, dizzy_points: dizzy_max, dizzy_max, guard_points: guard_max, guard_max, dizzy: false, guard_break: false, stun_by_hit: false, standby: false, rescued: 0, helper_name: None }
     }
 }
 

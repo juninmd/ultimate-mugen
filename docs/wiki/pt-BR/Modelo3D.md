@@ -24,6 +24,14 @@ A simulação continua 2D. Hitboxes, física, máquina de estados e rollback nun
 
 `tools/retarget` (Python, só stdlib): `retarget.py` aplica os clipes de `clips.json` num rig de `rigs.json`; `autorig.py` cria esqueleto e pesos para malha sem rig. Retrato: `cargo run -p ume-model3d --example portrait`. Vozes: `tools/voices/generate.py <id>` (mantém os outros bancos).
 
+## Cenário 3D: Aeroporto
+
+`airport3d` ("Aeroporto 3D — Pôr do Sol") é um fundo 3D ao vivo atrás da mesma feature `model3d`: sem a feature o cenário some, sem outra mudança.
+- `assets/model3d/airport.glb` (128 KB) é gerado por `python3 tools/airport/build.py <saida.glb>` (só stdlib): aviões, terminal com fingers, torre de controle, pista, morros, nuvens e sol. Sem arte de terceiros.
+- Clipe `ambient` (loop de 40 s): um jato pousa na pista ao fundo, outro taxia no pátio e um trator de bagagem cruza a vaga.
+- `Model::project_scene` (`crates/model3d/src/perspective.rs`) projeta em perspectiva (corte de plano próximo, Lambert plano, neblina por vértice, céu em gradiente) no mesmo `Raster` com z-buffer dos lutadores.
+- `src/model3d/airport.rs` renderiza 480x270 (320x180 no modo lite) a 30 Hz numa textura; com "fundo" desligado no lite aparece uma imagem estática da mesma cena.
+
 ## Golpes do Ichigo
 
 Pulos: `D, U` ou `U, U` super pulo (também no ar), dois pulos aéreos, três dashes aéreos. Especiais: Getsuga Tenshou, Shunpo, Shunpo Rush, Hollow Cero, Getsuga Juujishou, Kuro Getsuga, Hollow Rampage; Hollow Total adiciona Cero Oscuras.

@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod spawn; mod elixir; pub use elixir::{Elixir, ELIXIR_LIFE_FACTOR}; mod swarm; pub use swarm::{arena_tiles, Swarm, SWARM_MAX_TOTAL}; mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod knockdown; pub use knockdown::{KnockdownRule, KnockdownScope, DEFAULT_KNOCKDOWN_PRESET, KNOCKDOWN_PRESETS}; mod minus4; mod priority; mod types; mod unleash; mod walk;
+mod spawn; mod elixir; pub use elixir::{Elixir, ELIXIR_LIFE_FACTOR}; mod swarm; pub use swarm::{arena_tiles, Swarm, SWARM_MAX_TOTAL}; mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod knockdown; pub use knockdown::{KnockdownRule, KnockdownScope, DEFAULT_KNOCKDOWN_PRESET, KNOCKDOWN_PRESETS}; mod minus4; mod priority; mod telemetry; pub use telemetry::ComboTelemetry; mod types; mod unleash; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -439,14 +439,14 @@ impl Match {
                 }
                 'A' => {
                     f.vel.y += f.c("movement.yaccel", 0.44) * f.lscl * gravity;
-                    if !f.lands_by_script() && f.pos.y >= f.ground_level && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; f.air_dashes = 0; if f.move_type != 'H' { land = true; } }
+                    if !f.lands_by_script() && f.pos.y >= f.ground_level && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; f.air_dashes = 0; land = true; }
                 }
                 _ => {}
             }
             if f.slide_time > 0 { f.slide_time -= 1; }
             if f.move_type == 'H' && f.ghv.xaccel != 0.0 { f.vel.x += f.ghv.xaccel; }
         }
-        if land { let d = self.fighters[i].def.clone(); self.change_state(i, 52, d); }
+        if land { self.fighters[i].ctrl = true; let d = self.fighters[i].def.clone(); self.change_state(i, 52, d); }
     }
     fn rebind(&mut self) {
         for i in 0..self.fighters.len() {
@@ -1549,6 +1549,7 @@ impl Match {
         let mut h = Fighter::new(id, root.def.clone(), f.side, f.player_no);
         h.is_helper = true;
         h.helper_id = self.num(i, sc, "id", 0.0, 0) as i32;
+        h.ikemen.helper_name = sc.raw("name").map(|s| s.trim().trim_matches('"').into());
         h.parent = Some(f.id); h.root = root.id;
         h.key_ctrl = num(self, "keyctrl", 0.0, 0) != 0.0;
         h.pause_move_time = if num(self, "pausemove", 0.0, 0) != 0.0 { 999_999 } else { num(self, "pausemovetime", 0.0, 0) as i32 };

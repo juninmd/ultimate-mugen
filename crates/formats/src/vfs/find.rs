@@ -46,10 +46,14 @@ pub fn resolve_key(vfs: &Vfs, base_dir: &str, name: &str) -> Option<String> {
     vfs.keys().find(|k| k.ends_with(&suffix) || k.as_str() == base).cloned()
 }
 
-/// Same as [`resolve_key`], returning the bytes.
 pub fn resolve<'a>(vfs: &'a Vfs, base_dir: &str, name: &str) -> Option<VfsFile<'a>> {
     let key = resolve_key(vfs, base_dir, name)?;
     vfs.get(&key)
+}
+
+pub fn resolve_prefix(vfs: &Vfs, base_dir: &str, name: &str, max_len: usize) -> Option<Vec<u8>> {
+    let key = resolve_key(vfs, base_dir, name)?;
+    vfs.get_prefix(&key, max_len)
 }
 
 /// `\b<word>\s*=` in lowercase text.

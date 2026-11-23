@@ -47,6 +47,23 @@ const sceneLuminance = (page, buffer) => page.evaluate(async base64 => {
   await reach(0, 'the rooftop scene');
   await p.waitForTimeout(2500);
   const rooftop = await capture('epilogue-rooftop.png');
+  const firstBeatGpu = (await state())?.gpu;
+  await p.evaluate(() => {
+    globalThis.__epilogue_gpu_samples = [];
+    const sample = () => {
+      const state = JSON.parse(globalThis.__ume_state || 'null');
+      if (state?.epilogue === 1 && state.gpu) globalThis.__epilogue_gpu_samples.push(state.gpu);
+      requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  });
+  await reach(1, 'the second rooftop beat');
+  const nextBeatGpu = await p.evaluate(() => ({
+    peakUploads: Math.max(0, ...globalThis.__epilogue_gpu_samples.map(frame => frame.up)),
+    peakUploadKb: Math.max(0, ...globalThis.__epilogue_gpu_samples.map(frame => frame.kb)),
+    resets: Math.max(0, ...globalThis.__epilogue_gpu_samples.map(frame => frame.resets)),
+  }));
+  if (firstBeatGpu && nextBeatGpu.resets !== firstBeatGpu.resets) problems.push(`epilogue page transition reset the texture atlas (${firstBeatGpu.resets} → ${nextBeatGpu.resets})`);
   await reach(2, 'the home scene');
   await p.waitForTimeout(2500);
   const home = await capture('epilogue-home.png');
@@ -81,5 +98,5 @@ const sceneLuminance = (page, buffer) => page.evaluate(async base64 => {
   if (home < 8) problems.push(`home scene is black (mean luminance ${home.toFixed(1)})`);
   if (!after || after.screen !== 'menu') problems.push(`story did not return to the menu after the epilogue (${after && after.screen})`);
   if (problems.length) { console.error('WEB EPILOGUE SMOKE FAILED\n' + problems.join('\n')); process.exit(1); }
-  console.log(`WEB EPILOGUE SMOKE OK rooftop ${rooftop.toFixed(1)} home ${home.toFixed(1)}`);
+  console.log(`WEB EPILOGUE SMOKE OK rooftop ${rooftop.toFixed(1)} home ${home.toFixed(1)} atlas_resets 0 page_upload_peak ${nextBeatGpu.peakUploadKb} KB`);
 })().catch(e => { console.error('SCRIPT FAIL', e); process.exit(2); });

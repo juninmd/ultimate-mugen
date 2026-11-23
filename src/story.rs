@@ -3,6 +3,8 @@ pub mod choice;
 pub mod epilogue;
 pub mod helper;
 pub mod prefight;
+pub mod rank;
+pub mod tips;
 pub mod epilogue_music;
 pub mod epilogue_pose;
 pub mod objects;

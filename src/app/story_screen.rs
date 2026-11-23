@@ -69,7 +69,7 @@ impl App {
             Phase::Victory => (
                 text::story_clear().to_string(),
                 text::score_line(run.score),
-                String::new(),
+                crate::story::rank::line(crate::story::rank::of_run(&run)),
             ),
             Phase::Defeated => (
                 if run.can_continue() { text::knocked_out() } else { text::game_over() }.to_string(),
@@ -97,6 +97,9 @@ impl App {
             self.ui.text(choice::finish_label(), VW * 0.7, 510.0, 26.0, hex("#ff7a6b"), Align::Center, true);
         } else if run.phase == Phase::Intro {
             self.draw_story_boss_profile(&run, accent_color, reveal);
+        }
+        if run.phase == Phase::Defeated {
+            self.ui.text(crate::story::tips::of(run.stage), VW / 2.0, 470.0, 18.0, hex("#ffcc33"), Align::Center, false);
         }
         if let (Phase::Cleared, Some(tally)) = (run.phase, run.tally) {
             self.ui.text(&text::tally_line(&tally), VW / 2.0, 480.0, 20.0, hex("#ffcc33"), Align::Center, true);

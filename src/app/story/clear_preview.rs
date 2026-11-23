@@ -10,6 +10,13 @@ impl App {
         run.tally = Some(StageTally::new(0, 2000, 0.8));
     }
 
+    pub(crate) fn story_defeat_preview(&mut self) {
+        let Some(run) = self.story.as_mut() else { return };
+        run.stage = 1;
+        run.credits = 2;
+        run.phase = Phase::Defeated;
+    }
+
     pub(crate) fn story_ally_preview(&mut self) {
         if let Some(run) = self.story.as_mut() {
             run.helper = crate::story::HelperPick::Chosen("shion".into());

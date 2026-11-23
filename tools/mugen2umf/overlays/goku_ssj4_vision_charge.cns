@@ -1,0 +1,57 @@
+[Statedef 90200]
+type = S
+movetype = I
+physics = S
+anim = 735
+velset = 0,0
+ctrl = 0
+
+[State 90200, Sound]
+type = PlaySnd
+trigger1 = Time = 0
+value = 7,0
+volume = 255
+
+[State 90200, Loop Sound]
+type = PlaySnd
+trigger1 = TimeMod = 40,39
+value = 1,0
+volume = 255
+
+[State 90200, Ki]
+type = PowerAdd
+trigger1 = Power < 3000
+value = 12
+
+[State 90200, Glow]
+type = PalFX
+trigger1 = TimeMod = 4,0
+time = 3
+add = 40,40,0
+
+[State 90200, Aura Trail]
+type = AfterImage
+trigger1 = Time = 1
+time = 2
+length = 6
+framegap = 4
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State 90200, Keep Trail]
+type = AfterImageTime
+trigger1 = Time > 1
+time = 2
+
+[State 90200, Loop Anim]
+type = ChangeAnim
+trigger1 = AnimTime = 0
+value = 735
+
+[State 90200, Release]
+type = ChangeState
+trigger1 = Time >= 6 && command != "umf_charge_ki"
+trigger2 = Time >= 6 && Power >= 3000
+value = 0
+ctrl = 1

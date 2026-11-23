@@ -122,7 +122,7 @@ impl App {
         let Some(run) = self.story.as_mut() else { return };
         let next = run.won_fight(gained, remaining);
         match next {
-            Next::Wave => {
+            Next::Wave if !crate::story::prefight::pending(run) => {
                 if self.story_advance_in_place() {
                     self.screen = Screen::Fight;
                 } else {
@@ -131,7 +131,7 @@ impl App {
                     self.screen = Screen::Vs { t: 1.8, step: 0 };
                 }
             }
-            Next::StageCleared | Next::Finished => {
+            _ => {
                 self.audio.stop_music();
                 self.session = None;
                 self.screen = Screen::Story { t: 0.0 };

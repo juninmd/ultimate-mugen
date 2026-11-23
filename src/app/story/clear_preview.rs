@@ -36,8 +36,8 @@ impl App {
     pub(crate) fn story_prefight_preview(&mut self) {
         let Some(run) = self.story.as_mut() else { return };
         run.stage = crate::story::STAGES.len() - 1;
-        run.wave = run.stage_wave_count();
+        run.wave = run.stage_wave_count().saturating_sub(1);
         run.phase = Phase::Intro;
-        self.story_prepare_fight();
+        self.story_win();
     }
 }

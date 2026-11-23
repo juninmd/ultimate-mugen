@@ -25,6 +25,7 @@ pub fn has_chip(screen: &Screen) -> bool {
             | Screen::SurvivalOver { .. }
             | Screen::Controls
             | Screen::CharTuning { .. }
+            | Screen::StoryStudio { .. }
             | Screen::Mugen { .. }
             | Screen::Market
             | Screen::Replays { .. }

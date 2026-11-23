@@ -2,6 +2,7 @@ mod support;
 mod ai_tactics;
 mod air_dash;
 mod air_hits;
+mod air_recovery_landing;
 mod angle_draw;
 mod arena_elixir;
 mod assert_special;

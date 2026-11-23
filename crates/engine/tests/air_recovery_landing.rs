@@ -1,5 +1,4 @@
-mod support;
-use support::*;
+use crate::support::*;
 
 fn falling_in(state: i32) -> ume_engine::matchs::Match {
     let mut m = duel(mugen_char("p1", ""), mugen_char("p2", ""));

@@ -27,8 +27,8 @@ pub(super) async fn run(app: &mut App, dir: &str) {
         }
         app.mode = Mode::Arcade;
         app.arcade_start(find(app, "kaito"), None);
-        if let Some((_, idx)) = app.arcade.as_mut() {
-            *idx = 2;
+        if let Some(run) = app.arcade.as_mut() {
+            run.index = 2;
         }
         app.screen = Screen::Vs { t: 1.2, step: 0 };
         screen(app, dir, &format!("{code}-arcade-vs"), 2).await;

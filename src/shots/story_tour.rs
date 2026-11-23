@@ -39,7 +39,7 @@ pub async fn run(app: &mut App, dir: &str) {
 
     app.mode = Mode::Arcade;
     app.sel = (kaito, oboro, stage(app, "volcano"));
-    app.arcade = Some((vec![oboro, oboro, oboro], 0));
+    app.arcade = Some(crate::app::arcade::ArcadeRun::new(vec![oboro, oboro, oboro], None));
     app.ending_shown = false;
 
     app.screen = Screen::Cutscene { kind: 0, page: 3, t: 5.0 };
@@ -68,7 +68,7 @@ pub async fn run(app: &mut App, dir: &str) {
     app.session = None;
     app.mode = Mode::Arcade;
     app.sel = (kaito, oboro, stage(app, "spirit"));
-    app.arcade = Some((vec![oboro, oboro, oboro], 0));
+    app.arcade = Some(crate::app::arcade::ArcadeRun::new(vec![oboro, oboro, oboro], None));
     app.ending_shown = false;
     app.screen = Screen::Results { winner: 0, cur: 0 };
     frames(app, 2).await;
@@ -114,7 +114,7 @@ pub async fn run(app: &mut App, dir: &str) {
     app.session = None;
     app.mode = Mode::Arcade;
     app.sel = (kaito, oboro, stage(app, "spirit"));
-    app.arcade = Some((vec![oboro, oboro, oboro], 1));
+    app.arcade = Some(crate::app::arcade::ArcadeRun::at(vec![oboro, oboro, oboro], 1));
     app.screen = Screen::Results { winner: 0, cur: 0 };
     frames(app, 2).await;
     app.screen = Screen::Cutscene { kind: 4, page: 0, t: 1.2 };
@@ -123,7 +123,7 @@ pub async fn run(app: &mut App, dir: &str) {
     app.screen = Screen::Cutscene { kind: 4, page: 4, t: 3.5 };
     cap_screen(app, dir, "story-15-boss-form3-awakening", 30).await;
 
-    app.arcade = Some((vec![oboro, oboro, oboro], 2));
+    app.arcade = Some(crate::app::arcade::ArcadeRun::at(vec![oboro, oboro, oboro], 2));
     app.screen = Screen::Vs { t: 1.35, step: 0 };
     cap_screen(app, dir, "story-16-vs-supreme-climax", 2).await;
 
@@ -152,7 +152,7 @@ pub async fn run(app: &mut App, dir: &str) {
     app.session = None;
     app.mode = Mode::Arcade;
     app.sel = (kaito, oboro, stage(app, "spirit"));
-    app.arcade = Some((vec![oboro, oboro, oboro], 2));
+    app.arcade = Some(crate::app::arcade::ArcadeRun::at(vec![oboro, oboro, oboro], 2));
     app.screen = Screen::Results { winner: 0, cur: 0 };
     frames(app, 2).await;
     app.screen = Screen::Cutscene { kind: 5, page: 0, t: 0.85 };

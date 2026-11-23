@@ -22,7 +22,7 @@ storyboard = "chars/kfm/intro.def"
 
 [[step]]
 repeat = 6
-fight = { order = 1 }
+fight = { order = 1, stage = "dojo" }
 
 [[step]]
 when = "consecutive_wins == 6"
@@ -38,6 +38,7 @@ Cada `[[step]]` tem exatamente um entre `fight`, `storyboard` ou `action`.
 | Chave | Significado |
 |---|---|
 | `fight` | `order` (1 pega o próximo oponente comum, 2 ou mais pega o chefe), `p2` (ids ou nomes, vale o primeiro que existir), `stage`, `winscreen` |
+| `stage` | ID ou nome do cenário; `random` escolhe um cenário aleatório. A primeira luta pula a seleção de cenário quando a rota define um cenário. Um cenário desconhecido mantém a escolha automática normal. |
 | `storyboard` | Lido e validado, ainda não exibido: a engine avisa e continua |
 | `action` | `clear` encerra a rota |
 | `repeat` | De 1 a 99 vezes; `when` é verificado a cada repetição |

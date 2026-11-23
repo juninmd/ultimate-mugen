@@ -5,7 +5,6 @@
   "crates/engine/src/controllers.rs": 370,
   "crates/engine/src/diagnostics.rs": 333,
   "crates/engine/src/expr.rs": 381,
-  "crates/engine/src/fighter.rs": 298,
   "crates/engine/src/hitdef.rs": 463,
   "crates/engine/src/ikemen/introspect.rs": 314,
   "crates/engine/src/matchs.rs": 1727,

@@ -100,6 +100,9 @@ impl App {
         } else if run.phase == Phase::Intro {
             self.draw_story_boss_profile(&run, accent_color, reveal);
         }
+        if run.phase == Phase::Defeated {
+            self.ui.text(crate::story::tips::of(run.stage), VW / 2.0, 470.0, 18.0, hex("#ffcc33"), Align::Center, false);
+        }
         if let (Phase::Cleared, Some(tally)) = (run.phase, run.tally) {
             self.ui.text(&text::tally_line(&tally), VW / 2.0, 480.0, 20.0, hex("#ffcc33"), Align::Center, true);
         }

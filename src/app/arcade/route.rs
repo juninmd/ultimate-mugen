@@ -85,7 +85,7 @@ impl App {
         mate: Option<usize>,
         pool: &[usize],
         boss: Option<usize>,
-    ) -> Option<(Vec<usize>, Vec<Option<usize>>)> {
+    ) -> Option<(Vec<usize>, Vec<Option<usize>>, Vec<Vec<String>>)> {
         let route = load_route(&self.player_char_id())?;
         let context = self
             .route_context()
@@ -99,6 +99,7 @@ impl App {
         };
         let mut ladder = Vec::new();
         let mut stages = Vec::new();
+        let mut storyboards = vec![Vec::new()];
         let mut planned_fights = 0;
         for action in &actions {
             match action {
@@ -117,15 +118,16 @@ impl App {
                             stage
                         });
                         stages.push(stage);
+                        storyboards.push(Vec::new());
                     }
                 }
                 Action::Storyboard(path) => {
-                    eprintln!("route {}: storyboard '{path}' is not played yet", route.id)
+                    storyboards.last_mut().unwrap().push(path.clone());
                 }
                 Action::Clear => {}
             }
         }
-        (!ladder.is_empty()).then_some((ladder, stages))
+        (!ladder.is_empty()).then_some((ladder, stages, storyboards))
     }
 }
 

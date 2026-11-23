@@ -14,6 +14,7 @@ mod web {
             Screen::Fight => "fight",
             Screen::Results { .. } => "results",
             Screen::Story { .. } => "story",
+            Screen::StoryCheckpoint { .. } => "story_checkpoint",
             Screen::Tower { .. } => "tower",
             Screen::ArenaSetup { .. } => "arena_setup",
             Screen::SurvivalOver { .. } => "survival_over",
@@ -77,6 +78,11 @@ mod web {
             if crate::query_params().iter().any(|(k, _)| k == "e2e_ally") {
                 app.story_ally_preview();
             }
+        }
+        let checkpoint = crate::query_params().iter().any(|(k, _)| k == "e2e_story_checkpoint");
+        if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (checkpoint, &app.screen, app.story_snapshot()) {
+            app.story_jump_to_boss();
+            app.story_win();
         }
         let god = god_requested();
         let mut fighters = String::new();

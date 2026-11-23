@@ -29,6 +29,7 @@ pub fn has_chip(screen: &Screen) -> bool {
             | Screen::Market
             | Screen::Replays { .. }
             | Screen::PlayerCard { .. }
+            | Screen::StoryCheckpoint { .. }
             | Screen::Story { .. }
             | Screen::Settings { .. }
     )

@@ -497,7 +497,7 @@ impl App {
         self.back_chip_input();
         match &mut self.screen {
             Screen::Title => self.title(),
-            Screen::Menu { .. } => self.menu(),
+            Screen::Menu { .. } | Screen::StoryCheckpoint { .. } => self.menu(),
             Screen::Select { .. } => self.select(),
             Screen::Stages { .. } => self.stages(),
             Screen::Vs { .. } => self.vs(dt).await,

@@ -14,6 +14,7 @@ fn theme_for(screen: &Screen) -> Option<u32> {
     match screen {
         Screen::Title
         | Screen::Menu { .. }
+        | Screen::StoryCheckpoint { .. }
         | Screen::Select { .. }
         | Screen::Stages { .. }
         | Screen::Controls

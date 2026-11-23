@@ -1,3 +1,4 @@
+pub(crate) mod checkpoint;
 pub mod beats;
 pub mod choice;
 pub mod epilogue;

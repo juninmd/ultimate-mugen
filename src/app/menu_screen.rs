@@ -3,6 +3,10 @@ use super::*;
 
 impl App {
     pub(super) fn menu(&mut self) {
+        if matches!(self.screen, Screen::StoryCheckpoint { .. }) {
+            self.story_checkpoint_menu();
+            return;
+        }
         let Screen::Menu { cur } = &mut self.screen else {
             return;
         };
@@ -116,6 +120,7 @@ impl App {
                     )
                     .into();
                 }
+                0 if self.open_story_checkpoint() => {}
                 10 => self.open_arena_setup(),
                 0..=4 | 11 => {
                     self.set_mode(match i {

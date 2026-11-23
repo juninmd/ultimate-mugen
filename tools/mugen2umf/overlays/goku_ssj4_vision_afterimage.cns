@@ -1,0 +1,166 @@
+[Statedef -2]
+
+[State -2, Afterimage Shunkan Ido ground]
+type = AfterImage
+trigger1 = StateNo = 7500 && Time = 1
+time = 25
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Shunkan Ido ground 2]
+type = AfterImage
+trigger1 = StateNo = 7510 && Time = 1
+time = 25
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Shunkan Ido back]
+type = AfterImage
+trigger1 = StateNo = 7520 && Time = 1
+time = 25
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Shunkan Ido back 2]
+type = AfterImage
+trigger1 = StateNo = 7530 && Time = 1
+time = 25
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Shunkan Ido air back]
+type = AfterImage
+trigger1 = StateNo = 7535 && Time = 1
+time = 25
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Shunkan Ido air]
+type = AfterImage
+trigger1 = StateNo = 7550 && Time = 1
+time = 25
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Kamehameha]
+type = AfterImage
+trigger1 = StateNo = 1700 && Time = 1
+time = 60
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Kamehameha air]
+type = AfterImage
+trigger1 = StateNo = 31700 && Time = 1
+time = 60
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Super Kamehameha]
+type = AfterImage
+trigger1 = StateNo = 1800 && Time = 1
+time = 60
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Super Kamehameha air]
+type = AfterImage
+trigger1 = StateNo = 31800 && Time = 1
+time = 60
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Kamehameha x10]
+type = AfterImage
+trigger1 = StateNo = 1900 && Time = 1
+time = 60
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Fireball barrage]
+type = AfterImage
+trigger1 = StateNo = 1390 && Time = 1
+time = 45
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Fireball barrage 2]
+type = AfterImage
+trigger1 = StateNo = 2390 && Time = 1
+time = 45
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Dragon Fist]
+type = AfterImage
+trigger1 = StateNo = 3030 && Time = 1
+time = 60
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Flight]
+type = AfterImage
+trigger1 = StateNo = 3001 && Time = 1
+time = 40
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Flight dash]
+type = AfterImage
+trigger1 = StateNo = 3115 && Time = 1
+time = 40
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Clear on Hit]
+type = AfterImageTime
+trigger1 = MoveType = H
+time = 0

@@ -224,6 +224,7 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 | `posSet` | `[{ "at", "x", "y" }]` | Define a posição absoluta num elemento (`PosSet`) |
 | `palFx` | `[{ "at", "time", "add", "mul", "sinAdd", "color", "invertAll" }]` | Flash de cor no lutador (`PalFX`) |
 | `followUp` | `{ "to": "move_id", "on": "hit" \| "contact" \| "hitNow" \| "end" \| "command" \| "release", "command", "at" }` | Transição para golpe de continuação: no acerto, no fim, enquanto `command` está segurado (`command`) ou quando é solto (`release`) |
+| `holdRelease` | `{ "button": "y", "tiers": [{ "at": 0, "to": "move_id" }, { "at": 45, "to": "move_id" }] }` | Segurar para carregar: o golpe fica na anim (em loop) enquanto `button` está segurado e, ao soltar ou no fim da anim, vai para o nível com o maior `at` (ticks segurados) alcançado. Os `vfx` da carga somem ao soltar |
 | `spawn` | `[{ "at", "state", "id", "name", "pos", "postype", "facing", "ownPal", "superMoveTime", "pauseMoveTime" }]` | Cria um helper que roda um estado de `scripts.cns` (`Helper`) no elemento `at` da animação |
 | `voice` | `1000, 0` | Grupo e índice do som do personagem tocado no início do golpe, quando o áudio estiver incluído |
 | `airPhysics` | `true` | Mantém a física aérea |

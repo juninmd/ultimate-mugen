@@ -19,10 +19,11 @@ A simulação continua 2D. Hitboxes, física, máquina de estados e rollback nun
 - Luta: uma linha em `render.rs`. Painéis de seleção, versus e resultado: `draw_fit` dentro de `draw_char_fit`. Tiles e loading usam `portrait`.
 - A seleção tem a categoria `3D`.
 - A forma despertada troca para o segundo modelo (Ichigo: Hollow Total).
+- `src/model3d/aura.rs` desenha os efeitos só do 3D: rastro do `AfterImage` em cópias aditivas do quadro atual (Shunpo carmesim, Sonido dourado na forma Hollow) e uma barreira de reiatsu na defesa (estados 120-155) que pisca ao bloquear (150-155).
 
 ## Ferramentas
 
-`tools/retarget` (Python, só stdlib): `retarget.py` aplica os clipes de `clips.json` num rig de `rigs.json`; `autorig.py` cria esqueleto e pesos para malha sem rig. Retrato: `cargo run -p ume-model3d --example portrait`. Vozes: `tools/voices/generate.py <id>` (mantém os outros bancos).
+`tools/retarget` (Python, só stdlib): `retarget.py` aplica os clipes de `clips.json` num rig de `rigs.json`; `autorig.py` cria esqueleto e pesos para malha sem rig; `keyposes.py <in.glb> <out.glb> <rig>` aplica os clipes feitos à mão de `keyposes.json` (postura Bankai, sequência de espada, Getsuga com preparo, carga e disparo, Juujishou, Shunpo, Cero, defesa e pose de vitória), com direções de membros em `[azimute, elevação]` e `bladeR` resolvido por `blade_solve.py` para apontar a Zangetsu. Folha de clipes: `cargo run --release -p ume-model3d --example clip_sheet -- <modelo.glb> <saida.png> Clip1,Clip2 <quadros>`. Retrato: `cargo run -p ume-model3d --example portrait`. Vozes: `tools/voices/generate.py <id>` (mantém os outros bancos).
 
 ## Cenário 3D: Aeroporto
 
@@ -34,7 +35,7 @@ A simulação continua 2D. Hitboxes, física, máquina de estados e rollback nun
 
 ## Golpes do Ichigo
 
-Pulos: `D, U` ou `U, U` super pulo (também no ar), dois pulos aéreos, três dashes aéreos. Especiais: Getsuga Tenshou, Shunpo, Shunpo Rush, Hollow Cero, Getsuga Juujishou, Kuro Getsuga, Hollow Rampage; Hollow Total adiciona Cero Oscuras.
+Pulos: `D, U` ou `U, U` super pulo (também no ar), dois pulos aéreos, três dashes aéreos. Especiais: Getsuga Tenshou (`~D, DF, F, x`), Getsuga carregado (`~D, DB, B, y`, segure `y`; 45 ticks para a onda máxima), Shunpo (`~D, DB, B, b`, rastro de Sonido na forma Hollow), Shunpo Rush, Hollow Cero (`~D, DB, B, a`, segure `a`; 40 ticks para o raio grande), Getsuga Juujishou, Kuro Getsuga, Hollow Rampage; Hollow Total adiciona Cero Oscuras. A carga usa o campo `holdRelease` (ver [Personagem UMF](Personagem-UMF.md)).
 
 ## Créditos
 

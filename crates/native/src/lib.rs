@@ -16,6 +16,7 @@ mod chain;
 mod rekka;
 mod multihit;
 pub mod move_fx;
+pub mod hold_release;
 pub mod move_fx_spec;
 pub mod move_motion;
 pub mod move_spawn;

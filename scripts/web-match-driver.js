@@ -6,12 +6,13 @@ const ignoredConsole = /favicon|sw\.js|GPU stall|GroupMarker|WebGL: INVALID_OPER
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const settingsText = s => Object.entries(s).map(([k, v]) => `${k}=${v}`).join('\n') + '\n';
 
-async function openMatch({ dir, query, settings, shotDir, label }) {
+async function openMatch({ dir, query, settings, shotDir, label, videoDir }) {
   const server = staticServer(path.resolve(dir), types);
   await new Promise(ok => server.listen(0, '127.0.0.1', ok));
   const url = `http://127.0.0.1:${server.address().port}/index.html?${query}`;
   const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'] });
-  const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  const viewport = { width: 1280, height: 720 };
+  const page = await browser.newPage({ viewport, ...(videoDir ? { recordVideo: { dir: videoDir, size: viewport } } : {}) });
   const problems = [], consoleTail = [];
   page.on('crash', () => problems.push('Chromium page crashed'));
   page.on('pageerror', e => { if (!/register_plugin/.test(e.message)) problems.push(`pageerror: ${e.message.slice(0, 300)}`); });
@@ -48,7 +49,7 @@ async function openMatch({ dir, query, settings, shotDir, label }) {
       if (buffer && shotDir) fs.writeFileSync(path.join(shotDir, `${label}-${name}.png`), buffer);
       return buffer;
     },
-    async close() { await browser.close().catch(() => {}); server.close(); },
+    async close() { await page.close().catch(() => {}); await browser.close().catch(() => {}); server.close(); },
   };
   return api;
 }

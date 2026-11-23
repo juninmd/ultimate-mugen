@@ -1,5 +1,6 @@
 use super::canvas::{self, Placement};
-use super::{bindings, pose_pick};
+use super::{aura, bindings, pose_pick};
+use crate::gfx::WHITE;
 use crate::render::Gfx;
 use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
@@ -28,9 +29,14 @@ pub(super) fn draw(g: &mut Gfx, m: &Match, f: &Fighter, shx: f32, shy: f32) -> b
         feet: [g.ox + feet[0] * g.view_scale, g.oy + feet[1] * g.view_scale],
         samples: 1,
     };
+    let feet_px = at.feet;
     bindings::with(id, awakened, |b| {
         pose_pick::pose(b, f.anim_no, f.anim_elapsed, f.state_no, f.state_time);
-        canvas::present(b, (id, awakened, slot), at);
+        let height = b.height * at.screen_scale;
+        let drawn = canvas::present(b, (id, awakened, slot), at);
+        aura::trail(g, f, &drawn, awakened);
+        drawn.draw([0.0, 0.0], WHITE);
+        aura::guard(f, feet_px, height, awakened);
     })
     .is_some()
 }

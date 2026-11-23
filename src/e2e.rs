@@ -4,6 +4,8 @@ mod web {
     use js_sys::Reflect;
     use wasm_bindgen::JsValue;
 
+    thread_local!(static RESULTS_PREVIEWED: std::cell::Cell<bool> = const { std::cell::Cell::new(false) });
+
     fn screen_name(screen: &Screen) -> &'static str {
         match screen {
             Screen::Title => "title",
@@ -69,6 +71,15 @@ mod web {
                 app.sel.0 = hero;
                 app.arcade_start(hero, None);
             }
+        }
+        if crate::query_params().iter().any(|(k, _)| k == "e2e_results")
+            && matches!(&app.screen, Screen::Menu { .. })
+            && !RESULTS_PREVIEWED.with(|previewed| previewed.get())
+        {
+            RESULTS_PREVIEWED.with(|previewed| previewed.set(true));
+            app.mode = Mode::Cpu;
+            app.sel = (0, 1, 0);
+            app.screen = Screen::Results { winner: 0, cur: 0 };
         }
         let jump = crate::query_params().iter().find(|(k, _)| k == "e2e_stage").and_then(|(_, v)| v.parse::<usize>().ok());
         if let (Some(stage), Screen::Story { .. }, Some((0, 0, _, 0, _))) = (jump, &app.screen, app.story_snapshot()) {

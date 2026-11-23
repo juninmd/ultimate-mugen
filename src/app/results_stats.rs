@@ -136,7 +136,7 @@ impl App {
             if self.hover_rect(x, y, w, h) && mouse_delta_position().length() > 0.0 {
                 cur = i;
             }
-            if self.clicked_rect(x, y, w, h) {
+            if self.tapped_in(x, y, w, h) {
                 cur = i;
                 clicked = true;
             }

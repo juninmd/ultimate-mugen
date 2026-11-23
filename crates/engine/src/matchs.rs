@@ -663,7 +663,7 @@ impl Match {
         // any attack button skips the first-round face-off (inputs are recorded, so replays skip identically)
         if self.round_state == 1 && self.round_no == 1 && self.intro_ticks > 0 && self.global_asserts & gsf::ROUNDNOTSKIP == 0 && self.round_time > 8 && self.round_time < 60 + self.intro_ticks
             && inputs.iter().any(|b| b & (crate::input::k::A | crate::input::k::B | crate::input::k::C | crate::input::k::X | crate::input::k::Y | crate::input::k::Z) != 0) { self.round_time = 60 + self.intro_ticks; }
-        self.round_logic();
+        self.round_logic(); self.settle_intro_leftovers();
         self.global_asserts = 0;
         for p in [&mut self.all_palfx, &mut self.bg_palfx] { if p.as_ref().is_some_and(|fx| fx.expired()) { *p = None; } }
         let paused_by = self.pause.as_ref().map(|p| (p.by, p.move_time, p.is_super));

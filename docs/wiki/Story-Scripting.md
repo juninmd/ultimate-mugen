@@ -65,3 +65,13 @@ es = ["La red está bloqueada.", "Rompe el cortafuegos."]
 
 - `title` and `beats` accept either a plain string / string list (used in all languages) or a `{ en, pt, es }` table.
 - `alt_boss` is used automatically when the player picks the stage's primary `boss`.
+
+## Story Studio (in-game editor)
+
+Settings → Gameplay → **Story Studio** edits the active campaign without leaving the game: credits, life regained per wave and per stage, boss life and attack, and the four dialogue lines of each stage in the current language. Every change is validated, saved as TOML (`story-campaign.toml` in the app storage, localStorage on the web) and applied immediately. **Restore original script** deletes the saved copy.
+
+Lookup order for the campaign: `UME_STORY_SCRIPT` → Story Studio save → `story/campaign.toml`.
+
+### Epilogue editor
+
+Story Studio → **Epilogues…** edits the ending of any fighter (or the `*` fallback): title, the boss line and hero reply on the rooftop, and each narration page, in the current language. Saves go to `story-epilogues.toml` (one `["fighter"]` table per edited epilogue, merged over the bundled `epilogues.json`); **Restore original epilogue** removes the override. A `●` in the header marks an edited epilogue.

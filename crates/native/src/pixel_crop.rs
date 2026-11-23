@@ -10,6 +10,7 @@ pub(super) struct Cropped {
     pub top: f32,
 }
 
+#[cfg(test)]
 pub(super) fn crop(width: u32, height: u32, rgba: Arc<Vec<u8>>) -> Cropped {
     let bounds = content_box(width as usize, height as usize, &rgba);
     crop_bounded(width, height, rgba, bounds)

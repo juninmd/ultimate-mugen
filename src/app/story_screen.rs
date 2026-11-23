@@ -5,6 +5,14 @@ use crate::story::{beats, choice, helper, prefight, text, Phase};
 use crate::ui::*;
 
 impl App {
+    fn story_prompt(&self, prompt: &str, accent: Color) -> bool {
+        let (x, y, w, h) = (VW / 2.0 - 224.0, 488.0, 448.0, 48.0);
+        let hover = self.hover_rect(x, y, w, h);
+        self.ui.adapted_plate(x, y, w, h, hover.then_some(accent));
+        self.ui.text(prompt, VW / 2.0, y + 31.0, 22.0, WHITE, Align::Center, true);
+        self.tapped_in(x, y, w, h)
+    }
+
     pub(crate) async fn story_screen(&mut self, dt: f32) {
         let Screen::Story { t } = self.screen else { return };
         let Some(run) = self.story.clone() else {
@@ -132,14 +140,6 @@ impl App {
             return;
         }
         self.screen = Screen::Story { t: t + dt };
-    }
-
-    fn story_prompt(&self, prompt: &str, accent: Color) -> bool {
-        let (x, y, w, h) = (VW / 2.0 - 224.0, 488.0, 448.0, 48.0);
-        let hover = self.hover_rect(x, y, w, h);
-        self.ui.adapted_plate(x, y, w, h, hover.then_some(accent));
-        self.ui.text(prompt, VW / 2.0, y + 31.0, 22.0, WHITE, Align::Center, true);
-        self.tapped_in(x, y, w, h)
     }
 
     fn decide_mercy(&mut self, mercy: bool) {

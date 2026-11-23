@@ -22,6 +22,7 @@ impl CharEntry {
     }
     pub fn tile_portrait(&self, pal: i32) -> Option<Sprite> {
         let Src::Native(character) = &self.src else { return self.portrait() };
+        if let Some(own) = crate::model3d::portrait(&character.id) { return Some(own); }
         let revision = sprite_pack_revision(&character.id);
         let key = (character.id.clone(), pal);
         if let Some((cached, sprite)) = TILE_PORTRAITS.with(|cache| cache.borrow().get(&key).cloned()) {

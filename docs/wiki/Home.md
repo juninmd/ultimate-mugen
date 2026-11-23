@@ -11,6 +11,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Configuration and controls](Configuration.md) | Players | `.cfg` file, command-line flags, environment variables, controls |
 | [Adding M.U.G.E.N content](MUGEN-Content.md) | Players | Install `.def`/`.zip` characters and stages, and validate them |
 | [GitHub marketplace](Marketplace.md) | Players | Install characters, stages and music from any GitHub repository |
+| [3D fighters (prototype)](Model3D.md) | Contributors | Isolated glTF skeletal fighter drawn on the 2D fight plane |
 | [Story mode](Story-Mode.md) | Players | Five scrolling stages, waves, bosses, cutscenes and health carry-over |
 | [Stage objects](Stage-Objects.md) | Players, creators | Breakable crates, barrels and cars, food pickups, bonus rounds and their TOML data |
 | [Audio](Audio.md) | Players & Creators | Character sounds, music per stage, formats and panning |

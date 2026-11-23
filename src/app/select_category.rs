@@ -1,6 +1,7 @@
 use super::*;
 
-pub(crate) const CATEGORY_COUNT: u8 = 6;
+pub(crate) const CATEGORY_COUNT: u8 = 7;
+pub(crate) const FILTER_3D: u8 = 6;
 
 impl App {
     pub(crate) fn set_select_filter(&mut self, filter: u8) {
@@ -10,11 +11,12 @@ impl App {
     pub(crate) fn category_matches(&self, i: usize) -> bool {
         let e = &self.reg.chars[i];
         let kind = match self.sel_filter {
-            1 => !e.mugen && !e.boss,
+            1 => !e.mugen && !e.boss && !crate::model3d::is_3d(&e.id),
             2 => e.mugen,
             3 => e.boss,
             super::select_marks::FILTER_FAVORITES => self.is_favorite(i),
             super::select_marks::FILTER_RECENT => self.recent_rank(i).is_some(),
+            FILTER_3D => crate::model3d::is_3d(&e.id),
             _ => true,
         };
         kind && self.author_matches(i) && self.search_matches(i)
@@ -32,6 +34,7 @@ impl App {
             crate::i18n::t("select.filter_bosses"),
             crate::i18n::tr3("FAVORITOS", "FAVORITES", "FAVORITOS"),
             crate::i18n::tr3("RECENTES", "RECENT", "RECIENTES"),
+            crate::i18n::tr3("3D", "3D", "3D"),
         ]
     }
 }

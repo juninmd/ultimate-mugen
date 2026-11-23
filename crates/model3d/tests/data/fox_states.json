@@ -1,0 +1,9 @@
+{
+  "fallback": { "clip": "Survey", "loop": true },
+  "states": [
+    { "from": 20, "to": 21, "clip": "Walk", "loop": true, "speed": 1.0 },
+    { "from": 100, "to": 100, "clip": "Run", "loop": true, "speed": 1.0 },
+    { "from": 200, "to": 699, "clip": "Run", "loop": false, "speed": 2.0 },
+    { "from": 5000, "to": 5199, "clip": "Survey", "loop": false, "speed": 0.5 }
+  ]
+}

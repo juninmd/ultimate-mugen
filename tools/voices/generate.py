@@ -4,7 +4,6 @@ import soundfile as sf
 from kokoro_onnx import Kokoro
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-CHARS = os.path.join(ROOT, "assets", "chars")
 OUT = os.path.join(ROOT, "assets", "voices", "voices.bank")
 MODEL = os.environ.get("KOKORO_MODEL", "kokoro-v1.0.onnx")
 VOICES = os.environ.get("KOKORO_VOICES", "voices-v1.0.bin")
@@ -26,14 +25,50 @@ CAST = {
     "valdric": dict(voice="bm_daniel", speed=0.88, fx="asetrate=16000*0.9,aresample=16000,aecho=0.8:0.7:50:0.25"),
     "haruki": dict(voice="am_liam", speed=1.0),
     "oboro": dict(voice="pm_alex", speed=0.95, lang="pt-br", fx="aecho=0.8:0.7:70:0.3"),
+    "ichigo3d": dict(voice="am_michael", speed=1.12, fx="aecho=0.8:0.6:25:0.2"),
 }
 SHOUT = ("special", "super", "finisher")
+
+
+def char_doc(char):
+    for folder in ("chars", "chars3d"):
+        path = os.path.join(ROOT, "assets", folder, char + ".json")
+        if os.path.exists(path):
+            doc = json.load(open(path, encoding="utf-8"))
+            if "extends" not in doc:
+                return doc
+            base = char_doc(doc["extends"])
+            moves = {m["id"]: m for m in base.get("moves", [])}
+            for m in doc.get("moves", []):
+                if m.get("remove"):
+                    moves.pop(m["id"], None)
+                else:
+                    moves[m["id"]] = {**moves.get(m["id"], {}), **m}
+            return {**doc, "moves": list(moves.values())}
+    raise FileNotFoundError(char)
+
+
+def existing_banks():
+    if not os.path.exists(OUT):
+        return []
+    data, at, banks = open(OUT, "rb").read(), 12, []
+    for _ in range(struct.unpack_from("<I", data, 8)[0]):
+        n = data[at]; name = data[at + 1:at + 1 + n].decode(); at += 1 + n
+        count = struct.unpack_from("<H", data, at)[0]; at += 2
+        spans = []
+        for _ in range(count):
+            n = data[at]; mid = data[at + 1:at + 1 + n].decode(); at += 1 + n
+            start, length = struct.unpack_from("<II", data, at); at += 8
+            spans.append((mid, start, length))
+        size = struct.unpack_from("<I", data, at)[0]; at += 4
+        banks.append((name, spans, data[at:at + size])); at += size
+    return banks
 
 
 def shouts(doc):
     found = {}
     for m in doc.get("moves", []):
-        if m["kind"] in SHOUT and not m["id"].startswith("ex_"):
+        if m.get("kind") in SHOUT and not m["id"].startswith("ex_"):
             found[m["id"]] = m["name"]
     for form in doc.get("abilities", {}).get("forms", []):
         for m in form.get("moves", []):
@@ -83,11 +118,11 @@ def stream(clips):
 def main():
     only = sys.argv[1:]
     tts = Kokoro(MODEL, VOICES)
-    banks = []
+    banks = [b for b in existing_banks() if only and b[0] not in only]
     for char, cfg in CAST.items():
         if only and char not in only:
             continue
-        doc = json.load(open(os.path.join(CHARS, char + ".json"), encoding="utf-8"))
+        doc = char_doc(char)
         clips = []
         for move_id, name in shouts(doc).items():
             text = name.replace(":", ",") + "!"

@@ -36,7 +36,7 @@ fn compare<K: Ord + Hash + Debug + Clone, V>(a: &HashMap<K, V>, b: &HashMap<K, V
 }
 
 fn image_key(s: &ume_engine::chardef::Sprite) -> String {
-    let px = s.image.as_ref().map(|i| (i.w, i.h, ume_formats::vfs::content_hash(&i.rgba)));
+    let px = s.image.as_ref().map(|i| (i.w, i.h, ume_formats::vfs::content_hash(&i.rgba())));
     format!("{}|{}|{}|{}|{}|{px:?}", s.width, s.height, s.axis_x, s.axis_y, s.scale)
 }
 

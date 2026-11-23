@@ -110,7 +110,7 @@ fn run(args: &[String]) -> Result<(), String> {
             let frames = flag("--frames").map(|v| v.parse::<usize>().map_err(|e| e.to_string())).transpose()?.unwrap_or(5400);
             let level = flag("--level").map(|v| v.parse::<i32>().map_err(|e| e.to_string())).transpose()?.unwrap_or(8);
             let roster: Vec<String> = flag("--roster").ok_or("fight-census needs --roster a,b,c")?.split(',').map(String::from).collect();
-            let val = fight_census::run(&roster, level, frames)?;
+            let val = fight_census::run(&roster, level, flag("--level-b").map(|v| v.parse::<i32>().map_err(|e| e.to_string())).transpose()?.unwrap_or(level), frames)?;
             println!("{}", serde_json::to_string_pretty(&val).map_err(|e| e.to_string())?);
         }
         Some("knockdown-rate") => {

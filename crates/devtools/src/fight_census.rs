@@ -20,10 +20,11 @@ struct Tally {
     total_ticks: u64,
     longest_stall: usize,
     max_combo: i32,
+    side_a_wins: u32,
     wins: BTreeMap<String, (u32, u32)>,
 }
 
-fn fight(roster: &[String], a: usize, b: usize, level: i32, frames: usize, seed: u32, t: &mut Tally) -> Result<(), String> {
+fn fight(roster: &[String], a: usize, b: usize, level: i32, level_b: i32, frames: usize, seed: u32, t: &mut Tally) -> Result<(), String> {
     let p1 = crate::debug_fight::load_fighter(&roster[a])?;
     let p2 = crate::debug_fight::load_fighter(&roster[b])?;
     let mut m = Match::new(common_def(), None, flat_stage());
@@ -35,7 +36,7 @@ fn fight(roster: &[String], a: usize, b: usize, level: i32, frames: usize, seed:
         f.ctrl = true;
     }
     let mut ai0 = Ai::new(level, seed);
-    let mut ai1 = Ai::new(level, seed + 1);
+    let mut ai1 = Ai::new(level_b, seed + 1);
     let mut quiet = 0usize;
     t.fights += 1;
     let mut ended = false;
@@ -73,6 +74,7 @@ fn fight(roster: &[String], a: usize, b: usize, level: i32, frames: usize, seed:
             let loser = if winner == a { b } else { a };
             t.wins.entry(roster[winner].clone()).or_default().0 += 1;
             t.wins.entry(roster[loser].clone()).or_default().1 += 1;
+            t.side_a_wins += (winner == a) as u32;
             t.kos += 1;
             t.ko_frames += tick as u64;
             ended = true;
@@ -85,18 +87,20 @@ fn fight(roster: &[String], a: usize, b: usize, level: i32, frames: usize, seed:
     Ok(())
 }
 
-pub fn run(roster: &[String], level: i32, frames: usize) -> Result<Value, String> {
+pub fn run(roster: &[String], level: i32, level_b: i32, frames: usize) -> Result<Value, String> {
     let mut t = Tally::default();
     let n = roster.len();
     for i in 0..n {
         for j in (0..n).filter(|&j| j != i) {
-            fight(roster, i, j, level, frames, 11 + (i * n + j) as u32, &mut t)?;
+            fight(roster, i, j, level, level_b, frames, 11 + (i * n + j) as u32, &mut t)?;
         }
     }
     let avg_ko = if t.kos == 0 { 0.0 } else { t.ko_frames as f64 / t.kos as f64 / 60.0 };
     let stall_pct = t.stall_ticks as f64 / t.total_ticks.max(1) as f64 * 100.0;
     Ok(json!({
         "level": level,
+        "level_b": level_b,
+        "side_a_win_pct": (t.side_a_wins as f64 / t.fights.max(1) as f64 * 1000.0).round() / 10.0,
         "fights": t.fights,
         "kos": t.kos,
         "timeouts": t.timeouts,

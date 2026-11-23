@@ -79,10 +79,22 @@ impl App {
     pub(crate) fn draw_story_helper_pick(&self, run: &StoryRun, accent: Color) {
         let candidates = self.story_helper_candidates(run);
         let cursor = run.helper_cursor.min(candidates.len());
-        let label = match cursor.checked_sub(1).and_then(|k| candidates.get(k)) {
-            Some(&i) => self.reg.chars[i].name.to_uppercase(),
+        let picked = cursor.checked_sub(1).and_then(|k| candidates.get(k)).copied();
+        let label = match picked {
+            Some(i) => self.reg.chars[i].name.to_uppercase(),
             None => helper::none_label().to_string(),
         };
+        if let Some(profile) = picked.and_then(|i| crate::profile::of(&self.reg.chars[i])) {
+            let nationality = format!(
+                "{}: {}",
+                crate::profile::nationality_label(),
+                profile.nationality.pick(crate::profile::lang())
+            )
+            .to_uppercase();
+            let flag_x = (VW - self.ui.measure(&nationality, 13.0, true)) / 2.0 - 32.0;
+            self.ui.text(&nationality, VW / 2.0, 556.0, 13.0, WHITE, Align::Center, true);
+            self.ui.flag(&profile.country, flag_x, 542.0, 24.0, 1.0);
+        }
         self.ui.text(helper::hint(), VW / 2.0, 462.0, 16.0, WHITE, Align::Center, false);
         self.ui.text("<", VW * 0.22, 510.0, 34.0, accent, Align::Center, true);
         self.ui.text(">", VW * 0.78, 510.0, 34.0, accent, Align::Center, true);

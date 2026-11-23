@@ -7,6 +7,8 @@ mod active;
 #[cfg(feature = "model3d")]
 mod airport;
 #[cfg(feature = "model3d")]
+mod aura;
+#[cfg(feature = "model3d")]
 mod bindings;
 #[cfg(feature = "model3d")]
 mod canvas;

@@ -247,6 +247,7 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `posSet` | `[{ "at", "x", "y" }]` | Sets the absolute position on an element (`PosSet`) |
 | `palFx` | `[{ "at", "time", "add", "mul", "sinAdd", "color", "invertAll" }]` | Colour flash on the fighter (`PalFX`) |
 | `followUp` | `{ "to": "move_id", "on": "hit" \| "contact" \| "hitNow" \| "end" \| "command" \| "release", "command", "at" }` | Transition into a follow-up move: on hit-confirm, at the end, while `command` is held (`command`) or once it is released (`release`) |
+| `holdRelease` | `{ "button": "y", "tiers": [{ "at": 0, "to": "move_id" }, { "at": 45, "to": "move_id" }] }` | Hold-to-charge: the move stays in its (looping) anim while `button` is held and, on release or when the anim ends, jumps to the tier with the largest `at` (ticks held) reached. Charge `vfx` explods are cleared on release |
 | `spawn` | `[{ "at", "state", "id", "name", "pos", "postype", "facing", "ownPal", "superMoveTime", "pauseMoveTime" }]` | Spawns a helper running a `scripts.cns` state (`Helper`) on animation element `at` |
 | `cinematic` | `{ "letterbox", "hideUi", "freeze", "title", "camera", "cuts", "finishSlow" }` | Multi-beat movie direction (`Zoom`, `Camera`, `EnvColor`, `EnvShake`, `Cinema`, `SlowMo`, `AssertSpecial(NoBarDisplay)`) |
 | `voice` | `1000, 0` | Character sound group and index played at move start, when that sample is bundled |

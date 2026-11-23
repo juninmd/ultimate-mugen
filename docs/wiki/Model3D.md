@@ -19,12 +19,15 @@ The simulation stays 2D. Hitboxes, physics, state machine and rollback never rea
 - Fight: one line in `render.rs`. Select, versus and results panels: `draw_fit` inside `draw_char_fit`. Tiles and loading use `portrait`.
 - The select screen has a `3D` category.
 - The awakened form swaps to the second model (Ichigo: Hollow Total).
+- `src/model3d/aura.rs` draws the 3D-only effects: the `AfterImage` trail as additive tinted copies of the current frame (crimson Shunpo, gold Sonido in Hollow form) and a reiatsu barrier in front of the fighter in guard states (120-155) that flashes on guard hit (150-155).
 
 ## Asset tools
 
 `tools/retarget` (Python, stdlib only):
 - `retarget.py <clips dir> <source.glb> <out.glb> <rig>` bakes the clips listed in `clips.json` onto a rig from `rigs.json`.
 - `autorig.py <mesh.glb> <clips dir> <out.glb>` fits a skeleton and skin weights to an unrigged mesh.
+- `keyposes.py <in.glb> <out.glb> <rig>` bakes the hand-keyed clips of `keyposes.json` (Bankai stance, three-hit sword string, Getsuga wind-up, charge and release, Juujishou cross, Shunpo, Cero, guard, pointing win pose). A pose sets hips offset, torso/chest/head yaw-pitch-roll and limb directions as `[azimuth, elevation]` in character space (0 = toward the rival, +90 = his left); `bladeR` is solved by `blade_solve.py` into the wrist rotation that aims Zangetsu, and `keys_<rig>` overrides a clip for one rig (the Hollow fires Cero from the horns). Feet stay on the floor automatically. Re-run on both GLBs after editing; the script is idempotent.
+- Contact sheet of clips: `cargo run --release -p ume-model3d --example clip_sheet -- <model.glb> <out.png> Clip1,Clip2 <frames>`.
 - Portrait: `cargo run -p ume-model3d --example portrait -- <model.glb> <states.json> <out.png>`.
 - Voices: `tools/voices/generate.py <id>` adds the fighter to `voices.bank` and keeps the other banks.
 
@@ -39,7 +42,7 @@ The simulation stays 2D. Hitboxes, physics, state machine and rollback never rea
 
 ## Ichigo moves
 
-Jumps: `D, U` or `U, U` super jump (also in the air), two air jumps, three air dashes. Specials: Getsuga Tenshou, Shunpo, Shunpo Rush, Hollow Cero, Getsuga Juujishou, Kuro Getsuga, Hollow Rampage; Hollow Total adds Cero Oscuras.
+Jumps: `D, U` or `U, U` super jump (also in the air), two air jumps, three air dashes. Specials: Getsuga Tenshou (`~D, DF, F, x`), charged Getsuga (`~D, DB, B, y`, hold `y`; 45 ticks for the max wave), Shunpo (`~D, DB, B, b`, Sonido trail in Hollow form), Shunpo Rush, Hollow Cero (`~D, DB, B, a`, hold `a`; 40 ticks for the big beam), Getsuga Juujishou, Kuro Getsuga, Hollow Rampage; Hollow Total adds Cero Oscuras. Charges use the `holdRelease` move field (see [UMF character](UMF-Character.md)).
 
 ## Credits
 

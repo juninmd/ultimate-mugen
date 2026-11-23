@@ -384,6 +384,206 @@
      "ticks": 2
     }
    ]
+  },
+  "getsugaCharge": {
+   "frames": [
+    "powerup2*24",
+    "powerup2*24",
+    "powerup2*24",
+    "powerup2*24",
+    "powerup2*24"
+   ]
+  },
+  "ceroCharge": {
+   "frames": [
+    "powerup2*24",
+    "powerup2*24",
+    "powerup2*24",
+    "powerup2*24",
+    "powerup2*24"
+   ]
+  },
+  "getsugaOrbFx": {
+   "frames": [
+    {
+     "effect": {
+      "type": "darkfire",
+      "size": 22,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 0.0
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "darkfire",
+      "size": 22,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 1.1
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "darkfire",
+      "size": 22,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 2.2
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "darkfire",
+      "size": 22,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 3.3
+     },
+     "ticks": 2
+    }
+   ],
+   "loop": 0
+  },
+  "ceroOrbFx": {
+   "frames": [
+    {
+     "effect": {
+      "type": "orb",
+      "size": 22,
+      "color": "#ff1030",
+      "color2": "#ffe0e6",
+      "phase": 0.0
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "orb",
+      "size": 22,
+      "color": "#ff1030",
+      "color2": "#ffe0e6",
+      "phase": 1.1
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "orb",
+      "size": 22,
+      "color": "#ff1030",
+      "color2": "#ffe0e6",
+      "phase": 2.2
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "orb",
+      "size": 22,
+      "color": "#ff1030",
+      "color2": "#ffe0e6",
+      "phase": 3.3
+     },
+     "ticks": 2
+    }
+   ],
+   "loop": 0
+  },
+  "ceroBigFx": {
+   "frames": [
+    {
+     "effect": {
+      "type": "beam",
+      "size": 34,
+      "color": "#ff1030",
+      "color2": "#ffffff",
+      "phase": 0.0,
+      "length": 420
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "beam",
+      "size": 34,
+      "color": "#ff1030",
+      "color2": "#ffffff",
+      "phase": 1.1,
+      "length": 420
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "beam",
+      "size": 34,
+      "color": "#ff1030",
+      "color2": "#ffffff",
+      "phase": 2.2,
+      "length": 420
+     },
+     "ticks": 3
+    },
+    {
+     "effect": {
+      "type": "beam",
+      "size": 34,
+      "color": "#ff1030",
+      "color2": "#ffffff",
+      "phase": 3.3,
+      "length": 420
+     },
+     "ticks": 3
+    }
+   ]
+  },
+  "shunpoFx": {
+   "frames": [
+    {
+     "effect": {
+      "type": "shockwave",
+      "size": 36,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 0.0
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "shockwave",
+      "size": 36,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 1.1
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "shockwave",
+      "size": 36,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 2.2
+     },
+     "ticks": 2
+    },
+    {
+     "effect": {
+      "type": "shockwave",
+      "size": 36,
+      "color": "#14000a",
+      "color2": "#ff2440",
+      "phase": 3.3
+     },
+     "ticks": 2
+    }
+   ]
   }
  },
  "moves": [
@@ -611,6 +811,34 @@
       0
      ]
     }
+   ],
+   "afterimage": {
+    "at": 1,
+    "time": 18,
+    "length": 6,
+    "framegap": 2,
+    "trans": "add",
+    "palAdd": [
+     60,
+     0,
+     10
+    ],
+    "palMul": [
+     0.6,
+     0.1,
+     0.15
+    ]
+   },
+   "vfx": [
+    {
+     "at": 1,
+     "anim": "shunpoFx",
+     "offset": [
+      0,
+      -6
+     ],
+     "time": 8
+    }
    ]
   },
   {
@@ -632,40 +860,74 @@
       -2
      ]
     }
+   ],
+   "afterimage": {
+    "at": 1,
+    "time": 18,
+    "length": 6,
+    "framegap": 2,
+    "trans": "add",
+    "palAdd": [
+     60,
+     0,
+     10
+    ],
+    "palMul": [
+     0.6,
+     0.1,
+     0.15
+    ]
+   },
+   "vfx": [
+    {
+     "at": 1,
+     "anim": "shunpoFx",
+     "offset": [
+      0,
+      -6
+     ],
+     "time": 8
+    }
    ]
   },
   {
    "id": "tempest",
    "name": "Hollow Cero",
    "input": "~D, DB, B, a",
-   "anim": "gale",
+   "anim": "ceroCharge",
    "hits": null,
    "moves": null,
-   "projectile": {
-    "at": 3,
-    "anim": "ceroFx",
-    "hitAnim": "getsugaHit",
-    "speed": [
-     11,
-     0
-    ],
-    "offset": [
-     48,
-     -66
-    ],
-    "damage": 22,
-    "hits": 6,
-    "level": "medium",
-    "removeTime": 60,
-    "priority": 5,
-    "missTime": 2,
-    "element": "neutral"
+   "projectile": null,
+   "holdRelease": {
+    "button": "a",
+    "tiers": [
+     {
+      "at": 0,
+      "to": "cero_shot"
+     },
+     {
+      "at": 40,
+      "to": "gran_rey_cero"
+     }
+    ]
    },
+   "vfx": [
+    {
+     "at": 1,
+     "anim": "ceroOrbFx",
+     "offset": [
+      46,
+      -80
+     ],
+     "time": 120,
+     "follow": true
+    }
+   ],
    "quake": [
     {
-     "at": 3,
-     "time": 10,
-     "amp": 2
+     "at": 2,
+     "time": 80,
+     "amp": 1
     }
    ]
   },
@@ -919,6 +1181,195 @@
       2.4,
       -13
      ]
+    }
+   ]
+  },
+  {
+   "id": "getsuga_charge",
+   "name": "Getsuga Tenshou (Charge)",
+   "input": "~D, DB, B, y",
+   "kind": "special",
+   "anim": "getsugaCharge",
+   "hits": [],
+   "holdRelease": {
+    "button": "y",
+    "tiers": [
+     {
+      "at": 0,
+      "to": "getsuga_release"
+     },
+     {
+      "at": 45,
+      "to": "getsuga_max"
+     }
+    ]
+   },
+   "vfx": [
+    {
+     "at": 1,
+     "anim": "getsugaOrbFx",
+     "offset": [
+      -26,
+      -112
+     ],
+     "time": 120,
+     "follow": true
+    }
+   ],
+   "quake": [
+    {
+     "at": 3,
+     "time": 90,
+     "amp": 1
+    }
+   ]
+  },
+  {
+   "id": "getsuga_release",
+   "name": "Getsuga Tenshou (Release)",
+   "input": "",
+   "projectile": {
+    "anim": "getsugaFx",
+    "hitAnim": "getsugaHit",
+    "speed": [
+     8.5,
+     0
+    ],
+    "offset": [
+     52,
+     -64
+    ],
+    "damage": 92,
+    "hits": 2,
+    "level": "heavy",
+    "knockback": [
+     -5,
+     -2
+    ],
+    "removeTime": 70,
+    "element": "neutral",
+    "at": 3
+   },
+   "kind": "special",
+   "anim": "gale"
+  },
+  {
+   "id": "getsuga_max",
+   "name": "Getsuga Tenshou (Max)",
+   "input": "",
+   "kind": "special",
+   "anim": "gale",
+   "projectile": {
+    "anim": "getsugaBigFx",
+    "hitAnim": "getsugaHit",
+    "speed": [
+     11,
+     0
+    ],
+    "offset": [
+     56,
+     -72
+    ],
+    "damage": 48,
+    "hits": 5,
+    "level": "heavy",
+    "knockback": [
+     -7,
+     -3
+    ],
+    "removeTime": 80,
+    "priority": 7,
+    "missTime": 2,
+    "hitflag": "MAFP",
+    "element": "neutral",
+    "at": 3
+   },
+   "quake": [
+    {
+     "at": 3,
+     "time": 20,
+     "amp": 5
+    }
+   ],
+   "vfx": [
+    {
+     "at": 2,
+     "anim": "reiatsuFx",
+     "offset": [
+      0,
+      -50
+     ],
+     "time": 16,
+     "follow": true,
+     "scale": 1.8
+    }
+   ]
+  },
+  {
+   "id": "cero_shot",
+   "name": "Hollow Cero (Release)",
+   "input": "",
+   "anim": "tempest",
+   "projectile": {
+    "at": 3,
+    "anim": "ceroFx",
+    "hitAnim": "getsugaHit",
+    "speed": [
+     11,
+     0
+    ],
+    "offset": [
+     48,
+     -66
+    ],
+    "damage": 22,
+    "hits": 6,
+    "level": "medium",
+    "removeTime": 60,
+    "priority": 5,
+    "missTime": 2,
+    "element": "neutral"
+   },
+   "quake": [
+    {
+     "at": 3,
+     "time": 10,
+     "amp": 2
+    }
+   ],
+   "kind": "special"
+  },
+  {
+   "id": "gran_rey_cero",
+   "name": "Hollow Cero (Max)",
+   "input": "",
+   "kind": "special",
+   "anim": "tempest",
+   "projectile": {
+    "at": 3,
+    "anim": "ceroBigFx",
+    "hitAnim": "getsugaHit",
+    "speed": [
+     13,
+     0
+    ],
+    "offset": [
+     48,
+     -66
+    ],
+    "damage": 24,
+    "hits": 10,
+    "level": "heavy",
+    "removeTime": 70,
+    "priority": 7,
+    "missTime": 2,
+    "element": "neutral"
+   },
+   "quake": [
+    {
+     "at": 3,
+     "time": 18,
+     "amp": 4
     }
    ]
   }

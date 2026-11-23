@@ -1,14 +1,13 @@
 use miniz_oxide::deflate::compress_to_vec_zlib;
 
-fn crc32(bytes: &[u8]) -> u32 {
-    let mut crc = 0xFFFF_FFFFu32;
+fn crc32_update(mut crc: u32, bytes: &[u8]) -> u32 {
     for &byte in bytes {
         crc ^= byte as u32;
         for _ in 0..8 {
             crc = if crc & 1 != 0 { (crc >> 1) ^ 0xEDB8_8320 } else { crc >> 1 };
         }
     }
-    !crc
+    crc
 }
 
 fn paeth(a: u8, b: u8, c: u8) -> u8 {
@@ -18,32 +17,47 @@ fn paeth(a: u8, b: u8, c: u8) -> u8 {
     if pa <= pb && pa <= pc { a } else if pb <= pc { b } else { c }
 }
 
-fn filtered(kind: u8, row: &[u8], above: &[u8], bpp: usize) -> Vec<u8> {
-    (0..row.len()).map(|i| {
+fn filter_into(kind: u8, row: &[u8], above: &[u8], bpp: usize, dst: &mut Vec<u8>) -> u64 {
+    dst.clear();
+    let mut score = 0u64;
+    for i in 0..row.len() {
         let left = if i >= bpp { row[i - bpp] } else { 0 };
         let up = above[i];
         let up_left = if i >= bpp { above[i - bpp] } else { 0 };
-        row[i].wrapping_sub(match kind {
+        let v = row[i].wrapping_sub(match kind {
             0 => 0,
             1 => left,
             2 => up,
             3 => ((left as u16 + up as u16) / 2) as u8,
             _ => paeth(left, up, up_left),
-        })
-    }).collect()
+        });
+        score += (v as i8).unsigned_abs() as u64;
+        dst.push(v);
+    }
+    score
 }
 
 fn adaptive_scanlines(data: &[u8], row_bytes: usize, bpp: usize) -> Vec<u8> {
-    let zero = vec![0u8; row_bytes];
-    let mut out = Vec::with_capacity(data.len() + data.len() / row_bytes.max(1) + 1);
+    let stride = row_bytes.max(1);
+    let zero = vec![0u8; stride];
+    let mut out = Vec::with_capacity(data.len() + data.len() / stride + 1);
+    let mut trial = Vec::with_capacity(stride);
+    let mut best = Vec::with_capacity(stride);
     let mut above: &[u8] = &zero;
-    for row in data.chunks(row_bytes.max(1)) {
-        let best = (0u8..if bpp == 1 { 1 } else { 5 })
-            .map(|kind| (kind, filtered(kind, row, above, bpp)))
-            .min_by_key(|(_, bytes)| bytes.iter().map(|&b| (b as i8).unsigned_abs() as u64).sum::<u64>())
-            .unwrap_or((0, row.to_vec()));
-        out.push(best.0);
-        out.extend_from_slice(&best.1);
+    let max_kind = if bpp == 1 { 1u8 } else { 5u8 };
+    for row in data.chunks(stride) {
+        let mut best_kind = 0u8;
+        let mut best_score = u64::MAX;
+        for kind in 0u8..max_kind {
+            let score = filter_into(kind, row, above, bpp, &mut trial);
+            if score < best_score {
+                best_score = score;
+                best_kind = kind;
+                std::mem::swap(&mut best, &mut trial);
+            }
+        }
+        out.push(best_kind);
+        out.extend_from_slice(&best);
         above = row;
     }
     out
@@ -51,10 +65,10 @@ fn adaptive_scanlines(data: &[u8], row_bytes: usize, bpp: usize) -> Vec<u8> {
 
 fn chunk(out: &mut Vec<u8>, kind: &[u8; 4], body: &[u8]) {
     out.extend_from_slice(&(body.len() as u32).to_be_bytes());
-    let mut checked = kind.to_vec();
-    checked.extend_from_slice(body);
-    out.extend_from_slice(&checked);
-    out.extend_from_slice(&crc32(&checked).to_be_bytes());
+    out.extend_from_slice(kind);
+    out.extend_from_slice(body);
+    let crc = !crc32_update(crc32_update(0xFFFF_FFFFu32, kind), body);
+    out.extend_from_slice(&crc.to_be_bytes());
 }
 
 pub fn encode_palette_png(width: usize, height: usize, indices: &[u8], palette: &[[u8; 4]], level: u8) -> Vec<u8> {
@@ -118,5 +132,17 @@ mod tests {
         let rgba: Vec<u8> = (0..2 * 3 * 4).map(|i| (i * 11) as u8).collect();
         let png = decode_png(&encode_rgba_png(2, 3, &rgba, 9)).unwrap();
         assert_eq!(png.rgba.unwrap(), rgba);
+    }
+
+    #[test]
+    fn rgb_png_round_trips_as_opaque_rgba() {
+        let rgb: Vec<u8> = (0..3 * 2 * 3).map(|i| (i * 17) as u8).collect();
+        let png = decode_png(&encode_rgb_png(3, 2, &rgb, 6)).unwrap();
+        let rgba = png.rgba.unwrap();
+        assert_eq!(rgba.len(), 3 * 2 * 4);
+        for (px, chunk) in rgba.chunks_exact(4).enumerate() {
+            assert_eq!(&chunk[..3], &rgb[px * 3..px * 3 + 3]);
+            assert_eq!(chunk[3], 255);
+        }
     }
 }

@@ -57,14 +57,6 @@ impl App {
         if s.net.is_some() {
             s.paused = false;
         }
-        // pause button (touch) top-center
-        let pb = (VW / 2.0 - 46.0, 96.0, 92.0, 40.0);
-        let on_pause = |v: Vec2| v.x > pb.0 && v.x < pb.0 + pb.2 && v.y > pb.1 && v.y < pb.1 + pb.3;
-        let mouse_hit = is_mouse_button_pressed(MouseButton::Left) && on_pause(self.ui.to_virtual(mouse_position().into()));
-        let touch_hit = self.c.touch.began.iter().any(|t| on_pause(self.ui.to_virtual(*t)));
-        if !s.paused && self.c.touch.enabled && (mouse_hit || touch_hit) {
-            s.paused = true; self.pause.reset(); self.audio.sfx("pause");
-        }
         if is_key_pressed(KeyCode::Tab) && !s.paused && !replaying {
             s.switch_control();
         }
@@ -78,7 +70,6 @@ impl App {
         let framing = if replaying { ume_engine::replay_camera::frame(&mut s.m) } else { None };
         crate::power_arena::dock_above_touch_pad(self.c.touch.enabled); s.draw(&mut self.g, &self.ui);
         if !s.paused { crate::easter::draw(&self.ui, dt, s.vfx.below_banners(if self.c.touch.enabled { 146.0 } else { 116.0 })); }
-        let paused_now = s.paused;
         if let Some(saved) = framing {
             ume_engine::replay_camera::unframe(&mut s.m, saved);
         }
@@ -91,20 +82,6 @@ impl App {
         }
         if self.story_is_playing() {
             self.story_hud();
-        }
-        self.c.touch.draw();
-        if self.c.touch.enabled && !paused_now {
-            self.ui.rect(pb.0, pb.1, pb.2, pb.3, Color::new(0.08, 0.04, 0.16, 0.8));
-            self.ui.rect_lines(pb.0, pb.1, pb.2, pb.3, 2.0, Color::new(1.0, 0.8, 0.2, 0.9));
-            self.ui.text(
-                crate::i18n::tr3("II  PAUSA", "II  PAUSE", "II  PAUSA"),
-                VW / 2.0,
-                pb.1 + 27.0,
-                18.0,
-                WHITE,
-                Align::Center,
-                true,
-            );
         }
         #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
         if let Some(n) = self.session.as_ref().and_then(|s| s.net.as_ref()) {

@@ -5,7 +5,6 @@ use crate::settings::{
     VOLUME_STEPS,
 };
 
-mod touch_settings;
 mod pixel_controls;
 mod knockdown_label;
 use knockdown_label::knockdown_label;
@@ -63,7 +62,7 @@ struct Row {
     level: Option<u8>,
 }
 
-const TABS: [(&str, &str, &str); 8] = [
+const TABS: [(&str, &str, &str); 7] = [
     ("VÍDEO", "VIDEO", "VÍDEO"),
     ("ÁUDIO", "AUDIO", "AUDIO"),
     ("CONTROLES", "CONTROLS", "CONTROLES"),
@@ -71,7 +70,6 @@ const TABS: [(&str, &str, &str); 8] = [
     ("IDIOMA", "LANGUAGE", "IDIOMA"),
     ("SOBRE", "ABOUT", "ACERCA DE"),
     ("DESEMPENHO", "PERFORMANCE", "RENDIMIENTO"),
-    ("TOQUE", "TOUCH", "TÁCTIL"),
 ];
 
 fn row(act: Act, label: &str, value: impl Into<String>, hint: &str) -> Row {
@@ -377,9 +375,6 @@ impl App {
         else {
             return;
         };
-        if tab == TABS.len() - 1 {
-            return self.touch_settings_screen(from_fight);
-        }
         let rows = self.settings_rows(tab);
         let usable: Vec<usize> = (0..rows.len())
             .filter(|&i| rows[i].act != Act::Info)

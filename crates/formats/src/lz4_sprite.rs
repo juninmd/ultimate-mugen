@@ -39,6 +39,7 @@ fn bounds(data: &[u8], width: usize, height: usize, bpp: usize) -> Bounds {
     let mut bottom = 0usize;
     let mut left = width;
     let mut right = 0usize;
+    let mut found = false;
     let row_bytes = width * bpp;
     for row in 0..height {
         let slice = &data[row * row_bytes..(row + 1) * row_bytes];
@@ -46,12 +47,13 @@ fn bounds(data: &[u8], width: usize, height: usize, bpp: usize) -> Bounds {
             continue;
         };
         let last_byte = slice.iter().rposition(|&b| b != 0).unwrap_or(first_byte);
+        found = true;
         top = top.min(row);
         bottom = row;
         left = left.min(first_byte / bpp);
         right = right.max(last_byte / bpp);
     }
-    if top > bottom || left > right {
+    if !found {
         return Bounds { x: 0, y: 0, w: 0, h: 0 };
     }
     Bounds {

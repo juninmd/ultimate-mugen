@@ -5,6 +5,7 @@ use crate::input::k;
 use crate::matchs::Match;
 
 const MINIMUM_LEVEL: i32 = 3;
+const LOW_LEVEL_REACTION_SHARE: f32 = 0.5;
 const SUPER_COST: f32 = 1000.0;
 const ANTI_AIR_RANGE: f32 = 105.0;
 const WHIFF_MIN_STATE_TIME: i32 = 6;
@@ -131,7 +132,10 @@ impl Ai {
         near: f32,
         skill: f32,
     ) -> Option<usize> {
-        if self.level < MINIMUM_LEVEL || m.round_state != 2 {
+        if m.round_state != 2 {
+            return None;
+        }
+        if self.level < MINIMUM_LEVEL && self.r() >= self.level.max(0) as f32 / MINIMUM_LEVEL as f32 * LOW_LEVEL_REACTION_SHARE {
             return None;
         }
         let (f, e) = (&m.fighters[me], &m.fighters[ei]);

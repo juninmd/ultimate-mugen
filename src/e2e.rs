@@ -124,7 +124,7 @@ mod web {
                 app.boss_progression.clears = clears;
                 if let Some(boss) = app.boss_idx() {
                     app.sel.1 = boss;
-                    app.arcade = Some((vec![boss], 0));
+                    app.arcade = Some(crate::app::arcade::ArcadeRun::at(vec![boss], 0));
                     app.screen = Screen::Results { winner: 0, cur: 0 };
                 }
             }

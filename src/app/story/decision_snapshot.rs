@@ -15,4 +15,12 @@ impl App {
             matches!(&run.helper, crate::story::HelperPick::Chosen(_)),
         ))
     }
+
+    pub(crate) fn story_mercy_pending(&self) -> bool {
+        self.story
+            .as_ref()
+            .is_some_and(|run| {
+                crate::story::choice::pending(run) && !crate::story::prefight::pending(run)
+            })
+    }
 }

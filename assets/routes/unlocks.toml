@@ -1,3 +1,7 @@
 [[unlock]]
 target = "char:oboro"
 when = "stats.arcade.clear >= 1"
+
+[[unlock]]
+target = "char:byakuren"
+when = "stats.story.clear >= 1"

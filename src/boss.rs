@@ -10,6 +10,7 @@ pub struct BossToast {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct BossProgression {
     pub clears: usize,
+    pub story_clears: usize,
     pub unlocked_oboro: bool,
     pub toast: Option<BossToast>,
 }
@@ -22,6 +23,7 @@ impl BossProgression {
                 let Some((k, v)) = line.split_once('=') else { continue };
                 match k.trim() {
                     "clears" => prog.clears = v.trim().parse().unwrap_or(0),
+                    "story_clears" => prog.story_clears = v.trim().parse().unwrap_or(0),
                     "unlocked_oboro" => prog.unlocked_oboro = v.trim() == "1",
                     _ => {}
                 }
@@ -35,8 +37,9 @@ impl BossProgression {
 
     pub fn save(&self) {
         let text = format!(
-            "clears={}\nunlocked_oboro={}\n",
+            "clears={}\nstory_clears={}\nunlocked_oboro={}\n",
             self.clears,
+            self.story_clears,
             if self.unlocked_oboro { 1 } else { 0 }
         );
         crate::storage::write("boss_save.txt", &text);
@@ -48,6 +51,8 @@ impl BossProgression {
             false
         } else if clean == "oboro" {
             self.unlocked_oboro || self.clears > 0
+        } else if clean == "byakuren" {
+            self.story_clears > 0
         } else {
             true
         }
@@ -108,6 +113,33 @@ impl BossProgression {
             })
         };
         self.toast = toast.clone();
+        toast
+    }
+
+    pub fn on_story_clear(&mut self) -> Option<BossToast> {
+        let first = self.story_clears == 0;
+        self.story_clears += 1;
+        self.save();
+        let toast = if first {
+            Some(BossToast {
+                title: crate::i18n::tr3(
+                    "★ BYAKUREN SAKURABA DESBLOQUEADO! ★",
+                    "★ BYAKUREN SAKURABA UNLOCKED! ★",
+                    "★ ¡BYAKUREN SAKURABA DESBLOQUEADO! ★",
+                ).to_string(),
+                subtitle: crate::i18n::tr3(
+                    "Recompensa por zerar o Modo História!",
+                    "Story Mode completion reward!",
+                    "¡Recompensa por completar el Modo Historia!",
+                ).to_string(),
+                timer: 5.5,
+            })
+        } else {
+            None
+        };
+        if toast.is_some() {
+            self.toast = toast.clone();
+        }
         toast
     }
 

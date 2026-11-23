@@ -1171,3 +1171,94 @@ line_a_es = "La fuerza bruta nunca alcanza a quien lee el futuro."
 line_b_pt = "Se eu cortar tudo pela frente, sua ilusão cai junto!"
 line_b_en = "If I cut everything in front of me, your illusion falls too!"
 line_b_es = "¡Si corto todo al frente, tu ilusión cae también!"
+
+[[stage_interaction]]
+id = "byakuren_spirit_gate"
+fighter = "byakuren"
+stage_contains = ["espírit", "espirit", "spirit"]
+style = "ribbon"
+sprite = "sakura_petals"
+sfx = "easter_bankai"
+color = [1.0, 0.56, 0.78]
+title_pt = "SANTUÁRIO DAS MIL PÉTALAS!"
+title_en = "SANCTUARY OF A THOUSAND PETALS!"
+title_es = "¡SANTUARIO DE LOS MIL PÉTALOS!"
+sub_pt = "BYAKUREN RETOMA O PORTÃO DOS ESPÍRITOS"
+sub_en = "BYAKUREN RECLAIMS THE SPIRIT GATE"
+sub_es = "BYAKUREN RECLAMA EL PORTAL ESPIRITUAL"
+
+[[fighter_trigger]]
+id = "byakuren_taunt"
+fighter = "byakuren"
+trigger = "taunt"
+per_round = true
+speaker = "BYAKUREN"
+style = "speech"
+sfx = "easter_kitsune"
+color = [1.0, 0.56, 0.78]
+title_pt = "A distância entre nós é como a do céu e da terra."
+title_en = "The gap between us is like heaven and earth."
+title_es = "La distancia entre nosotros es como el cielo y la tierra."
+
+[[fighter_trigger]]
+id = "byakuren_bankai_egg"
+fighter = "byakuren"
+trigger = "transform"
+per_round = false
+style = "flyby"
+sprite = "sakura_petals"
+sfx = "easter_bankai"
+color = [1.0, 0.54, 0.78]
+title_pt = "BANKAI: MIL PÉTALAS DA SOMBRA!"
+title_en = "BANKAI: THOUSAND PETALS OF SHADOW!"
+title_es = "¡BANKAI: MIL PÉTALOS DE SOMBRA!"
+sub_pt = "DISPERSE-SE — SENBONZAKURA KAGEYOSHI"
+sub_en = "SCATTER — SENBONZAKURA KAGEYOSHI"
+sub_es = "DISPÉRSATE — SENBONZAKURA KAGEYOSHI"
+
+[[fighter_trigger]]
+id = "byakuren_first_strike"
+fighter = "byakuren"
+trigger = "first_attack"
+per_round = true
+speaker = "BYAKUREN"
+style = "speech"
+sfx = "easter_shunpo"
+color = [1.0, 0.62, 0.82]
+title_pt = "Shunpo... você sequer viu a lâmina sair da bainha."
+title_en = "Flash Step... you never even saw the blade leave its sheath."
+title_es = "Shunpo... ni siquiera viste salir la hoja."
+
+[[exchange]]
+id = "ex_byakuren_kaname"
+fighters = ["byakuren", "kaname"]
+first_id = "byakuren"
+first_speaker = "BYAKUREN"
+second_speaker = "KANAME"
+delay_ticks = 135
+sfx = "easter_bankai"
+color_a = [1.0, 0.56, 0.78]
+color_b = [0.64, 0.88, 1.0]
+line_a_pt = "Inverno contra primavera, Fuyutsuki... mostre sua disciplina."
+line_a_en = "Winter against spring, Fuyutsuki... show me your discipline."
+line_a_es = "Invierno contra primavera, Fuyutsuki... muestra tu disciplina."
+line_b_pt = "A neve eterna não se curva nem diante de mil pétalas."
+line_b_en = "Everlasting snow never bows — not even to a thousand petals."
+line_b_es = "La nieve eterna no se inclina ni ante mil pétalos."
+
+[[exchange]]
+id = "ex_byakuren_oboro"
+fighters = ["byakuren", "oboro"]
+first_id = "oboro"
+first_speaker = "OBORO"
+second_speaker = "BYAKUREN"
+delay_ticks = 135
+sfx = "easter_bankai"
+color_a = [0.94, 0.24, 0.42]
+color_b = [1.0, 0.56, 0.78]
+line_a_pt = "Então o nobre da Casa Sakuraba finalmente deixou seu santuário."
+line_a_en = "So the noble of House Sakuraba finally left his sanctuary."
+line_a_es = "Así que el noble de la Casa Sakuraba al fin dejó su santuario."
+line_b_pt = "Ilusões não enganam quem controla mil lâminas simultâneas."
+line_b_en = "Illusions cannot deceive one who commands a thousand blades."
+line_b_es = "Las ilusiones no engañan a quien domina mil hojas a la vez."

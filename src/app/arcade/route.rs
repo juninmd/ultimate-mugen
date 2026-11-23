@@ -16,6 +16,7 @@ impl App {
         };
         Context::default()
             .with_int("stats.arcade.clear", self.boss_progression.clears as i64)
+            .with_int("stats.story.clear", self.boss_progression.story_clears as i64)
             .with_text("mode", mode)
             .with_int("netplay", 0)
             .with_text("player", &self.player_char_id())

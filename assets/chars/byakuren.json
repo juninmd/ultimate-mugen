@@ -1530,65 +1530,65 @@
   "anims": {
     "powerUp": {
       "frames": [
-        "powerup0*3",
-        "powerup01*3",
-        "powerup1*6",
-        "powerup2*6"
+        "15_power0*3",
+        "15_power0*3",
+        "16_power1*6",
+        "16_power1*6"
       ],
       "loop": 0
     },
     "idle": {
       "frames": [
-        "idle0*10",
-        "idle1*8",
-        "idle2*10",
-        "idle3*8",
-        "idle2*10",
-        "idle1*8"
+        "01_idle*10",
+        "01_idle*8",
+        "01_idle*10",
+        "01_idle*8",
+        "01_idle*10",
+        "01_idle*8"
       ]
     },
     "turn": {
       "frames": [
-        "turn*3",
-        "turn*3"
+        "01_idle*3",
+        "01_idle*3"
       ]
     },
     "walk": {
       "frames": [
         "walk0*7",
         "walk1*7",
-        "walk2*7",
-        "walk3*7",
-        "walk4*7",
-        "walk5*7"
+        "walk0*7",
+        "walk1*7",
+        "walk0*7",
+        "walk1*7"
       ]
     },
     "walkBack": {
       "frames": [
-        "walk5*7",
-        "walk4*7",
-        "walk3*7",
-        "walk2*7",
+        "walk1*7",
+        "walk0*7",
+        "walk1*7",
+        "walk0*7",
         "walk1*7",
         "walk0*7"
       ]
     },
     "crouchStart": {
       "frames": [
-        "crouch0*3",
+        "crouch*3",
         "crouch*2"
       ]
     },
     "crouch": {
       "frames": [
         "crouch*14",
-        "crouch1*14"
+        "crouch*14"
       ]
     },
     "crouchEnd": {
       "frames": [
-        "crouch0*3",
-        "idle0*2"
+        "crouch*3",
+        "01_idle*2"
       ]
     },
     "crouchTurn": {
@@ -1599,357 +1599,342 @@
     },
     "jumpStart": {
       "frames": [
-        "jumpStart*2",
-        "jumpStart*2"
+        "jumpUp*2",
+        "jumpUp*2"
       ]
     },
     "jumpUp": {
       "frames": [
         "jumpUp*6",
-        "jumpTop*-1"
+        "jumpUp*-1"
       ]
     },
     "jumpFwd": {
       "frames": [
         "jumpUp*4",
-        "flip0*4",
-        "flip1*4",
-        "flip2*4",
-        "flip3*4",
-        "jumpTop*-1"
+        "jumpUp*4",
+        "jumpUp*4",
+        "jumpUp*4",
+        "jumpUp*4",
+        "jumpUp*-1"
       ]
     },
     "jumpBack": {
       "frames": [
         "jumpUp*5",
-        "jumpTop*-1"
+        "jumpUp*-1"
       ]
     },
     "jumpDown": {
       "frames": [
-        "jumpDown*-1"
+        "jumpUp*-1"
       ]
     },
     "land": {
       "frames": [
-        "land*2",
-        "jumpStart*2",
-        "idle0*1"
+        "01_idle*2",
+        "jumpUp*2",
+        "01_idle*1"
       ]
     },
     "run": {
       "frames": [
         {
           "pose": "run0",
-          "ticks": 4,
-          "sprite": "sg_run_run0_fx"
+          "ticks": 4
         },
         {
-          "pose": "run1",
-          "ticks": 3,
-          "sprite": "sg_run_run1_fx"
-        },
-        {
-          "pose": "runMid",
-          "sprite": "sg_run_mid_fx",
+          "pose": "run0",
           "ticks": 3
         },
         {
-          "pose": "run2",
-          "ticks": 3,
-          "sprite": "sg_run_run2_fx"
+          "pose": "run0",
+          "ticks": 3
         },
         {
-          "pose": "run3",
-          "ticks": 3,
-          "sprite": "sg_run_run3_fx"
+          "pose": "run0",
+          "ticks": 3
+        },
+        {
+          "pose": "run0",
+          "ticks": 3
         }
       ]
     },
     "hop": {
       "frames": [
         {
-          "pose": "hop",
-          "sprite": "sg_run_run0_bfx",
+          "pose": "run0",
           "ticks": 2
         },
         {
-          "pose": "hop",
-          "sprite": "sg_run_run1_bfx",
+          "pose": "run0",
           "ticks": 4
         },
         {
-          "pose": "hop",
-          "sprite": "sg_run_run2_bfx",
+          "pose": "run0",
           "ticks": 2
         },
         {
-          "pose": "hop",
-          "sprite": "sg_run_run1_bfx",
+          "pose": "run0",
           "ticks": -1
         }
       ]
     },
     "guardStart": {
       "frames": [
-        "guard*2"
+        "15_power0*2"
       ]
     },
     "crouchGuardStart": {
       "frames": [
-        "crouchGuard*2"
+        "crouch*2"
       ]
     },
     "airGuardStart": {
       "frames": [
-        "airGuard*2"
+        "jumpUp*2"
       ]
     },
     "guard": {
       "frames": [
-        "guard*-1"
+        "15_power0*-1"
       ]
     },
     "crouchGuard": {
       "frames": [
-        "crouchGuard*-1"
+        "crouch*-1"
       ]
     },
     "airGuard": {
       "frames": [
-        "airGuard*-1"
+        "jumpUp*-1"
       ]
     },
     "guardEnd": {
       "frames": [
-        "guard*3"
+        "15_power0*3"
       ]
     },
     "guardHit": {
       "frames": [
-        "guardHit*3",
-        "guard*-1"
+        "15_power0*3",
+        "15_power0*-1"
       ]
     },
     "crouchGuardHit": {
       "frames": [
-        "crouchGuardHit*3",
-        "crouchGuard*-1"
+        "crouch*3",
+        "crouch*-1"
       ]
     },
     "airGuardHit": {
       "frames": [
-        "airGuardHit*3",
-        "airGuard*-1"
+        "jumpUp*3",
+        "jumpUp*-1"
       ]
     },
     "hitLight": {
       "frames": [
         {
-          "pose": "hitH1",
-          "ticks": 3,
-          "sprite": "hitLightImpact"
+          "pose": "crouch",
+          "ticks": 3
         },
         {
-          "pose": "hitH1",
-          "ticks": 6,
-          "sprite": "hitLightRecoil"
+          "pose": "crouch",
+          "ticks": 6
         },
-        "idle0*3"
+        "01_idle*3"
       ]
     },
     "hitMedium": {
       "frames": [
-        "hitH2*3",
-        "hitH1*8",
-        "idle0*3"
+        "crouch*3",
+        "crouch*8",
+        "01_idle*3"
       ]
     },
     "hitHeavy": {
       "frames": [
-        "hitH3*3",
-        "hitH2*10",
-        "hitH1*4"
+        "crouch*3",
+        "crouch*10",
+        "crouch*4"
       ]
     },
     "hitLowLight": {
       "frames": [
         {
-          "pose": "hitL1",
-          "ticks": 3,
-          "sprite": "hitLowLightImpact"
+          "pose": "crouch",
+          "ticks": 3
         },
         {
-          "pose": "hitL1",
-          "ticks": 6,
-          "sprite": "hitLowLightRecoil"
+          "pose": "crouch",
+          "ticks": 6
         },
-        "idle0*3"
+        "01_idle*3"
       ]
     },
     "hitLowMedium": {
       "frames": [
-        "hitL2*3",
-        "hitL1*8",
-        "idle0*3"
+        "crouch*3",
+        "crouch*8",
+        "01_idle*3"
       ]
     },
     "hitLowHeavy": {
       "frames": [
-        "hitL3*3",
-        "hitL2*10",
-        "hitL1*4"
+        "crouch*3",
+        "crouch*10",
+        "crouch*4"
       ]
     },
     "hitCrouch": {
       "frames": [
         {
-          "pose": "hitCrouch",
-          "ticks": 3,
-          "sprite": "hitCrouchImpact"
+          "pose": "crouch",
+          "ticks": 3
         },
         {
-          "pose": "hitCrouch",
-          "ticks": 8,
-          "sprite": "hitCrouchRecoil"
+          "pose": "crouch",
+          "ticks": 8
         },
         "crouch*3"
       ]
     },
     "hitAir": {
       "frames": [
-        "hitAir1*4",
-        "hitAir2*-1"
+        "jumpUp*4",
+        "jumpUp*-1"
       ]
     },
     "fall": {
       "frames": [
-        "fall1*6",
-        "fall2*-1"
+        "jumpUp*6",
+        "jumpUp*-1"
       ]
     },
     "bounce": {
       "frames": [
-        "bounce*3",
-        "bounce*-1"
+        "jumpUp*3",
+        "jumpUp*-1"
       ]
     },
     "bounceAir": {
       "frames": [
-        "fall2*3",
-        "bounce*-1"
+        "jumpUp*3",
+        "jumpUp*-1"
       ]
     },
     "lieDown": {
       "frames": [
-        "lie*-1"
+        "crouch*-1"
       ]
     },
     "getUp": {
       "frames": [
-        "lie*6",
-        "getUp1*8",
-        "getUp2*7",
-        "getUp3*5",
-        "idle0*3"
+        "crouch*6",
+        "crouch*8",
+        "crouch*7",
+        "crouch*5",
+        "01_idle*3"
       ]
     },
     "dead": {
       "frames": [
-        "dead*-1"
+        "crouch*-1"
       ]
     },
     "trip": {
       "frames": [
-        "trip*4",
-        "fall1*-1"
+        "jumpUp*4",
+        "jumpUp*-1"
       ]
     },
     "airRecover": {
       "frames": [
-        "flip0*3",
-        "flip1*3",
-        "flip2*3",
-        "flip3*3",
-        "jumpDown*-1"
+        "jumpUp*3",
+        "jumpUp*3",
+        "jumpUp*3",
+        "jumpUp*3",
+        "jumpUp*-1"
       ]
     },
     "win": {
       "frames": [
-        "win0*14",
-        "win1*14"
+        "06_victory*14",
+        "06_victory*14"
       ]
     },
     "lose": {
       "frames": [
-        "lose*-1"
+        "crouch*-1"
       ]
     },
     "draw": {
       "frames": [
-        "intro1*-1"
+        "06_victory*-1"
       ]
     },
     "intro": {
       "frames": [
-        "intro0*40",
-        "intro1*10",
-        "idle0*10"
+        "06_victory*40",
+        "06_victory*10",
+        "01_idle*10"
       ]
     },
     "jab": {
       "frames": [
-        "jab0*3",
+        "02_attack1*3",
         {
-          "pose": "jab1",
+          "pose": "02_attack1",
           "ticks": 3,
           "hit": {
             "part": "weapon",
             "radius": 12
           }
         },
-        "jab0*5",
-        "idle0*2"
+        "02_attack1*5",
+        "02_attack1*2"
       ]
     },
     "strong": {
       "frames": [
-        "str0*6",
-        "str0*3",
+        "03_attack2*6",
+        "03_attack2*3",
         {
-          "pose": "str1",
+          "pose": "03_attack2",
           "ticks": 4,
           "hit": {
             "part": "weapon",
             "radius": 14
           }
         },
-        "str1*4",
-        "str0*7",
-        "idle0*4"
+        "03_attack2*4",
+        "03_attack2*7",
+        "03_attack2*4"
       ]
     },
     "lkick": {
       "frames": [
-        "lk0*3",
+        "02_attack1*3",
         {
-          "pose": "lk1",
+          "pose": "02_attack1",
           "ticks": 4,
           "hit": {
             "part": "footF",
             "radius": 10
           }
         },
-        "lk0*6",
-        "idle0*2"
+        "02_attack1*6",
+        "02_attack1*2"
       ]
     },
     "hkick": {
       "frames": [
-        "hk0*6",
-        "hk0*2",
+        "03_attack2*6",
+        "03_attack2*2",
         {
-          "pose": "hk1",
+          "pose": "03_attack2",
           "ticks": 4,
           "hit": {
             "part": "weapon",
@@ -1957,38 +1942,38 @@
           }
         },
         {
-          "pose": "hk2",
+          "pose": "03_attack2",
           "ticks": 4,
           "hit": {
             "part": "weapon",
             "radius": 12
           }
         },
-        "hk2*4",
-        "hk0*9",
-        "idle0*4"
+        "03_attack2*4",
+        "03_attack2*9",
+        "03_attack2*4"
       ]
     },
     "cjab": {
       "frames": [
-        "cjab0*3",
+        "02_attack1*3",
         {
-          "pose": "cjab1",
+          "pose": "02_attack1",
           "ticks": 3,
           "hit": {
             "part": "weapon",
             "radius": 10
           }
         },
-        "cjab0*6",
-        "crouch*2"
+        "02_attack1*6",
+        "02_attack1*2"
       ]
     },
     "clk": {
       "frames": [
-        "crouch*3",
+        "02_attack1*3",
         {
-          "pose": "clk",
+          "pose": "02_attack1",
           "ticks": 4,
           "hit": {
             "part": "footF",
@@ -1996,47 +1981,33 @@
           }
         },
         {
-          "pose": {
-            "elbowF": 42,
-            "blade": 128,
-            "glow": true,
-            "thighF": 80,
-            "head": -12,
-            "ankleF": 25,
-            "kneeB": 125,
-            "elbowB": 95,
-            "lean": 10,
-            "shoulderB": 43,
-            "shoulderF": 57,
-            "kneeF": 60,
-            "thighB": 38
-          },
+          "pose": "02_attack1",
           "ticks": 3
         },
-        "crouch*4"
+        "02_attack1*4"
       ]
     },
     "sweep": {
       "frames": [
-        "sweep0*7",
+        "03_attack2*7",
         {
-          "pose": "sweep1",
+          "pose": "03_attack2",
           "ticks": 5,
           "hit": {
             "part": "weapon",
             "radius": 9
           }
         },
-        "sweep1*6",
-        "sweep0*9",
-        "crouch*4"
+        "03_attack2*6",
+        "03_attack2*9",
+        "03_attack2*4"
       ]
     },
     "ajab": {
       "frames": [
-        "jumpTop*2",
+        "02_attack1*2",
         {
-          "pose": "ajab",
+          "pose": "02_attack1",
           "ticks": 6,
           "hit": {
             "part": "weapon",
@@ -2044,74 +2015,44 @@
           }
         },
         {
-          "pose": {
-            "elbowF": 54.5,
-            "blade": 104,
-            "thighF": 78,
-            "head": -6,
-            "ankleF": 30,
-            "kneeB": 118,
-            "elbowB": 110,
-            "wind": 0.4,
-            "lean": 8,
-            "shoulderB": 45,
-            "shoulderF": 70,
-            "kneeF": 120,
-            "ankleB": 35,
-            "thighB": 50
-          },
+          "pose": "02_attack1",
           "ticks": 6
         },
-        "jumpTop*-1"
+        "02_attack1*-1"
       ]
     },
     "akick": {
       "frames": [
-        "akick0*5",
+        "02_attack1*5",
         {
-          "pose": "akick",
+          "pose": "02_attack1",
           "ticks": 9,
           "hit": {
             "part": "weapon",
             "radius": 10
           }
         },
-        "akick*8",
-        "jumpTop*-1"
+        "02_attack1*8",
+        "02_attack1*-1"
       ]
     },
     "frostArc": {
       "frames": [
-        "cr0*8",
+        "05_projectile*8",
         {
-          "pose": {
-            "shoulderF": 172,
-            "elbowF": 25,
-            "shoulderB": 150,
-            "elbowB": 45,
-            "thighF": 24,
-            "kneeF": 28,
-            "thighB": -20,
-            "kneeB": 14,
-            "lean": -10,
-            "head": -6,
-            "blade": 205,
-            "phase": 2,
-            "glow": true,
-            "wind": 0.6
-          },
+          "pose": "05_projectile",
           "ticks": 4
         },
         {
-          "pose": "cr1",
+          "pose": "05_projectile",
           "ticks": 4,
           "hit": {
             "part": "weapon",
             "radius": 5
           }
         },
-        "cr2*14",
-        "idle0*5"
+        "05_projectile*14",
+        "05_projectile*5"
       ]
     },
     "frostArcFx": {
@@ -2210,9 +2151,9 @@
     },
     "hoarfrost": {
       "frames": [
-        "mr0*4",
+        "04_special*4",
         {
-          "pose": "mr1",
+          "pose": "04_special",
           "ticks": 4,
           "hit": {
             "part": "weapon",
@@ -2220,81 +2161,47 @@
           }
         },
         {
-          "pose": "mr1",
+          "pose": "04_special",
           "ticks": 4,
           "hit": {
             "part": "weapon",
             "radius": 12
           }
         },
-        "mr2*10",
-        "jumpDown*-1"
+        "04_special*10",
+        "04_special*-1"
       ]
     },
     "blinkCut": {
       "frames": [
-        "ss0*7",
+        "03_attack2*7",
         {
-          "pose": "ss1",
+          "pose": "03_attack2",
           "ticks": 4,
           "hit": {
             "part": "weapon",
             "radius": 12
           }
         },
-        "ss1*5",
-        "ss2*10",
-        "idle0*4"
+        "03_attack2*5",
+        "03_attack2*10",
+        "03_attack2*4"
       ]
     },
     "super": {
       "frames": [
-        "sp0*14",
+        "04_special*14",
         {
-          "pose": {
-            "shoulderF": 178,
-            "elbowF": 5,
-            "shoulderB": 165,
-            "elbowB": 25,
-            "thighF": 34,
-            "kneeF": 40,
-            "thighB": -26,
-            "kneeB": 18,
-            "lean": -6,
-            "head": -14,
-            "blade": 180,
-            "phase": 2,
-            "aura": true,
-            "glow": true,
-            "face": "shout",
-            "wind": 1
-          },
+          "pose": "04_special",
           "ticks": 10
         },
-        "sp1*6",
+        "04_special*6",
         {
-          "pose": {
-            "shoulderF": 60,
-            "elbowF": 0,
-            "shoulderB": 45,
-            "elbowB": 30,
-            "thighF": 50,
-            "kneeF": 50,
-            "thighB": -34,
-            "kneeB": 4,
-            "lean": 30,
-            "head": -20,
-            "blade": 45,
-            "phase": 3,
-            "aura": true,
-            "glow": true,
-            "face": "shout",
-            "wind": 1
-          },
+          "pose": "04_special",
           "ticks": 30
         },
-        "cr2*8",
-        "idle0*4"
+        "04_special*8",
+        "04_special*4"
       ]
     },
     "winterFangFx": {
@@ -2393,34 +2300,34 @@
     },
     "iai": {
       "frames": [
-        "cr0*4",
-        "cr0*4",
-        "cr1*3",
+        "03_attack2*4",
+        "03_attack2*4",
+        "03_attack2*3",
         {
-          "pose": "cr2",
+          "pose": "03_attack2",
           "ticks": 4,
           "hit": {
             "part": "weapon",
             "radius": 14
           }
         },
-        "cr2*5",
-        "idle0*5"
+        "03_attack2*5",
+        "03_attack2*5"
       ]
     },
     "trap": {
       "frames": [
-        "mr0*6",
-        "mr1*5",
-        "mr2*8",
-        "idle0*4"
+        "04_special*6",
+        "04_special*5",
+        "04_special*8",
+        "04_special*4"
       ]
     },
     "thousand": {
       "frames": [
-        "cr0*6",
+        "04_special*6",
         {
-          "pose": "cr1",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2428,7 +2335,7 @@
           }
         },
         {
-          "pose": "cr2",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2436,7 +2343,7 @@
           }
         },
         {
-          "pose": "cr1",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2444,7 +2351,7 @@
           }
         },
         {
-          "pose": "cr2",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2452,7 +2359,7 @@
           }
         },
         {
-          "pose": "cr1",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2460,7 +2367,7 @@
           }
         },
         {
-          "pose": "cr2",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2468,7 +2375,7 @@
           }
         },
         {
-          "pose": "cr1",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2476,7 +2383,7 @@
           }
         },
         {
-          "pose": "cr2",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2484,205 +2391,83 @@
           }
         },
         {
-          "pose": "cr2",
+          "pose": "04_special",
           "ticks": 6,
           "hit": {
             "part": "weapon",
             "radius": 20
           }
         },
-        "idle0*6"
+        "04_special*6"
       ]
     },
     "drawThrow": {
       "frames": [
         {
-          "pose": "cr1",
+          "pose": "02_attack1",
           "ticks": 4,
           "hit": {
             "part": "weapon",
             "radius": 22
           }
         },
-        "cr2*5",
-        "str0*6",
-        "idle0*6"
+        "02_attack1*5",
+        "02_attack1*6",
+        "02_attack1*6"
       ]
     },
     "needleBeam": {
       "frames": [
         {
-          "pose": {
-            "shoulderF": 120,
-            "elbowF": 10,
-            "shoulderB": 60,
-            "elbowB": 50,
-            "thighF": 30,
-            "kneeF": 30,
-            "thighB": -24,
-            "kneeB": 12,
-            "lean": 6,
-            "head": -4,
-            "blade": 120,
-            "phase": 1,
-            "glow": true
-          },
+          "pose": "05_projectile",
           "ticks": 8
         },
         {
-          "pose": {
-            "shoulderF": 92,
-            "elbowF": 0,
-            "shoulderB": 40,
-            "elbowB": 60,
-            "thighF": 44,
-            "kneeF": 34,
-            "thighB": -30,
-            "kneeB": 8,
-            "lean": 14,
-            "head": -10,
-            "blade": 90,
-            "phase": 2,
-            "glow": true,
-            "wind": 0.8
-          },
+          "pose": "05_projectile",
           "ticks": 4
         },
         {
-          "pose": {
-            "shoulderF": 90,
-            "elbowF": 0,
-            "shoulderB": 38,
-            "elbowB": 62,
-            "thighF": 46,
-            "kneeF": 34,
-            "thighB": -32,
-            "kneeB": 8,
-            "lean": 16,
-            "head": -10,
-            "blade": 88,
-            "phase": 2,
-            "glow": true,
-            "wind": 1
-          },
+          "pose": "05_projectile",
           "ticks": 4,
           "hit": {
             "part": "weapon",
             "radius": 5
           }
         },
-        "cr2*14",
-        "idle0*5"
+        "05_projectile*14",
+        "05_projectile*5"
       ]
     },
     "crimsonCannon": {
       "frames": [
         {
-          "pose": {
-            "shoulderF": 100,
-            "elbowF": 30,
-            "shoulderB": 100,
-            "elbowB": 30,
-            "thighF": 36,
-            "kneeF": 44,
-            "thighB": -28,
-            "kneeB": 16,
-            "lean": -4,
-            "head": -8,
-            "blade": 70,
-            "phase": 1,
-            "glow": true,
-            "aura": true
-          },
+          "pose": "05_projectile",
           "ticks": 8
         },
         {
-          "pose": {
-            "shoulderF": 80,
-            "elbowF": 0,
-            "shoulderB": 78,
-            "elbowB": 0,
-            "thighF": 40,
-            "kneeF": 50,
-            "thighB": -32,
-            "kneeB": 10,
-            "lean": 12,
-            "head": -12,
-            "blade": 60,
-            "phase": 2,
-            "glow": true,
-            "aura": true,
-            "face": "shout",
-            "wind": 1
-          },
+          "pose": "05_projectile",
           "ticks": 4
         },
         {
-          "pose": {
-            "shoulderF": 78,
-            "elbowF": 0,
-            "shoulderB": 76,
-            "elbowB": 0,
-            "thighF": 42,
-            "kneeF": 52,
-            "thighB": -34,
-            "kneeB": 10,
-            "lean": 14,
-            "head": -12,
-            "blade": 58,
-            "phase": 2,
-            "glow": true,
-            "aura": true,
-            "face": "shout",
-            "wind": 1
-          },
+          "pose": "05_projectile",
           "ticks": 4,
           "hit": {
             "part": "weapon",
             "radius": 5
           }
         },
-        "cr2*14",
-        "idle0*5"
+        "05_projectile*14",
+        "05_projectile*5"
       ]
     },
     "flashStep": {
       "frames": [
         {
-          "pose": {
-            "shoulderF": 40,
-            "elbowF": 40,
-            "shoulderB": 20,
-            "elbowB": 60,
-            "thighF": 60,
-            "kneeF": 70,
-            "thighB": -40,
-            "kneeB": 30,
-            "lean": 34,
-            "head": -10,
-            "blade": 20,
-            "phase": 1,
-            "wind": 1
-          },
+          "pose": "03_attack2",
           "ticks": 7
         },
         {
-          "pose": {
-            "shoulderF": 105,
-            "elbowF": 8,
-            "shoulderB": 70,
-            "elbowB": 40,
-            "thighF": 20,
-            "kneeF": 20,
-            "thighB": -16,
-            "kneeB": 10,
-            "lean": -4,
-            "head": -6,
-            "blade": 95,
-            "phase": 2,
-            "glow": true,
-            "wind": 1
-          },
+          "pose": "03_attack2",
           "ticks": 4,
           "hit": {
             "part": "weapon",
@@ -2690,116 +2475,53 @@
           }
         },
         {
-          "pose": {
-            "shoulderF": 100,
-            "elbowF": 10,
-            "shoulderB": 66,
-            "elbowB": 42,
-            "thighF": 22,
-            "kneeF": 22,
-            "thighB": -18,
-            "kneeB": 10,
-            "lean": -4,
-            "head": -6,
-            "blade": 92,
-            "phase": 2,
-            "glow": true
-          },
+          "pose": "03_attack2",
           "ticks": 5
         },
-        "ss2*10",
-        "idle0*4"
+        "03_attack2*10",
+        "03_attack2*4"
       ]
     },
     "petalStorm": {
       "frames": [
-        "sp0*14",
+        "04_special*14",
         {
-          "pose": {
-            "shoulderF": 175,
-            "elbowF": 10,
-            "shoulderB": 150,
-            "elbowB": 20,
-            "thighF": 30,
-            "kneeF": 30,
-            "thighB": -24,
-            "kneeB": 12,
-            "lean": -10,
-            "head": -14,
-            "blade": 230,
-            "phase": 2,
-            "aura": true,
-            "glow": true,
-            "face": "shout",
-            "wind": 1
-          },
+          "pose": "04_special",
           "ticks": 10
         },
-        "sp1*6",
+        "04_special*6",
         {
-          "pose": {
-            "shoulderF": 120,
-            "elbowF": 0,
-            "shoulderB": 120,
-            "elbowB": 0,
-            "thighF": 40,
-            "kneeF": 40,
-            "thighB": -30,
-            "kneeB": 10,
-            "lean": 18,
-            "head": -16,
-            "blade": 140,
-            "phase": 3,
-            "aura": true,
-            "glow": true,
-            "face": "shout",
-            "wind": 1
-          },
+          "pose": "04_special",
           "ticks": 30
         },
-        "cr2*8",
-        "idle0*4"
+        "04_special*8",
+        "04_special*4"
       ]
     },
     "frostArcEx": {
       "frames": [
-        "cr0*6",
+        "05_projectile*6",
         {
-          "pose": {
-            "shoulderF": 172,
-            "elbowF": 25,
-            "shoulderB": 150,
-            "elbowB": 45,
-            "thighF": 24,
-            "kneeF": 28,
-            "thighB": -20,
-            "kneeB": 14,
-            "lean": -10,
-            "head": -6,
-            "blade": 205,
-            "phase": 2,
-            "glow": true,
-            "wind": 0.6
-          },
+          "pose": "05_projectile",
           "ticks": 3
         },
         {
-          "pose": "cr1",
+          "pose": "05_projectile",
           "ticks": 4,
           "hit": {
             "part": "weapon",
             "radius": 5
           }
         },
-        "cr2*11",
-        "idle0*4"
+        "05_projectile*11",
+        "05_projectile*4"
       ]
     },
     "hoarfrostEx": {
       "frames": [
-        "mr0*3",
+        "04_special*3",
         {
-          "pose": "mr1",
+          "pose": "04_special",
           "ticks": 4,
           "hit": {
             "part": "weapon",
@@ -2807,22 +2529,22 @@
           }
         },
         {
-          "pose": "mr1",
+          "pose": "04_special",
           "ticks": 4,
           "hit": {
             "part": "weapon",
             "radius": 12
           }
         },
-        "mr2*8",
-        "jumpDown*1"
+        "04_special*8",
+        "04_special*1"
       ]
     },
     "thousandUlt": {
       "frames": [
-        "cr0*6",
+        "04_special*6",
         {
-          "pose": "cr1",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2830,7 +2552,7 @@
           }
         },
         {
-          "pose": "cr2",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2838,7 +2560,7 @@
           }
         },
         {
-          "pose": "cr1",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2846,7 +2568,7 @@
           }
         },
         {
-          "pose": "cr2",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2854,7 +2576,7 @@
           }
         },
         {
-          "pose": "cr1",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2862,7 +2584,7 @@
           }
         },
         {
-          "pose": "cr2",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2870,7 +2592,7 @@
           }
         },
         {
-          "pose": "cr1",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2878,7 +2600,7 @@
           }
         },
         {
-          "pose": "cr2",
+          "pose": "04_special",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2886,82 +2608,82 @@
           }
         },
         {
-          "pose": "cr2",
+          "pose": "04_special",
           "ticks": 6,
           "hit": {
             "part": "weapon",
             "radius": 20
           }
         },
-        "idle0*6"
+        "04_special*6"
       ]
     },
     "stringA": {
       "frames": [
-        "str0*4",
-        "str0*2",
+        "02_attack1*4",
+        "02_attack1*2",
         {
-          "pose": "str1",
+          "pose": "02_attack1",
           "ticks": 3,
           "hit": {
             "part": "weapon",
             "radius": 14
           }
         },
-        "jab0*2",
+        "02_attack1*2",
         {
-          "pose": "jab1",
+          "pose": "02_attack1",
           "ticks": 2,
           "hit": {
             "part": "weapon",
             "radius": 12
           }
         },
-        "jab0*4",
-        "idle0*2"
+        "02_attack1*4",
+        "02_attack1*2"
       ]
     },
     "stringB": {
       "frames": [
-        "jab0*2",
+        "03_attack2*2",
         {
-          "pose": "jab1",
+          "pose": "03_attack2",
           "ticks": 2,
           "hit": {
             "part": "weapon",
             "radius": 12
           }
         },
-        "lk0*2",
+        "03_attack2*2",
         {
-          "pose": "lk1",
+          "pose": "03_attack2",
           "ticks": 3,
           "hit": {
             "part": "footF",
             "radius": 10
           }
         },
-        "str0*4",
-        "str0*2",
+        "03_attack2*4",
+        "03_attack2*2",
         {
-          "pose": "str1",
+          "pose": "03_attack2",
           "ticks": 3,
           "hit": {
             "part": "weapon",
             "radius": 14
           }
         },
-        "str1*3",
-        "str0*6",
-        "idle0*3"
+        "03_attack2*3",
+        "03_attack2*6",
+        "03_attack2*3"
       ]
     },
     "stringC": {
       "frames": [
-        "hk0*5",
-        "hk0*2",
+        "03_attack2*5",
+        "03_attack2*2",
         {
-          "pose": "hk1",
+          "pose": "03_attack2",
           "ticks": 3,
           "hit": {
             "part": "weapon",
@@ -2969,125 +2691,125 @@
           }
         },
         {
-          "pose": "hk2",
+          "pose": "03_attack2",
           "ticks": 4,
           "hit": {
             "part": "weapon",
             "radius": 12
           }
         },
-        "hk2*4",
-        "hk0*9",
-        "idle0*4"
+        "03_attack2*4",
+        "03_attack2*9",
+        "03_attack2*4"
       ]
     },
     "chain_jab2": {
       "frames": [
-        "jab0*1",
+        "02_attack1*1",
         {
-          "pose": "jab1",
+          "pose": "02_attack1",
           "ticks": 2,
           "hit": {
             "part": "weapon",
             "radius": 12
           }
         },
-        "jab1*2",
-        "jab0*1",
-        "idle0*1"
+        "02_attack1*2",
+        "02_attack1*1",
+        "02_attack1*1"
       ]
     },
     "chain_jab3": {
       "frames": [
-        "str0*2",
+        "02_attack1*2",
         {
-          "pose": "str1",
+          "pose": "02_attack1",
           "ticks": 3,
           "hit": {
             "part": "weapon",
             "radius": 14
           }
         },
-        "str1*2",
-        "str0*3",
-        "idle0*2"
+        "02_attack1*2",
+        "02_attack1*3",
+        "02_attack1*2"
       ]
     },
     "chain_lkick2": {
       "frames": [
-        "lk0*1",
+        "02_attack1*1",
         {
-          "pose": "lowKick",
+          "pose": "02_attack1",
           "ticks": 2,
           "hit": {
             "part": "footF",
             "radius": 10
           }
         },
-        "lk1*2",
-        "lk0*2",
-        "idle0*1"
+        "02_attack1*2",
+        "02_attack1*2",
+        "02_attack1*1"
       ]
     },
     "chain_lkick3": {
       "frames": [
-        "hk0*2",
+        "02_attack1*2",
         {
-          "pose": "hk1",
+          "pose": "02_attack1",
           "ticks": 3,
           "hit": {
             "part": "weapon",
             "radius": 12
           }
         },
-        "hk1*2",
-        "hk0*3",
-        "idle0*2"
+        "02_attack1*2",
+        "02_attack1*3",
+        "02_attack1*2"
       ]
     },
     "chain_strong2": {
       "frames": [
-        "jab1*2",
+        "02_attack1*2",
         {
-          "pose": "str1",
+          "pose": "02_attack1",
           "ticks": 3,
           "hit": {
             "part": "weapon",
             "radius": 14
           }
         },
-        "str0*3",
-        "idle0*2"
+        "02_attack1*3",
+        "02_attack1*2"
       ]
     },
     "chain_cjab2": {
       "frames": [
-        "cjab0*1",
+        "02_attack1*1",
         {
-          "pose": "cjab1",
+          "pose": "02_attack1",
           "ticks": 2,
           "hit": {
             "part": "weapon",
             "radius": 10
           }
         },
-        "cjab0*2",
-        "crouch*1"
+        "02_attack1*2",
+        "02_attack1*1"
       ]
     },
     "chain_ajab2": {
       "frames": [
-        "jumpTop*1",
+        "02_attack1*1",
         {
-          "pose": "ajab",
+          "pose": "02_attack1",
           "ticks": 3,
           "hit": {
             "part": "weapon",
             "radius": 12
           }
         },
-        "akick*3",
-        "jumpTop*-1"
+        "02_attack1*3",
+        "02_attack1*-1"
       ]
     }
   },

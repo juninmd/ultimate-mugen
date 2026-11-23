@@ -107,3 +107,49 @@ fn explod_parameters_are_recognised_by_the_audit() {
     let d = audit_cns("x.cns", cns);
     assert!(d.is_clean(), "{}", d.detail());
 }
+
+fn skip_match(d: Arc<CharDef>) -> Match {
+    let mut m = Match::new(common_def(), None, flat_stage());
+    m.add_player(d.clone(), 0, 0, 1);
+    m.add_player(d, 1, 0, 2);
+    m.intro_ticks = 170;
+    m.start_round();
+    m
+}
+
+fn ticks_to_fight(m: &mut Match, press: u32, from: usize) -> usize {
+    for t in 0..1200 {
+        m.tick(&[if t >= from { press } else { 0 }, 0]);
+        if m.round_state == 2 { return t; }
+    }
+    usize::MAX
+}
+
+#[test]
+fn a_button_press_skips_a_custom_intro_that_asserts_the_intro_flag() {
+    let mut m = skip_match(fighter(OWN_INTRO));
+    let fight_at = ticks_to_fight(&mut m, ume_engine::input::k::A, 100);
+    assert!(fight_at < 160, "FIGHT started at {fight_at}");
+    assert!(m.explods.is_empty(), "the intro bubble is gone");
+    for f in &m.fighters {
+        assert!(f.ctrl && f.state_no == 0, "state {} ctrl {}", f.state_no, f.ctrl);
+        assert!(Arc::ptr_eq(&f.st_def, &f.def));
+    }
+}
+
+#[test]
+fn start_also_skips_and_a_direction_does_not() {
+    let mut m = skip_match(fighter(OWN_INTRO));
+    assert!(ticks_to_fight(&mut m, ume_engine::input::k::R, 100) > 300);
+    let mut m = skip_match(fighter(OWN_INTRO));
+    assert!(ticks_to_fight(&mut m, ume_engine::input::k::S, 100) < 160);
+}
+
+#[test]
+fn a_skipped_intro_does_not_leak_into_the_next_round() {
+    let mut m = skip_match(fighter(OWN_INTRO));
+    ticks_to_fight(&mut m, ume_engine::input::k::A, 20);
+    assert!(m.intro_skipped);
+    m.start_round();
+    assert!(!m.intro_skipped);
+}

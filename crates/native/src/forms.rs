@@ -5,12 +5,12 @@ use ume_engine::chardef::FormInfo;
 use serde_json::Value;
 use std::sync::Arc;
 
-pub(super) fn build_forms(nc: &NativeChar, pal_no: i32, with_images: bool) -> Vec<FormInfo> {
+pub(super) fn build_forms(nc: &NativeChar, pal_no: i32, with_images: bool, only: Option<&[i32]>) -> Vec<FormInfo> {
     let mut forms = vec![];
     if let Some(spec) = &nc.abilities {
         for f in &spec.forms {
             let target = f.character.as_deref().and_then(find_native).map(|target_nc| {
-                Arc::new(super::compile::compile_native_with(&target_nc, pal_no, with_images, None))
+                Arc::new(super::compile::compile_native_with(&target_nc, pal_no, with_images, only))
             });
             forms.push(FormInfo {
                 name: f.name.clone(),

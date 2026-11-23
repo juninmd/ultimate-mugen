@@ -22,3 +22,22 @@ pub fn menu_sprite_files(nc: &NativeChar) -> Vec<String> {
         compile_native_preview(nc, 1);
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::Arc;
+
+    #[test]
+    fn the_menu_preview_does_not_compile_the_form_target_in_full() {
+        let suzume = crate::parse_char(include_str!("../../../assets/chars/suzume.json")).unwrap();
+        let oboro = crate::parse_char(include_str!("../../../assets/chars/oboro.json")).unwrap();
+        crate::register_native(Arc::new(oboro));
+        let preview = compile_native_preview(&suzume, 1);
+        let target = preview.forms.iter().find_map(|form| form.target.as_ref()).expect("suzume transforms into oboro");
+        let full = compile_native_with(&suzume, 1, false, None);
+        let full_target = full.forms.iter().find_map(|form| form.target.as_ref()).unwrap();
+        assert!(target.anims.keys().all(|no| MENU_ANIMS.contains(no)), "only the menu animations");
+        assert!(full_target.anims.len() > target.anims.len());
+    }
+}

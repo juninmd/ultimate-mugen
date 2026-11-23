@@ -15,6 +15,10 @@ pub(crate) fn decode_illustration(bytes: &[u8]) -> Result<Arc<ImageData>, String
 }
 
 pub fn illustration_preview(id: &str) -> Option<Arc<ImageData>> {
+    #[cfg(feature = "model3d")]
+    if id == super::airport::ID {
+        return Some(super::airport::preview());
+    }
     if let Some(image) = wonders::illustration_preview(id) {
         return Some(image);
     }

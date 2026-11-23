@@ -112,6 +112,7 @@ impl Match {
         }
         self.strike_breakables();
         self.slam_breakables();
+        self.step_fuses();
         self.block_on_solid_breakables();
         self.step_pickups();
         self.step_zones();

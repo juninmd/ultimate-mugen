@@ -81,3 +81,5 @@ A linha **Cena** do editor de epílogos troca o cenário de fundo (qualquer fase
 O Editor da História também edita o **nome** de cada fase (por idioma) e o **chefe** (Esq/Dir percorre os lutadores instalados); o chefe final do epílogo acompanha o chefe da última fase. A linha **Inimigos por onda** (Esq/Dir) muda de 1 a 4 inimigos em todas as ondas da fase.
 
 Na introdução do chefe final, escolha **Poupar** ou **Derrubar** com Esq/Dir ou tocando na opção. A escolha define o epílogo correspondente.
+
+Depois, toque nas laterais do seletor de ajudante para percorrer os aliados e toque no nome selecionado para chamá-lo à luta final.

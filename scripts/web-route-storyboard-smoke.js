@@ -11,7 +11,7 @@ const server = staticServer(dist, types);
 (async () => {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
-  const context = await browser.newContext({ viewport: { width: 1280, height: 720 }, recordVideo: output ? { dir: output, size: { width: 1280, height: 720 } } : undefined });
+  const context = await browser.newContext({ viewport: { width: 1280, height: 720 }, hasTouch: true, recordVideo: output ? { dir: output, size: { width: 1280, height: 720 } } : undefined });
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -35,8 +35,14 @@ const server = staticServer(dist, types);
     fs.mkdirSync(output, { recursive: true });
     await page.screenshot({ path: path.join(output, 'arcade-route-storyboard.png') });
   }
+  await page.touchscreen.tap(640, 360);
+  await page.waitForFunction(() => {
+    const state = JSON.parse(window.__ume_state || 'null');
+    return state?.arcade?.storyboard === true && state.arcade.scene === 1;
+  }, null, { timeout: 5000 });
+  if (output) await page.screenshot({ path: path.join(output, 'arcade-route-storyboard-touch-advanced.png') });
   await page.locator('#glcanvas').focus();
-  for (let scene = 1; scene < 5; scene += 1) {
+  for (let scene = 2; scene < 5; scene += 1) {
     await page.keyboard.down('Enter');
     await page.waitForTimeout(120);
     await page.keyboard.up('Enter');
@@ -47,9 +53,7 @@ const server = staticServer(dist, types);
   }
   await page.waitForTimeout(500);
   if (output) await page.screenshot({ path: path.join(output, 'arcade-route-storyboard-scene-4.png') });
-  await page.keyboard.down('Escape');
-  await page.waitForTimeout(120);
-  await page.keyboard.up('Escape');
+  await page.touchscreen.tap(1060, 20);
   await page.waitForFunction(() => {
     const state = JSON.parse(window.__ume_state || 'null');
     return state?.screen === 'vs' && state.arcade?.stage === 'native:brazil' && state.arcade.fight === 1;
@@ -65,7 +69,7 @@ const server = staticServer(dist, types);
   await browser.close();
   server.close();
   if (errors.length) throw new Error(errors.join('\n'));
-  console.log(`WEB ROUTE STORYBOARD OK scenes=0..4 advanced=4 skipped=1 fight=${state.arcade.fight} stage=${state.arcade.stage}`);
+  console.log(`WEB ROUTE STORYBOARD OK scenes=0..4 tap_advanced=1 skipped_by_tap=1 fight=${state.arcade.fight} stage=${state.arcade.stage}`);
 })().catch(error => {
   console.error('WEB ROUTE STORYBOARD FAILED', error);
   server.close();

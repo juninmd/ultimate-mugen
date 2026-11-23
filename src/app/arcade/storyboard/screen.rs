@@ -27,12 +27,12 @@ pub(super) fn tick(app: &mut App) {
     draw(app, &playback, page, t);
     let dt = get_frame_time();
     let max_time = scene.end_time.max(1) as f32 / 60.0;
-    let skip = app.c.pressed(nav::BACK | nav::START);
+    let skip = app.skip_chip() || app.c.pressed(nav::BACK | nav::START);
     if skip {
         app.route_storyboard_done();
         return;
     }
-    if app.c.pressed(nav::OK) || t + dt >= max_time {
+    if app.c.pressed(nav::OK) || app.tap_any() || t + dt >= max_time {
         page += 1;
         t = 0.0;
     } else {

@@ -1212,7 +1212,7 @@ impl Match {
             let point_mul = attack_mul / self.fighters[d].effective_defence().max(0.01);
             crate::ikemen::life::apply_hit_points(self, d, hd, true, point_mul);
             crate::ikemen::life::enter_stun_states(self, d, true);
-            self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power);
+            self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power); guard::apply_perfect_guard_reward(self, d);
             self.spawn_spark(a, hd.guard_spark_no, hd.guard_spark_own, at.0, at.1, true, false, hd.spark_scale);
             if let Some(s) = hd.guard_sound { self.sound(a, s.0, s.1, s.2, Some("guard")); }
             if cornered && self.fighters[a].def.rules().hitdef_corner_push && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { corner_pushed = if d_air { hd.air_guard_corner_push } else { hd.guard_corner_push }; self.fighters[a].vel.x = corner_pushed; }

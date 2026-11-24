@@ -94,6 +94,9 @@ impl Vfx {
                 self.cracks(f.pos.x, feet, 1.0, 64.0);
                 self.cracks(f.pos.x, feet, -1.0, 64.0);
             }
+            if super::final_form::is_final(f) {
+                self.final_burst(f, col);
+            }
             let nm = f.active_form_name().to_uppercase();
             self.tag(
                 x,

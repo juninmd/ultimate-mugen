@@ -86,6 +86,13 @@ impl SheetFx {
         self.spawn(SheetKind::AwakenBurst, x, feet, 120.0, 0.0);
     }
 
+    pub(super) fn final_form(&mut self, x: f32, chest_x: f32, chest_y: f32, feet: f32) {
+        self.spawn(SheetKind::LightningStrike, x - 70.0, feet, 150.0, 0.0);
+        self.spawn(SheetKind::LightningStrike, x + 70.0, feet, 150.0, 0.0);
+        self.spawn(SheetKind::StaticBurst, chest_x, chest_y, 190.0, 0.0);
+        self.spawn(SheetKind::FirePillar, x, feet, 170.0, 0.0);
+    }
+
     pub(super) fn knockout(&mut self, x: f32, feet: f32) {
         self.spawn(SheetKind::SmokeBomb, x, feet, 120.0, 0.0);
     }

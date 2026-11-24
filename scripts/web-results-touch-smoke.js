@@ -19,9 +19,11 @@ const server = staticServer(dist, types);
   await page.locator('#boot').waitFor({ state: 'detached', timeout: 45000 }).catch(() => {});
   await page.waitForTimeout(12000);
   await page.locator('#glcanvas').focus();
+  const frames = n => page.evaluate(n => new Promise(done => { const step = i => (i ? requestAnimationFrame(() => step(i - 1)) : done()); step(n); }), n);
   await page.keyboard.down('Enter');
-  await page.waitForTimeout(100);
+  await frames(2);
   await page.keyboard.up('Enter');
+  await frames(5);
   await page.waitForFunction(() => JSON.parse(window.__ume_state || 'null')?.screen === 'results', null, { timeout: 45000 }).catch(async error => {
     const state = await page.evaluate(() => window.__ume_state || 'unpublished');
     throw new Error(`Results screen did not open: ${state}; ${error.message}`);

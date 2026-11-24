@@ -448,8 +448,11 @@ impl Hud {
             }
             let strip_y = 30.5;
             let mut col_idx = [0usize; 2];
+            let paused = self.paused;
             let strip_n = |side: usize| -> usize {
-                if let Some(t) = team.filter(|t| !t.simul) {
+                if paused {
+                    0
+                } else if let Some(t) = team.filter(|t| !t.simul) {
                     t.names[side].len()
                 } else {
                     partners.iter().filter(|f| f.side.min(1) == side).count()
@@ -655,7 +658,7 @@ impl Hud {
                     side_color(1),
                     Align::Center,
                 );
-                if human.len() == 1 && m.roots().filter(|f| f.side == 0 && f.alive).count() > 1 {
+                if !paused && human.len() == 1 && m.roots().filter(|f| f.side == 0 && f.alive).count() > 1 {
                     text(
                         crate::i18n::tr3("TAB · TROCAR DE LUTADOR", "TAB · SWITCH FIGHTER", "TAB · CAMBIAR DE LUCHADOR"),
                         w / 2.0,

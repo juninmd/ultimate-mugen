@@ -37,9 +37,10 @@ const checks = [];
   const touch = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map(([x, y, id]) => ({ x, y, id, radiusX: 6, radiusY: 6, force: 1 })) });
   const center = async sel => { const b = await page.locator(sel).first().boundingBox(); return [b.x + b.width / 2, b.y + b.height / 2, b.width / 2]; };
   const btn = label => `#vp-right .vp-hit:text-is("${label}")`;
-  const tapSel = async (sel, hold = 90) => { const [x, y] = await center(sel); await touch('touchStart', [[x, y, 1]]); await wait(hold); await touch('touchEnd', []); await wait(250); };
+  const frames = n => page.evaluate(n => new Promise(done => { const step = i => (i ? requestAnimationFrame(() => step(i - 1)) : done()); step(n); }), n);
+  const tapSel = async (sel) => { const [x, y] = await center(sel); await touch('touchStart', [[x, y, 1]]); await frames(2); await touch('touchEnd', []); await frames(2); };
   const stickAt = async (dx, dy) => { const [x, y, r] = await center('#vp-base'); return [x + dx * r, y + dy * r]; };
-  const flick = async (dx, dy) => { const [x, y] = await stickAt(dx, dy); await touch('touchStart', [[x, y, 1]]); await wait(90); await touch('touchEnd', []); await wait(250); };
+  const flick = async (dx, dy) => { const [x, y] = await stickAt(dx, dy); await touch('touchStart', [[x, y, 1]]); await frames(2); await touch('touchEnd', []); await frames(2); };
 
   const padVisible = async screen => {
     const r = await page.evaluate(() => {
@@ -71,10 +72,13 @@ const checks = [];
   await padVisible('menu');
   const c0 = (await state()).menu_cur;
   await flick(0, 0.9);
+  await until('menu cursor down', async () => (await state()).menu_cur === (c0 + 1) % 13, 5000).catch(() => {});
   const c1 = (await state()).menu_cur;
   ok('stick down moves the menu cursor', c1 === (c0 + 1) % 13, `${c0} -> ${c1}`);
   await flick(0, -0.9);
-  ok('stick up moves the menu cursor back', (await state()).menu_cur === c0);
+  await until('menu cursor back', async () => (await state()).menu_cur === c0, 5000).catch(() => {});
+  const back = (await state()).menu_cur;
+  ok('stick up moves the menu cursor back', back === c0, `${c1} -> ${back}`);
   for (let i = 0; i < 16 && (await state()).menu_cur !== TRAINING; i++) await flick(0, (await state()).menu_cur < TRAINING ? 0.9 : -0.9);
   ok('menu reaches training by touch', (await state()).menu_cur === TRAINING);
   await tapSel(btn('OK'));

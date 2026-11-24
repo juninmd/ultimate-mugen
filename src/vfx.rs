@@ -8,6 +8,7 @@ use crate::ui::Ui;
 use ume_engine::matchs::{Event, Match};
 
 mod awaken;
+mod final_form;
 mod elixir;
 mod crack;
 mod dash;
@@ -1005,13 +1006,18 @@ impl Vfx {
                     },
                 );
             }
+            if final_form::is_final(f) {
+                self.draw_final_aura(&tp, s, f, col, hgt);
+            }
+            let big = if final_form::is_final(f) { 1.45 } else { 1.0 };
             for layer in 0..2 {
                 let n = 9;
                 for i in 0..n {
                     let u = i as f32 / (n - 1) as f32;
                     let ph = t * (5.0 + i as f32 * 0.7) + i as f32 * 1.9;
-                    let x0 = f.pos.x + (u - 0.5) * 34.0 * if layer == 0 { 1.0 } else { 0.55 };
+                    let x0 = f.pos.x + (u - 0.5) * 34.0 * big * if layer == 0 { 1.0 } else { 0.55 };
                     let h = hgt
+                        * big
                         * (0.55 + 0.45 * (ph).sin().abs())
                         * (1.0 - (u - 0.5).abs() * 0.9)
                         * if layer == 0 { 1.0 } else { 0.62 };

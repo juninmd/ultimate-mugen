@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 #[cfg(target_arch = "wasm32")]
 #[path = "screen_art_fetch.rs"]
-mod fetch;
+pub(crate) mod fetch;
 
 use crate::gfx::*;
 use crate::ui::{Ui, VH, VW};
@@ -161,13 +161,13 @@ impl ScreenArt {
             Self::Cutscene => "arcade-cutscene.png",
             Self::Menu | Self::Loading => return None,
         };
-        fetch::get(file, decode)
+        fetch::get("assets/ui/", file, decode)
     }
 
     #[cfg(target_arch = "wasm32")]
     fn warm(self) {
         if matches!(self, Self::Menu) {
-            fetch::warm(&DEFERRED, decode);
+            fetch::warm("assets/ui/", &DEFERRED, decode);
         }
     }
 

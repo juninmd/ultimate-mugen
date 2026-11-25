@@ -1,0 +1,4 @@
+before: ultimate-mugen_bg.wasm 22948854 B (gzip -9 13323453 B)
+after:  ultimate-mugen_bg.wasm 21108534 B (gzip -9 11628412 B)
+saved: 1840320 B raw, 1695041 B gzip (-12.7%)
+smoke: web-smoke OK; web-arena-swarm-smoke OK (3 vs 100)

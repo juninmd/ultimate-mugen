@@ -1,207 +1,47 @@
-<p align="center">
-  <img src="docs/assets/banner-pixel-art-pt-BR.png" alt="Ultimate MUGEN" width="100%">
-</p>
+# Ultimate MUGEN
 
-<p align="center">
-  <a href="https://juninmd.github.io/ultimate-mugen/"><img src="https://img.shields.io/badge/jogue-no%20navegador-ff3d6e?style=for-the-badge&logo=webassembly&logoColor=white" alt="Jogue no navegador"></a>
-  <a href="https://github.com/juninmd/ultimate-mugen/releases/latest"><img src="https://img.shields.io/github/v/release/juninmd/ultimate-mugen?style=for-the-badge&color=b14dff&label=download" alt="Última versão"></a>
-</p>
+Motor de jogos de luta 2D de código aberto, escrito em Rust. Jogue com o elenco original em pixel art, importe lutadores e cenários do M.U.G.E.N ou crie seus próprios personagens no formato UMF.
 
-<p align="center">
-  <a href="https://github.com/juninmd/ultimate-mugen/actions/workflows/ci.yml"><img src="https://github.com/juninmd/ultimate-mugen/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-ffb23d" alt="Licença MIT"></a>
-  <img src="https://img.shields.io/badge/rust-stable-dea584?logo=rust" alt="Rust">
-  <img src="https://img.shields.io/badge/GPU-wgpu-5865f2" alt="wgpu">
-  <img src="https://img.shields.io/badge/plataformas-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Web%20%7C%20Android%20%7C%20iOS-2ea44f" alt="Plataformas">
-</p>
+**[Jogar no navegador](https://juninmd.github.io/ultimate-mugen/)** · **[Baixar para desktop](https://github.com/juninmd/ultimate-mugen/releases/latest)** · [Wiki](https://juninmd.github.io/ultimate-mugen/wiki/) · [English](README.md)
 
-<p align="center">
-  <a href="README.md">English</a> · <b>Português (BR)</b>
-</p>
+![A aura da forma final de Bruno ilumina o dojo enquanto Kaito bloqueia um golpe](docs/assets/readme/gameplay.webp)
 
-<p align="center">
-  <b>Um motor moderno de luta 2D escrito do zero em Rust.</b><br>
-  Roda personagens e cenários clássicos do M.U.G.E.N, tem seu próprio formato declarativo de lutadores<br>
-  e coloca desempenho e determinismo em primeiro lugar, no desktop, no celular e na web.
-</p>
+## Como jogar
 
----
+- **Navegador.** Abra a versão web e escolha um modo no menu principal. Para adicionar um personagem, arraste o arquivo `.zip` para a janela ou use **Importar M.U.G.E.N**.
+- **Desktop.** Baixe a versão para Windows, Linux ou macOS. Você pode adicionar personagens em `mugen/chars/` e cenários em `mugen/stages/`, ou apontar `UME_MUGEN_DIR` para uma instalação existente. [Guia de instalação](docs/wiki/pt-BR/Instalacao.md)
+- **Controles.** Jogue com teclado, controle ou toque. No teclado, o jogador 1 usa as setas para se mover, `Q` e `W` para socos e `A` e `S` para chutes. [Tabela de controles](#controles)
 
-## Por que o Ultimate MUGEN existe
+## Capturas do jogo
 
-Um lutador criado há anos ainda pode ter lugar em um elenco novo. O Ultimate MUGEN é um motor de luta 2D de código aberto, escrito em Rust para dar continuidade ao trabalho da comunidade e facilitar a criação de lutadores originais. O M.U.G.E.N da Elecbyte e o Ikemen GO inspiraram o projeto.
+As capturas foram feitas no próprio jogo, nas versões para desktop e navegador.
 
-A engine carrega personagens e cenários clássicos do M.U.G.E.N, e o elenco de pixel art do jogo mostra o que dá para criar com o UMF. Os dois tipos de lutador usam a mesma simulação de combate. Dá para colocar um personagem da comunidade e um lutador nativo na mesma partida.
+| Seleção de lutadores | Seleção de arenas |
+| --- | --- |
+| ![Elenco de lutadores com retrato e ficha do personagem selecionado](docs/assets/readme/fighter-select.webp) | ![Seleção de arenas com prévia do cenário](docs/assets/readme/arena-select.webp) |
 
-### O que muda na nova engine
+![Luta do modo História com o cenário e o HUD da fase](docs/assets/readme/story-mode.webp)
 
-| Decisão de projeto | O que muda na prática |
-|---|---|
-| **Simulação de combate fixa a 60 Hz** | Golpes, colisões e comandos avançam em ticks independentes da renderização. Com a mesma configuração de partida e as mesmas entradas, a engine pode reproduzir uma luta ou recalcular os últimos ticks durante o rollback. |
-| **Renderizador feito para sprites indexados** | Sprites clássicos podem usar um byte por pixel para guardar o índice da cor. A GPU consulta a paleta na hora de desenhar, então trocar de paleta pode reaproveitar os mesmos pixels do sprite. |
-| **Carregamento que respeita o tempo de cada quadro** | No desktop, threads de trabalho cuidam da decodificação fora da thread principal. No navegador, a importação de ZIP divide o trabalho entre quadros para manter o progresso visível e permitir o cancelamento. |
-| **Dois caminhos para criar lutadores** | O carregador clássico lê os arquivos do M.U.G.E.N. O compilador UMF transforma a definição declarativa do lutador em comandos, animações e estados para o mesmo motor de combate. |
+## Modos de jogo e criação
 
-[Arquitetura da engine](docs/wiki/pt-BR/Engine.md) · [Decisões de compatibilidade](docs/wiki/pt-BR/Decisoes-de-Compatibilidade.md) · [Replays e jogo em rede](docs/wiki/pt-BR/Replays-Rede.md)
+- **Partidas e treino.** Arcade, Versus CPU, 2 Jogadores, Treino, CPU vs CPU, Sobrevivência, Torre, Arena do Poder e equipes em Sequência, Paralelo e Tag. O jogo também inclui rollback online, replays, Desafios de Combo e Modo Foto. [Modos de jogo](docs/wiki/pt-BR/Modos-de-Jogo.md) · [Rede e replays](docs/wiki/pt-BR/Replays-Rede.md)
+- **História.** Avance por cinco fases com rolagem lateral, ondas de inimigos, chefes, objetos quebráveis e rodadas bônus. Cada lutador nativo tem seu próprio epílogo. [Modo História](docs/wiki/Story-Mode.md)
+- **Conteúdo da comunidade.** Importe lutadores e cenários M.U.G.E.N e use o Mercado GitHub para instalar personagens, cenários e músicas de repositórios públicos. [Importação](docs/wiki/MUGEN-Content.md) · [Mercado GitHub](docs/wiki/pt-BR/Mercado.md)
+- **Criação de lutadores.** O UMF define golpes, animações, passivas e transformações em JSON e usa sprites PNG. O conversor `mugen2umf` oferece CLI, servidor MCP e verificações de paridade com o personagem de origem. [Guia UMF](docs/wiki/pt-BR/Personagem-UMF.md)
 
-### UMF, o formato nativo de lutadores
+## Compilar do código-fonte
 
-O UMF (*Ultimate Mugen Format*) reúne atributos, tempos de animação e regras de combate em uma definição JSON. Os sprites em pixel art podem ficar em arquivos PNG separados. A definição diz qual comando aciona um golpe, qual animação ele usa, quando acerta e quais golpes podem vir em seguida.
-
-Por exemplo, o **Snap Jab** de Kaito usa o comando `x` e a animação `jab`. O acerto fica ativo no segundo quadro da animação e causa 28 pontos de dano base. O golpe declara por ID continuações como **Reverse Punch** e **Gale Fist**. O mesmo formato pode descrever custos de energia, projéteis, armadura, habilidades passivas e transformações.
-
-O UMF 2 também permite herdar definições com `extends` e reaproveitar golpes individuais com `use`. Um kit compartilhado pode fornecer golpes, poses, animações e atributos a vários lutadores.
-
-[Crie um lutador UMF](docs/wiki/pt-BR/Personagem-UMF.md) · [Definição do Kaito](assets/chars/kaito.json) · [Habilidades passivas](docs/wiki/pt-BR/Passivos.md)
-
----
-
-## ✨ Em resumo
-
-<table>
-<tr>
-<td width="33%" valign="top">
-
-### ⚡ Rápido
-Decodificação de SFF e conversão de sprites em paralelo, paletas aplicadas na GPU, ritmo de quadros travado na taxa do monitor e **zero alocações por tick de simulação**.
-
-</td>
-<td width="33%" valign="top">
-
-### 🎯 Determinístico
-Simulação fixa a 60 Hz, PRNG determinístico e sem coletor de lixo. As mesmas entradas sempre geram a mesma luta, base para **replays e netplay com rollback**.
-
-</td>
-<td width="33%" valign="top">
-
-### 🕹️ Compatível
-`.def`, `.sff` v1/v2, `.air`, `.cmd`, `.cns`, `.snd`, `.act` e cenários. VM de expressões, **90+ state controllers**, helpers, projéteis e `localcoord` HD.
-
-</td>
-</tr>
-<tr>
-<td valign="top">
-
-### 🌍 Em todo lugar
-Um só código com **wgpu + winit**: Vulkan, Metal, DX12, GLES e WebGL2. Windows, Linux, macOS, navegador (WASM, ~3 MB), Android e iOS.
-
-</td>
-<td valign="top">
-
-### 🎨 Caprichado
-4K de verdade, bloom, aberração cromática, supers cinematográficos, partículas, reflexos no chão, HUD animado e opção de reduzir efeitos para acessibilidade.
-
-</td>
-<td valign="top">
-
-### 🎮 Gostoso de jogar
-Teclado, toque, Xbox, DualShock 4 e DualSense com **vibração e lightbar**. Arcade, Versus, Treino, Sequência 3v3 e Paralelo até **7v7**.
-
-</td>
-</tr>
-</table>
-
----
-
-## 🖼️ Elenco em pixel art, mapas e jogabilidade
-
-<p align="center">
-  <img src="docs/assets/readme/readme-fight-pixel-art.png" alt="Ilustração em pixel art de dois lutadores trocando golpes em um bambuzal" width="70%">
-</p>
-
-<p align="center"><i>Ilustração em pixel art criada para este README; não é uma captura de gameplay.</i></p>
-
-### Lutadores em pixel art
-
-O elenco nativo é desenhado em pixel art arcade de 32 bits, com um conjunto de poses dedicado por lutador, paletas, especiais de ki, voo, teletransporte e transformações. Cada personagem é declarado em um único JSON UMF.
-
-![Ilustração em pixel art de uma tela de seleção de lutadores](docs/assets/readme/readme-roster-pixel-art.png)
-
-### Mapas
-
-21 arenas ilustradas, do telhado do dojo ao pôr do sol e uma metrópole neon até as maravilhas do mundo (Petra, Taj Mahal, Cristo Redentor, Coliseu, Grande Muralha, Chichén Itzá e mais), cada uma com camadas de ambiente vivas e sua própria trilha embutida.
-
-![Ilustração em pixel art de uma tela de seleção de arenas](docs/assets/readme/readme-stage-select-pixel-art.png)
-
-O **modo História** traz cinco extensões longas e roláveis das arenas (Brasil, Neon, Bambu, Vulcão e Dojo): um trecho por luta, quatro ondas de capangas mais um chefe de fase, com a vida carregada entre as lutas. Veja o [guia do modo História](docs/wiki/Story-Mode.md).
-
-![Panoramas em pixel art inspirados nas cinco fases da História](docs/assets/readme/readme-story-stages-pixel-art.png)
-
-<table>
-<tr>
-<td width="50%"><img src="docs/assets/readme/readme-versus-pixel-art.png" alt="Ilustração em pixel art de dois lutadores antes da partida"></td>
-<td width="50%"><img src="docs/assets/readme/readme-fight-round1-pixel-art.png" alt="Ilustração em pixel art de uma luta em um bambuzal"></td>
-</tr>
-</table>
-
----
-
-## 🆕 Novidades
-
-- **Modos de jogo:** Arcade, História (com epílogo escrito por lutador), Versus CPU, 2 Jogadores, Treino, CPU vs CPU, Sobrevivência, Torre, Arena do Poder, times Sequência/Paralelo/Tag (até 7v7, com posições iniciais aleatórias por semente; 5v5 no Android e iOS) e rollback online. Desafios de Combo e Modo Foto funcionam dentro das lutas. [Modos de jogo](docs/wiki/pt-BR/Modos-de-Jogo.md) · [Desafios de Combo](docs/wiki/Combo-Trials.md) · [Modo Foto](docs/wiki/pt-BR/Modo-Foto.md)
-- **História:** cinco fases de ondas e chefes, depois chefe final e epílogos em PT/EN/ES. Cada lutador nativo tem seu país único. [Guia](docs/wiki/Story-Mode.md) · [Objetos de cenário](docs/wiki/pt-BR/Objetos-de-Cenario.md)
-- **Conversor MUGEN → UMF:** `tools/mugen2umf` é um conversor exato em Rust, com checagem de paridade golpe a golpe. Um único pacote serve a CLI (`mugen2umf <ferramenta>`) e um servidor MCP (`mugen2umf mcp`). [Guia UMF](docs/wiki/UMF-Character.md)
-- **Mercado GitHub:** instale personagens, cenários e músicas de qualquer repositório público, com visões de lista e grade, selos MUGEN e UMF, tipo personagem ou pacote, status desatualizado e instalar, atualizar e remover em lote. [Mercado](docs/wiki/pt-BR/Mercado.md)
-- **Importar M.U.G.E.N:** mosaico holográfico de todos os lutadores importados e ficha completa com retrato, atributos e lista de golpes. [Conteúdo M.U.G.E.N](docs/wiki/MUGEN-Content.md)
-- **Desktop em um arquivo só:** as releases embutem os pacotes de sprites dos lutadores nativos, então o executável roda sozinho. [Instalação](docs/wiki/Installation.md)
-- **Web e wiki:** a [versão web](https://juninmd.github.io/ultimate-mugen/) e a [wiki](https://juninmd.github.io/ultimate-mugen/wiki/) são publicadas a cada merge no `master`. Toda subtela tem botão **Voltar**, que ajuda também no celular.
-- **Também:** música por cenário, atalhos de golpe em `1`-`4`, especiais EX e hypers em todo lutador nativo e atualização automática no desktop. [Áudio](docs/wiki/Audio.md) · [Controles](docs/wiki/pt-BR/Configuracao.md#controles) · [Atualização automática](docs/wiki/pt-BR/Atualizacao-Automatica.md)
-
-<table>
-<tr>
-<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/market-view/acoes-market-grid.jpg" alt="Grade do Mercado GitHub com selos MUGEN e UMF"></td>
-<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/holo-gate/gate-import.png" alt="Mosaico holográfico dos lutadores importados"></td>
-</tr>
-<tr>
-<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/mugen2umf-exact/goku-ssj_sequence.png" alt="Sequência de golpes do Goku SSJ4 convertido pelo conversor exato"></td>
-<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/char-flags/depois-selecao.png" alt="Seleção com bandeira de país por lutador"></td>
-</tr>
-</table>
-
----
-
-## 🚀 Desempenho em primeiro lugar
-
-Velocidade é funcionalidade aqui, e tudo abaixo pode ser medido no próprio repositório.
-
-| Área | O que o motor faz |
-|---|---|
-| **Carregamento** | Payloads SFF v2 (LZ5, RLE5, RLE8, PNG) e conversão de paleta usam todos os núcleos; sprites ligados compartilham pixels e uploads na GPU. Personagens carregam numa thread em segundo plano atrás da tela de VS. |
-| **Memória de GPU** | Sprites indexados do M.U.G.E.N ficam num atlas de 8 bits e recebem as cores de uma linha de paleta no shader WGSL: **4× menos upload e espaço de atlas** que RGBA. `RemapPal` só troca a linha. |
-| **Quadros suaves** | O `Pacer` alinha o tempo de quadro ao período da tela, então monitores de 60 Hz recebem exatamente um tick por quadro. Sprites e sons dos lutadores são pré-carregados antes do round. |
-| **Simulação** | Passo fixo com limite de 5 ticks por quadro (sem espiral da morte) e um teste que garante **zero alocações por tick**. |
-| **Elencos grandes** | A tela de seleção desenha só as linhas visíveis e carrega só o retrato sob o cursor, com cache LRU. Centenas de personagens importados são registrados em segundos. |
-
-Referência (4 núcleos, release): `kfm720` carrega em **27 ms** (antes 85 ms), `kfm` em **7 ms**.
+Instale a [versão estável do Rust](https://rustup.rs/) para compilar o projeto. No Debian ou Ubuntu, instale primeiro as dependências do sistema.
 
 ```bash
-cargo run --release -p ume-engine --example mugen_load_bench   # tempo de carga M.U.G.E.N
-cargo test -p ume-engine --release --test it tick_alloc::           # zero alocações por tick
+sudo apt-get install -y pkg-config libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev
 ```
-
-Detalhes na [página de Desempenho da wiki](docs/wiki/pt-BR/Desempenho.md).
-
----
-
-## 🏁 Começo rápido
-
-**Jogue agora:** abra a [versão web](https://juninmd.github.io/ultimate-mugen/) e arraste um `.zip` de personagem para a janela.
-
-**Desktop:**
 
 ```bash
 git clone https://github.com/juninmd/ultimate-mugen
 cd ultimate-mugen
 cargo run --release
 ```
-
-No Linux, instale alguns pacotes antes:
-
-```bash
-sudo apt-get install -y pkg-config libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev
-```
-
-**Traga seu conteúdo M.U.G.E.N:** coloque personagens em `mugen/chars/` (pasta ou `.zip`) e cenários em `mugen/stages/`, ou aponte `UME_MUGEN_DIR` para uma instalação existente. Também dá para instalar personagens, cenários e músicas de qualquer repositório público do GitHub em **Mercado GitHub** (menu principal); veja o [guia do mercado](docs/wiki/pt-BR/Mercado.md).
 
 <details>
 <summary><b>Outros alvos de build e flags</b></summary>
@@ -218,6 +58,7 @@ cargo test --workspace --release
 
 ```bash
 rustup target add wasm32-unknown-unknown
+cargo install wasm-bindgen-cli --locked --version "$(awk '/^name = "wasm-bindgen"$/{getline; gsub(/"/,"",$3); print $3}' Cargo.lock)"
 ./scripts/build-web.sh
 python3 -m http.server -d web/dist 8080
 ```
@@ -229,13 +70,13 @@ cargo install cargo-apk --version 0.9.6 --locked
 cargo apk build -p ultimate-mugen --lib --release --target aarch64-linux-android
 ```
 
-**iOS**: `cargo install cargo-bundle` e depois `cargo bundle --release --target aarch64-apple-ios` no macOS com Xcode.
+**iOS.** `cargo install cargo-bundle` e depois `cargo bundle --release --target aarch64-apple-ios` no macOS com Xcode.
 
 </details>
 
 ---
 
-## 🎮 Controles
+## Controles
 
 Teclado, vários controles e toque funcionam ao mesmo tempo. As listas de golpes mostram a tecla ou botão real do dispositivo em uso.
 
@@ -265,24 +106,20 @@ DualShock 4 e DualSense usam relatórios HID nativos por USB e Bluetooth: vibra�
 
 ---
 
-## 🧱 Arquitetura
+## Arquitetura
 
-Um workspace Cargo que separa leitura de formatos, simulação e apresentação:
+A simulação determinística roda a 60 Hz e alimenta os replays e o rollback. O workspace Rust separa os parsers M.U.G.E.N (`crates/formats`), a simulação (`crates/engine`), o compilador UMF (`crates/native`), o renderizador wgpu (`crates/render`) e a camada de janela, áudio e entrada (`crates/shell`).
 
+O mesmo motor de combate executa lutadores M.U.G.E.N e UMF em uma única partida. O renderizador consulta a paleta na GPU para desenhar sprites indexados. [Arquitetura da engine](docs/wiki/pt-BR/Engine.md) · [Decisões de compatibilidade](docs/wiki/pt-BR/Decisoes-de-Compatibilidade.md)
+
+## Desempenho
+
+A decodificação de sprites acontece em paralelo no desktop. No navegador, a importação de ZIP distribui o trabalho entre quadros para manter o progresso visível e permitir o cancelamento. Os testes da engine verificam que a simulação roda sem alocações por tick. [Desempenho na wiki](docs/wiki/pt-BR/Desempenho.md)
+
+```bash
+cargo run --release -p ume-engine --example mugen_load_bench
+cargo test -p ume-engine --release --test it tick_alloc::
 ```
-crates/
-├── formats/   parsers e decodificadores M.U.G.E.N puros (SFF, AIR, SND, ACT, cenários, VFS sobre pastas e zips)
-├── engine/    VM de luta determinística, expressões, 90+ controllers, colisões, IA, compilador UMF
-├── netplay/   netcode com rollback
-├── render/    renderizador wgpu: atlas, sprites em lote, paletas em WGSL, pós-processamento
-└── shell/     janela winit, entrada, texto, áudio, ritmo de quadros
-src/           telas, HUD, controles e HID, síntese de áudio
-web/           shell HTML, PWA e cola JS
-```
-
-Personagens M.U.G.E.N e lutadores nativos **UMF** (um arquivo JSON declarativo cada, hitboxes geradas do esqueleto) compilam para a **mesma máquina de estados**, então os dois lutam sob as mesmas regras. Veja o [guia UMF](docs/CHARACTER_FORMAT.md).
-
----
 
 ## 📚 Documentação
 
@@ -296,7 +133,6 @@ Personagens M.U.G.E.N e lutadores nativos **UMF** (um arquivo JSON declarativo c
 Contribuições são bem-vindas. Antes de abrir um PR:
 
 ```bash
-cargo fmt --check
 cargo clippy --workspace --tests
 cargo test --workspace
 cargo check --target wasm32-unknown-unknown

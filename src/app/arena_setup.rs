@@ -62,6 +62,7 @@ impl App {
 
     pub(crate) fn open_arena_setup(&mut self) {
         self.set_mode(Mode::PowerArena);
+        crate::power_arena_backdrop::prefetch();
         self.audio.sfx("confirm");
         self.screen = Screen::ArenaSetup { row: ROW_GO };
     }

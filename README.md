@@ -1,207 +1,47 @@
-<p align="center">
-  <img src="docs/assets/banner-pixel-art-en.png" alt="Ultimate MUGEN" width="100%">
-</p>
+# Ultimate MUGEN
 
-<p align="center">
-  <a href="https://juninmd.github.io/ultimate-mugen/"><img src="https://img.shields.io/badge/play-in%20your%20browser-ff3d6e?style=for-the-badge&logo=webassembly&logoColor=white" alt="Play in your browser"></a>
-  <a href="https://github.com/juninmd/ultimate-mugen/releases/latest"><img src="https://img.shields.io/github/v/release/juninmd/ultimate-mugen?style=for-the-badge&color=b14dff&label=download" alt="Latest release"></a>
-</p>
+An open-source 2D fighting game engine written in Rust. Play with the original pixel-art roster, import M.U.G.E.N fighters and stages, or create your own fighters in UMF.
 
-<p align="center">
-  <a href="https://github.com/juninmd/ultimate-mugen/actions/workflows/ci.yml"><img src="https://github.com/juninmd/ultimate-mugen/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-ffb23d" alt="MIT License"></a>
-  <img src="https://img.shields.io/badge/rust-stable-dea584?logo=rust" alt="Rust">
-  <img src="https://img.shields.io/badge/GPU-wgpu-5865f2" alt="wgpu">
-  <img src="https://img.shields.io/badge/platforms-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Web%20%7C%20Android%20%7C%20iOS-2ea44f" alt="Platforms">
-</p>
+**[Play in your browser](https://juninmd.github.io/ultimate-mugen/)** · **[Download for desktop](https://github.com/juninmd/ultimate-mugen/releases/latest)** · [Wiki](https://juninmd.github.io/ultimate-mugen/wiki/) · [Português (BR)](README.pt-BR.md)
 
-<p align="center">
-  <b>English</b> · <a href="README.pt-BR.md">Português (BR)</a>
-</p>
+![Bruno’s final-form aura lights up the dojo as Kaito blocks a strike](docs/assets/readme/gameplay.webp)
 
-<p align="center">
-  <b>A modern 2D fighting game engine built from scratch in Rust.</b><br>
-  Runs classic M.U.G.E.N characters and stages, ships its own declarative fighter format,<br>
-  and puts performance and determinism first, on desktop, mobile and the web.
-</p>
+## How to play
 
----
+- **Browser.** Open the web build and choose a mode from the main menu. To add a character, drop a `.zip` onto the window or use **Import M.U.G.E.N**.
+- **Desktop.** Download the release for Windows, Linux or macOS. Add characters to `mugen/chars/` and stages to `mugen/stages/`, or point `UME_MUGEN_DIR` to an existing installation. [Installation guide](docs/wiki/Installation.md)
+- **Controls.** Play with a keyboard, gamepad or touch. On keyboard, player 1 moves with the arrow keys, punches with `Q` and `W`, and kicks with `A` and `S`. [Controls table](#controls)
 
-## Why Ultimate MUGEN exists
+## In-game screenshots
 
-A fighter someone built years ago should still have a place in a new roster. Ultimate MUGEN is an open-source 2D fighting game engine built in Rust to carry forward that community work and give creators a more direct way to build original fighters. Elecbyte's M.U.G.E.N and Ikemen GO inspired the project.
+These screenshots come from the desktop and browser builds.
 
-The engine loads classic M.U.G.E.N characters and stages, and the built-in pixel-art roster demonstrates what creators can make with UMF. Both kinds of fighter use the same combat simulation, so you can put a community character and a native fighter in the same match.
+| Fighter select | Stage select |
+| --- | --- |
+| ![Fighter roster with the highlighted character’s portrait and profile](docs/assets/readme/fighter-select.webp) | ![Stage selection screen with an arena preview](docs/assets/readme/arena-select.webp) |
 
-### What the new engine changes
+![Story Mode fight with the stage and combat HUD visible](docs/assets/readme/story-mode.webp)
 
-| Design choice | What it means in practice |
-|---|---|
-| **A fixed 60 Hz combat simulation** | Moves, collisions and input timing run in ticks independent of rendering. With the same match setup and inputs, the engine can replay a fight or resimulate recent ticks during rollback. |
-| **A renderer built for indexed sprites** | Classic sprites can keep one byte per pixel for the color index. The GPU looks up the palette when drawing, so a palette swap can reuse the same sprite pixels. |
-| **Loading designed around frame time** | Desktop workers handle decoding off the main thread. In the browser, ZIP import processes a bounded amount of work per frame so progress can redraw and the player can cancel. |
-| **Two ways to author fighters** | The classic loader reads M.U.G.E.N files. The UMF compiler turns a declarative fighter definition into commands, animations and states for the same combat engine. |
+## Game modes and creation tools
 
-[Engine architecture](docs/wiki/Engine.md) · [Compatibility decisions](docs/wiki/Compatibility-Decisions.md) · [Netplay and replays](docs/wiki/Netplay-and-Replays.md)
+- **Matches and training.** Arcade, Versus CPU, 2 Players, Training, CPU vs CPU, Survival, Tower, Power Arena, and Sequence, Parallel and Tag teams. The game also includes online rollback, replays, Combo Trials and Photo Mode. [Game modes](docs/wiki/Game-Modes.md) · [Netplay and replays](docs/wiki/Netplay-and-Replays.md)
+- **Story Mode.** Progress through five side-scrolling stages with enemy waves, bosses, breakable objects and bonus rounds. Each native fighter has a dedicated epilogue. [Story Mode](docs/wiki/Story-Mode.md)
+- **Community content.** Import M.U.G.E.N fighters and stages and use the GitHub Marketplace to install characters, stages and music from public repositories. [M.U.G.E.N content](docs/wiki/MUGEN-Content.md) · [Marketplace](docs/wiki/Marketplace.md)
+- **Fighter creation.** UMF defines moves, animations, passives and transformations in JSON and uses PNG sprites. The `mugen2umf` converter provides a CLI, an MCP server and parity checks against the source character. [UMF guide](docs/wiki/UMF-Character.md)
 
-### UMF, the native fighter format
+## Build from source
 
-UMF (*Ultimate Mugen Format*) brings stats, animation timing and combat rules together in a JSON definition. Pixel-art sprites can live in separate PNG files. The fighter definition says which input activates a move, which animation it plays, when it hits and which moves can follow it.
-
-For example, Kaito's **Snap Jab** uses the `x` input and the `jab` animation. Its hit activates on the second animation frame and deals 28 base damage. The move declares follow-ups such as **Reverse Punch** and **Gale Fist** by ID. The same format can describe meter costs, projectiles, armor, passive abilities and transformations.
-
-UMF 2 also lets creators reuse whole definitions with `extends` and compose individual moves with `use`. Shared kits can provide moves, poses, animations and stats across multiple fighters.
-
-[Create a UMF fighter](docs/wiki/UMF-Character.md) · [Kaito's definition](assets/chars/kaito.json) · [Passive abilities](docs/wiki/Passives.md)
-
----
-
-## ✨ At a glance
-
-<table>
-<tr>
-<td width="33%" valign="top">
-
-### ⚡ Fast
-Parallel SFF decode and sprite conversion, palettes applied on the GPU, frame pacing locked to your refresh rate and **zero allocations per simulation tick**.
-
-</td>
-<td width="33%" valign="top">
-
-### 🎯 Deterministic
-Fixed 60 Hz simulation, deterministic PRNG and no garbage collector. The same inputs always give the same fight, which powers **replays and rollback netplay**.
-
-</td>
-<td width="33%" valign="top">
-
-### 🕹️ Compatible
-`.def`, `.sff` v1/v2, `.air`, `.cmd`, `.cns`, `.snd`, `.act` and stages. Expression VM, **90+ state controllers**, helpers, projectiles and HD `localcoord`.
-
-</td>
-</tr>
-<tr>
-<td valign="top">
-
-### 🌍 Everywhere
-One codebase on **wgpu + winit**: Vulkan, Metal, DX12, GLES and WebGL2. Windows, Linux, macOS, browser (WASM, ~3 MB), Android and iOS.
-
-</td>
-<td valign="top">
-
-### 🎨 Polished
-True 4K, bloom, chromatic aberration, cinematic supers, particles, floor reflections, animated HUD and an option to reduce effects for accessibility.
-
-</td>
-<td valign="top">
-
-### 🎮 Great to play
-Keyboard, touch, Xbox, DualShock 4 and DualSense with **rumble and lightbars**. Arcade, Versus, Training, Sequence 3v3 and Parallel up to **7v7**.
-
-</td>
-</tr>
-</table>
-
----
-
-## 🖼️ Pixel-art roster, maps and gameplay
-
-<p align="center">
-  <img src="docs/assets/readme/readme-fight-pixel-art.png" alt="Pixel art illustration of two fighters trading a hit in a bamboo arena" width="70%">
-</p>
-
-<p align="center"><i>Illustrative pixel art created for this README; this image is not a live gameplay capture.</i></p>
-
-### Pixel-art fighters
-
-The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set per fighter, with palettes, ki/energy specials, flight, teleport and transformations. Characters are declared in a single UMF JSON each.
-
-![Pixel art illustration of a character-select screen](docs/assets/readme/readme-roster-pixel-art.png)
-
-### Maps
-
-21 illustrated arenas, from a sunset dojo roof and a neon metropolis to the wonders of the world (Petra, Taj Mahal, Christ the Redeemer, the Colosseum, the Great Wall, Chichen Itza and more), each with living ambience layers and its own built-in music theme.
-
-![Pixel art illustration of an arena-select screen](docs/assets/readme/readme-stage-select-pixel-art.png)
-
-**Story mode** adds five long scrolling extensions of the arenas (Brazil, Neon, Bamboo, Volcano and Dojo): one segment per fight, four waves of thugs plus a stage boss, with health carry-over between fights. See the [Story mode guide](docs/wiki/Story-Mode.md).
-
-![Pixel art panoramas inspired by the five story stages](docs/assets/readme/readme-story-stages-pixel-art.png)
-
-<table>
-<tr>
-<td width="50%"><img src="docs/assets/readme/readme-versus-pixel-art.png" alt="Pixel art illustration of two fighters facing off before a match"></td>
-<td width="50%"><img src="docs/assets/readme/readme-fight-round1-pixel-art.png" alt="Pixel art illustration of a fight on a bamboo arena"></td>
-</tr>
-</table>
-
----
-
-## 🆕 What's new
-
-- **Game modes:** Arcade, Story (with a written epilogue per fighter), Versus CPU, 2 Players, Training, CPU vs CPU, Survival, Tower, Power Arena, Sequence/Parallel/Tag teams (up to 7v7, with seeded random spawns; 5v5 on Android and iOS) and online rollback. Combo Trials and Photo Mode work inside fights. [Game modes](docs/wiki/Game-Modes.md) · [Combo Trials](docs/wiki/Combo-Trials.md) · [Photo Mode](docs/wiki/Photo-Mode.md)
-- **Story:** five stages of waves and bosses, then a final boss and epilogues in EN/PT/ES. Every native fighter has its own unique country. [Guide](docs/wiki/Story-Mode.md) · [Stage objects](docs/wiki/Stage-Objects.md)
-- **MUGEN → UMF converter:** `tools/mugen2umf` is an exact converter in Rust with move-by-move parity checks. One package serves a CLI (`mugen2umf <tool>`) and an MCP server (`mugen2umf mcp`). [UMF guide](docs/wiki/UMF-Character.md)
-- **Mercado GitHub:** install characters, stages and music from any public repository, with list/grid views, MUGEN and UMF badges, a character-vs-pack kind, an outdated status and batch install, update and remove. [Marketplace](docs/wiki/Marketplace.md)
-- **Import M.U.G.E.N:** a holographic mosaic of every imported fighter and a full character sheet with portrait, stats and move list. [M.U.G.E.N content](docs/wiki/MUGEN-Content.md)
-- **Desktop in one file:** release builds embed the native fighter sprite packs, so the executable runs alone. [Installation](docs/wiki/Installation.md)
-- **Web and wiki:** the [web build](https://juninmd.github.io/ultimate-mugen/) and the [wiki](https://juninmd.github.io/ultimate-mugen/wiki/) are redeployed on every merge to `master`. Every sub screen has a **Back** button, which also helps on mobile.
-- **Also:** per-stage music, move shortcuts on `1`-`4`, EX specials and hypers for every native fighter, and automatic desktop updates. [Audio](docs/wiki/Audio.md) · [Controls](docs/wiki/Configuration.md#controls) · [Auto-update](docs/wiki/Auto-Update.md)
-
-<table>
-<tr>
-<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/market-view/acoes-market-grid.jpg" alt="Mercado GitHub grid with MUGEN and UMF badges"></td>
-<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/holo-gate/gate-import.png" alt="Holographic mosaic of imported fighters"></td>
-</tr>
-<tr>
-<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/mugen2umf-exact/goku-ssj_sequence.png" alt="Converted Goku SSJ4 move sequence from the exact converter"></td>
-<td width="50"><img src="https://raw.githubusercontent.com/juninmd/ultimate-mugen/9a4c335387d5aa13220b1b7d7802f32cfb8f9e43/docs/evidence/char-flags/depois-selecao.png" alt="Select screen with a country flag per fighter"></td>
-</tr>
-</table>
-
----
-
-## 🚀 Performance first
-
-Speed is a feature here, and every claim below is measurable from the repo.
-
-| Area | What the engine does |
-|---|---|
-| **Loading** | SFF v2 payloads (LZ5, RLE5, RLE8, PNG) and palette conversion run on all cores; linked sprites share pixels and GPU uploads. Characters load on a background thread behind the VS screen. |
-| **GPU memory** | Indexed M.U.G.E.N sprites live in an 8-bit atlas and get their colors from a palette row in the WGSL shader: **4× less upload and atlas space** than RGBA. `RemapPal` just swaps the row. |
-| **Smooth frames** | `Pacer` snaps frame time to the display period, so 60 Hz screens get exactly one tick per frame. Fighter sprites and sounds are prefetched before the round starts. |
-| **Simulation** | Fixed step with a cap of 5 ticks per frame (no spiral of death) and a test that guards **zero allocations per tick**. |
-| **Big rosters** | The select screen draws only visible rows and loads only the portrait under the cursor, with an LRU cache. Hundreds of imported characters register in seconds. |
-
-Reference (4 cores, release): `kfm720` loads in **27 ms** (was 85 ms), `kfm` in **7 ms**.
+Install the [stable Rust toolchain](https://rustup.rs/) to build from source. On Debian or Ubuntu, install the system dependencies first.
 
 ```bash
-cargo run --release -p ume-engine --example mugen_load_bench   # M.U.G.E.N load time
-cargo test -p ume-engine --release --test it tick_alloc::           # zero allocations per tick
+sudo apt-get install -y pkg-config libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev
 ```
-
-Details in the [Performance wiki page](docs/wiki/Performance.md).
-
----
-
-## 🏁 Quick start
-
-**Play now:** open the [web build](https://juninmd.github.io/ultimate-mugen/) and drag a character `.zip` into the window (or use Import M.U.G.E.N in the main menu).
-
-**Desktop:**
 
 ```bash
 git clone https://github.com/juninmd/ultimate-mugen
 cd ultimate-mugen
 cargo run --release
 ```
-
-Linux needs a few system packages first:
-
-```bash
-sudo apt-get install -y pkg-config libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev
-```
-
-**Bring your M.U.G.E.N content:** put characters in `mugen/chars/` (folder or `.zip`) and stages in `mugen/stages/`, or point `UME_MUGEN_DIR` to an existing install. You can also install characters, stages and music from any public GitHub repository in **Mercado GitHub** (main menu); see the [marketplace guide](docs/wiki/Marketplace.md).
 
 <details>
 <summary><b>More build targets and flags</b></summary>
@@ -218,6 +58,7 @@ cargo test --workspace --release
 
 ```bash
 rustup target add wasm32-unknown-unknown
+cargo install wasm-bindgen-cli --locked --version "$(awk '/^name = "wasm-bindgen"$/{getline; gsub(/"/,"",$3); print $3}' Cargo.lock)"
 ./scripts/build-web.sh
 python3 -m http.server -d web/dist 8080
 ```
@@ -229,13 +70,13 @@ cargo install cargo-apk --version 0.9.6 --locked
 cargo apk build -p ultimate-mugen --lib --release --target aarch64-linux-android
 ```
 
-**iOS**: `cargo install cargo-bundle`, then `cargo bundle --release --target aarch64-apple-ios` on macOS with Xcode.
+**iOS.** `cargo install cargo-bundle`, then `cargo bundle --release --target aarch64-apple-ios` on macOS with Xcode.
 
 </details>
 
 ---
 
-## 🎮 Controls
+## Controls
 
 Keyboard, multiple gamepads and touch work at the same time. Move lists show the real key or button of the device in use.
 
@@ -265,24 +106,20 @@ DualShock 4 and DualSense get native USB and Bluetooth HID reports: proportional
 
 ---
 
-## 🧱 Architecture
+## Architecture
 
-A Cargo workspace that keeps parsing, simulation and presentation apart:
+The deterministic simulation runs at 60 Hz and powers replays and rollback. The Rust workspace separates M.U.G.E.N parsers (`crates/formats`), the simulation (`crates/engine`), the UMF compiler (`crates/native`), the wgpu renderer (`crates/render`) and windowing, audio and input (`crates/shell`).
 
+The same combat engine runs M.U.G.E.N and UMF fighters in a single match. The renderer looks up palettes on the GPU when drawing indexed sprites. [Engine architecture](docs/wiki/Engine.md) · [Compatibility decisions](docs/wiki/Compatibility-Decisions.md)
+
+## Performance
+
+Sprite decoding runs in parallel on desktop. In the browser, ZIP import spreads work across frames to keep progress visible and allow cancellation. Engine tests check that the simulation runs without allocations per tick. [Performance guide](docs/wiki/Performance.md)
+
+```bash
+cargo run --release -p ume-engine --example mugen_load_bench
+cargo test -p ume-engine --release --test it tick_alloc::
 ```
-crates/
-├── formats/   pure M.U.G.E.N parsers and decoders (SFF, AIR, SND, ACT, stages, VFS over folders and zips)
-├── engine/    deterministic fight VM, expressions, 90+ controllers, collisions, AI, UMF compiler
-├── netplay/   rollback netcode
-├── render/    wgpu renderer: atlases, batched sprites, palettes in WGSL, post-processing
-└── shell/     winit window, input, text, audio, frame pacing
-src/           screens, HUD, gamepads and HID, audio synthesis
-web/           HTML shell, PWA and JS glue
-```
-
-M.U.G.E.N characters and native **UMF** fighters (one declarative JSON file each, hitboxes generated from the skeleton) compile to the **same state machine**, so both fight under identical rules. See the [UMF guide](docs/CHARACTER_FORMAT.md).
-
----
 
 ## 📚 Documentation
 
@@ -297,7 +134,6 @@ M.U.G.E.N characters and native **UMF** fighters (one declarative JSON file each
 Contributions are welcome. Read the [contributing guide](CONTRIBUTING.md) first. Before opening a PR:
 
 ```bash
-cargo fmt --check
 cargo clippy --workspace --tests
 cargo test --workspace
 cargo check --target wasm32-unknown-unknown

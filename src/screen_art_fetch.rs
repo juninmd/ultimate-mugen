@@ -20,9 +20,9 @@ mod js {
     }
 }
 
-async fn load(file: &'static str, decode: fn(&[u8]) -> Option<Texture2D>) {
+async fn load(dir: &'static str, file: &'static str, decode: fn(&[u8]) -> Option<Texture2D>) {
     let Ok(data) =
-        js_sys::futures::JsFuture::from(js::ume_fetch_asset(&format!("assets/ui/{file}"))).await
+        js_sys::futures::JsFuture::from(js::ume_fetch_asset(&format!("{dir}{file}"))).await
     else {
         return;
     };
@@ -35,7 +35,7 @@ fn claim(file: &'static str) -> bool {
     SLOTS.with(|slots| slots.borrow_mut().insert(file, Slot::Pending).is_none())
 }
 
-pub(crate) fn get(file: &'static str, decode: fn(&[u8]) -> Option<Texture2D>) -> Option<Texture2D> {
+pub(crate) fn get(dir: &'static str, file: &'static str, decode: fn(&[u8]) -> Option<Texture2D>) -> Option<Texture2D> {
     let found = SLOTS.with(|slots| {
         slots.borrow().get(file).map(|slot| match slot {
             Slot::Ready(texture) => Some(texture.clone()),
@@ -46,12 +46,12 @@ pub(crate) fn get(file: &'static str, decode: fn(&[u8]) -> Option<Texture2D>) ->
         return texture;
     }
     if claim(file) {
-        wasm_bindgen_futures::spawn_local(load(file, decode));
+        wasm_bindgen_futures::spawn_local(load(dir, file, decode));
     }
     None
 }
 
-pub(crate) fn warm(files: &[&'static str], decode: fn(&[u8]) -> Option<Texture2D>) {
+pub(crate) fn warm(dir: &'static str, files: &[&'static str], decode: fn(&[u8]) -> Option<Texture2D>) {
     if WARMED.with(|warmed| warmed.replace(true)) {
         return;
     }
@@ -59,7 +59,7 @@ pub(crate) fn warm(files: &[&'static str], decode: fn(&[u8]) -> Option<Texture2D
     wasm_bindgen_futures::spawn_local(async move {
         for file in files {
             if claim(file) {
-                load(file, decode).await;
+                load(dir, file, decode).await;
             }
         }
     });

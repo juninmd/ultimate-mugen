@@ -6,11 +6,10 @@ use std::cell::Cell;
 use ume_engine::matchs::{Match, ARENA_HALF_WIDTH, ARENA_PLATFORMS};
 
 thread_local! {
-    static BACKDROP: Option<Texture2D> = load_texture(include_bytes!("../assets/stages/power_arena.png"));
     static PLATFORM: Option<Texture2D> = load_texture(include_bytes!("../assets/stages/power_arena_platform.png"));
 }
 
-fn load_texture(bytes: &[u8]) -> Option<Texture2D> {
+pub(crate) fn load_texture(bytes: &[u8]) -> Option<Texture2D> {
     let image = ume_formats::png::decode_png(bytes).ok()?;
     let texture = Texture2D::from_rgba8(image.width as u16, image.height as u16, &image.rgba?);
     texture.set_filter(FilterMode::Nearest);
@@ -19,14 +18,12 @@ fn load_texture(bytes: &[u8]) -> Option<Texture2D> {
 
 pub(crate) fn draw(g: &Gfx, battle: &Match, shx: f32, shy: f32) {
     let scale = g.view_scale;
-    BACKDROP.with(|backdrop| {
-        if let Some(texture) = backdrop {
-            draw_texture_ex(texture, g.ox, g.oy, WHITE, DrawTextureParams {
-                dest_size: Some(vec2(battle.view_w * scale, battle.view_h * scale)),
-                ..Default::default()
-            });
-        }
-    });
+    if let Some(texture) = crate::power_arena_backdrop::get() {
+        draw_texture_ex(&texture, g.ox, g.oy, WHITE, DrawTextureParams {
+            dest_size: Some(vec2(battle.view_w * scale, battle.view_h * scale)),
+            ..Default::default()
+        });
+    }
     let x = |world: f32| g.ox + (world - battle.camera.x + battle.view_w / 2.0 + shx) * scale;
     let y = |world: f32| g.oy + (world - battle.camera.y + battle.stage.zoffset + shy) * scale;
     PLATFORM.with(|platform| {

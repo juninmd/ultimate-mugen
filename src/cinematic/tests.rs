@@ -90,9 +90,9 @@ fn the_disabled_flag_and_user_overrides_are_honoured() {
     let custom = "[[victory]]\nsubject = \"both\"\nduration = 2.0\nzoom = [0.0, 0.3]\n";
     let cfg = Config::parse(include_str!("../../assets/cinematic.toml"), Some(custom));
     assert_eq!(cfg.victory.len(), 1);
-    assert_eq!(cfg.intro.len(), 3, "untouched sections keep the defaults");
+    assert_eq!(cfg.intro.len(), defaults().intro.len(), "untouched sections keep the defaults");
     let broken = Config::parse(include_str!("../../assets/cinematic.toml"), Some("[[intro"));
-    assert_eq!(broken.intro.len(), 3, "invalid user file falls back to the defaults");
+    assert_eq!(broken.intro.len(), defaults().intro.len(), "invalid user file falls back to the defaults");
 }
 
 #[test]
@@ -140,11 +140,12 @@ fn a_face_close_up_lands_the_aim_point_on_the_chest_line() {
     let (mut scale, mut feet) = (2.0, 500.0);
     let height = 100.0;
     let chest_line = feet - 0.55 * height * scale;
-    close_up(&mut scale, &mut feet, height, &view);
+    let aim = close_up(&mut scale, &mut feet, height, &view);
+    assert_eq!(aim, 0.88);
     assert_eq!(scale, 4.0);
     let aim_y = feet - 0.88 * height * scale;
     assert!((aim_y - chest_line).abs() < 1e-3, "{aim_y} vs {chest_line}");
     let (mut s2, mut f2) = (2.0, 500.0);
-    close_up(&mut s2, &mut f2, height, &Sample::default());
+    assert_eq!(close_up(&mut s2, &mut f2, height, &Sample::default()), 0.0);
     assert_eq!((s2, f2), (2.0, 500.0), "no detail leaves the placement untouched");
 }

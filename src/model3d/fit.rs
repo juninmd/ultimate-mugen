@@ -26,6 +26,7 @@ pub(super) fn draw(
             yaw: 0.0,
             pitch: 0.0,
             lens: 0.0,
+            aim: 0.0,
         };
         canvas::present(b, (id, false, FIT_SLOT + mirror as usize), at).draw([0.0, 0.0], crate::gfx::WHITE);
     })

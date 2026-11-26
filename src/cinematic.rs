@@ -60,9 +60,9 @@ pub fn view_for(m: &Match, side: usize) -> Sample {
 
 const CHEST: f32 = 0.55;
 
-pub fn close_up(scale: &mut f32, feet_y: &mut f32, height: f32, view: &Sample) {
+pub fn close_up(scale: &mut f32, feet_y: &mut f32, height: f32, view: &Sample) -> f32 {
     if view.detail <= 0.0 {
-        return;
+        return 0.0;
     }
     let zoom = 1.0 + view.detail;
     let full = height * *scale;
@@ -70,4 +70,5 @@ pub fn close_up(scale: &mut f32, feet_y: &mut f32, height: f32, view: &Sample) {
     let hold = view.aim * (1.0 - lean) + CHEST * lean;
     *feet_y += (view.aim * zoom - hold) * full;
     *scale *= zoom;
+    view.aim.max(f32::EPSILON)
 }

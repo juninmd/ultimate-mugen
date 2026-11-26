@@ -88,7 +88,7 @@ impl Beat {
         self.shake = clamp_pair(self.shake, 0.0, 1.0);
         self.pitch = clamp_pair(self.pitch, -MAX_PITCH, MAX_PITCH);
         self.lens = clamp_pair(self.lens, 0.0, 0.6);
-        self.detail = clamp_pair(self.detail, 0.0, 1.0);
+        self.detail = clamp_pair(self.detail, 0.0, 2.0);
         self.aim = clamp_pair(self.aim, 0.0, 1.0);
         self.sweep = clamp_pair(self.sweep, -MAX_SWEEP, MAX_SWEEP);
         self

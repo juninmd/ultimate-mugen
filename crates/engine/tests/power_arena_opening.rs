@@ -107,7 +107,7 @@ fn scripted_qa_climb_rings_out_against_the_loading_cpu() {
             p.state_no
         );
         match phase {
-            0 if p.pos.x < -218.0 => phase = 1,
+            0 if p.pos.x < -164.0 && p.pos.x > -250.0 => phase = 1,
             1 => {
                 up += 1;
                 if up >= 8 {

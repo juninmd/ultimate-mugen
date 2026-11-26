@@ -16,7 +16,7 @@ async function run() {
     if (state?.screen !== 'fight' || !clock?.arena || !player) return false;
     switch (step) {
       case 'start': return clock.round_state === 2;
-      case 'approach': return player.x < -218;
+      case 'approach': return player.x < -164 && player.x > -250;
       case 'land': return player.ground <= height && player.y === player.ground && player.state === 0;
       case 'edge': return player.x < -510 && clock.round_state === 2;
       case 'fall': return player.state === 19903 && player.alive && player.y > 12;
@@ -24,6 +24,15 @@ async function run() {
       default: return false;
     }
   }, { step, height }, { timeout: 35000 });
+  const hop = async () => {
+    await match.page.keyboard.down('ArrowUp');
+    await match.page.waitForFunction(() => {
+      const state = JSON.parse(window.__ume_state || 'null');
+      const player = state?.fighters?.find(f => f.side === 0);
+      return !!player && player.y < player.ground - 2;
+    }, null, { timeout: 8000 });
+    await match.page.keyboard.up('ArrowUp');
+  };
 
   try {
     await wait('start');
@@ -32,9 +41,7 @@ async function run() {
     await wait('approach');
     await match.page.keyboard.up('ArrowLeft');
     for (const [height, shot] of [[-50, 'platform'], [-102, 'second-tier']]) {
-      await match.page.keyboard.down('ArrowUp');
-      await match.page.waitForTimeout(120);
-      await match.page.keyboard.up('ArrowUp');
+      await hop();
       await wait('land', height);
       await match.shot(shot);
     }

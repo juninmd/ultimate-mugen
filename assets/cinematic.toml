@@ -2,40 +2,64 @@ enabled = true
 
 [[intro]]
 subject = "p1"
-duration = 1.2
+duration = 0.9
 ease = "out"
 zoom = [0.15, 0.4]
 focus = [0.6, 1.0]
-yaw = [1.1, 0.0]
-pitch = [-0.3, 0.05]
-lens = [0.4, 0.15]
-detail = [0.0, 0.6]
+yaw = [1.1, 0.4]
+pitch = [-0.3, -0.05]
+lens = [0.4, 0.25]
+detail = [0.2, 1.4]
 aim = [0.85, 0.85]
-sweep = [-40.0, 0.0]
+sweep = [-40.0, -10.0]
+
+[[intro]]
+subject = "p1"
+duration = 0.3
+ease = "in_out"
+zoom = [0.4, 0.4]
+focus = [1.0, 1.0]
+yaw = [0.4, 0.0]
+pitch = [-0.05, 0.0]
+lens = [0.25, 0.1]
+detail = [1.4, 0.0]
+aim = [0.85, 0.7]
+sweep = [-10.0, 0.0]
 
 [[intro]]
 subject = "p2"
-duration = 1.2
+duration = 0.9
 ease = "out"
 zoom = [0.4, 0.4]
 focus = [1.0, 1.0]
-yaw = [-1.1, 0.0]
-pitch = [0.35, 0.0]
-lens = [0.3, 0.1]
-detail = [0.4, 0.2]
-aim = [0.6, 0.6]
-sweep = [40.0, 0.0]
+yaw = [-1.1, -0.4]
+pitch = [0.35, 0.05]
+lens = [0.3, 0.2]
+detail = [0.0, 1.1]
+aim = [0.62, 0.62]
+sweep = [40.0, 10.0]
+
+[[intro]]
+subject = "p2"
+duration = 0.3
+ease = "in_out"
+zoom = [0.4, 0.4]
+focus = [1.0, 1.0]
+yaw = [-0.4, 0.0]
+pitch = [0.05, 0.0]
+lens = [0.2, 0.1]
+detail = [1.1, 0.0]
+aim = [0.62, 0.6]
+sweep = [10.0, 0.0]
 
 [[intro]]
 subject = "both"
-duration = 1.4
+duration = 1.1
 ease = "in_out"
 zoom = [0.4, 0.0]
 focus = [1.0, 0.0]
 lens = [0.1, 0.0]
-detail = [0.2, 0.0]
 aim = [0.6, 0.6]
-sweep = [0.0, 0.0]
 
 [[victory]]
 subject = "winner"
@@ -46,7 +70,7 @@ focus = [0.0, 1.0]
 yaw = [0.0, 3.1416]
 pitch = [-0.4, 0.0]
 lens = [0.2, 0.4]
-detail = [0.0, 0.35]
+detail = [0.0, 1.2]
 aim = [0.6, 0.8]
 shake = [0.3, 0.0]
 sweep = [0.0, 30.0]
@@ -60,6 +84,6 @@ focus = [1.0, 1.0]
 yaw = [3.1416, 6.2832]
 pitch = [0.0, 0.25]
 lens = [0.4, 0.1]
-detail = [0.35, 0.0]
+detail = [1.2, 0.0]
 aim = [0.8, 0.6]
 sweep = [30.0, 0.0]

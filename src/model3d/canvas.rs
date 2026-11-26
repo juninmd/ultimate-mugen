@@ -5,10 +5,13 @@ use std::collections::HashMap;
 use ume_model3d::{Facing, Raster};
 
 const EDGE: usize = 448;
+const CLOSE_EDGE: usize = 640;
+const CLOSE_SLOT: usize = 1000;
 const FEET: f32 = 0.84;
 const FILL: f32 = 0.5;
 
 struct Canvas {
+    edge: usize,
     raster: Raster,
     samples: usize,
     pixels: Vec<u8>,
@@ -23,6 +26,7 @@ pub(super) struct Placement {
     pub yaw: f32,
     pub pitch: f32,
     pub lens: f32,
+    pub aim: f32,
 }
 
 thread_local! {
@@ -51,16 +55,27 @@ impl Drawn {
 }
 
 pub(super) fn present(b: &mut Binding, key: (&str, bool, usize), at: Placement) -> Drawn {
-    let render_scale = at.screen_scale.min(EDGE as f32 * FILL / b.height);
+    let close = at.aim > 0.0;
+    let edge = if close { CLOSE_EDGE } else { EDGE };
+    let render_scale = if close {
+        at.screen_scale
+    } else {
+        at.screen_scale.min(EDGE as f32 * FILL / b.height)
+    };
     let mut camera = b.camera;
     camera.pixels_per_unit *= render_scale;
     camera.yaw_offset += at.yaw;
     camera.pitch = at.pitch;
     camera.lens = at.lens;
-    let origin = [EDGE as f32 / 2.0, EDGE as f32 * FEET];
+    let origin = if close {
+        [edge as f32 / 2.0, edge as f32 / 2.0 + at.aim * b.height * render_scale]
+    } else {
+        [edge as f32 / 2.0, edge as f32 * FEET]
+    };
     b.model
         .project(&b.posed, &camera, at.facing, origin, &mut b.triangles);
-    let drawn = CANVASES.with(|cache| {
+    let slot = key.2 + if close { CLOSE_SLOT } else { 0 };
+    CANVASES.with(|cache| {
         let mut cache = cache.borrow_mut();
         let samples = if crate::lite::scale() < 1.0 {
             1
@@ -68,15 +83,16 @@ pub(super) fn present(b: &mut Binding, key: (&str, bool, usize), at: Placement) 
             at.samples
         };
         let canvas = cache
-            .entry((key.0.to_string(), key.1, key.2))
+            .entry((key.0.to_string(), key.1, slot))
             .or_insert_with(|| Canvas {
-                raster: Raster::new(EDGE, EDGE, samples),
+                edge,
+                raster: Raster::new(edge, edge, samples),
                 samples,
-                pixels: vec![0; EDGE * EDGE * 4],
+                pixels: vec![0; edge * edge * 4],
                 texture: None,
             });
         if canvas.samples != samples {
-            canvas.raster = Raster::new(EDGE, EDGE, samples);
+            canvas.raster = Raster::new(edge, edge, samples);
             canvas.samples = samples;
         }
         canvas.raster.draw(&b.triangles, &b.model.images);
@@ -87,17 +103,17 @@ pub(super) fn present(b: &mut Binding, key: (&str, bool, usize), at: Placement) 
                 texture.clone()
             }
             None => {
-                let texture = Texture2D::from_rgba8(EDGE as u16, EDGE as u16, &canvas.pixels);
+                let texture = Texture2D::from_rgba8(edge as u16, edge as u16, &canvas.pixels);
                 canvas.texture = Some(texture.clone());
                 texture
             }
         };
-        let dest = EDGE as f32 * at.screen_scale / render_scale;
+        let dest = canvas.edge as f32 * at.screen_scale / render_scale;
+        let ratio = dest / canvas.edge as f32;
         Drawn {
             texture,
-            corner: [at.feet[0] - dest / 2.0, at.feet[1] - dest * FEET],
+            corner: [at.feet[0] - origin[0] * ratio, at.feet[1] - origin[1] * ratio],
             size: dest,
         }
-    });
-    drawn
+    })
 }

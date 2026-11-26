@@ -3,7 +3,8 @@ use super::{Fighter, Match, V2, asf};
 pub const ARENA_HALF_WIDTH: f32 = 554.0;
 pub const ENGINE_STATE_ARENA_EXIT: i32 = 19903;
 const ARENA_EXIT_DEPTH: f32 = 184.0;
-const ARENA_SPAWN_X: f32 = 112.0;
+pub const ARENA_P1_SPAWN_X: f32 = -140.0;
+pub const ARENA_P2_SPAWN_X: f32 = 220.0;
 pub(super) const ARENA_ROOF_Y: f32 = -414.0;
 const CAMERA_HEADROOM: f32 = 134.0;
 const CAMERA_FLOOR_MARGIN: f32 = 34.0;
@@ -57,7 +58,7 @@ pub const ARENA_PLATFORMS: [(f32, f32, f32); 40] = [
     (372.0, 500.0, ARENA_ROOF_Y),
 ];
 
-pub(super) fn tile_local(x: f32) -> f32 {
+pub(crate) fn tile_local(x: f32) -> f32 {
     (x + ARENA_HALF_WIDTH).rem_euclid(ARENA_HALF_WIDTH * 2.0) - ARENA_HALF_WIDTH
 }
 
@@ -83,9 +84,9 @@ impl Match {
         self.stage.bound_left = -self.arena_half;
         self.stage.bound_right = self.arena_half;
         self.zoom_max = (ARENA_HALF_WIDTH * 2.0 + 48.0) / super::BASE_W;
-        let spawn_offsets = [-ARENA_SPAWN_X - self.stage.p1x, ARENA_SPAWN_X - self.stage.p2x];
-        self.stage.p1x = -ARENA_SPAWN_X;
-        self.stage.p2x = ARENA_SPAWN_X;
+        let spawn_offsets = [ARENA_P1_SPAWN_X - self.stage.p1x, ARENA_P2_SPAWN_X - self.stage.p2x];
+        self.stage.p1x = ARENA_P1_SPAWN_X;
+        self.stage.p2x = ARENA_P2_SPAWN_X;
         for fighter in self.fighters.iter_mut().filter(|fighter| !fighter.is_helper) {
             fighter.pos.x += spawn_offsets[fighter.side.min(1)];
         }

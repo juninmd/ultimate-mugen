@@ -112,6 +112,8 @@ O plano fica em `Pilot::Dummy(DummyPlan)` (`src/session/dummy.rs`); o boneco ape
 
 Escolha **Arena do Poder** no menu principal, ajuste a partida e escolha seus lutadores para enfrentar a CPU. Suba por 40 plataformas suspensas em oito níveis. Atravesse-as no salto e pouse nelas durante a descida. O lutador ainda pode voltar enquanto estiver acima da base. Ao cair pela borda, ele gira no ar e só é eliminado quando sai da arena. A câmera acompanha a altura e abre o enquadramento quando os lutadores se afastam na horizontal ou na vertical.
 
+Os dois lutadores começam no chão, sob uma plataforma interna do primeiro nível, então uma caminhada e um salto chegam nela. Até o rival pousar numa plataforma, ou até um golpe acertar, a CPU sobe para a própria plataforma e não ataca. Depois desse primeiro pouso a CPU luta com a pressão de sempre, e o ring-out continua encerrando o round.
+
 ### Time contra enxame (1 a 5 contra até 100)
 
 A entrada do menu abre uma tela de ajuste antes da seleção: **seu time** (1 a 5 lutadores), **inimigos** (1, 5, 10, 25, 50 ou 100) e o **tipo** de inimigo (lutadores aleatórios ou um lutador escolhido, repetido). Funciona com mouse, toque, teclado e controle.
@@ -124,6 +126,6 @@ A entrada do menu abre uma tela de ajuste antes da seleção: **seu time** (1 a 
 
 - **Elixir do poder:** um frasco brilhante flutua na plataforma mais alta (marcado em dourado no minimapa). Quem chegar primeiro, seu lutador ou qualquer inimigo, dobra a vida máxima e a preenche por completo. Existe uma vez por round e é devolvido quando o próximo round começa. Código: `crates/engine/src/matchs/elixir.rs`, desenho em `src/power_arena_elixir.rs`.
 
-Código: simulação em `crates/engine/src/matchs/swarm.rs`, tela de ajuste em `src/app/arena_setup.rs` e `arena_pick.rs`, minimapa e plataformas em bloco em `src/power_arena.rs`.
+Código: simulação em `crates/engine/src/matchs/swarm.rs` e `crates/engine/src/matchs/power_arena.rs`, subida inicial em `crates/engine/src/ai/arena.rs`, tela de ajuste em `src/app/arena_setup.rs` e `arena_pick.rs`, minimapa e plataformas em bloco em `src/power_arena.rs`.
 
 Na versão web, abra uma luta diretamente com `?modo=arena&p1=kaito&p2=shion&luta=1`.

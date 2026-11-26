@@ -1,4 +1,4 @@
-use super::power_arena::{tile_local, ARENA_HALF_WIDTH, ARENA_PLATFORMS};
+use super::power_arena::{tile_local, ARENA_HALF_WIDTH, ARENA_P1_SPAWN_X, ARENA_P2_SPAWN_X, ARENA_PLATFORMS};
 use super::{Match, V2};
 use crate::fighter::GetHitVars;
 
@@ -61,7 +61,7 @@ impl Match {
         for (k, &i) in players.iter().enumerate() {
             let step = (k as f32 / 2.0).ceil() * TEAM_SPACING;
             let x = if k % 2 == 0 { -step } else { step };
-            self.fighters[i].pos.x = if crowd { x } else { -112.0 };
+            self.fighters[i].pos.x = if crowd { x } else { ARENA_P1_SPAWN_X };
             self.fighters[i].facing = 1.0;
         }
         if crowd {
@@ -69,6 +69,9 @@ impl Match {
                 let (x, y) = self.spawn_point();
                 self.place_foe(i, x, y);
             }
+        } else if let Some(&i) = foes.first() {
+            self.fighters[i].pos.x = ARENA_P2_SPAWN_X;
+            self.fighters[i].facing = -1.0;
         }
         self.update_camera();
     }

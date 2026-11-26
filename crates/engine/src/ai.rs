@@ -1,6 +1,7 @@
 use crate::input::{k, InputSource};
 use crate::matchs::Match;
 
+mod arena;
 mod charge;
 mod guard_budget;
 mod reading;
@@ -19,6 +20,7 @@ pub struct Ai {
     ranged_attack: Vec<usize>,
     init: bool,
     last_form: u8,
+    arena_live: bool,
     profile: reading::Profile,
     guard: GuardBudget,
 }
@@ -36,6 +38,7 @@ impl Ai {
             ranged_attack: vec![],
             init: false,
             last_form: u8::MAX,
+            arena_live: false,
             profile: Default::default(),
             guard: GuardBudget::default(),
         }
@@ -43,6 +46,7 @@ impl Ai {
     pub fn reset(&mut self) {
         self.init = false;
         self.last_form = u8::MAX;
+        self.arena_live = false;
         self.guard = GuardBudget::default();
         self.queue.clear();
         self.hold = 0;
@@ -109,6 +113,9 @@ impl Ai {
                     }
                 }
             }
+        }
+        if let Some(bits) = self.arena_opening(m, me) {
+            return bits;
         }
         if let Some(b) = self.queue.pop_front() {
             return b;

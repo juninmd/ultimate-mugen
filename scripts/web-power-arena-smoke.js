@@ -33,26 +33,33 @@ async function run() {
     }, null, { timeout: 8000 });
     await match.page.keyboard.up('ArrowUp');
   };
+  const shot = async (name) => {
+    await match.page.keyboard.press('Escape');
+    await match.page.waitForFunction(() => JSON.parse(window.__ume_state || 'null')?.paused === true, null, { timeout: 5000 });
+    await match.shot(name);
+    await match.page.keyboard.press('Escape');
+    await match.page.waitForFunction(() => JSON.parse(window.__ume_state || 'null')?.paused === false, null, { timeout: 5000 });
+  };
 
   try {
     await wait('start');
-    await match.shot('start');
+    await shot('start');
     await match.page.keyboard.down('ArrowLeft');
     await wait('approach');
     await match.page.keyboard.up('ArrowLeft');
-    for (const [height, shot] of [[-50, 'platform'], [-102, 'second-tier']]) {
+    for (const [height, name] of [[-50, 'platform'], [-102, 'second-tier']]) {
       await hop();
       await wait('land', height);
-      await match.shot(shot);
+      await shot(name);
     }
     await match.page.keyboard.down('ArrowLeft');
     await wait('edge');
-    await match.shot('edge');
+    await shot('edge');
     await wait('fall');
-    await match.shot('fall');
+    await shot('fall');
     await wait('result');
     await match.page.keyboard.up('ArrowLeft');
-    await match.shot('ring-out');
+    await shot('ring-out');
     assert.deepEqual(match.problems, []);
     console.log('POWER ARENA OK platform ascent, arena edge, ring-out');
   } finally {

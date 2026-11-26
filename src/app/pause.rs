@@ -44,7 +44,9 @@ impl App {
                 bindable: self.pause.tab == Tab::Moves,
             }
         });
-        self.pause_slots(&lay, &cards, ease);
+        if SlotCard::any_visible(&cards) {
+            self.pause_slots(&lay, &cards, ease);
+        }
         if self.pause.tab == Tab::Moves {
             let slot_of = |command: &str| self.c.shortcuts.slot_of(&name, command);
             self.pause_moves_list(&lay, moves, &slot_of, ease);

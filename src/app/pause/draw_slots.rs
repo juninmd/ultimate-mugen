@@ -13,6 +13,12 @@ pub(super) struct SlotCard<'a> {
     pub bindable: bool,
 }
 
+impl SlotCard<'_> {
+    pub(super) fn any_visible(cards: &[SlotCard; 4]) -> bool {
+        cards.iter().any(|c| c.bindable || c.mv.is_some())
+    }
+}
+
 const KEY_NAMES: [&str; 4] = ["1", "2", "3", "4"];
 
 impl App {
@@ -67,5 +73,24 @@ impl App {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn card(bindable: bool) -> SlotCard<'static> {
+        SlotCard { mv: None, selected: false, bindable }
+    }
+
+    #[test]
+    fn empty_unbindable_slots_stay_hidden() {
+        assert!(!SlotCard::any_visible(&[card(false), card(false), card(false), card(false)]));
+    }
+
+    #[test]
+    fn bindable_slots_stay_visible_when_empty() {
+        assert!(SlotCard::any_visible(&[card(true), card(true), card(true), card(true)]));
     }
 }

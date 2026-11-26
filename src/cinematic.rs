@@ -49,11 +49,25 @@ pub fn frame(m: &Match) -> Option<Frame> {
     frame_with(m, config())
 }
 
-pub fn yaw_for(m: &Match, side: usize) -> f32 {
+pub fn view_for(m: &Match, side: usize) -> Sample {
     if crate::tweaks::current().reduce_motion {
-        return 0.0;
+        return Sample::default();
     }
     frame(m)
         .filter(|f| f.covers(side, m.winner_side))
-        .map_or(0.0, |f| f.sample.yaw)
+        .map_or_else(Sample::default, |f| f.sample)
+}
+
+const CHEST: f32 = 0.55;
+
+pub fn close_up(scale: &mut f32, feet_y: &mut f32, height: f32, view: &Sample) {
+    if view.detail <= 0.0 {
+        return;
+    }
+    let zoom = 1.0 + view.detail;
+    let full = height * *scale;
+    let lean = (view.detail * 2.0).min(1.0);
+    let hold = view.aim * (1.0 - lean) + CHEST * lean;
+    *feet_y += (view.aim * zoom - hold) * full;
+    *scale *= zoom;
 }

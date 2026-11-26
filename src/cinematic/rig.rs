@@ -11,6 +11,7 @@ struct Target {
     bias: f32,
     point: Option<(f32, f32)>,
     shake: f32,
+    sweep: f32,
 }
 
 #[derive(Clone, Copy, Default)]
@@ -19,6 +20,7 @@ pub struct Rig {
     bias: f32,
     point: (f32, f32),
     shake: f32,
+    sweep: f32,
     target: Target,
 }
 
@@ -51,6 +53,7 @@ impl Rig {
                     bias: point.map_or(0.0, |_| frame.sample.focus),
                     point,
                     shake: frame.sample.shake,
+                    sweep: frame.sample.sweep,
                 }
             }
             None => Target::default(),
@@ -72,6 +75,7 @@ impl Rig {
         }
         self.zoom += (self.target.zoom - self.zoom) * k;
         self.bias += (self.target.bias - self.bias) * k;
+        self.sweep += (self.target.sweep - self.sweep) * k;
     }
 
     pub fn zoom(&self, gain: f32) -> f32 {
@@ -85,7 +89,7 @@ impl Rig {
     pub fn focus(&self, mid: (f32, f32), gain: f32) -> (f32, f32) {
         let b = (self.bias * gain).clamp(0.0, 1.0);
         (
-            mid.0 + (self.point.0 - mid.0) * b,
+            mid.0 + (self.point.0 - mid.0) * b + self.sweep * gain,
             mid.1 + (self.point.1 - mid.1) * b,
         )
     }

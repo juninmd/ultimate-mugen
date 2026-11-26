@@ -892,7 +892,6 @@ impl Vfx {
                 )
             }
         };
-        let mid = self.shot.focus(mid, gain);
         let ko = if self.ko_t > 0.0 {
             let e = (self.ko_t.min(1.0)).powf(0.6);
             e * if self.cinema.dramatic { 0.36 } else { 0.28 }
@@ -925,7 +924,7 @@ impl Vfx {
         } else {
             mid
         };
-        (z, focus)
+        (z, self.shot.focus(focus, gain))
     }
 
     pub fn shake(&mut self, gain: f32) -> (f32, f32) {

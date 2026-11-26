@@ -93,11 +93,19 @@ impl Model {
                 Facing::Left => -std::f32::consts::FRAC_PI_2,
             };
         let (s, c) = yaw.sin_cos();
+        let (sp, cp) = cam.pitch.sin_cos();
+        let reach = cam.lens / cam.span;
         let mut normals = Vec::new();
         for (prim, verts) in self.primitives.iter().zip(&posed.positions) {
             let view: Vec<[f32; 3]> = verts
                 .iter()
-                .map(|p| [p[0] * c + p[2] * s, p[1], -p[0] * s + p[2] * c])
+                .map(|p| {
+                    let (x, z) = (p[0] * c + p[2] * s, -p[0] * s + p[2] * c);
+                    let dy = p[1] - cam.pivot;
+                    let (y, z) = (dy * cp - z * sp, dy * sp + z * cp);
+                    let near = if reach == 0.0 { 1.0 } else { 1.0 / (1.0 - z * reach).max(0.35) };
+                    [x * near, y * near + cam.pivot, z]
+                })
                 .collect();
             vertex_normals(&view, &prim.indices, &mut normals);
             for tri in prim.indices.chunks_exact(3) {

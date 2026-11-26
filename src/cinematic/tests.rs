@@ -1,7 +1,7 @@
 use super::beat::{sample, Beat};
 use super::config::Config;
 use super::ease::Ease;
-use super::{frame_with, Rig, Subject};
+use super::{close_up, frame_with, Rig, Sample, Subject};
 use ume_engine::matchs::Match;
 
 fn duel() -> Match {
@@ -52,6 +52,7 @@ fn the_intro_hands_the_camera_from_p1_to_p2_then_pulls_back_to_neutral() {
     intro_at(&mut m, 227);
     let end = frame_with(&m, &cfg).unwrap().sample;
     assert!(end.zoom.abs() < 0.02 && end.focus < 0.02 && end.yaw == 0.0, "{end:?}");
+    assert!(end.pitch.abs() + end.lens + end.detail + end.sweep.abs() < 0.01, "{end:?}");
 }
 
 #[test]
@@ -131,4 +132,19 @@ fn the_rig_eases_toward_the_subject_and_back_without_snapping() {
         rig.ease(1.0 / 60.0);
     }
     assert!(rig.zoom(1.0).abs() < 0.01 && rig.focus(mid, 1.0).0.abs() < 1.0);
+}
+
+#[test]
+fn a_face_close_up_lands_the_aim_point_on_the_chest_line() {
+    let view = Sample { detail: 1.0, aim: 0.88, ..Default::default() };
+    let (mut scale, mut feet) = (2.0, 500.0);
+    let height = 100.0;
+    let chest_line = feet - 0.55 * height * scale;
+    close_up(&mut scale, &mut feet, height, &view);
+    assert_eq!(scale, 4.0);
+    let aim_y = feet - 0.88 * height * scale;
+    assert!((aim_y - chest_line).abs() < 1e-3, "{aim_y} vs {chest_line}");
+    let (mut s2, mut f2) = (2.0, 500.0);
+    close_up(&mut s2, &mut f2, height, &Sample::default());
+    assert_eq!((s2, f2), (2.0, 500.0), "no detail leaves the placement untouched");
 }

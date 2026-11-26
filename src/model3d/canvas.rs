@@ -21,6 +21,8 @@ pub(super) struct Placement {
     pub feet: [f32; 2],
     pub samples: usize,
     pub yaw: f32,
+    pub pitch: f32,
+    pub lens: f32,
 }
 
 thread_local! {
@@ -53,6 +55,8 @@ pub(super) fn present(b: &mut Binding, key: (&str, bool, usize), at: Placement) 
     let mut camera = b.camera;
     camera.pixels_per_unit *= render_scale;
     camera.yaw_offset += at.yaw;
+    camera.pitch = at.pitch;
+    camera.lens = at.lens;
     let origin = [EDGE as f32 / 2.0, EDGE as f32 * FEET];
     b.model
         .project(&b.posed, &camera, at.facing, origin, &mut b.triangles);

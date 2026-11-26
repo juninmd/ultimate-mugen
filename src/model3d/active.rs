@@ -23,14 +23,19 @@ pub(super) fn draw(g: &mut Gfx, m: &Match, f: &Fighter, shx: f32, shy: f32) -> b
         .position(|o| std::ptr::eq(o, f))
         .unwrap_or(0);
     let awakened = f.form > 0;
-    let at = Placement {
+    let view = crate::cinematic::view_for(m, f.side);
+    let mut at = Placement {
         facing,
         screen_scale: g.view_scale * f.lscl,
         feet: [g.ox + feet[0] * g.view_scale, g.oy + feet[1] * g.view_scale],
         samples: 1,
+        yaw: view.yaw,
+        pitch: view.pitch,
+        lens: view.lens,
     };
     let feet_px = at.feet;
     bindings::with(id, awakened, |b| {
+        crate::cinematic::close_up(&mut at.screen_scale, &mut at.feet[1], b.height, &view);
         pose_pick::pose(b, f.anim_no, f.anim_elapsed, f.state_no, f.state_time);
         let height = b.height * at.screen_scale;
         let drawn = canvas::present(b, (id, awakened, slot), at);

@@ -23,6 +23,9 @@ pub(super) fn draw(
             screen_scale: height * FIT_SHARE / b.height,
             feet: [center_x, bottom],
             samples: 2,
+            yaw: 0.0,
+            pitch: 0.0,
+            lens: 0.0,
         };
         canvas::present(b, (id, false, FIT_SLOT + mirror as usize), at).draw([0.0, 0.0], crate::gfx::WHITE);
     })

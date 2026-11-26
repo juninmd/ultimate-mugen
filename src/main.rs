@@ -1,7 +1,7 @@
 mod app;
 mod audio;
 mod e2e; mod easter;
-mod boss; mod char_tuning;
+mod boss; mod char_tuning; mod cinematic;
 mod controls;
 mod credit_line; mod flag; mod player_card;
 mod gamepad;

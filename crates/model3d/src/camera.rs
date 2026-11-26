@@ -5,6 +5,10 @@ pub struct Camera {
     pub pixels_per_unit: f32,
     pub floor: f32,
     pub yaw_offset: f32,
+    pub pitch: f32,
+    pub lens: f32,
+    pub pivot: f32,
+    pub span: f32,
 }
 
 impl Camera {
@@ -17,6 +21,10 @@ impl Camera {
             pixels_per_unit: pixels / (hi - lo).max(f32::EPSILON),
             floor: lo,
             yaw_offset: 0.0,
+            pitch: 0.0,
+            lens: 0.0,
+            pivot: (lo + hi) / 2.0,
+            span: (hi - lo).max(f32::EPSILON),
         }
     }
 }

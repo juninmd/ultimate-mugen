@@ -153,9 +153,7 @@ pub struct Vfx {
     sat_pulse: f32,
     super_t: f32,
     super_owner: u32,
-    /// face-off camera push-in at the start of the first round (target is set by the session, eased in `update`)
-    pub intro_target: f32,
-    intro_zoom: f32,
+    pub shot: crate::cinematic::Rig,
     pub photo_zoom: f32,
     /// cinematic super camera 0..1 (eased in while the super pause runs, eased out afterwards: build-up + follow-through)
     sz: f32,
@@ -213,8 +211,7 @@ impl Vfx {
             sat_pulse: 0.0,
             super_t: 0.0,
             super_owner: 0,
-            intro_target: 0.0,
-            intro_zoom: 0.0,
+            shot: Default::default(),
             photo_zoom: 1.0,
             sz: 0.0,
             super_active: false,
@@ -699,6 +696,8 @@ impl Vfx {
         }
         self.super_active = m.pause.as_ref().is_some_and(|p| p.is_super);
         self.cinema.tick_match(m);
+        self.shot.retarget(m);
+        self.trauma = self.trauma.max(self.shot.shake(1.0));
         self.overdrive_embers(m);
         // awakened fighters burn with rising embers and crackling arcs; defeats get their own beat
         for f in m.fighters.iter().filter(|f| !f.is_helper) {
@@ -838,7 +837,7 @@ impl Vfx {
         self.cinema.update(dt, self.super_active, self.ko_t);
         self.invert_t = (self.invert_t - dt).max(0.0);
         self.flash_clock += dt;
-        self.intro_zoom += (self.intro_target - self.intro_zoom) * (2.5 * dt).min(1.0);
+        self.shot.ease(dt);
         for l in &mut self.lights {
             l.t += dt;
         }
@@ -900,7 +899,7 @@ impl Vfx {
             0.0
         };
         let sup = self.sz * self.sz * (3.0 - 2.0 * self.sz) * 0.2;
-        let z = (1.0 + (self.punch + ko + sup + self.intro_zoom) * gain) * self.photo_zoom;
+        let z = (1.0 + (self.punch + ko + sup) * gain + self.shot.zoom(gain)) * self.photo_zoom;
         let mid = if self.sz > 0.01 {
             match m
                 .fighters
@@ -925,7 +924,7 @@ impl Vfx {
         } else {
             mid
         };
-        (z, focus)
+        (z, self.shot.focus(focus, gain))
     }
 
     pub fn shake(&mut self, gain: f32) -> (f32, f32) {

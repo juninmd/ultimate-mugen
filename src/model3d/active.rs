@@ -28,6 +28,7 @@ pub(super) fn draw(g: &mut Gfx, m: &Match, f: &Fighter, shx: f32, shy: f32) -> b
         screen_scale: g.view_scale * f.lscl,
         feet: [g.ox + feet[0] * g.view_scale, g.oy + feet[1] * g.view_scale],
         samples: 1,
+        yaw: crate::cinematic::yaw_for(m, f.side),
     };
     let feet_px = at.feet;
     bindings::with(id, awakened, |b| {

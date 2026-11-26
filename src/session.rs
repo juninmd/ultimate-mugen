@@ -642,16 +642,6 @@ impl Session {
             return;
         }
         self.vfx.update(dt * if self.r.debug { debug_ctrl::speed_mul() } else { 1.0 });
-        // face-off camera push-in
-        self.vfx.intro_target = if self.m.round_state == 1
-            && self.m.round_no == 1
-            && self.m.intro_ticks > 0
-            && self.m.round_time > 10
-        {
-            0.2
-        } else {
-            0.0
-        };
         self.acc += dt.min(0.1) * self.vfx.time_scale() * self.speed * if self.r.debug { debug_ctrl::speed_mul() } else { 1.0 };
         let step = 1.0 / 60.0;
         let mut n = 0;

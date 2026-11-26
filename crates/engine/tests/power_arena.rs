@@ -1,7 +1,14 @@
 use crate::support;
 
 use support::{duel, mugen_char, ticks};
-use ume_engine::matchs::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT};
+use ume_engine::matchs::{ARENA_HALF_WIDTH, ARENA_P1_SPAWN_X, ARENA_P2_SPAWN_X, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT};
+
+#[test]
+fn default_spawns_stand_under_the_inner_first_tier() {
+    let under = |x: f32| ARENA_PLATFORMS.iter().any(|&(left, right, top)| top == -50.0 && x >= left && x <= right);
+    assert!(under(ARENA_P1_SPAWN_X), "p1 spawn {ARENA_P1_SPAWN_X}");
+    assert!(under(ARENA_P2_SPAWN_X), "p2 spawn {ARENA_P2_SPAWN_X}");
+}
 
 #[test]
 fn descending_fighter_lands_on_platform() {

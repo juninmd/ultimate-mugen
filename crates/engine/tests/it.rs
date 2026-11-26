@@ -107,6 +107,7 @@ mod pixel_states_test;
 mod player_slot_triggers;
 mod potential;
 mod power_arena;
+mod power_arena_opening;
 mod projectile_teamside;
 mod projectiles;
 mod rekka;

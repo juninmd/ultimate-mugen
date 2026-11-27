@@ -1,5 +1,15 @@
 {
   "frames": {
+    "flyFwd0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "flyFwd1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "hitLightImpact": {
       "axisX": 200.0,
       "axisY": 392.0,

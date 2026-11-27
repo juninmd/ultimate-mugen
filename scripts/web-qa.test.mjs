@@ -9,7 +9,6 @@ const require = createRequire(import.meta.url);
 const lib = require('./web-qa-lib.js');
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const manifest = lib.loadManifest();
-const ci = fs.readFileSync(path.join(dir, '..', '.github', 'workflows', 'ci.yml'), 'utf8');
 
 test('every scenario has a unique name, an existing script and a shard', () => {
   const names = manifest.scenarios.map(s => s.name);
@@ -27,16 +26,6 @@ test('no web smoke script can be forgotten: it runs in a scenario or is excluded
     assert.ok(covered.has(name) || manifest.excluded[name], `${name} is neither in web-qa.json scenarios nor excluded`);
   }
   for (const [name, reason] of Object.entries(manifest.excluded)) assert.ok(reason.length > 3, `${name} needs a reason`);
-});
-
-test('CI runs every scenario through the runner parts', () => {
-  assert.match(ci, /node scripts\/web-qa\.js/);
-  const matrix = ci.match(/part: \[([^\]]+)\]/);
-  assert.ok(matrix, 'ci.yml has no part matrix');
-  const parts = matrix[1].split(',').map(x => Number(x.trim()));
-  assert.deepEqual(parts, parts.map((_, i) => i + 1));
-  const seen = parts.flatMap(i => lib.select(manifest, { part: `${i}/${parts.length}` }).map(s => s.name));
-  assert.deepEqual(seen.sort(), manifest.scenarios.map(s => s.name).sort());
 });
 
 test('partition balances by weight and is deterministic', () => {

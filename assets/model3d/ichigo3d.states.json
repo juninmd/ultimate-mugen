@@ -391,7 +391,7 @@
    "speed": 1.0
   },
   "shunpoStep": {
-   "clip": "ShunpoDash",
+   "clip": "ShunpoStep",
    "loop": false,
    "speed": 2.5
   },

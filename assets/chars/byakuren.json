@@ -1970,7 +1970,18 @@
           }
         },
         "02_attack1*3",
-        "02_attack1*4"
+        "02_attack1*4",
+        "crouch*3",
+        {
+          "pose": "clk",
+          "ticks": 4,
+          "hit": {
+            "part": "footF",
+            "radius": 9
+          }
+        },
+        "clk*3",
+        "crouch*4"
       ]
     },
     "sweep": {

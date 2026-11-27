@@ -566,7 +566,7 @@
     "trip": {"frames":["jumpUp*4","jumpUp*-1"]},
     "airRecover": {"frames":["jumpUp*3","jumpUp*3","jumpUp*3","jumpUp*3","jumpUp*-1"]},
     "win": {"frames":["06_victory*14","06_victory*14"]},
-    "lose": {"frames":["crouch*-1"]},
+    "lose": {"frames":["lose*-1"]},
     "draw": {"frames":["06_victory*-1"]},
     "intro": {"frames":["06_victory*40","06_victory*10","01_idle*10"]},
     "jab": {"frames":["02_attack1*3",{"pose":"02_attack1","ticks":3,"hit":{"part":"weapon","radius":12}},"02_attack1*5","02_attack1*2"]},

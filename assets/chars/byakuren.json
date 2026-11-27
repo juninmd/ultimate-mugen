@@ -531,7 +531,7 @@
     "crouch": {"frames":["crouch*14","crouch*14"]},
     "crouchEnd": {"frames":["crouch*3","01_idle*2"]},
     "crouchTurn": {"frames":["crouch*3","crouch*3"]},
-    "jumpStart": {"frames":["jumpUp*2","jumpUp*2"]},
+    "jumpStart": {"frames":["jumpStart*2","jumpStart*2"]},
     "jumpUp": {"frames":["jumpUp*6","jumpUp*-1"]},
     "jumpFwd": {"frames":["jumpUp*4","jumpUp*4","jumpUp*4","jumpUp*4","jumpUp*4","jumpUp*-1"]},
     "jumpBack": {"frames":["jumpUp*5","jumpUp*-1"]},
@@ -761,7 +761,7 @@
   ],
   "awakeningPalette": {"hair":"#14151c","eye":"#ffd6eb","energy":"#ffb8dc","aura":"#ff85c0","trim":"#ffb8dc"},
   "abilities": {
-    "fly": {"speed":4.4,"cost":40,"input":"b+c","upAnim":"jumpUp","downAnim":"jumpDown","fwdAnim":"jumpTop","backAnim":"jumpStart","sound":[200,2]},
+    "fly": {"speed":4.4,"cost":40,"input":"b+c","upAnim":"jumpUp","downAnim":"jumpDown","fwdAnim":"jumpTop","backAnim":"jumpUp","sound":[200,2]},
     "teleport": {"cost":200,"input":"a+b","offset":42,"invuln":14,"turn":true,"sound":[200,2]},
     "superSpeed": {"mul":1.9,"cost":55,"input":"a+c"},
     "charge": {"auraColor":[255,138,196],"shake":true,"sound":[200,4],"startSound":[200,5]},

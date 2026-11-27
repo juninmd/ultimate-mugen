@@ -14,6 +14,19 @@ pub(crate) fn decode_illustration(bytes: &[u8]) -> Result<Arc<ImageData>, String
     Ok(ImageData::new(png.width, png.height, rgba))
 }
 
+#[cfg(target_arch = "wasm32")]
+pub fn illustration_preview(id: &str) -> Option<Arc<ImageData>> {
+    #[cfg(feature = "model3d")]
+    if id == super::airport::ID {
+        return Some(super::airport::preview());
+    }
+    if wonders::WONDER_IDS.contains(&id) || ILLUSTRATION_IDS.contains(&id) {
+        return super::web_preview::get(id);
+    }
+    None
+}
+
+#[cfg(not(target_arch = "wasm32"))]
 pub fn illustration_preview(id: &str) -> Option<Arc<ImageData>> {
     #[cfg(feature = "model3d")]
     if id == super::airport::ID {

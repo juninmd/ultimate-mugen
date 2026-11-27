@@ -446,6 +446,7 @@
     "jumpUp": {"frames":["jumpUp*6","jumpTop*-1"]},
     "jumpFwd": {"frames":["jumpUp*4","flip0*4","flip1*4","flip2*4","flip3*4","jumpTop*-1"]},
     "jumpBack": {"frames":["jumpUp*5","jumpTop*-1"]},
+    "flyForward": {"frames":["flyFwd0*5","flyFwd1*5"],"loop":0},
     "jumpDown": {"frames":["jumpDown*-1"]},
     "land": {"frames":["land*2","jumpStart*2","idle0*1"]},
     "run": {
@@ -1062,7 +1063,7 @@
   "stage": "spirit",
   "passives": {"meterRegen":0.45,"enrageTime":{"maxMultiplier":1.3,"startSeconds":15,"rampSeconds":45,"exponent":1}},
   "abilities": {
-    "fly": {"speed":3.8,"cost":40,"input":"x+z"},
+    "fly": {"speed":3.8,"cost":40,"input":"x+z","fwdAnim":"flyForward"},
     "teleport": {"cost":150,"input":"b+c"},
     "forms": [
       {

@@ -58,10 +58,10 @@
     "moves": [
      {
       "id": "vasto_cero",
-      "name": "Cero Oscuras",
+      "name": "Cero do Hollow Total",
       "input": "~D, DF, F, a+b",
       "kind": "special",
-      "anim": "gale",
+      "anim": "tempest",
       "cost": 300,
       "projectile": {
        "at": 3,
@@ -757,7 +757,7 @@
   },
   {
    "id": "dragon",
-   "name": "Tsukiyomi Rising",
+   "name": "Getsuga Ascendente",
    "projectile": {
     "anim": "getsugaFx",
     "hitAnim": "getsugaHit",

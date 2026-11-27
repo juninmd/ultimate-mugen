@@ -16,62 +16,13 @@
   "country": "Portão dos Espíritos",
   "stage": "spirit",
   "rivals": {
-    "kaname": {
-      "intro": "Sua lâmina de inverno é admirável, Fuyutsuki... mas a primavera sempre vence.",
-      "taunt": "Gelo contra mil pétalas. Mostre sua disciplina."
-    },
-    "oboro": {
-      "intro": "Ilusões não enganam quem controla mil lâminas simultâneas.",
-      "taunt": "Seu Eclipse Escarlate será cortado em fragmentos."
-    },
-    "suzume": {
-      "intro": "A Deusa do Relâmpago... ainda tenta superar o meu Shunpo?",
-      "taunt": "Velocidade sem elegância é apenas pressa."
-    },
-    "shion": {
-      "intro": "Força bruta sem técnica jamais tocará um nobre da Casa Sakuraba.",
-      "taunt": "Balança essa espada pesada o quanto quiser."
-    }
+    "kaname": {"intro":"Sua lâmina de inverno é admirável, Fuyutsuki... mas a primavera sempre vence.","taunt":"Gelo contra mil pétalas. Mostre sua disciplina."},
+    "oboro": {"intro":"Ilusões não enganam quem controla mil lâminas simultâneas.","taunt":"Seu Eclipse Escarlate será cortado em fragmentos."},
+    "suzume": {"intro":"A Deusa do Relâmpago... ainda tenta superar o meu Shunpo?","taunt":"Velocidade sem elegância é apenas pressa."},
+    "shion": {"intro":"Força bruta sem técnica jamais tocará um nobre da Casa Sakuraba.","taunt":"Balança essa espada pesada o quanto quiser."}
   },
-  "stats": {
-    "life": 1020,
-    "power": 3000,
-    "attack": 106,
-    "defense": 100,
-    "walk": [
-      4.35,
-      2.5
-    ],
-    "run": [
-      7.2,
-      5.2
-    ],
-    "jump": [
-      -8.8,
-      -2.8,
-      0,
-      2.9
-    ],
-    "height": 102,
-    "width": [
-      16,
-      15
-    ],
-    "airJumps": 1
-  },
-  "passives": {
-    "meterRegen": 0.55,
-    "stacks": {
-      "damageGain": 0.03,
-      "defenceGain": 0.02,
-      "speedGain": 0.025,
-      "maxStacks": 6,
-      "decayTicks": 360,
-      "resetOnRound": true,
-      "specials": true,
-      "supers": true
-    }
-  },
+  "stats": {"life":1020,"power":3000,"attack":106,"defense":100,"walk":[4.35,2.5],"run":[7.2,5.2],"jump":[-8.8,-2.8,0,2.9],"height":102,"width":[16,15],"airJumps":1},
+  "passives": {"meterRegen":0.55,"stacks":{"damageGain":0.03,"defenceGain":0.02,"speedGain":0.025,"maxStacks":6,"decayTicks":360,"resetOnRound":true,"specials":true,"supers":true}},
   "art": {
     "type": "sprites",
     "style": {
@@ -83,37 +34,11 @@
       "beltTails": 1,
       "gloves": "wrap",
       "boots": "tabi",
-      "skirt": {
-        "type": "coat",
-        "length": 44,
-        "color": "cloth"
-      },
-      "cape": {
-        "color": "cloth",
-        "length": 50,
-        "collar": true
-      },
-      "hair": {
-        "type": "ponytail",
-        "length": 40,
-        "spikes": 7,
-        "min": 0.25,
-        "max": 0.42,
-        "sweep": 36,
-        "bangs": 3,
-        "bangLen": 0.6,
-        "seed": 31,
-        "strands": 7,
-        "locks": 3,
-        "shine": true
-      },
+      "skirt": {"type":"coat","length":44,"color":"cloth"},
+      "cape": {"color":"cloth","length":50,"collar":true},
+      "hair": {"type":"ponytail","length":40,"spikes":7,"min":0.25,"max":0.42,"sweep":36,"bangs":3,"bangLen":0.6,"seed":31,"strands":7,"locks":3,"shine":true},
       "eyes": "fierce",
-      "weapon": {
-        "type": "katana",
-        "length": 50,
-        "glowColor": "energy",
-        "twoHand": true
-      },
+      "weapon": {"type":"katana","length":50,"glowColor":"energy","twoHand":true},
       "colors": {
         "skin": "#f2d4bc",
         "hair": "#14151c",
@@ -144,111 +69,19 @@
       "hem": true,
       "knuckles": true,
       "faceShade": 1,
-      "brow": {
-        "thick": 1.1,
-        "shape": "arched"
-      },
+      "brow": {"thick":1.1,"shape":"arched"},
       "earring": "#5ab8f0",
-      "emblem": {
-        "type": "moon",
-        "color": "#5ab8f0",
-        "where": "back",
-        "size": 1.7
-      },
-      "hairpin": {
-        "type": "ring",
-        "color": "#5ab8f0"
-      },
-      "footwear": {
-        "sole": true,
-        "split": true
-      }
+      "emblem": {"type":"moon","color":"#5ab8f0","where":"back","size":1.7},
+      "hairpin": {"type":"ring","color":"#5ab8f0"},
+      "footwear": {"sole":true,"split":true}
     },
     "poses": {
-      "idle0": {
-        "shoulderF": 30,
-        "elbowF": 60,
-        "shoulderB": 38,
-        "elbowB": 95,
-        "thighF": 30,
-        "kneeF": 30,
-        "thighB": -26,
-        "kneeB": 18,
-        "lean": 4,
-        "head": -6,
-        "blade": 112,
-        "phase": 0
-      },
-      "idle1": {
-        "shoulderF": 30,
-        "elbowF": 62,
-        "shoulderB": 38,
-        "elbowB": 97,
-        "thighF": 30,
-        "kneeF": 32,
-        "thighB": -26,
-        "kneeB": 18,
-        "lean": 4,
-        "head": -6,
-        "blade": 114,
-        "phase": 1.6
-      },
-      "idle2": {
-        "shoulderF": 31,
-        "elbowF": 60,
-        "shoulderB": 38,
-        "elbowB": 99,
-        "thighF": 30,
-        "kneeF": 30,
-        "thighB": -26,
-        "kneeB": 18,
-        "lean": 5,
-        "head": -6,
-        "blade": 112,
-        "phase": 3.2
-      },
-      "idle3": {
-        "shoulderF": 30,
-        "elbowF": 58,
-        "shoulderB": 38,
-        "elbowB": 97,
-        "thighF": 30,
-        "kneeF": 30,
-        "thighB": -26,
-        "kneeB": 18,
-        "lean": 4,
-        "head": -6,
-        "blade": 110,
-        "phase": 4.800000000000001
-      },
-      "turn": {
-        "shoulderF": 20,
-        "elbowF": 42,
-        "shoulderB": 20,
-        "elbowB": 95,
-        "thighF": 8,
-        "kneeF": 8,
-        "thighB": -8,
-        "kneeB": 8,
-        "lean": 0,
-        "head": -6,
-        "blade": 128
-      },
-      "walk0": {
-        "shoulderF": 52,
-        "elbowF": 42,
-        "shoulderB": 38,
-        "elbowB": 95,
-        "thighF": 10,
-        "kneeF": 38,
-        "thighB": -4,
-        "kneeB": 12,
-        "lean": 11,
-        "head": -6,
-        "blade": 128,
-        "phase": 0,
-        "wind": 0.5
-      },
+      "idle0": {"shoulderF":30,"elbowF":60,"shoulderB":38,"elbowB":95,"thighF":30,"kneeF":30,"thighB":-26,"kneeB":18,"lean":4,"head":-6,"blade":112,"phase":0},
+      "idle1": {"shoulderF":30,"elbowF":62,"shoulderB":38,"elbowB":97,"thighF":30,"kneeF":32,"thighB":-26,"kneeB":18,"lean":4,"head":-6,"blade":114,"phase":1.6},
+      "idle2": {"shoulderF":31,"elbowF":60,"shoulderB":38,"elbowB":99,"thighF":30,"kneeF":30,"thighB":-26,"kneeB":18,"lean":5,"head":-6,"blade":112,"phase":3.2},
+      "idle3": {"shoulderF":30,"elbowF":58,"shoulderB":38,"elbowB":97,"thighF":30,"kneeF":30,"thighB":-26,"kneeB":18,"lean":4,"head":-6,"blade":110,"phase":4.800000000000001},
+      "turn": {"shoulderF":20,"elbowF":42,"shoulderB":20,"elbowB":95,"thighF":8,"kneeF":8,"thighB":-8,"kneeB":8,"lean":0,"head":-6,"blade":128},
+      "walk0": {"shoulderF":52,"elbowF":42,"shoulderB":38,"elbowB":95,"thighF":10,"kneeF":38,"thighB":-4,"kneeB":12,"lean":11,"head":-6,"blade":128,"phase":0,"wind":0.5},
       "walk1": {
         "shoulderF": 55.46410161513776,
         "elbowF": 42,
@@ -279,21 +112,7 @@
         "phase": 2,
         "wind": 0.5
       },
-      "walk3": {
-        "shoulderF": 52,
-        "elbowF": 42,
-        "shoulderB": 38,
-        "elbowB": 95,
-        "thighF": 10.000000000000002,
-        "kneeF": 12,
-        "thighB": -4.000000000000003,
-        "kneeB": 38,
-        "lean": 11,
-        "head": -6,
-        "blade": 128,
-        "phase": 3,
-        "wind": 0.5
-      },
+      "walk3": {"shoulderF":52,"elbowF":42,"shoulderB":38,"elbowB":95,"thighF":10.000000000000002,"kneeF":12,"thighB":-4.000000000000003,"kneeB":38,"lean":11,"head":-6,"blade":128,"phase":3,"wind":0.5},
       "walk4": {
         "shoulderF": 48.53589838486224,
         "elbowF": 42,
@@ -392,111 +211,13 @@
         "wind": 1,
         "phase": 4.5
       },
-      "crouch0": {
-        "shoulderF": 52,
-        "elbowF": 42,
-        "shoulderB": 38,
-        "elbowB": 95,
-        "thighF": 50,
-        "kneeF": 70,
-        "thighB": 15,
-        "kneeB": 70,
-        "lean": 12,
-        "head": -8,
-        "blade": 128,
-        "glow": true
-      },
-      "crouch": {
-        "shoulderF": 57,
-        "elbowF": 42,
-        "shoulderB": 43,
-        "elbowB": 95,
-        "thighF": 72,
-        "kneeF": 118,
-        "thighB": 36,
-        "kneeB": 122,
-        "lean": 16,
-        "head": -12,
-        "blade": 128,
-        "glow": true
-      },
-      "crouch1": {
-        "shoulderF": 57,
-        "elbowF": 46,
-        "shoulderB": 43,
-        "elbowB": 95,
-        "thighF": 72,
-        "kneeF": 121,
-        "thighB": 36,
-        "kneeB": 125,
-        "lean": 16,
-        "head": -12,
-        "blade": 128,
-        "phase": 2,
-        "glow": true
-      },
-      "jumpStart": {
-        "shoulderF": 25,
-        "elbowF": 70,
-        "shoulderB": 10,
-        "elbowB": 70,
-        "thighF": 45,
-        "kneeF": 78,
-        "thighB": 12,
-        "kneeB": 74,
-        "lean": 18,
-        "head": -10,
-        "blade": 128
-      },
-      "jumpUp": {
-        "shoulderF": 55,
-        "elbowF": 100,
-        "shoulderB": 40,
-        "elbowB": 110,
-        "thighF": 55,
-        "kneeF": 95,
-        "thighB": 5,
-        "kneeB": 70,
-        "lean": 0,
-        "head": -4,
-        "blade": 128,
-        "ankleF": 30,
-        "ankleB": 40,
-        "wind": 0.2
-      },
-      "jumpTop": {
-        "shoulderF": 60,
-        "elbowF": 105,
-        "shoulderB": 45,
-        "elbowB": 110,
-        "thighF": 78,
-        "kneeF": 120,
-        "thighB": 50,
-        "kneeB": 118,
-        "lean": 4,
-        "head": -6,
-        "blade": 128,
-        "ankleF": 30,
-        "ankleB": 35,
-        "wind": 0.4
-      },
-      "jumpDown": {
-        "shoulderF": 60,
-        "elbowF": 85,
-        "shoulderB": 45,
-        "elbowB": 90,
-        "thighF": 25,
-        "kneeF": 40,
-        "thighB": -12,
-        "kneeB": 30,
-        "lean": 4,
-        "head": -6,
-        "blade": 128,
-        "ankleF": 30,
-        "ankleB": 25,
-        "wind": 0.1,
-        "hairWind": -0.6
-      },
+      "crouch0": {"shoulderF":52,"elbowF":42,"shoulderB":38,"elbowB":95,"thighF":50,"kneeF":70,"thighB":15,"kneeB":70,"lean":12,"head":-8,"blade":128,"glow":true},
+      "crouch": {"shoulderF":57,"elbowF":42,"shoulderB":43,"elbowB":95,"thighF":72,"kneeF":118,"thighB":36,"kneeB":122,"lean":16,"head":-12,"blade":128,"glow":true},
+      "crouch1": {"shoulderF":57,"elbowF":46,"shoulderB":43,"elbowB":95,"thighF":72,"kneeF":121,"thighB":36,"kneeB":125,"lean":16,"head":-12,"blade":128,"phase":2,"glow":true},
+      "jumpStart": {"shoulderF":25,"elbowF":70,"shoulderB":10,"elbowB":70,"thighF":45,"kneeF":78,"thighB":12,"kneeB":74,"lean":18,"head":-10,"blade":128},
+      "jumpUp": {"shoulderF":55,"elbowF":100,"shoulderB":40,"elbowB":110,"thighF":55,"kneeF":95,"thighB":5,"kneeB":70,"lean":0,"head":-4,"blade":128,"ankleF":30,"ankleB":40,"wind":0.2},
+      "jumpTop": {"shoulderF":60,"elbowF":105,"shoulderB":45,"elbowB":110,"thighF":78,"kneeF":120,"thighB":50,"kneeB":118,"lean":4,"head":-6,"blade":128,"ankleF":30,"ankleB":35,"wind":0.4},
+      "jumpDown": {"shoulderF":60,"elbowF":85,"shoulderB":45,"elbowB":90,"thighF":25,"kneeF":40,"thighB":-12,"kneeB":30,"lean":4,"head":-6,"blade":128,"ankleF":30,"ankleB":25,"wind":0.1,"hairWind":-0.6},
       "flip0": {
         "shoulderF": 70,
         "elbowF": 110,
@@ -573,235 +294,21 @@
         "wind": 0.8,
         "phase": 3
       },
-      "land": {
-        "shoulderF": 25,
-        "elbowF": 70,
-        "shoulderB": 10,
-        "elbowB": 70,
-        "thighF": 45,
-        "kneeF": 78,
-        "thighB": 12,
-        "kneeB": 74,
-        "lean": 12,
-        "head": -10,
-        "blade": 128
-      },
-      "hop": {
-        "shoulderF": 78,
-        "elbowF": 128,
-        "shoulderB": 68,
-        "elbowB": 136,
-        "thighF": 40,
-        "kneeF": 50,
-        "thighB": -15,
-        "kneeB": 40,
-        "lean": -12,
-        "head": 6,
-        "blade": 160,
-        "ankleF": 30,
-        "ankleB": 30,
-        "wind": 0.9
-      },
-      "guard": {
-        "shoulderF": 78,
-        "elbowF": 128,
-        "shoulderB": 68,
-        "elbowB": 136,
-        "thighF": 26,
-        "kneeF": 36,
-        "thighB": -20,
-        "kneeB": 22,
-        "lean": -2,
-        "head": 10,
-        "blade": 160
-      },
-      "guardHit": {
-        "shoulderF": 78,
-        "elbowF": 128,
-        "shoulderB": 68,
-        "elbowB": 136,
-        "thighF": 26,
-        "kneeF": 36,
-        "thighB": -26,
-        "kneeB": 22,
-        "lean": -8,
-        "head": 14,
-        "blade": 160,
-        "phase": 1
-      },
-      "crouchGuard": {
-        "thighF": 72,
-        "kneeF": 118,
-        "thighB": 36,
-        "kneeB": 122,
-        "lean": 8,
-        "head": 4,
-        "shoulderF": 78,
-        "elbowF": 128,
-        "shoulderB": 68,
-        "elbowB": 136,
-        "blade": 160,
-        "glow": true
-      },
-      "crouchGuardHit": {
-        "thighF": 72,
-        "kneeF": 118,
-        "thighB": 36,
-        "kneeB": 122,
-        "lean": 2,
-        "head": 10,
-        "shoulderF": 78,
-        "elbowF": 128,
-        "shoulderB": 68,
-        "elbowB": 136,
-        "blade": 160,
-        "glow": true
-      },
-      "airGuard": {
-        "shoulderF": 78,
-        "elbowF": 128,
-        "shoulderB": 68,
-        "elbowB": 136,
-        "thighF": 78,
-        "kneeF": 120,
-        "thighB": 50,
-        "kneeB": 118,
-        "lean": 4,
-        "head": 10,
-        "blade": 160,
-        "ankleF": 30,
-        "ankleB": 35,
-        "wind": 0.4
-      },
-      "airGuardHit": {
-        "shoulderF": 78,
-        "elbowF": 128,
-        "shoulderB": 68,
-        "elbowB": 136,
-        "thighF": 78,
-        "kneeF": 120,
-        "thighB": 50,
-        "kneeB": 118,
-        "lean": -8,
-        "head": 10,
-        "blade": 160,
-        "ankleF": 30,
-        "ankleB": 35,
-        "wind": 0.4
-      },
-      "hitH1": {
-        "shoulderF": 15,
-        "elbowF": 35,
-        "shoulderB": -5,
-        "elbowB": 40,
-        "thighF": 18,
-        "kneeF": 22,
-        "thighB": -22,
-        "kneeB": 18,
-        "lean": -14,
-        "head": -18,
-        "blade": 120,
-        "handF": "open",
-        "handB": "open",
-        "face": "hurt"
-      },
-      "hitH2": {
-        "shoulderF": -10,
-        "elbowF": 25,
-        "shoulderB": -25,
-        "elbowB": 40,
-        "thighF": 26,
-        "kneeF": 14,
-        "thighB": -26,
-        "kneeB": 24,
-        "lean": -24,
-        "head": -24,
-        "blade": 100,
-        "handF": "open",
-        "handB": "open",
-        "face": "hurt"
-      },
-      "hitH3": {
-        "shoulderF": -10,
-        "elbowF": 25,
-        "shoulderB": -25,
-        "elbowB": 40,
-        "thighF": 32,
-        "kneeF": 14,
-        "thighB": -26,
-        "kneeB": 24,
-        "lean": -30,
-        "head": -28,
-        "blade": 100,
-        "handF": "open",
-        "handB": "open",
-        "face": "hurt",
-        "phase": 2
-      },
-      "hitL1": {
-        "shoulderF": -12,
-        "elbowF": 50,
-        "shoulderB": -22,
-        "elbowB": 45,
-        "thighF": 12,
-        "kneeF": 26,
-        "thighB": -14,
-        "kneeB": 26,
-        "lean": 24,
-        "head": 18,
-        "blade": 125,
-        "handF": "open",
-        "handB": "open",
-        "face": "hurt"
-      },
-      "hitL2": {
-        "shoulderF": -12,
-        "elbowF": 50,
-        "shoulderB": -22,
-        "elbowB": 45,
-        "thighF": 12,
-        "kneeF": 32,
-        "thighB": -14,
-        "kneeB": 26,
-        "lean": 32,
-        "head": 24,
-        "blade": 125,
-        "handF": "open",
-        "handB": "open",
-        "face": "hurt"
-      },
-      "hitL3": {
-        "shoulderF": -12,
-        "elbowF": 50,
-        "shoulderB": -22,
-        "elbowB": 45,
-        "thighF": 12,
-        "kneeF": 32,
-        "thighB": -14,
-        "kneeB": 36,
-        "lean": 38,
-        "head": 26,
-        "blade": 125,
-        "handF": "open",
-        "handB": "open",
-        "face": "hurt"
-      },
-      "hitCrouch": {
-        "thighF": 72,
-        "kneeF": 118,
-        "thighB": 36,
-        "kneeB": 122,
-        "lean": -12,
-        "head": -22,
-        "shoulderF": 15,
-        "elbowF": 35,
-        "shoulderB": -5,
-        "elbowB": 40,
-        "handF": "open",
-        "handB": "open",
-        "face": "hurt",
-        "blade": 110
-      },
+      "land": {"shoulderF":25,"elbowF":70,"shoulderB":10,"elbowB":70,"thighF":45,"kneeF":78,"thighB":12,"kneeB":74,"lean":12,"head":-10,"blade":128},
+      "hop": {"shoulderF":78,"elbowF":128,"shoulderB":68,"elbowB":136,"thighF":40,"kneeF":50,"thighB":-15,"kneeB":40,"lean":-12,"head":6,"blade":160,"ankleF":30,"ankleB":30,"wind":0.9},
+      "guard": {"shoulderF":78,"elbowF":128,"shoulderB":68,"elbowB":136,"thighF":26,"kneeF":36,"thighB":-20,"kneeB":22,"lean":-2,"head":10,"blade":160},
+      "guardHit": {"shoulderF":78,"elbowF":128,"shoulderB":68,"elbowB":136,"thighF":26,"kneeF":36,"thighB":-26,"kneeB":22,"lean":-8,"head":14,"blade":160,"phase":1},
+      "crouchGuard": {"thighF":72,"kneeF":118,"thighB":36,"kneeB":122,"lean":8,"head":4,"shoulderF":78,"elbowF":128,"shoulderB":68,"elbowB":136,"blade":160,"glow":true},
+      "crouchGuardHit": {"thighF":72,"kneeF":118,"thighB":36,"kneeB":122,"lean":2,"head":10,"shoulderF":78,"elbowF":128,"shoulderB":68,"elbowB":136,"blade":160,"glow":true},
+      "airGuard": {"shoulderF":78,"elbowF":128,"shoulderB":68,"elbowB":136,"thighF":78,"kneeF":120,"thighB":50,"kneeB":118,"lean":4,"head":10,"blade":160,"ankleF":30,"ankleB":35,"wind":0.4},
+      "airGuardHit": {"shoulderF":78,"elbowF":128,"shoulderB":68,"elbowB":136,"thighF":78,"kneeF":120,"thighB":50,"kneeB":118,"lean":-8,"head":10,"blade":160,"ankleF":30,"ankleB":35,"wind":0.4},
+      "hitH1": {"shoulderF":15,"elbowF":35,"shoulderB":-5,"elbowB":40,"thighF":18,"kneeF":22,"thighB":-22,"kneeB":18,"lean":-14,"head":-18,"blade":120,"handF":"open","handB":"open","face":"hurt"},
+      "hitH2": {"shoulderF":-10,"elbowF":25,"shoulderB":-25,"elbowB":40,"thighF":26,"kneeF":14,"thighB":-26,"kneeB":24,"lean":-24,"head":-24,"blade":100,"handF":"open","handB":"open","face":"hurt"},
+      "hitH3": {"shoulderF":-10,"elbowF":25,"shoulderB":-25,"elbowB":40,"thighF":32,"kneeF":14,"thighB":-26,"kneeB":24,"lean":-30,"head":-28,"blade":100,"handF":"open","handB":"open","face":"hurt","phase":2},
+      "hitL1": {"shoulderF":-12,"elbowF":50,"shoulderB":-22,"elbowB":45,"thighF":12,"kneeF":26,"thighB":-14,"kneeB":26,"lean":24,"head":18,"blade":125,"handF":"open","handB":"open","face":"hurt"},
+      "hitL2": {"shoulderF":-12,"elbowF":50,"shoulderB":-22,"elbowB":45,"thighF":12,"kneeF":32,"thighB":-14,"kneeB":26,"lean":32,"head":24,"blade":125,"handF":"open","handB":"open","face":"hurt"},
+      "hitL3": {"shoulderF":-12,"elbowF":50,"shoulderB":-22,"elbowB":45,"thighF":12,"kneeF":32,"thighB":-14,"kneeB":36,"lean":38,"head":26,"blade":125,"handF":"open","handB":"open","face":"hurt"},
+      "hitCrouch": {"thighF":72,"kneeF":118,"thighB":36,"kneeB":122,"lean":-12,"head":-22,"shoulderF":15,"elbowF":35,"shoulderB":-5,"elbowB":40,"handF":"open","handB":"open","face":"hurt","blade":110},
       "hitAir1": {
         "shoulderF": -40,
         "elbowF": 25,
@@ -877,23 +384,7 @@
         "blade": 60,
         "phase": 3
       },
-      "bounce": {
-        "rot": -90,
-        "thighF": 35,
-        "kneeF": 40,
-        "thighB": 15,
-        "kneeB": 50,
-        "shoulderF": 140,
-        "elbowF": 30,
-        "shoulderB": 160,
-        "elbowB": 25,
-        "head": 10,
-        "face": "hurt",
-        "handF": "open",
-        "handB": "open",
-        "wind": 0,
-        "blade": 170
-      },
+      "bounce": {"rot":-90,"thighF":35,"kneeF":40,"thighB":15,"kneeB":50,"shoulderF":140,"elbowF":30,"shoulderB":160,"elbowB":25,"head":10,"face":"hurt","handF":"open","handB":"open","wind":0,"blade":170},
       "lie": {
         "rot": -90,
         "thighF": 10,
@@ -914,47 +405,9 @@
         "hairWind": 0,
         "blade": 175
       },
-      "getUp1": {
-        "lean": -30,
-        "thighF": 82,
-        "kneeF": 30,
-        "thighB": 70,
-        "kneeB": 95,
-        "shoulderF": 40,
-        "elbowF": 70,
-        "shoulderB": -40,
-        "elbowB": 5,
-        "head": 10,
-        "handB": "open",
-        "face": "hurt",
-        "blade": 100
-      },
-      "getUp2": {
-        "thighF": 72,
-        "kneeF": 118,
-        "thighB": 36,
-        "kneeB": 122,
-        "lean": 30,
-        "head": -14,
-        "shoulderF": 30,
-        "elbowF": 80,
-        "shoulderB": 10,
-        "elbowB": 70,
-        "blade": 128
-      },
-      "getUp3": {
-        "shoulderF": 52,
-        "elbowF": 42,
-        "shoulderB": 38,
-        "elbowB": 95,
-        "thighF": 50,
-        "kneeF": 70,
-        "thighB": 15,
-        "kneeB": 70,
-        "lean": 12,
-        "head": -8,
-        "blade": 128
-      },
+      "getUp1": {"lean":-30,"thighF":82,"kneeF":30,"thighB":70,"kneeB":95,"shoulderF":40,"elbowF":70,"shoulderB":-40,"elbowB":5,"head":10,"handB":"open","face":"hurt","blade":100},
+      "getUp2": {"thighF":72,"kneeF":118,"thighB":36,"kneeB":122,"lean":30,"head":-14,"shoulderF":30,"elbowF":80,"shoulderB":10,"elbowB":70,"blade":128},
+      "getUp3": {"shoulderF":52,"elbowF":42,"shoulderB":38,"elbowB":95,"thighF":50,"kneeF":70,"thighB":15,"kneeB":70,"lean":12,"head":-8,"blade":128},
       "dead": {
         "rot": -90,
         "thighF": 10,
@@ -975,22 +428,7 @@
         "hairWind": 0,
         "blade": 175
       },
-      "trip": {
-        "shoulderF": 110,
-        "elbowF": 20,
-        "shoulderB": 150,
-        "elbowB": 30,
-        "handF": "open",
-        "handB": "open",
-        "rot": -45,
-        "lean": -10,
-        "thighF": 75,
-        "kneeF": 15,
-        "thighB": 55,
-        "kneeB": 30,
-        "face": "hurt",
-        "blade": 150
-      },
+      "trip": {"shoulderF":110,"elbowF":20,"shoulderB":150,"elbowB":30,"handF":"open","handB":"open","rot":-45,"lean":-10,"thighF":75,"kneeF":15,"thighB":55,"kneeB":30,"face":"hurt","blade":150},
       "recover0": {
         "shoulderF": 70,
         "elbowF": 110,
@@ -1011,399 +449,32 @@
         "phase": 1,
         "face": "neutral"
       },
-      "win0": {
-        "shoulderF": 30,
-        "elbowF": 40,
-        "shoulderB": 45,
-        "elbowB": 130,
-        "thighF": 6,
-        "kneeF": 4,
-        "thighB": -6,
-        "kneeB": 4,
-        "lean": 0,
-        "head": -10,
-        "blade": 0,
-        "face": "neutral",
-        "wind": 0.6,
-        "glow": true,
-        "aura": true
-      },
-      "win1": {
-        "shoulderF": 32,
-        "elbowF": 38,
-        "shoulderB": 45,
-        "elbowB": 130,
-        "thighF": 6,
-        "kneeF": 4,
-        "thighB": -6,
-        "kneeB": 4,
-        "lean": 0,
-        "head": -12,
-        "blade": 0,
-        "face": "neutral",
-        "wind": 0.9,
-        "phase": 2,
-        "glow": true,
-        "aura": true
-      },
-      "lose": {
-        "shoulderF": -5,
-        "elbowF": 15,
-        "shoulderB": 0,
-        "elbowB": 10,
-        "thighF": 80,
-        "kneeF": 88,
-        "thighB": -5,
-        "kneeB": 100,
-        "lean": 26,
-        "head": 25,
-        "blade": 135,
-        "ankleB": 70,
-        "face": "closed",
-        "handF": "open",
-        "handB": "open"
-      },
-      "intro0": {
-        "shoulderF": 30,
-        "elbowF": 40,
-        "shoulderB": 45,
-        "elbowB": 130,
-        "thighF": 6,
-        "kneeF": 4,
-        "thighB": -6,
-        "kneeB": 4,
-        "lean": 0,
-        "head": 0,
-        "blade": 200,
-        "face": "closed",
-        "wind": 0.8
-      },
-      "intro1": {
-        "shoulderF": 60,
-        "elbowF": 40,
-        "shoulderB": 45,
-        "elbowB": 130,
-        "thighF": 6,
-        "kneeF": 4,
-        "thighB": -6,
-        "kneeB": 4,
-        "lean": 0,
-        "head": 0,
-        "blade": 140,
-        "face": "neutral",
-        "wind": 0.8
-      },
-      "jab0": {
-        "shoulderF": 40,
-        "elbowF": 120,
-        "shoulderB": 38,
-        "elbowB": 95,
-        "thighF": 24,
-        "kneeF": 28,
-        "thighB": -20,
-        "kneeB": 14,
-        "lean": 0,
-        "head": -6,
-        "blade": 175,
-        "phase": 0
-      },
-      "jab1": {
-        "shoulderF": 88,
-        "elbowF": 8,
-        "shoulderB": 38,
-        "elbowB": 95,
-        "thighF": 30,
-        "kneeF": 24,
-        "thighB": -20,
-        "kneeB": 14,
-        "lean": 14,
-        "head": -10,
-        "blade": 96,
-        "phase": 0,
-        "wind": 0.6
-      },
-      "str0": {
-        "shoulderF": 168,
-        "elbowF": 30,
-        "shoulderB": 150,
-        "elbowB": 40,
-        "thighF": 24,
-        "kneeF": 28,
-        "thighB": -20,
-        "kneeB": 14,
-        "lean": -8,
-        "head": -6,
-        "blade": 200,
-        "phase": 0
-      },
-      "str1": {
-        "shoulderF": 75,
-        "elbowF": 4,
-        "shoulderB": 50,
-        "elbowB": 40,
-        "thighF": 40,
-        "kneeF": 34,
-        "thighB": -28,
-        "kneeB": 4,
-        "lean": 22,
-        "head": -16,
-        "blade": 55,
-        "phase": 0,
-        "face": "shout",
-        "wind": 0.9
-      },
-      "lk0": {
-        "shoulderF": 52,
-        "elbowF": 42,
-        "shoulderB": 38,
-        "elbowB": 95,
-        "thighF": 62,
-        "kneeF": 105,
-        "thighB": -20,
-        "kneeB": 14,
-        "lean": -2,
-        "head": -6,
-        "blade": 128,
-        "phase": 0,
-        "ankleF": 30
-      },
-      "lk1": {
-        "shoulderF": 50,
-        "elbowF": 110,
-        "shoulderB": 38,
-        "elbowB": 95,
-        "thighF": 88,
-        "kneeF": 4,
-        "thighB": -6,
-        "kneeB": 6,
-        "lean": -12,
-        "head": 6,
-        "blade": 128,
-        "phase": 0,
-        "ankleF": 50
-      },
-      "hk0": {
-        "shoulderF": 15,
-        "elbowF": 5,
-        "shoulderB": 38,
-        "elbowB": 95,
-        "thighF": 36,
-        "kneeF": 40,
-        "thighB": -20,
-        "kneeB": 14,
-        "lean": 18,
-        "head": -10,
-        "blade": 25,
-        "phase": 0
-      },
-      "hk1": {
-        "shoulderF": 128,
-        "elbowF": 6,
-        "shoulderB": 38,
-        "elbowB": 95,
-        "thighF": 26,
-        "kneeF": 14,
-        "thighB": -22,
-        "kneeB": 8,
-        "lean": -6,
-        "head": -12,
-        "blade": 122,
-        "phase": 0,
-        "face": "shout",
-        "wind": 0.8
-      },
-      "cjab0": {
-        "shoulderF": 40,
-        "elbowF": 110,
-        "shoulderB": 43,
-        "elbowB": 95,
-        "thighF": 72,
-        "kneeF": 118,
-        "thighB": 36,
-        "kneeB": 122,
-        "lean": 16,
-        "head": -12,
-        "blade": 150
-      },
-      "cjab1": {
-        "shoulderF": 86,
-        "elbowF": 4,
-        "shoulderB": 43,
-        "elbowB": 95,
-        "thighF": 72,
-        "kneeF": 118,
-        "thighB": 36,
-        "kneeB": 122,
-        "lean": 20,
-        "head": -14,
-        "blade": 94
-      },
-      "clk": {
-        "shoulderF": 57,
-        "elbowF": 42,
-        "shoulderB": 43,
-        "elbowB": 95,
-        "thighF": 88,
-        "kneeF": 2,
-        "thighB": 40,
-        "kneeB": 128,
-        "lean": 4,
-        "head": -12,
-        "blade": 128,
-        "ankleF": 25
-      },
-      "sweep0": {
-        "shoulderF": 120,
-        "elbowF": 40,
-        "shoulderB": 43,
-        "elbowB": 95,
-        "thighF": 72,
-        "kneeF": 118,
-        "thighB": 36,
-        "kneeB": 122,
-        "lean": 10,
-        "head": -12,
-        "blade": 200
-      },
-      "sweep1": {
-        "shoulderF": 70,
-        "elbowF": 2,
-        "shoulderB": 43,
-        "elbowB": 95,
-        "thighF": 80,
-        "kneeF": 110,
-        "thighB": 36,
-        "kneeB": 122,
-        "lean": 34,
-        "head": -24,
-        "blade": 82,
-        "wind": 0.9
-      },
-      "ajab": {
-        "shoulderF": 80,
-        "elbowF": 4,
-        "shoulderB": 45,
-        "elbowB": 110,
-        "thighF": 78,
-        "kneeF": 120,
-        "thighB": 50,
-        "kneeB": 118,
-        "lean": 12,
-        "head": -6,
-        "blade": 80,
-        "ankleF": 30,
-        "ankleB": 35,
-        "wind": 0.4
-      },
-      "akick": {
-        "shoulderF": 60,
-        "elbowF": 0,
-        "shoulderB": 45,
-        "elbowB": 110,
-        "thighF": 78,
-        "kneeF": 120,
-        "thighB": 50,
-        "kneeB": 118,
-        "lean": 20,
-        "head": -10,
-        "blade": 45,
-        "ankleF": 30,
-        "ankleB": 35,
-        "wind": 0.8
-      },
-      "hk2": {
-        "shoulderF": 160,
-        "elbowF": 10,
-        "shoulderB": 38,
-        "elbowB": 95,
-        "thighF": 20,
-        "kneeF": 10,
-        "thighB": -22,
-        "kneeB": 8,
-        "lean": -14,
-        "head": -14,
-        "blade": 168,
-        "phase": 0,
-        "wind": 0.8
-      },
-      "akick0": {
-        "shoulderF": 165,
-        "elbowF": 20,
-        "shoulderB": 45,
-        "elbowB": 110,
-        "thighF": 78,
-        "kneeF": 120,
-        "thighB": 50,
-        "kneeB": 118,
-        "lean": -6,
-        "head": -6,
-        "blade": 200,
-        "ankleF": 30,
-        "ankleB": 35,
-        "wind": 0.4
-      },
-      "cr0": {
-        "shoulderF": 172,
-        "elbowF": 25,
-        "shoulderB": 150,
-        "elbowB": 45,
-        "thighF": 24,
-        "kneeF": 28,
-        "thighB": -20,
-        "kneeB": 14,
-        "lean": -10,
-        "head": -6,
-        "blade": 205,
-        "phase": 0,
-        "glow": true,
-        "wind": 0.6
-      },
-      "cr1": {
-        "shoulderF": 72,
-        "elbowF": 2,
-        "shoulderB": 45,
-        "elbowB": 40,
-        "thighF": 44,
-        "kneeF": 36,
-        "thighB": -30,
-        "kneeB": 4,
-        "lean": 24,
-        "head": -16,
-        "blade": 62,
-        "phase": 0,
-        "face": "shout",
-        "glow": true,
-        "wind": 1
-      },
-      "cr2": {
-        "shoulderF": 60,
-        "elbowF": 4,
-        "shoulderB": 40,
-        "elbowB": 40,
-        "thighF": 44,
-        "kneeF": 36,
-        "thighB": -30,
-        "kneeB": 4,
-        "lean": 20,
-        "head": -12,
-        "blade": 40,
-        "phase": 0,
-        "glow": true
-      },
-      "mr0": {
-        "shoulderF": 10,
-        "elbowF": 10,
-        "shoulderB": 43,
-        "elbowB": 95,
-        "thighF": 72,
-        "kneeF": 118,
-        "thighB": 36,
-        "kneeB": 122,
-        "lean": 26,
-        "head": -16,
-        "blade": 20,
-        "glow": true
-      },
+      "win0": {"shoulderF":30,"elbowF":40,"shoulderB":45,"elbowB":130,"thighF":6,"kneeF":4,"thighB":-6,"kneeB":4,"lean":0,"head":-10,"blade":0,"face":"neutral","wind":0.6,"glow":true,"aura":true},
+      "win1": {"shoulderF":32,"elbowF":38,"shoulderB":45,"elbowB":130,"thighF":6,"kneeF":4,"thighB":-6,"kneeB":4,"lean":0,"head":-12,"blade":0,"face":"neutral","wind":0.9,"phase":2,"glow":true,"aura":true},
+      "lose": {"shoulderF":-5,"elbowF":15,"shoulderB":0,"elbowB":10,"thighF":80,"kneeF":88,"thighB":-5,"kneeB":100,"lean":26,"head":25,"blade":135,"ankleB":70,"face":"closed","handF":"open","handB":"open"},
+      "intro0": {"shoulderF":30,"elbowF":40,"shoulderB":45,"elbowB":130,"thighF":6,"kneeF":4,"thighB":-6,"kneeB":4,"lean":0,"head":0,"blade":200,"face":"closed","wind":0.8},
+      "intro1": {"shoulderF":60,"elbowF":40,"shoulderB":45,"elbowB":130,"thighF":6,"kneeF":4,"thighB":-6,"kneeB":4,"lean":0,"head":0,"blade":140,"face":"neutral","wind":0.8},
+      "jab0": {"shoulderF":40,"elbowF":120,"shoulderB":38,"elbowB":95,"thighF":24,"kneeF":28,"thighB":-20,"kneeB":14,"lean":0,"head":-6,"blade":175,"phase":0},
+      "jab1": {"shoulderF":88,"elbowF":8,"shoulderB":38,"elbowB":95,"thighF":30,"kneeF":24,"thighB":-20,"kneeB":14,"lean":14,"head":-10,"blade":96,"phase":0,"wind":0.6},
+      "str0": {"shoulderF":168,"elbowF":30,"shoulderB":150,"elbowB":40,"thighF":24,"kneeF":28,"thighB":-20,"kneeB":14,"lean":-8,"head":-6,"blade":200,"phase":0},
+      "str1": {"shoulderF":75,"elbowF":4,"shoulderB":50,"elbowB":40,"thighF":40,"kneeF":34,"thighB":-28,"kneeB":4,"lean":22,"head":-16,"blade":55,"phase":0,"face":"shout","wind":0.9},
+      "lk0": {"shoulderF":52,"elbowF":42,"shoulderB":38,"elbowB":95,"thighF":62,"kneeF":105,"thighB":-20,"kneeB":14,"lean":-2,"head":-6,"blade":128,"phase":0,"ankleF":30},
+      "lk1": {"shoulderF":50,"elbowF":110,"shoulderB":38,"elbowB":95,"thighF":88,"kneeF":4,"thighB":-6,"kneeB":6,"lean":-12,"head":6,"blade":128,"phase":0,"ankleF":50},
+      "hk0": {"shoulderF":15,"elbowF":5,"shoulderB":38,"elbowB":95,"thighF":36,"kneeF":40,"thighB":-20,"kneeB":14,"lean":18,"head":-10,"blade":25,"phase":0},
+      "hk1": {"shoulderF":128,"elbowF":6,"shoulderB":38,"elbowB":95,"thighF":26,"kneeF":14,"thighB":-22,"kneeB":8,"lean":-6,"head":-12,"blade":122,"phase":0,"face":"shout","wind":0.8},
+      "cjab0": {"shoulderF":40,"elbowF":110,"shoulderB":43,"elbowB":95,"thighF":72,"kneeF":118,"thighB":36,"kneeB":122,"lean":16,"head":-12,"blade":150},
+      "cjab1": {"shoulderF":86,"elbowF":4,"shoulderB":43,"elbowB":95,"thighF":72,"kneeF":118,"thighB":36,"kneeB":122,"lean":20,"head":-14,"blade":94},
+      "clk": {"shoulderF":57,"elbowF":42,"shoulderB":43,"elbowB":95,"thighF":88,"kneeF":2,"thighB":40,"kneeB":128,"lean":4,"head":-12,"blade":128,"ankleF":25},
+      "sweep0": {"shoulderF":120,"elbowF":40,"shoulderB":43,"elbowB":95,"thighF":72,"kneeF":118,"thighB":36,"kneeB":122,"lean":10,"head":-12,"blade":200},
+      "sweep1": {"shoulderF":70,"elbowF":2,"shoulderB":43,"elbowB":95,"thighF":80,"kneeF":110,"thighB":36,"kneeB":122,"lean":34,"head":-24,"blade":82,"wind":0.9},
+      "ajab": {"shoulderF":80,"elbowF":4,"shoulderB":45,"elbowB":110,"thighF":78,"kneeF":120,"thighB":50,"kneeB":118,"lean":12,"head":-6,"blade":80,"ankleF":30,"ankleB":35,"wind":0.4},
+      "akick": {"shoulderF":60,"elbowF":0,"shoulderB":45,"elbowB":110,"thighF":78,"kneeF":120,"thighB":50,"kneeB":118,"lean":20,"head":-10,"blade":45,"ankleF":30,"ankleB":35,"wind":0.8},
+      "hk2": {"shoulderF":160,"elbowF":10,"shoulderB":38,"elbowB":95,"thighF":20,"kneeF":10,"thighB":-22,"kneeB":8,"lean":-14,"head":-14,"blade":168,"phase":0,"wind":0.8},
+      "akick0": {"shoulderF":165,"elbowF":20,"shoulderB":45,"elbowB":110,"thighF":78,"kneeF":120,"thighB":50,"kneeB":118,"lean":-6,"head":-6,"blade":200,"ankleF":30,"ankleB":35,"wind":0.4},
+      "cr0": {"shoulderF":172,"elbowF":25,"shoulderB":150,"elbowB":45,"thighF":24,"kneeF":28,"thighB":-20,"kneeB":14,"lean":-10,"head":-6,"blade":205,"phase":0,"glow":true,"wind":0.6},
+      "cr1": {"shoulderF":72,"elbowF":2,"shoulderB":45,"elbowB":40,"thighF":44,"kneeF":36,"thighB":-30,"kneeB":4,"lean":24,"head":-16,"blade":62,"phase":0,"face":"shout","glow":true,"wind":1},
+      "cr2": {"shoulderF":60,"elbowF":4,"shoulderB":40,"elbowB":40,"thighF":44,"kneeF":36,"thighB":-30,"kneeB":4,"lean":20,"head":-12,"blade":40,"phase":0,"glow":true},
+      "mr0": {"shoulderF":10,"elbowF":10,"shoulderB":43,"elbowB":95,"thighF":72,"kneeF":118,"thighB":36,"kneeB":122,"lean":26,"head":-16,"blade":20,"glow":true},
       "mr1": {
         "shoulderF": 165,
         "elbowF": 8,
@@ -1423,37 +494,8 @@
         "glow": true,
         "aura": true
       },
-      "mr2": {
-        "shoulderF": 150,
-        "elbowF": 20,
-        "shoulderB": 45,
-        "elbowB": 110,
-        "thighF": 78,
-        "kneeF": 120,
-        "thighB": 50,
-        "kneeB": 118,
-        "lean": 0,
-        "head": -6,
-        "blade": 150,
-        "ankleF": 30,
-        "ankleB": 35,
-        "wind": 0.4,
-        "glow": true
-      },
-      "ss0": {
-        "shoulderF": -20,
-        "elbowF": 20,
-        "shoulderB": 10,
-        "elbowB": 60,
-        "thighF": 50,
-        "kneeF": 70,
-        "thighB": 15,
-        "kneeB": 70,
-        "lean": 26,
-        "head": -16,
-        "blade": -75,
-        "wind": 0.6
-      },
+      "mr2": {"shoulderF":150,"elbowF":20,"shoulderB":45,"elbowB":110,"thighF":78,"kneeF":120,"thighB":50,"kneeB":118,"lean":0,"head":-6,"blade":150,"ankleF":30,"ankleB":35,"wind":0.4,"glow":true},
+      "ss0": {"shoulderF":-20,"elbowF":20,"shoulderB":10,"elbowB":60,"thighF":50,"kneeF":70,"thighB":15,"kneeB":70,"lean":26,"head":-16,"blade":-75,"wind":0.6},
       "ss1": {
         "shoulderF": 92,
         "elbowF": 2,
@@ -1474,477 +516,68 @@
         "glow": true,
         "aura": true
       },
-      "ss2": {
-        "shoulderF": 110,
-        "elbowF": 5,
-        "shoulderB": 38,
-        "elbowB": 95,
-        "thighF": 40,
-        "kneeF": 40,
-        "thighB": -20,
-        "kneeB": 14,
-        "lean": 6,
-        "head": -6,
-        "blade": 125,
-        "phase": 0,
-        "wind": 0.8
-      },
-      "sp0": {
-        "shoulderF": 178,
-        "elbowF": 5,
-        "shoulderB": 165,
-        "elbowB": 25,
-        "thighF": 34,
-        "kneeF": 40,
-        "thighB": -26,
-        "kneeB": 18,
-        "lean": -6,
-        "head": -14,
-        "blade": 180,
-        "phase": 0,
-        "aura": true,
-        "glow": true,
-        "face": "shout",
-        "wind": 1
-      },
-      "sp1": {
-        "shoulderF": 60,
-        "elbowF": 0,
-        "shoulderB": 45,
-        "elbowB": 30,
-        "thighF": 50,
-        "kneeF": 50,
-        "thighB": -34,
-        "kneeB": 4,
-        "lean": 30,
-        "head": -20,
-        "blade": 45,
-        "phase": 0,
-        "aura": true,
-        "glow": true,
-        "face": "shout",
-        "wind": 1
-      }
+      "ss2": {"shoulderF":110,"elbowF":5,"shoulderB":38,"elbowB":95,"thighF":40,"kneeF":40,"thighB":-20,"kneeB":14,"lean":6,"head":-6,"blade":125,"phase":0,"wind":0.8},
+      "sp0": {"shoulderF":178,"elbowF":5,"shoulderB":165,"elbowB":25,"thighF":34,"kneeF":40,"thighB":-26,"kneeB":18,"lean":-6,"head":-14,"blade":180,"phase":0,"aura":true,"glow":true,"face":"shout","wind":1},
+      "sp1": {"shoulderF":60,"elbowF":0,"shoulderB":45,"elbowB":30,"thighF":50,"kneeF":50,"thighB":-34,"kneeB":4,"lean":30,"head":-20,"blade":45,"phase":0,"aura":true,"glow":true,"face":"shout","wind":1}
     }
   },
   "anims": {
-    "powerUp": {
-      "frames": [
-        "15_power0*3",
-        "15_power0*3",
-        "16_power1*6",
-        "16_power1*6"
-      ],
-      "loop": 0
-    },
-    "idle": {
-      "frames": [
-        "01_idle*10",
-        "01_idle*8",
-        "01_idle*10",
-        "01_idle*8",
-        "01_idle*10",
-        "01_idle*8"
-      ]
-    },
-    "turn": {
-      "frames": [
-        "01_idle*3",
-        "01_idle*3"
-      ]
-    },
-    "walk": {
-      "frames": [
-        "walk0*7",
-        "walk1*7",
-        "walk0*7",
-        "walk1*7",
-        "walk0*7",
-        "walk1*7"
-      ]
-    },
-    "walkBack": {
-      "frames": [
-        "walk1*7",
-        "walk0*7",
-        "walk1*7",
-        "walk0*7",
-        "walk1*7",
-        "walk0*7"
-      ]
-    },
-    "crouchStart": {
-      "frames": [
-        "crouch*3",
-        "crouch*2"
-      ]
-    },
-    "crouch": {
-      "frames": [
-        "crouch*14",
-        "crouch*14"
-      ]
-    },
-    "crouchEnd": {
-      "frames": [
-        "crouch*3",
-        "01_idle*2"
-      ]
-    },
-    "crouchTurn": {
-      "frames": [
-        "crouch*3",
-        "crouch*3"
-      ]
-    },
-    "jumpStart": {
-      "frames": [
-        "jumpUp*2",
-        "jumpUp*2",
-        "jumpStart*2"
-      ]
-    },
-    "jumpUp": {
-      "frames": [
-        "jumpUp*6",
-        "jumpUp*-1"
-      ]
-    },
-    "jumpFwd": {
-      "frames": [
-        "jumpFwd*4",
-        "jumpFwd*4",
-        "jumpFwd*4",
-        "jumpFwd*4",
-        "jumpFwd*4",
-        "jumpFwd*-1",
-        "jumpUp*4",
-        "jumpUp*-1"
-      ]
-    },
-    "jumpBack": {
-      "frames": [
-        "jumpUp*5",
-        "jumpUp*-1",
-        "jumpBack*5",
-        "jumpBack*-1"
-      ]
-    },
-    "jumpDown": {
-      "frames": [
-        "jumpUp*-1",
-        "jumpDown*-1"
-      ]
-    },
-    "land": {
-      "frames": [
-        "01_idle*2",
-        "jumpUp*2",
-        "01_idle*1",
-        "land*4"
-      ]
-    },
-    "run": {
-      "frames": [
-        "run0*4",
-        "run1*3",
-        "run2*3",
-        "run1*3",
-        "run0*3"
-      ]
-    },
-    "hop": {
-      "frames": [
-        "run0*2",
-        "run0*4",
-        "run0*2",
-        "run0*-1"
-      ]
-    },
-    "guardStart": {
-      "frames": [
-        "15_power0*2",
-        "guard*2"
-      ]
-    },
-    "crouchGuardStart": {
-      "frames": [
-        "crouch*2",
-        "crouchGuard*2"
-      ]
-    },
-    "airGuardStart": {
-      "frames": [
-        "jumpUp*2",
-        "airGuard*2"
-      ]
-    },
-    "guard": {
-      "frames": [
-        "15_power0*-1",
-        "guard*-1"
-      ]
-    },
-    "crouchGuard": {
-      "frames": [
-        "crouch*-1",
-        "crouchGuard*-1"
-      ]
-    },
-    "airGuard": {
-      "frames": [
-        "jumpUp*-1",
-        "airGuard*-1"
-      ]
-    },
-    "guardEnd": {
-      "frames": [
-        "15_power0*3"
-      ]
-    },
-    "guardHit": {
-      "frames": [
-        "15_power0*3",
-        "15_power0*-1",
-        "guard*3",
-        "guard*-1"
-      ]
-    },
-    "crouchGuardHit": {
-      "frames": [
-        "crouch*3",
-        "crouch*-1",
-        "crouchGuard*3",
-        "crouchGuard*-1"
-      ]
-    },
-    "airGuardHit": {
-      "frames": [
-        "jumpUp*3",
-        "jumpUp*-1",
-        "airGuard*3",
-        "airGuard*-1"
-      ]
-    },
-    "hitLight": {
-      "frames": [
-        "crouch*3",
-        "crouch*6",
-        "01_idle*3"
-      ]
-    },
-    "hitMedium": {
-      "frames": [
-        "crouch*3",
-        "crouch*8",
-        "01_idle*3"
-      ]
-    },
-    "hitHeavy": {
-      "frames": [
-        "crouch*3",
-        "crouch*10",
-        "crouch*4"
-      ]
-    },
-    "hitLowLight": {
-      "frames": [
-        "crouch*3",
-        "crouch*6",
-        "01_idle*3"
-      ]
-    },
-    "hitLowMedium": {
-      "frames": [
-        "crouch*3",
-        "crouch*8",
-        "01_idle*3"
-      ]
-    },
-    "hitLowHeavy": {
-      "frames": [
-        "crouch*3",
-        "crouch*10",
-        "crouch*4"
-      ]
-    },
-    "hitCrouch": {
-      "frames": [
-        "crouch*3",
-        "crouch*8",
-        "crouch*3",
-        "hitCrouch*11"
-      ]
-    },
-    "hitAir": {
-      "frames": [
-        "hitAir1*4",
-        "hitAir1*-1",
-        "jumpUp*4",
-        "jumpUp*-1"
-      ]
-    },
-    "fall": {
-      "frames": [
-        "jumpUp*6",
-        "jumpUp*-1",
-        "fall1*6",
-        "fall1*-1"
-      ]
-    },
-    "bounce": {
-      "frames": [
-        "jumpUp*3",
-        "jumpUp*-1",
-        "bounce*3",
-        "bounce*-1"
-      ]
-    },
-    "bounceAir": {
-      "frames": [
-        "jumpUp*3",
-        "jumpUp*-1",
-        "bounce*3",
-        "bounce*-1"
-      ]
-    },
-    "lieDown": {
-      "frames": [
-        "crouch*-1",
-        "lie*-1"
-      ]
-    },
-    "getUp": {
-      "frames": [
-        "crouch*6",
-        "crouch*8",
-        "crouch*7",
-        "crouch*5",
-        "01_idle*3",
-        "getUp1*6"
-      ]
-    },
-    "dead": {
-      "frames": [
-        "crouch*-1",
-        "lie*-1"
-      ]
-    },
-    "trip": {
-      "frames": [
-        "jumpUp*4",
-        "jumpUp*-1",
-        "trip*4",
-        "trip*-1"
-      ]
-    },
-    "airRecover": {
-      "frames": [
-        "jumpUp*3",
-        "jumpUp*3",
-        "jumpUp*3",
-        "jumpUp*3",
-        "jumpUp*-1",
-        "airRecover*3",
-        "airRecover*-1"
-      ]
-    },
-    "win": {
-      "frames": [
-        "06_victory*14",
-        "06_victory*14",
-        "win0*14",
-        "win1*14"
-      ]
-    },
-    "lose": {
-      "frames": [
-        "lose*-1",
-        "crouch*-1"
-      ]
-    },
-    "draw": {
-      "frames": [
-        "06_victory*-1"
-      ]
-    },
-    "intro": {
-      "frames": [
-        "intro0*50",
-        "01_idle*10",
-        "06_victory*40",
-        "06_victory*10",
-        "intro0*40",
-        "intro1*10"
-      ]
-    },
-    "jab": {
-      "frames": [
-        "02_attack1*3",
-        {
-          "pose": "02_attack1",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
-        "02_attack1*5",
-        "02_attack1*2"
-      ]
-    },
-    "strong": {
-      "frames": [
-        "03_attack2*6",
-        "03_attack2*3",
-        {
-          "pose": "03_attack2",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 14
-          }
-        },
-        "03_attack2*4",
-        "03_attack2*7",
-        "03_attack2*4"
-      ]
-    },
-    "lkick": {
-      "frames": [
-        "02_attack1*3",
-        {
-          "pose": "02_attack1",
-          "ticks": 4,
-          "hit": {
-            "part": "footF",
-            "radius": 10
-          }
-        },
-        "02_attack1*6",
-        "02_attack1*2"
-      ]
-    },
+    "powerUp": {"frames":["15_power0*3","15_power0*3","16_power1*6","16_power1*6"],"loop":0},
+    "idle": {"frames":["01_idle*10","01_idle*8","01_idle*10","01_idle*8","01_idle*10","01_idle*8"]},
+    "turn": {"frames":["01_idle*3","01_idle*3"]},
+    "walk": {"frames":["walk0*7","walk1*7","walk0*7","walk1*7","walk0*7","walk1*7"]},
+    "walkBack": {"frames":["walk1*7","walk0*7","walk1*7","walk0*7","walk1*7","walk0*7"]},
+    "crouchStart": {"frames":["crouch*3","crouch*2"]},
+    "crouch": {"frames":["crouch*14","crouch*14"]},
+    "crouchEnd": {"frames":["crouch*3","01_idle*2"]},
+    "crouchTurn": {"frames":["crouch*3","crouch*3"]},
+    "jumpStart": {"frames":["jumpUp*2","jumpUp*2","jumpStart*2"]},
+    "jumpUp": {"frames":["jumpUp*6","jumpUp*-1"]},
+    "jumpFwd": {"frames":["jumpFwd*4","jumpFwd*4","jumpFwd*4","jumpFwd*4","jumpFwd*4","jumpFwd*-1","jumpUp*4","jumpUp*-1"]},
+    "jumpBack": {"frames":["jumpUp*5","jumpUp*-1","jumpBack*5","jumpBack*-1"]},
+    "jumpDown": {"frames":["jumpUp*-1","jumpDown*-1"]},
+    "land": {"frames":["01_idle*2","jumpUp*2","01_idle*1","land*4"]},
+    "run": {"frames":["run0*4","run1*3","run2*3","run1*3","run0*3"]},
+    "hop": {"frames":["run0*2","run0*4","run0*2","run0*-1"]},
+    "guardStart": {"frames":["15_power0*2","guard*2"]},
+    "crouchGuardStart": {"frames":["crouch*2","crouchGuard*2"]},
+    "airGuardStart": {"frames":["jumpUp*2","airGuard*2"]},
+    "guard": {"frames":["15_power0*-1","guard*-1"]},
+    "crouchGuard": {"frames":["crouch*-1","crouchGuard*-1"]},
+    "airGuard": {"frames":["jumpUp*-1","airGuard*-1"]},
+    "guardEnd": {"frames":["15_power0*3"]},
+    "guardHit": {"frames":["15_power0*3","15_power0*-1","guard*3","guard*-1"]},
+    "crouchGuardHit": {"frames":["crouch*3","crouch*-1","crouchGuard*3","crouchGuard*-1"]},
+    "airGuardHit": {"frames":["jumpUp*3","jumpUp*-1","airGuard*3","airGuard*-1"]},
+    "hitLight": {"frames":["crouch*3","crouch*6","01_idle*3"]},
+    "hitMedium": {"frames":["crouch*3","crouch*8","01_idle*3"]},
+    "hitHeavy": {"frames":["crouch*3","crouch*10","crouch*4"]},
+    "hitLowLight": {"frames":["crouch*3","crouch*6","01_idle*3"]},
+    "hitLowMedium": {"frames":["crouch*3","crouch*8","01_idle*3"]},
+    "hitLowHeavy": {"frames":["crouch*3","crouch*10","crouch*4"]},
+    "hitCrouch": {"frames":["crouch*3","crouch*8","crouch*3","hitCrouch*11"]},
+    "hitAir": {"frames":["hitAir1*4","hitAir1*-1","jumpUp*4","jumpUp*-1"]},
+    "fall": {"frames":["jumpUp*6","jumpUp*-1","fall1*6","fall1*-1"]},
+    "bounce": {"frames":["jumpUp*3","jumpUp*-1","bounce*3","bounce*-1"]},
+    "bounceAir": {"frames":["jumpUp*3","jumpUp*-1","bounce*3","bounce*-1"]},
+    "lieDown": {"frames":["crouch*-1","lie*-1"]},
+    "getUp": {"frames":["crouch*6","crouch*8","crouch*7","crouch*5","01_idle*3","getUp1*6"]},
+    "dead": {"frames":["crouch*-1","lie*-1"]},
+    "trip": {"frames":["jumpUp*4","jumpUp*-1","trip*4","trip*-1"]},
+    "airRecover": {"frames":["jumpUp*3","jumpUp*3","jumpUp*3","jumpUp*3","jumpUp*-1","airRecover*3","airRecover*-1"]},
+    "win": {"frames":["06_victory*14","06_victory*14","win0*14","win1*14"]},
+    "lose": {"frames":["lose*-1","crouch*-1"]},
+    "draw": {"frames":["06_victory*-1"]},
+    "intro": {"frames":["intro0*50","01_idle*10","06_victory*40","06_victory*10","intro0*40","intro1*10"]},
+    "jab": {"frames":["02_attack1*3",{"pose":"02_attack1","ticks":3,"hit":{"part":"weapon","radius":12}},"02_attack1*5","02_attack1*2"]},
+    "strong": {"frames":["03_attack2*6","03_attack2*3",{"pose":"03_attack2","ticks":4,"hit":{"part":"weapon","radius":14}},"03_attack2*4","03_attack2*7","03_attack2*4"]},
+    "lkick": {"frames":["02_attack1*3",{"pose":"02_attack1","ticks":4,"hit":{"part":"footF","radius":10}},"02_attack1*6","02_attack1*2"]},
     "hkick": {
       "frames": [
         "03_attack2*6",
         "03_attack2*2",
-        {
-          "pose": "03_attack2",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
-        {
-          "pose": "03_attack2",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
+        {"pose":"03_attack2","ticks":4,"hit":{"part":"weapon","radius":12}},
+        {"pose":"03_attack2","ticks":4,"hit":{"part":"weapon","radius":12}},
         "03_attack2*4",
         "03_attack2*9",
         "03_attack2*4"
@@ -1953,25 +586,11 @@
     "cjab": {
       "frames": [
         "02_attack1*3",
-        {
-          "pose": "02_attack1",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 10
-          }
-        },
+        {"pose":"02_attack1","ticks":3,"hit":{"part":"weapon","radius":10}},
         "02_attack1*6",
         "02_attack1*2",
         "crouch*3",
-        {
-          "pose": "cjab",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 10
-          }
-        },
+        {"pose":"cjab","ticks":3,"hit":{"part":"weapon","radius":10}},
         "cjab*6",
         "crouch*2"
       ]
@@ -1979,67 +598,24 @@
     "clk": {
       "frames": [
         "02_attack1*3",
-        {
-          "pose": "02_attack1",
-          "ticks": 4,
-          "hit": {
-            "part": "footF",
-            "radius": 9
-          }
-        },
+        {"pose":"02_attack1","ticks":4,"hit":{"part":"footF","radius":9}},
         "02_attack1*3",
         "02_attack1*4",
         "crouch*3",
-        {
-          "pose": "clk",
-          "ticks": 4,
-          "hit": {
-            "part": "footF",
-            "radius": 9
-          }
-        },
+        {"pose":"clk","ticks":4,"hit":{"part":"footF","radius":9}},
         "clk*3",
         "crouch*4"
       ]
     },
-    "sweep": {
-      "frames": [
-        "03_attack2*7",
-        {
-          "pose": "03_attack2",
-          "ticks": 5,
-          "hit": {
-            "part": "weapon",
-            "radius": 9
-          }
-        },
-        "03_attack2*6",
-        "03_attack2*9",
-        "03_attack2*4"
-      ]
-    },
+    "sweep": {"frames":["03_attack2*7",{"pose":"03_attack2","ticks":5,"hit":{"part":"weapon","radius":9}},"03_attack2*6","03_attack2*9","03_attack2*4"]},
     "ajab": {
       "frames": [
         "02_attack1*2",
-        {
-          "pose": "02_attack1",
-          "ticks": 6,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
+        {"pose":"02_attack1","ticks":6,"hit":{"part":"weapon","radius":12}},
         "02_attack1*6",
         "02_attack1*-1",
         "jumpUp*2",
-        {
-          "pose": "ajab",
-          "ticks": 6,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
+        {"pose":"ajab","ticks":6,"hit":{"part":"weapon","radius":12}},
         "ajab*6",
         "jumpUp*-1"
       ]
@@ -2047,572 +623,89 @@
     "akick": {
       "frames": [
         "02_attack1*5",
-        {
-          "pose": "02_attack1",
-          "ticks": 9,
-          "hit": {
-            "part": "weapon",
-            "radius": 10
-          }
-        },
+        {"pose":"02_attack1","ticks":9,"hit":{"part":"weapon","radius":10}},
         "02_attack1*8",
         "02_attack1*-1",
         "jumpUp*5",
-        {
-          "pose": "akick",
-          "ticks": 9,
-          "hit": {
-            "part": "weapon",
-            "radius": 10
-          }
-        },
+        {"pose":"akick","ticks":9,"hit":{"part":"weapon","radius":10}},
         "akick*8",
         "akick*-1"
       ]
     },
-    "frostArc": {
-      "frames": [
-        "05_projectile*8",
-        "05_projectile*4",
-        {
-          "pose": "05_projectile",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 5
-          }
-        },
-        "05_projectile*14",
-        "05_projectile*5"
-      ]
-    },
+    "frostArc": {"frames":["05_projectile*8","05_projectile*4",{"pose":"05_projectile","ticks":4,"hit":{"part":"weapon","radius":5}},"05_projectile*14","05_projectile*5"]},
     "frostArcFx": {
       "frames": [
-        {
-          "effect": {
-            "type": "slash",
-            "size": 24,
-            "color": "#7fdcff",
-            "phase": 0
-          },
-          "ticks": 3
-        },
-        {
-          "effect": {
-            "type": "slash",
-            "size": 24,
-            "color": "#7fdcff",
-            "phase": 0.9
-          },
-          "ticks": 3
-        },
-        {
-          "effect": {
-            "type": "slash",
-            "size": 24,
-            "color": "#7fdcff",
-            "phase": 1.8
-          },
-          "ticks": 3
-        },
-        {
-          "effect": {
-            "type": "slash",
-            "size": 24,
-            "color": "#7fdcff",
-            "phase": 2.7
-          },
-          "ticks": 3
-        }
+        {"effect":{"type":"slash","size":24,"color":"#7fdcff","phase":0},"ticks":3},
+        {"effect":{"type":"slash","size":24,"color":"#7fdcff","phase":0.9},"ticks":3},
+        {"effect":{"type":"slash","size":24,"color":"#7fdcff","phase":1.8},"ticks":3},
+        {"effect":{"type":"slash","size":24,"color":"#7fdcff","phase":2.7},"ticks":3}
       ]
     },
     "frostHit": {
       "frames": [
-        {
-          "effect": {
-            "type": "burst",
-            "size": 20,
-            "color": "#7fdcff",
-            "phase": 0,
-            "nohit": true
-          },
-          "ticks": 3
-        },
-        {
-          "effect": {
-            "type": "burst",
-            "size": 20,
-            "color": "#7fdcff",
-            "phase": 0.25,
-            "nohit": true
-          },
-          "ticks": 3
-        },
-        {
-          "effect": {
-            "type": "burst",
-            "size": 20,
-            "color": "#7fdcff",
-            "phase": 0.5,
-            "nohit": true
-          },
-          "ticks": 3
-        },
-        {
-          "effect": {
-            "type": "burst",
-            "size": 20,
-            "color": "#7fdcff",
-            "phase": 0.75,
-            "nohit": true
-          },
-          "ticks": 3
-        },
-        {
-          "effect": {
-            "type": "burst",
-            "size": 20,
-            "color": "#7fdcff",
-            "phase": 0.95,
-            "nohit": true
-          },
-          "ticks": 3
-        }
+        {"effect":{"type":"burst","size":20,"color":"#7fdcff","phase":0,"nohit":true},"ticks":3},
+        {"effect":{"type":"burst","size":20,"color":"#7fdcff","phase":0.25,"nohit":true},"ticks":3},
+        {"effect":{"type":"burst","size":20,"color":"#7fdcff","phase":0.5,"nohit":true},"ticks":3},
+        {"effect":{"type":"burst","size":20,"color":"#7fdcff","phase":0.75,"nohit":true},"ticks":3},
+        {"effect":{"type":"burst","size":20,"color":"#7fdcff","phase":0.95,"nohit":true},"ticks":3}
       ]
     },
-    "hoarfrost": {
-      "frames": [
-        "04_special*4",
-        {
-          "pose": "04_special",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
-        "04_special*10",
-        "04_special*-1"
-      ]
-    },
-    "blinkCut": {
-      "frames": [
-        "03_attack2*7",
-        {
-          "pose": "03_attack2",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
-        "03_attack2*5",
-        "03_attack2*10",
-        "03_attack2*4"
-      ]
-    },
-    "super": {
-      "frames": [
-        "04_special*14",
-        "04_special*10",
-        "04_special*6",
-        "04_special*30",
-        "04_special*8",
-        "04_special*4"
-      ]
-    },
+    "hoarfrost": {"frames":["04_special*4",{"pose":"04_special","ticks":4,"hit":{"part":"weapon","radius":12}},{"pose":"04_special","ticks":4,"hit":{"part":"weapon","radius":12}},"04_special*10","04_special*-1"]},
+    "blinkCut": {"frames":["03_attack2*7",{"pose":"03_attack2","ticks":4,"hit":{"part":"weapon","radius":12}},"03_attack2*5","03_attack2*10","03_attack2*4"]},
+    "super": {"frames":["04_special*14","04_special*10","04_special*6","04_special*30","04_special*8","04_special*4"]},
     "winterFangFx": {
       "frames": [
-        {
-          "effect": {
-            "type": "slash",
-            "size": 52,
-            "color": "#7fdcff",
-            "phase": 0
-          },
-          "ticks": 3
-        },
-        {
-          "effect": {
-            "type": "slash",
-            "size": 52,
-            "color": "#7fdcff",
-            "phase": 0.8
-          },
-          "ticks": 3
-        },
-        {
-          "effect": {
-            "type": "slash",
-            "size": 52,
-            "color": "#7fdcff",
-            "phase": 1.6
-          },
-          "ticks": 3
-        },
-        {
-          "effect": {
-            "type": "slash",
-            "size": 52,
-            "color": "#7fdcff",
-            "phase": 2.4000000000000004
-          },
-          "ticks": 3
-        }
+        {"effect":{"type":"slash","size":52,"color":"#7fdcff","phase":0},"ticks":3},
+        {"effect":{"type":"slash","size":52,"color":"#7fdcff","phase":0.8},"ticks":3},
+        {"effect":{"type":"slash","size":52,"color":"#7fdcff","phase":1.6},"ticks":3},
+        {"effect":{"type":"slash","size":52,"color":"#7fdcff","phase":2.4000000000000004},"ticks":3}
       ]
     },
     "winterFangHit": {
       "frames": [
-        {
-          "effect": {
-            "type": "burst",
-            "size": 30,
-            "color": "#7fdcff",
-            "phase": 0,
-            "nohit": true
-          },
-          "ticks": 3
-        },
-        {
-          "effect": {
-            "type": "burst",
-            "size": 30,
-            "color": "#7fdcff",
-            "phase": 0.25,
-            "nohit": true
-          },
-          "ticks": 3
-        },
-        {
-          "effect": {
-            "type": "burst",
-            "size": 30,
-            "color": "#7fdcff",
-            "phase": 0.5,
-            "nohit": true
-          },
-          "ticks": 3
-        },
-        {
-          "effect": {
-            "type": "burst",
-            "size": 30,
-            "color": "#7fdcff",
-            "phase": 0.75,
-            "nohit": true
-          },
-          "ticks": 3
-        },
-        {
-          "effect": {
-            "type": "burst",
-            "size": 30,
-            "color": "#7fdcff",
-            "phase": 0.95,
-            "nohit": true
-          },
-          "ticks": 3
-        }
+        {"effect":{"type":"burst","size":30,"color":"#7fdcff","phase":0,"nohit":true},"ticks":3},
+        {"effect":{"type":"burst","size":30,"color":"#7fdcff","phase":0.25,"nohit":true},"ticks":3},
+        {"effect":{"type":"burst","size":30,"color":"#7fdcff","phase":0.5,"nohit":true},"ticks":3},
+        {"effect":{"type":"burst","size":30,"color":"#7fdcff","phase":0.75,"nohit":true},"ticks":3},
+        {"effect":{"type":"burst","size":30,"color":"#7fdcff","phase":0.95,"nohit":true},"ticks":3}
       ]
     },
-    "iai": {
-      "frames": [
-        "03_attack2*4",
-        "03_attack2*4",
-        "03_attack2*3",
-        {
-          "pose": "03_attack2",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 14
-          }
-        },
-        "03_attack2*5",
-        "03_attack2*5"
-      ]
-    },
-    "trap": {
-      "frames": [
-        "04_special*6",
-        "04_special*5",
-        "04_special*8",
-        "04_special*4"
-      ]
-    },
+    "iai": {"frames":["03_attack2*4","03_attack2*4","03_attack2*3",{"pose":"03_attack2","ticks":4,"hit":{"part":"weapon","radius":14}},"03_attack2*5","03_attack2*5"]},
+    "trap": {"frames":["04_special*6","04_special*5","04_special*8","04_special*4"]},
     "thousand": {
       "frames": [
         "04_special*6",
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 16
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 16
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 16
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 16
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 18
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 18
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 18
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 18
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 6,
-          "hit": {
-            "part": "weapon",
-            "radius": 20
-          }
-        },
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":16}},
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":16}},
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":16}},
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":16}},
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":18}},
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":18}},
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":18}},
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":18}},
+        {"pose":"04_special","ticks":6,"hit":{"part":"weapon","radius":20}},
         "04_special*6"
       ]
     },
-    "drawThrow": {
-      "frames": [
-        {
-          "pose": "02_attack1",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 22
-          }
-        },
-        "02_attack1*5",
-        "02_attack1*6",
-        "02_attack1*6"
-      ]
-    },
-    "needleBeam": {
-      "frames": [
-        "05_projectile*8",
-        "05_projectile*4",
-        {
-          "pose": "05_projectile",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 5
-          }
-        },
-        "05_projectile*14",
-        "05_projectile*5"
-      ]
-    },
-    "crimsonCannon": {
-      "frames": [
-        "05_projectile*8",
-        "05_projectile*4",
-        {
-          "pose": "05_projectile",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 5
-          }
-        },
-        "05_projectile*14",
-        "05_projectile*5"
-      ]
-    },
-    "flashStep": {
-      "frames": [
-        "03_attack2*7",
-        {
-          "pose": "03_attack2",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
-        "03_attack2*5",
-        "03_attack2*10",
-        "03_attack2*4"
-      ]
-    },
-    "petalStorm": {
-      "frames": [
-        "04_special*14",
-        "04_special*10",
-        "04_special*6",
-        "04_special*30",
-        "04_special*8",
-        "04_special*4"
-      ]
-    },
-    "frostArcEx": {
-      "frames": [
-        "05_projectile*6",
-        "05_projectile*3",
-        {
-          "pose": "05_projectile",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 5
-          }
-        },
-        "05_projectile*11",
-        "05_projectile*4"
-      ]
-    },
-    "hoarfrostEx": {
-      "frames": [
-        "04_special*3",
-        {
-          "pose": "04_special",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
-        "04_special*8",
-        "04_special*1"
-      ]
-    },
+    "drawThrow": {"frames":[{"pose":"02_attack1","ticks":4,"hit":{"part":"weapon","radius":22}},"02_attack1*5","02_attack1*6","02_attack1*6"]},
+    "needleBeam": {"frames":["05_projectile*8","05_projectile*4",{"pose":"05_projectile","ticks":4,"hit":{"part":"weapon","radius":5}},"05_projectile*14","05_projectile*5"]},
+    "crimsonCannon": {"frames":["05_projectile*8","05_projectile*4",{"pose":"05_projectile","ticks":4,"hit":{"part":"weapon","radius":5}},"05_projectile*14","05_projectile*5"]},
+    "flashStep": {"frames":["03_attack2*7",{"pose":"03_attack2","ticks":4,"hit":{"part":"weapon","radius":12}},"03_attack2*5","03_attack2*10","03_attack2*4"]},
+    "petalStorm": {"frames":["04_special*14","04_special*10","04_special*6","04_special*30","04_special*8","04_special*4"]},
+    "frostArcEx": {"frames":["05_projectile*6","05_projectile*3",{"pose":"05_projectile","ticks":4,"hit":{"part":"weapon","radius":5}},"05_projectile*11","05_projectile*4"]},
+    "hoarfrostEx": {"frames":["04_special*3",{"pose":"04_special","ticks":4,"hit":{"part":"weapon","radius":12}},{"pose":"04_special","ticks":4,"hit":{"part":"weapon","radius":12}},"04_special*8","04_special*1"]},
     "thousandUlt": {
       "frames": [
         "04_special*6",
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 16
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 16
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 16
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 16
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 18
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 18
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 18
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 18
-          }
-        },
-        {
-          "pose": "04_special",
-          "ticks": 6,
-          "hit": {
-            "part": "weapon",
-            "radius": 20
-          }
-        },
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":16}},
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":16}},
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":16}},
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":16}},
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":18}},
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":18}},
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":18}},
+        {"pose":"04_special","ticks":3,"hit":{"part":"weapon","radius":18}},
+        {"pose":"04_special","ticks":6,"hit":{"part":"weapon","radius":20}},
         "04_special*6"
       ]
     },
@@ -2620,23 +713,9 @@
       "frames": [
         "02_attack1*4",
         "02_attack1*2",
-        {
-          "pose": "02_attack1",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 14
-          }
-        },
+        {"pose":"02_attack1","ticks":3,"hit":{"part":"weapon","radius":14}},
         "02_attack1*2",
-        {
-          "pose": "02_attack1",
-          "ticks": 2,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
+        {"pose":"02_attack1","ticks":2,"hit":{"part":"weapon","radius":12}},
         "02_attack1*4",
         "02_attack1*2"
       ]
@@ -2644,33 +723,12 @@
     "stringB": {
       "frames": [
         "03_attack2*2",
-        {
-          "pose": "03_attack2",
-          "ticks": 2,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
+        {"pose":"03_attack2","ticks":2,"hit":{"part":"weapon","radius":12}},
         "03_attack2*2",
-        {
-          "pose": "03_attack2",
-          "ticks": 3,
-          "hit": {
-            "part": "footF",
-            "radius": 10
-          }
-        },
+        {"pose":"03_attack2","ticks":3,"hit":{"part":"footF","radius":10}},
         "03_attack2*4",
         "03_attack2*2",
-        {
-          "pose": "03_attack2",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 14
-          }
-        },
+        {"pose":"03_attack2","ticks":3,"hit":{"part":"weapon","radius":14}},
         "03_attack2*3",
         "03_attack2*6",
         "03_attack2*3"
@@ -2680,143 +738,21 @@
       "frames": [
         "03_attack2*5",
         "03_attack2*2",
-        {
-          "pose": "03_attack2",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
-        {
-          "pose": "03_attack2",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
+        {"pose":"03_attack2","ticks":3,"hit":{"part":"weapon","radius":12}},
+        {"pose":"03_attack2","ticks":4,"hit":{"part":"weapon","radius":12}},
         "03_attack2*4",
         "03_attack2*9",
         "03_attack2*4"
       ]
     },
-    "chain_jab2": {
-      "frames": [
-        "02_attack1*1",
-        {
-          "pose": "02_attack1",
-          "ticks": 2,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
-        "02_attack1*2",
-        "02_attack1*1",
-        "02_attack1*1"
-      ]
-    },
-    "chain_jab3": {
-      "frames": [
-        "02_attack1*2",
-        {
-          "pose": "02_attack1",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 14
-          }
-        },
-        "02_attack1*2",
-        "02_attack1*3",
-        "02_attack1*2"
-      ]
-    },
-    "chain_lkick2": {
-      "frames": [
-        "02_attack1*1",
-        {
-          "pose": "02_attack1",
-          "ticks": 2,
-          "hit": {
-            "part": "footF",
-            "radius": 10
-          }
-        },
-        "02_attack1*2",
-        "02_attack1*2",
-        "02_attack1*1"
-      ]
-    },
-    "chain_lkick3": {
-      "frames": [
-        "02_attack1*2",
-        {
-          "pose": "02_attack1",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
-        "02_attack1*2",
-        "02_attack1*3",
-        "02_attack1*2"
-      ]
-    },
-    "chain_strong2": {
-      "frames": [
-        "02_attack1*2",
-        {
-          "pose": "02_attack1",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 14
-          }
-        },
-        "02_attack1*3",
-        "02_attack1*2"
-      ]
-    },
-    "chain_cjab2": {
-      "frames": [
-        "02_attack1*1",
-        {
-          "pose": "02_attack1",
-          "ticks": 2,
-          "hit": {
-            "part": "weapon",
-            "radius": 10
-          }
-        },
-        "02_attack1*2",
-        "02_attack1*1"
-      ]
-    },
-    "chain_ajab2": {
-      "frames": [
-        "02_attack1*1",
-        {
-          "pose": "02_attack1",
-          "ticks": 3,
-          "hit": {
-            "part": "weapon",
-            "radius": 12
-          }
-        },
-        "02_attack1*3",
-        "02_attack1*-1"
-      ]
-    },
-    "flyForward": {
-      "frames": [
-        "flyFwd0*5",
-        "flyFwd1*5"
-      ],
-      "loop": 0
-    }
+    "chain_jab2": {"frames":["02_attack1*1",{"pose":"02_attack1","ticks":2,"hit":{"part":"weapon","radius":12}},"02_attack1*2","02_attack1*1","02_attack1*1"]},
+    "chain_jab3": {"frames":["02_attack1*2",{"pose":"02_attack1","ticks":3,"hit":{"part":"weapon","radius":14}},"02_attack1*2","02_attack1*3","02_attack1*2"]},
+    "chain_lkick2": {"frames":["02_attack1*1",{"pose":"02_attack1","ticks":2,"hit":{"part":"footF","radius":10}},"02_attack1*2","02_attack1*2","02_attack1*1"]},
+    "chain_lkick3": {"frames":["02_attack1*2",{"pose":"02_attack1","ticks":3,"hit":{"part":"weapon","radius":12}},"02_attack1*2","02_attack1*3","02_attack1*2"]},
+    "chain_strong2": {"frames":["02_attack1*2",{"pose":"02_attack1","ticks":3,"hit":{"part":"weapon","radius":14}},"02_attack1*3","02_attack1*2"]},
+    "chain_cjab2": {"frames":["02_attack1*1",{"pose":"02_attack1","ticks":2,"hit":{"part":"weapon","radius":10}},"02_attack1*2","02_attack1*1"]},
+    "chain_ajab2": {"frames":["02_attack1*1",{"pose":"02_attack1","ticks":3,"hit":{"part":"weapon","radius":12}},"02_attack1*3","02_attack1*-1"]},
+    "flyForward": {"frames":["flyFwd0*5","flyFwd1*5"],"loop":0}
   },
   "palettes": [
     {
@@ -2868,59 +804,12 @@
       "accent": "#fff4cc"
     }
   ],
-  "awakeningPalette": {
-    "hair": "#14151c",
-    "eye": "#ffd6eb",
-    "energy": "#ffb8dc",
-    "aura": "#ff85c0",
-    "trim": "#ffb8dc"
-  },
+  "awakeningPalette": {"hair":"#14151c","eye":"#ffd6eb","energy":"#ffb8dc","aura":"#ff85c0","trim":"#ffb8dc"},
   "abilities": {
-    "fly": {
-      "speed": 4.4,
-      "cost": 40,
-      "input": "b+c",
-      "upAnim": "jumpUp",
-      "downAnim": "jumpDown",
-      "fwdAnim": "jumpFwd",
-      "backAnim": "jumpStart",
-      "sound": [
-        200,
-        2
-      ]
-    },
-    "teleport": {
-      "cost": 200,
-      "input": "a+b",
-      "offset": 42,
-      "invuln": 14,
-      "turn": true,
-      "sound": [
-        200,
-        2
-      ]
-    },
-    "superSpeed": {
-      "mul": 1.9,
-      "cost": 55,
-      "input": "a+c"
-    },
-    "charge": {
-      "auraColor": [
-        255,
-        138,
-        196
-      ],
-      "shake": true,
-      "sound": [
-        200,
-        4
-      ],
-      "startSound": [
-        200,
-        5
-      ]
-    },
+    "fly": {"speed":4.4,"cost":40,"input":"b+c","upAnim":"jumpUp","downAnim":"jumpDown","fwdAnim":"jumpFwd","backAnim":"jumpStart","sound":[200,2]},
+    "teleport": {"cost":200,"input":"a+b","offset":42,"invuln":14,"turn":true,"sound":[200,2]},
+    "superSpeed": {"mul":1.9,"cost":55,"input":"a+c"},
+    "charge": {"auraColor":[255,138,196],"shake":true,"sound":[200,4],"startSound":[200,5]},
     "forms": [
       {
         "id": "byakuren_bankai",
@@ -2928,13 +817,7 @@
         "cost": 1000,
         "attack": 1.25,
         "defense": 1.15,
-        "palette": {
-          "colors": {
-            "aura": "#ff7ab8",
-            "energy": "#ffb8dc",
-            "trim": "#ff9ed0"
-          }
-        },
+        "palette": {"colors":{"aura":"#ff7ab8","energy":"#ffb8dc","trim":"#ff9ed0"}},
         "moves": [
           {
             "id": "bankai_petal_wave",
@@ -2942,91 +825,14 @@
             "input": "~D, DF, F, a+b",
             "kind": "special",
             "anim": "frostArc",
-            "afterimage": {
-              "at": 1,
-              "time": 26,
-              "length": 7,
-              "framegap": 2,
-              "trans": "add",
-              "palAdd": [
-                85,
-                12,
-                48
-              ],
-              "palMul": [
-                1,
-                0.74,
-                0.9
-              ]
-            },
+            "afterimage": {"at":1,"time":26,"length":7,"framegap":2,"trans":"add","palAdd":[85,12,48],"palMul":[1,0.74,0.9]},
             "projectile": [
-              {
-                "at": 3,
-                "anim": "frostArcFx",
-                "hitAnim": "frostHit",
-                "speed": [
-                  6.5,
-                  -1.2
-                ],
-                "offset": [
-                  52,
-                  -52
-                ],
-                "damage": 58,
-                "level": "heavy",
-                "hits": 2,
-                "element": "wind"
-              },
-              {
-                "at": 3,
-                "anim": "frostArcFx",
-                "hitAnim": "frostHit",
-                "speed": [
-                  6.8,
-                  0
-                ],
-                "offset": [
-                  52,
-                  -52
-                ],
-                "damage": 58,
-                "level": "heavy",
-                "hits": 2,
-                "element": "wind"
-              },
-              {
-                "at": 3,
-                "anim": "frostArcFx",
-                "hitAnim": "frostHit",
-                "speed": [
-                  6.5,
-                  1.2
-                ],
-                "offset": [
-                  52,
-                  -52
-                ],
-                "damage": 58,
-                "level": "heavy",
-                "hits": 2,
-                "element": "wind"
-              }
+              {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.5,-1.2],"offset":[52,-52],"damage":58,"level":"heavy","hits":2,"element":"wind"},
+              {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.8,0],"offset":[52,-52],"damage":58,"level":"heavy","hits":2,"element":"wind"},
+              {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.5,1.2],"offset":[52,-52],"damage":58,"level":"heavy","hits":2,"element":"wind"}
             ],
-            "shake": {
-              "at": 3,
-              "time": 10,
-              "ampl": 5,
-              "freq": 60
-            },
-            "sounds": [
-              {
-                "at": 2,
-                "snd": [
-                  200,
-                  4
-                ]
-              }
-            ],
+            "shake": {"at":3,"time":10,"ampl":5,"freq":60},
+            "sounds": [{"at":2,"snd":[200,4]}],
             "cost": 300
           },
           {
@@ -3035,93 +841,17 @@
             "input": "~D, DB, B, a+b",
             "kind": "special",
             "anim": "thousand",
-            "invuln": [
-              1,
-              6
-            ],
-            "afterimage": {
-              "at": 1,
-              "time": 26,
-              "length": 7,
-              "framegap": 2,
-              "trans": "add",
-              "palAdd": [
-                85,
-                12,
-                48
-              ],
-              "palMul": [
-                1,
-                0.74,
-                0.9
-              ]
-            },
-            "flash": {
-              "at": 2,
-              "time": 6,
-              "color": [
-                255,
-                186,
-                224
-              ]
-            },
+            "invuln": [1,6],
+            "afterimage": {"at":1,"time":26,"length":7,"framegap":2,"trans":"add","palAdd":[85,12,48],"palMul":[1,0.74,0.9]},
+            "flash": {"at":2,"time":6,"color":[255,186,224]},
             "hits": [
-              {
-                "at": 2,
-                "damage": 38,
-                "level": "medium",
-                "hitstun": 18,
-                "knockback": [
-                  -1,
-                  0
-                ]
-              },
-              {
-                "at": 4,
-                "damage": 38,
-                "level": "medium",
-                "hitstun": 18,
-                "knockback": [
-                  -1,
-                  0
-                ]
-              },
-              {
-                "at": 6,
-                "damage": 42,
-                "level": "medium",
-                "hitstun": 20,
-                "knockback": [
-                  -1,
-                  -2
-                ]
-              },
-              {
-                "at": 9,
-                "damage": 84,
-                "level": "heavy",
-                "launch": true,
-                "knockback": [
-                  -3,
-                  -7
-                ]
-              }
+              {"at":2,"damage":38,"level":"medium","hitstun":18,"knockback":[-1,0]},
+              {"at":4,"damage":38,"level":"medium","hitstun":18,"knockback":[-1,0]},
+              {"at":6,"damage":42,"level":"medium","hitstun":20,"knockback":[-1,-2]},
+              {"at":9,"damage":84,"level":"heavy","launch":true,"knockback":[-3,-7]}
             ],
-            "shake": {
-              "at": 2,
-              "time": 14,
-              "ampl": 6,
-              "freq": 70
-            },
-            "sounds": [
-              {
-                "at": 2,
-                "snd": [
-                  200,
-                  4
-                ]
-              }
-            ],
+            "shake": {"at":2,"time":14,"ampl":6,"freq":70},
+            "sounds": [{"at":2,"snd":[200,4]}],
             "cost": 400
           },
           {
@@ -3130,90 +860,11 @@
             "input": "D, D, y",
             "kind": "special",
             "anim": "strong",
-            "teleport": [
-              {
-                "at": 2,
-                "mode": "behind",
-                "offset": [
-                  36,
-                  0
-                ],
-                "turn": true
-              },
-              {
-                "at": 5,
-                "mode": "front",
-                "offset": [
-                  36,
-                  0
-                ],
-                "turn": true
-              }
-            ],
-            "afterimage": {
-              "at": 1,
-              "time": 26,
-              "length": 7,
-              "framegap": 2,
-              "trans": "add",
-              "palAdd": [
-                85,
-                12,
-                48
-              ],
-              "palMul": [
-                1,
-                0.74,
-                0.9
-              ]
-            },
-            "hits": [
-              {
-                "at": 3,
-                "damage": 52,
-                "level": "medium",
-                "hitstun": 20
-              },
-              {
-                "at": 6,
-                "damage": 78,
-                "level": "heavy",
-                "launch": true,
-                "knockback": [
-                  -3.5,
-                  -7.5
-                ]
-              }
-            ],
-            "shake": {
-              "at": 6,
-              "time": 12,
-              "ampl": 6,
-              "freq": 70
-            },
-            "sounds": [
-              {
-                "at": 1,
-                "snd": [
-                  200,
-                  2
-                ]
-              },
-              {
-                "at": 3,
-                "snd": [
-                  200,
-                  0
-                ]
-              },
-              {
-                "at": 6,
-                "snd": [
-                  200,
-                  1
-                ]
-              }
-            ],
+            "teleport": [{"at":2,"mode":"behind","offset":[36,0],"turn":true},{"at":5,"mode":"front","offset":[36,0],"turn":true}],
+            "afterimage": {"at":1,"time":26,"length":7,"framegap":2,"trans":"add","palAdd":[85,12,48],"palMul":[1,0.74,0.9]},
+            "hits": [{"at":3,"damage":52,"level":"medium","hitstun":20},{"at":6,"damage":78,"level":"heavy","launch":true,"knockback":[-3.5,-7.5]}],
+            "shake": {"at":6,"time":12,"ampl":6,"freq":70},
+            "sounds": [{"at":1,"snd":[200,2]},{"at":3,"snd":[200,0]},{"at":6,"snd":[200,1]}],
             "cost": 350
           }
         ],
@@ -3225,13 +876,7 @@
         "cost": 2000,
         "attack": 1.45,
         "defense": 1.28,
-        "palette": {
-          "colors": {
-            "aura": "#fff4e6",
-            "energy": "#fff4e6",
-            "trim": "#ffd6eb"
-          }
-        },
+        "palette": {"colors":{"aura":"#fff4e6","energy":"#fff4e6","trim":"#ffd6eb"}},
         "moves": [
           {
             "id": "hakuteiken_ascent",
@@ -3240,74 +885,12 @@
             "kind": "special",
             "when": "air",
             "anim": "airKick",
-            "afterimage": {
-              "at": 1,
-              "time": 42,
-              "length": 10,
-              "framegap": 2,
-              "trans": "add",
-              "palAdd": [
-                110,
-                96,
-                104
-              ],
-              "palMul": [
-                1,
-                0.96,
-                0.98
-              ]
-            },
-            "flash": {
-              "at": 2,
-              "time": 6,
-              "color": [
-                255,
-                246,
-                252
-              ]
-            },
-            "moves": [
-              {
-                "at": 2,
-                "vel": [
-                  7.2,
-                  4.4
-                ]
-              }
-            ],
-            "hits": [
-              {
-                "at": 3,
-                "damage": 118,
-                "level": "heavy",
-                "knockback": [
-                  -5,
-                  -4
-                ]
-              }
-            ],
-            "shake": {
-              "at": 3,
-              "time": 12,
-              "ampl": 6,
-              "freq": 75
-            },
-            "sounds": [
-              {
-                "at": 1,
-                "snd": [
-                  200,
-                  5
-                ]
-              },
-              {
-                "at": 3,
-                "snd": [
-                  200,
-                  1
-                ]
-              }
-            ],
+            "afterimage": {"at":1,"time":42,"length":10,"framegap":2,"trans":"add","palAdd":[110,96,104],"palMul":[1,0.96,0.98]},
+            "flash": {"at":2,"time":6,"color":[255,246,252]},
+            "moves": [{"at":2,"vel":[7.2,4.4]}],
+            "hits": [{"at":3,"damage":118,"level":"heavy","knockback":[-5,-4]}],
+            "shake": {"at":3,"time":12,"ampl":6,"freq":75},
+            "sounds": [{"at":1,"snd":[200,5]},{"at":3,"snd":[200,1]}],
             "cost": 300
           },
           {
@@ -3316,171 +899,24 @@
             "input": "~D, DF, F, D, DF, F, a+b",
             "kind": "super",
             "anim": "thousand",
-            "invuln": [
-              1,
-              10
-            ],
-            "superPause": {
-              "at": 1,
-              "time": 34,
-              "darken": true
-            },
-            "flash": {
-              "at": 2,
-              "time": 12,
-              "color": [
-                255,
-                240,
-                250
-              ]
-            },
-            "afterimage": {
-              "at": 1,
-              "time": 42,
-              "length": 10,
-              "framegap": 2,
-              "trans": "add",
-              "palAdd": [
-                110,
-                96,
-                104
-              ],
-              "palMul": [
-                1,
-                0.96,
-                0.98
-              ]
-            },
-            "moves": [
-              {
-                "at": 2,
-                "vel": [
-                  7.5,
-                  0
-                ]
-              },
-              {
-                "at": 8,
-                "vel": [
-                  1.2,
-                  0
-                ]
-              }
-            ],
+            "invuln": [1,10],
+            "superPause": {"at":1,"time":34,"darken":true},
+            "flash": {"at":2,"time":12,"color":[255,240,250]},
+            "afterimage": {"at":1,"time":42,"length":10,"framegap":2,"trans":"add","palAdd":[110,96,104],"palMul":[1,0.96,0.98]},
+            "moves": [{"at":2,"vel":[7.5,0]},{"at":8,"vel":[1.2,0]}],
             "hits": [
-              {
-                "at": 2,
-                "damage": 64,
-                "level": "light",
-                "hitstun": 22,
-                "knockback": [
-                  -1,
-                  0
-                ]
-              },
-              {
-                "at": 3,
-                "damage": 64,
-                "level": "light",
-                "hitstun": 22,
-                "knockback": [
-                  -1,
-                  0
-                ]
-              },
-              {
-                "at": 4,
-                "damage": 64,
-                "level": "light",
-                "hitstun": 22,
-                "knockback": [
-                  -1,
-                  0
-                ]
-              },
-              {
-                "at": 5,
-                "damage": 64,
-                "level": "light",
-                "hitstun": 22,
-                "knockback": [
-                  -1,
-                  0
-                ]
-              },
-              {
-                "at": 6,
-                "damage": 64,
-                "level": "light",
-                "hitstun": 22,
-                "knockback": [
-                  -1,
-                  0
-                ]
-              },
-              {
-                "at": 7,
-                "damage": 64,
-                "level": "light",
-                "hitstun": 22,
-                "knockback": [
-                  -1,
-                  0
-                ]
-              },
-              {
-                "at": 8,
-                "damage": 64,
-                "level": "light",
-                "hitstun": 22,
-                "knockback": [
-                  -1,
-                  0
-                ]
-              },
-              {
-                "at": 9,
-                "damage": 64,
-                "level": "light",
-                "hitstun": 22,
-                "knockback": [
-                  -1,
-                  0
-                ]
-              },
-              {
-                "at": 10,
-                "damage": 310,
-                "level": "heavy",
-                "launch": true,
-                "knockback": [
-                  -4,
-                  -9
-                ]
-              }
+              {"at":2,"damage":64,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":3,"damage":64,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":4,"damage":64,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":5,"damage":64,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":6,"damage":64,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":7,"damage":64,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":8,"damage":64,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":9,"damage":64,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":10,"damage":310,"level":"heavy","launch":true,"knockback":[-4,-9]}
             ],
-            "shake": {
-              "at": 10,
-              "time": 22,
-              "ampl": 10,
-              "freq": 80
-            },
-            "sounds": [
-              {
-                "at": 1,
-                "snd": [
-                  200,
-                  5
-                ]
-              },
-              {
-                "at": 9,
-                "snd": [
-                  200,
-                  1
-                ]
-              }
-            ],
+            "shake": {"at":10,"time":22,"ampl":10,"freq":80},
+            "sounds": [{"at":1,"snd":[200,5]},{"at":9,"snd":[200,1]}],
             "cost": 2000
           }
         ],
@@ -3488,46 +924,14 @@
       }
     ]
   },
-  "helpers": {
-    "clones": {
-      "name": "Utsusemi (Clone de Pétalas)",
-      "input": "D, D, b",
-      "cost": 400,
-      "count": 1,
-      "maxActive": 1,
-      "duration": 210,
-      "walkSpeed": 4.4,
-      "attackRange": 75,
-      "oneHitPoof": true
-    }
-  },
+  "helpers": {"clones":{"name":"Utsusemi (Clone de Pétalas)","input":"D, D, b","cost":400,"count":1,"maxActive":1,"duration":210,"walkSpeed":4.4,"attackRange":75,"oneHitPoof":true}},
   "profile": {
     "country": "SPIRIT",
-    "nationality": {
-      "en": "Spirit Gate Nobility",
-      "pt": "Nobreza do Portão dos Espíritos",
-      "es": "Nobleza del Portal Espiritual"
-    },
-    "origin": {
-      "en": "Blossom Sanctuary",
-      "pt": "Santuário das Pétalas",
-      "es": "Santuario de los Pétalos"
-    },
-    "title": {
-      "en": "Lord of a Thousand Blossoms",
-      "pt": "Senhor das Mil Pétalas",
-      "es": "Señor de los Mil Pétalos"
-    },
-    "fightingStyle": {
-      "en": "Sakuraba Iaido, Shunpo & Kido",
-      "pt": "Iaido Sakuraba, Shunpo e Kido",
-      "es": "Iaido Sakuraba, Shunpo y Kido"
-    },
-    "affiliation": {
-      "en": "House of Sakuraba",
-      "pt": "Casa Sakuraba",
-      "es": "Casa Sakuraba"
-    },
+    "nationality": {"en":"Spirit Gate Nobility","pt":"Nobreza do Portão dos Espíritos","es":"Nobleza del Portal Espiritual"},
+    "origin": {"en":"Blossom Sanctuary","pt":"Santuário das Pétalas","es":"Santuario de los Pétalos"},
+    "title": {"en":"Lord of a Thousand Blossoms","pt":"Senhor das Mil Pétalas","es":"Señor de los Mil Pétalos"},
+    "fightingStyle": {"en":"Sakuraba Iaido, Shunpo & Kido","pt":"Iaido Sakuraba, Shunpo e Kido","es":"Iaido Sakuraba, Shunpo y Kido"},
+    "affiliation": {"en":"House of Sakuraba","pt":"Casa Sakuraba","es":"Casa Sakuraba"},
     "bio": {
       "en": "Head of the aristocratic Sakuraba clan above the Spirit Gate. Unlocked only by conquering Story Mode, Byakuren commands flash-step speed, arcane Kido, Utsusemi clones, and a blade that scatters into a thousand sakura petals.",
       "pt": "Líder do clã aristocrático Sakuraba acima do Portão dos Espíritos. Desbloqueado apenas ao zerar o Modo História, Byakuren domina o Shunpo, feitiços Kido, clones Utsusemi e uma lâmina que se dispersa em mil pétalas cortantes.",
@@ -3536,13 +940,7 @@
     "element": "wind",
     "weakness": "fire",
     "alignment": "neutral",
-    "tags": [
-      "sword",
-      "shunpo",
-      "bankai",
-      "kido",
-      "story-unlock"
-    ]
+    "tags": ["sword","shunpo","bankai","kido","story-unlock"]
   },
   "moves": [
     {
@@ -3551,31 +949,9 @@
       "input": "x",
       "kind": "normal",
       "anim": "jab",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 34,
-          "level": "light"
-        }
-      ],
-      "cancels": [
-        "cjab",
-        "lkick",
-        "strong",
-        "launcher",
-        "overhead",
-        "slide",
-        "string_a"
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
+      "hits": [{"at":2,"damage":34,"level":"light"}],
+      "cancels": ["cjab","lkick","strong","launcher","overhead","slide","string_a"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "strong",
@@ -3583,27 +959,9 @@
       "input": "y",
       "kind": "normal",
       "anim": "strong",
-      "hits": [
-        {
-          "at": 3,
-          "damage": 80,
-          "level": "heavy"
-        }
-      ],
-      "cancels": [
-        "shunpo_senka",
-        "chire_sakuramai",
-        "overhead"
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            1
-          ]
-        }
-      ]
+      "hits": [{"at":3,"damage":80,"level":"heavy"}],
+      "cancels": ["shunpo_senka","chire_sakuramai","overhead"],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "lkick",
@@ -3611,27 +969,9 @@
       "input": "a",
       "kind": "normal",
       "anim": "lkick",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 28,
-          "level": "light"
-        }
-      ],
-      "cancels": [
-        "strong",
-        "launcher",
-        "slide"
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
+      "hits": [{"at":2,"damage":28,"level":"light"}],
+      "cancels": ["strong","launcher","slide"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "hkick",
@@ -3639,80 +979,11 @@
       "input": "b",
       "kind": "normal",
       "anim": "hkick",
-      "hits": [
-        {
-          "at": 3,
-          "damage": 74,
-          "level": "heavy",
-          "launch": true,
-          "knockback": [
-            -2,
-            -6
-          ]
-        }
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            1
-          ]
-        }
-      ]
+      "hits": [{"at":3,"damage":74,"level":"heavy","launch":true,"knockback":[-2,-6]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
-    {
-      "id": "cjab",
-      "name": "Kneeling Slice",
-      "input": "x",
-      "kind": "normal",
-      "anim": "cjab",
-      "when": "crouch",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 29,
-          "level": "light"
-        }
-      ],
-      "cancels": [
-        "strong"
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
-    },
-    {
-      "id": "clk",
-      "name": "Shin Kick",
-      "input": "a",
-      "kind": "normal",
-      "anim": "clk",
-      "when": "crouch",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 27,
-          "level": "light",
-          "guard": "low"
-        }
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
-    },
+    {"id":"cjab","name":"Kneeling Slice","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":29,"level":"light"}],"cancels":["strong"],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"clk","name":"Shin Kick","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":27,"level":"light","guard":"low"}],"sounds":[{"at":1,"snd":[200,0]}]},
     {
       "id": "sweep",
       "name": "Drift Sweep",
@@ -3720,79 +991,11 @@
       "kind": "normal",
       "anim": "sweep",
       "when": "crouch",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 66,
-          "level": "heavy",
-          "guard": "low",
-          "launch": true,
-          "knockback": [
-            -2,
-            -4
-          ]
-        }
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            1
-          ]
-        }
-      ]
+      "hits": [{"at":2,"damage":66,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-4]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
-    {
-      "id": "ajab",
-      "name": "Falling Petal Cut",
-      "input": "x",
-      "kind": "normal",
-      "anim": "ajab",
-      "when": "air",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 36,
-          "level": "light",
-          "guard": "high"
-        }
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
-    },
-    {
-      "id": "akick",
-      "name": "Icicle Drop",
-      "input": "b",
-      "kind": "normal",
-      "anim": "akick",
-      "when": "air",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 62,
-          "level": "medium",
-          "guard": "high"
-        }
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            1
-          ]
-        }
-      ]
-    },
+    {"id":"ajab","name":"Falling Petal Cut","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":36,"level":"light","guard":"high"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"akick","name":"Icicle Drop","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":62,"level":"medium","guard":"high"}],"sounds":[{"at":1,"snd":[200,1]}]},
     {
       "id": "drawThrow",
       "name": "Frost Draw Throw",
@@ -3800,27 +1003,8 @@
       "kind": "normal",
       "when": "stand",
       "anim": "drawThrow",
-      "throw": {
-        "damage": 88,
-        "bind": [
-          32,
-          0
-        ],
-        "launch": [
-          -4,
-          -6
-        ],
-        "at": 1
-      },
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            5
-          ]
-        }
-      ]
+      "throw": {"damage":88,"bind":[32,0],"launch":[-4,-6],"at":1},
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "overhead",
@@ -3828,29 +1012,8 @@
       "input": "x+b",
       "kind": "normal",
       "anim": "hkick",
-      "hits": [
-        {
-          "at": 3,
-          "damage": 70.3,
-          "level": "medium",
-          "launch": true,
-          "knockback": [
-            -2,
-            -6
-          ],
-          "guard": "high",
-          "hitstun": 20
-        }
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            1
-          ]
-        }
-      ]
+      "hits": [{"at":3,"damage":70.3,"level":"medium","launch":true,"knockback":[-2,-6],"guard":"high","hitstun":20}],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "launcher",
@@ -3859,28 +1022,8 @@
       "kind": "normal",
       "when": "crouch",
       "anim": "strong",
-      "hits": [
-        {
-          "at": 3,
-          "damage": 58,
-          "level": "heavy",
-          "launch": true,
-          "hitstun": 22,
-          "knockback": [
-            -1,
-            -6
-          ]
-        }
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            1
-          ]
-        }
-      ]
+      "hits": [{"at":3,"damage":58,"level":"heavy","launch":true,"hitstun":22,"knockback":[-1,-6]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "divekick",
@@ -3889,38 +1032,9 @@
       "kind": "normal",
       "anim": "akick",
       "when": "air",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 68.2,
-          "level": "heavy",
-          "guard": "high",
-          "groundBounce": true,
-          "launch": true,
-          "knockback": [
-            -1,
-            4
-          ]
-        }
-      ],
-      "moves": [
-        {
-          "at": 1,
-          "vel": [
-            1.8,
-            2.5
-          ]
-        }
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            1
-          ]
-        }
-      ]
+      "hits": [{"at":2,"damage":68.2,"level":"heavy","guard":"high","groundBounce":true,"launch":true,"knockback":[-1,4]}],
+      "moves": [{"at":1,"vel":[1.8,2.5]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "slide",
@@ -3929,44 +1043,9 @@
       "kind": "normal",
       "anim": "sweep",
       "when": "stand",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 56.1,
-          "level": "heavy",
-          "guard": "low",
-          "launch": true,
-          "knockback": [
-            -2,
-            -5
-          ]
-        }
-      ],
-      "moves": [
-        {
-          "at": 1,
-          "vel": [
-            3,
-            0
-          ]
-        },
-        {
-          "at": 3,
-          "vel": [
-            1.2,
-            0
-          ]
-        }
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            5
-          ]
-        }
-      ]
+      "hits": [{"at":2,"damage":56.1,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-5]}],
+      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "lunge",
@@ -3974,42 +1053,9 @@
       "input": "F+y",
       "kind": "normal",
       "anim": "strong",
-      "moves": [
-        {
-          "at": 1,
-          "vel": [
-            5.5,
-            0
-          ]
-        },
-        {
-          "at": 3,
-          "vel": [
-            1.5,
-            0
-          ]
-        }
-      ],
-      "hits": [
-        {
-          "at": 3,
-          "damage": 92,
-          "level": "heavy",
-          "knockback": [
-            -3,
-            -1
-          ]
-        }
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
+      "moves": [{"at":1,"vel":[5.5,0]},{"at":3,"vel":[1.5,0]}],
+      "hits": [{"at":3,"damage":92,"level":"heavy","knockback":[-3,-1]}],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "falcondive",
@@ -4018,32 +1064,9 @@
       "kind": "normal",
       "when": "air",
       "anim": "akick",
-      "moves": [
-        {
-          "at": 1,
-          "vel": [
-            4.5,
-            2.2
-          ]
-        }
-      ],
-      "hits": [
-        {
-          "at": 2,
-          "damage": 68.2,
-          "level": "medium",
-          "guard": "high"
-        }
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
+      "moves": [{"at":1,"vel":[4.5,2.2]}],
+      "hits": [{"at":2,"damage":68.2,"level":"medium","guard":"high"}],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "jab2",
@@ -4051,56 +1074,11 @@
       "input": "x",
       "kind": "normal",
       "anim": "chain_jab2",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 31,
-          "level": "light",
-          "knockback": [
-            -0.6,
-            0
-          ]
-        }
-      ],
-      "moves": [
-        {
-          "at": 1,
-          "vel": [
-            0.4,
-            0
-          ]
-        },
-        {
-          "at": 3,
-          "vel": [
-            0.2,
-            0
-          ]
-        }
-      ],
-      "cancels": [
-        "chire_sakuramai",
-        "shunpo_senka"
-      ],
-      "rekka": {
-        "after": [
-          "jab"
-        ],
-        "window": [
-          1,
-          19
-        ],
-        "contact": true
-      },
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
+      "hits": [{"at":2,"damage":31,"level":"light","knockback":[-0.6,0]}],
+      "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
+      "cancels": ["chire_sakuramai","shunpo_senka"],
+      "rekka": {"after":["jab"],"window":[1,19],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "jab3",
@@ -4108,56 +1086,11 @@
       "input": "x",
       "kind": "normal",
       "anim": "chain_jab3",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 72,
-          "level": "medium",
-          "knockback": [
-            -3,
-            0
-          ]
-        }
-      ],
-      "moves": [
-        {
-          "at": 1,
-          "vel": [
-            0.4,
-            0
-          ]
-        },
-        {
-          "at": 3,
-          "vel": [
-            0.2,
-            0
-          ]
-        }
-      ],
-      "cancels": [
-        "chire_sakuramai",
-        "shunpo_senka"
-      ],
-      "rekka": {
-        "after": [
-          "jab2"
-        ],
-        "window": [
-          1,
-          13
-        ],
-        "contact": true
-      },
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
+      "hits": [{"at":2,"damage":72,"level":"medium","knockback":[-3,0]}],
+      "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
+      "cancels": ["chire_sakuramai","shunpo_senka"],
+      "rekka": {"after":["jab2"],"window":[1,13],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick2",
@@ -4165,56 +1098,11 @@
       "input": "a",
       "kind": "normal",
       "anim": "chain_lkick2",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 25,
-          "level": "light",
-          "knockback": [
-            -0.6,
-            0
-          ]
-        }
-      ],
-      "moves": [
-        {
-          "at": 1,
-          "vel": [
-            0.4,
-            0
-          ]
-        },
-        {
-          "at": 3,
-          "vel": [
-            0.2,
-            0
-          ]
-        }
-      ],
-      "cancels": [
-        "chire_sakuramai",
-        "shunpo_senka"
-      ],
-      "rekka": {
-        "after": [
-          "lkick"
-        ],
-        "window": [
-          1,
-          21
-        ],
-        "contact": true
-      },
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
+      "hits": [{"at":2,"damage":25,"level":"light","knockback":[-0.6,0]}],
+      "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
+      "cancels": ["chire_sakuramai","shunpo_senka"],
+      "rekka": {"after":["lkick"],"window":[1,21],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick3",
@@ -4222,56 +1110,11 @@
       "input": "a",
       "kind": "normal",
       "anim": "chain_lkick3",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 56,
-          "level": "medium",
-          "knockback": [
-            -3.5,
-            0
-          ]
-        }
-      ],
-      "moves": [
-        {
-          "at": 1,
-          "vel": [
-            0.4,
-            0
-          ]
-        },
-        {
-          "at": 3,
-          "vel": [
-            0.2,
-            0
-          ]
-        }
-      ],
-      "cancels": [
-        "chire_sakuramai",
-        "shunpo_senka"
-      ],
-      "rekka": {
-        "after": [
-          "lkick2"
-        ],
-        "window": [
-          1,
-          14
-        ],
-        "contact": true
-      },
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
+      "hits": [{"at":2,"damage":56,"level":"medium","knockback":[-3.5,0]}],
+      "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
+      "cancels": ["chire_sakuramai","shunpo_senka"],
+      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "strong2",
@@ -4279,56 +1122,11 @@
       "input": "y",
       "kind": "normal",
       "anim": "chain_strong2",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 68,
-          "level": "medium",
-          "knockback": [
-            -4,
-            0
-          ]
-        }
-      ],
-      "moves": [
-        {
-          "at": 1,
-          "vel": [
-            0.4,
-            0
-          ]
-        },
-        {
-          "at": 3,
-          "vel": [
-            0.2,
-            0
-          ]
-        }
-      ],
-      "cancels": [
-        "chire_sakuramai",
-        "shunpo_senka"
-      ],
-      "rekka": {
-        "after": [
-          "strong"
-        ],
-        "window": [
-          6,
-          33
-        ],
-        "contact": true
-      },
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            1
-          ]
-        }
-      ]
+      "hits": [{"at":2,"damage":68,"level":"medium","knockback":[-4,0]}],
+      "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
+      "cancels": ["chire_sakuramai","shunpo_senka"],
+      "rekka": {"after":["strong"],"window":[6,33],"contact":true},
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "cjab2",
@@ -4336,38 +1134,11 @@
       "input": "x",
       "kind": "normal",
       "anim": "chain_cjab2",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 26,
-          "level": "light",
-          "knockback": [
-            -0.5,
-            0
-          ]
-        }
-      ],
+      "hits": [{"at":2,"damage":26,"level":"light","knockback":[-0.5,0]}],
       "when": "crouch",
       "cancels": [],
-      "rekka": {
-        "after": [
-          "cjab"
-        ],
-        "window": [
-          1,
-          20
-        ],
-        "contact": true
-      },
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
+      "rekka": {"after":["cjab"],"window":[1,20],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "ajab2",
@@ -4375,35 +1146,11 @@
       "input": "x",
       "kind": "normal",
       "anim": "chain_ajab2",
-      "hits": [
-        {
-          "at": 2,
-          "damage": 32,
-          "level": "light",
-          "guard": "high"
-        }
-      ],
+      "hits": [{"at":2,"damage":32,"level":"light","guard":"high"}],
       "when": "air",
       "cancels": [],
-      "rekka": {
-        "after": [
-          "ajab"
-        ],
-        "window": [
-          1,
-          20
-        ],
-        "contact": true
-      },
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
+      "rekka": {"after":["ajab"],"window":[1,20],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_a",
@@ -4411,55 +1158,10 @@
       "input": "B+x",
       "kind": "normal",
       "anim": "stringA",
-      "hits": [
-        {
-          "at": 3,
-          "damage": 50,
-          "level": "medium",
-          "knockback": [
-            -0.5,
-            0
-          ],
-          "element": "ice"
-        },
-        {
-          "at": 5,
-          "damage": 24,
-          "level": "light",
-          "element": "ice"
-        }
-      ],
-      "moves": [
-        {
-          "at": 1,
-          "vel": [
-            2,
-            0
-          ]
-        },
-        {
-          "at": 5,
-          "vel": [
-            0.5,
-            0
-          ]
-        }
-      ],
-      "cancels": [
-        "string_b",
-        "string_c",
-        "chire_sakuramai",
-        "shunpo_senka"
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
+      "hits": [{"at":3,"damage":50,"level":"medium","knockback":[-0.5,0],"element":"ice"},{"at":5,"damage":24,"level":"light","element":"ice"}],
+      "moves": [{"at":1,"vel":[2,0]},{"at":5,"vel":[0.5,0]}],
+      "cancels": ["string_b","string_c","chire_sakuramai","shunpo_senka"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_b",
@@ -4468,64 +1170,13 @@
       "kind": "normal",
       "anim": "stringB",
       "hits": [
-        {
-          "at": 2,
-          "damage": 20,
-          "level": "light",
-          "knockback": [
-            -0.5,
-            0
-          ],
-          "element": "ice"
-        },
-        {
-          "at": 4,
-          "damage": 26,
-          "level": "light",
-          "guard": "low",
-          "knockback": [
-            -0.5,
-            0
-          ],
-          "element": "ice"
-        },
-        {
-          "at": 7,
-          "damage": 50,
-          "level": "medium",
-          "element": "ice"
-        }
+        {"at":2,"damage":20,"level":"light","knockback":[-0.5,0],"element":"ice"},
+        {"at":4,"damage":26,"level":"light","guard":"low","knockback":[-0.5,0],"element":"ice"},
+        {"at":7,"damage":50,"level":"medium","element":"ice"}
       ],
-      "moves": [
-        {
-          "at": 1,
-          "vel": [
-            1.5,
-            0
-          ]
-        },
-        {
-          "at": 7,
-          "vel": [
-            0.5,
-            0
-          ]
-        }
-      ],
-      "cancels": [
-        "string_c",
-        "chire_sakuramai",
-        "shunpo_senka"
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
+      "moves": [{"at":1,"vel":[1.5,0]},{"at":7,"vel":[0.5,0]}],
+      "cancels": ["string_c","chire_sakuramai","shunpo_senka"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_c",
@@ -4533,49 +1184,10 @@
       "input": "B+y",
       "kind": "normal",
       "anim": "stringC",
-      "hits": [
-        {
-          "at": 3,
-          "damage": 96,
-          "level": "heavy",
-          "launch": true,
-          "knockback": [
-            -1,
-            -6
-          ],
-          "hitstun": 22,
-          "element": "ice"
-        }
-      ],
-      "moves": [
-        {
-          "at": 1,
-          "vel": [
-            2.5,
-            0
-          ]
-        },
-        {
-          "at": 3,
-          "vel": [
-            0.5,
-            0
-          ]
-        }
-      ],
-      "cancels": [
-        "chire_sakuramai",
-        "shunpo_senka"
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
+      "hits": [{"at":3,"damage":96,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22,"element":"ice"}],
+      "moves": [{"at":1,"vel":[2.5,0]},{"at":3,"vel":[0.5,0]}],
+      "cancels": ["chire_sakuramai","shunpo_senka"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "chire_sakuramai",
@@ -4583,34 +1195,8 @@
       "input": "~D, DF, F, x",
       "kind": "special",
       "anim": "frostArc",
-      "projectile": {
-        "at": 3,
-        "anim": "frostArcFx",
-        "hitAnim": "frostHit",
-        "speed": [
-          6.4,
-          0
-        ],
-        "offset": [
-          52,
-          -52
-        ],
-        "damage": 78,
-        "level": "heavy",
-        "element": "wind",
-        "hits": 3,
-        "removeTime": 130,
-        "priority": 2
-      },
-      "sounds": [
-        {
-          "at": 2,
-          "snd": [
-            200,
-            4
-          ]
-        }
-      ]
+      "projectile": {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.4,0],"offset":[52,-52],"damage":78,"level":"heavy","element":"wind","hits":3,"removeTime":130,"priority":2},
+      "sounds": [{"at":2,"snd":[200,4]}]
     },
     {
       "id": "hado_1_sho",
@@ -4618,41 +1204,10 @@
       "input": "D, D, a",
       "kind": "special",
       "anim": "jab",
-      "flash": {
-        "at": 2,
-        "time": 4,
-        "color": [
-          232,
-          244,
-          255
-        ]
-      },
-      "hits": [
-        {
-          "at": 2,
-          "damage": 52,
-          "level": "heavy",
-          "knockback": [
-            -9.5,
-            -2.5
-          ]
-        }
-      ],
-      "shake": {
-        "at": 2,
-        "time": 8,
-        "ampl": 5,
-        "freq": 70
-      },
-      "sounds": [
-        {
-          "at": 2,
-          "snd": [
-            200,
-            2
-          ]
-        }
-      ]
+      "flash": {"at":2,"time":4,"color":[232,244,255]},
+      "hits": [{"at":2,"damage":52,"level":"heavy","knockback":[-9.5,-2.5]}],
+      "shake": {"at":2,"time":8,"ampl":5,"freq":70},
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
     {
       "id": "hado_4_byakurai",
@@ -4660,43 +1215,9 @@
       "input": "~D, DF, F, y",
       "kind": "special",
       "anim": "frostArc",
-      "projectile": {
-        "at": 2,
-        "anim": "frostArcFx",
-        "hitAnim": "frostHit",
-        "speed": [
-          11.2,
-          0
-        ],
-        "offset": [
-          56,
-          -54
-        ],
-        "damage": 68,
-        "level": "heavy",
-        "element": "lightning",
-        "hits": 1,
-        "removeTime": 90,
-        "priority": 3
-      },
-      "flash": {
-        "at": 2,
-        "time": 4,
-        "color": [
-          220,
-          240,
-          255
-        ]
-      },
-      "sounds": [
-        {
-          "at": 2,
-          "snd": [
-            200,
-            3
-          ]
-        }
-      ]
+      "projectile": {"at":2,"anim":"frostArcFx","hitAnim":"frostHit","speed":[11.2,0],"offset":[56,-54],"damage":68,"level":"heavy","element":"lightning","hits":1,"removeTime":90,"priority":3},
+      "flash": {"at":2,"time":4,"color":[220,240,255]},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "hado_33_sokatsui",
@@ -4704,40 +1225,9 @@
       "input": "~D, DB, B, x",
       "kind": "special",
       "anim": "frostArc",
-      "projectile": {
-        "at": 3,
-        "anim": "frostArcFx",
-        "hitAnim": "frostHit",
-        "speed": [
-          5.4,
-          0
-        ],
-        "offset": [
-          52,
-          -50
-        ],
-        "damage": 94,
-        "level": "heavy",
-        "element": "fire",
-        "hits": 2,
-        "removeTime": 140,
-        "priority": 2
-      },
-      "shake": {
-        "at": 3,
-        "time": 10,
-        "ampl": 5,
-        "freq": 60
-      },
-      "sounds": [
-        {
-          "at": 2,
-          "snd": [
-            200,
-            3
-          ]
-        }
-      ]
+      "projectile": {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[5.4,0],"offset":[52,-50],"damage":94,"level":"heavy","element":"fire","hits":2,"removeTime":140,"priority":2},
+      "shake": {"at":3,"time":10,"ampl":5,"freq":60},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "bakudo_61_rikujokoro",
@@ -4745,38 +1235,9 @@
       "input": "~D, DB, B, y",
       "kind": "special",
       "anim": "frostArc",
-      "projectile": {
-        "at": 3,
-        "anim": "frostArcFx",
-        "hitAnim": "frostHit",
-        "speed": [
-          7.2,
-          0
-        ],
-        "offset": [
-          50,
-          -48
-        ],
-        "damage": 48,
-        "level": "medium",
-        "element": "lightning",
-        "hits": 2,
-        "removeTime": 110,
-        "priority": 2
-      },
-      "followUp": {
-        "to": "shunpo_senka",
-        "on": "hit"
-      },
-      "sounds": [
-        {
-          "at": 2,
-          "snd": [
-            200,
-            4
-          ]
-        }
-      ]
+      "projectile": {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[7.2,0],"offset":[50,-48],"damage":48,"level":"medium","element":"lightning","hits":2,"removeTime":110,"priority":2},
+      "followUp": {"to":"shunpo_senka","on":"hit"},
+      "sounds": [{"at":2,"snd":[200,4]}]
     },
     {
       "id": "bakudo_81_danku",
@@ -4784,51 +1245,12 @@
       "input": "~D, DB, B, a",
       "kind": "special",
       "anim": "strong",
-      "invuln": [
-        1,
-        10
-      ],
-      "parry": {
-        "window": [
-          1,
-          3
-        ]
-      },
-      "hits": [
-        {
-          "at": 3,
-          "damage": 66,
-          "level": "heavy",
-          "knockback": [
-            -7.5,
-            -2
-          ]
-        }
-      ],
-      "flash": {
-        "at": 2,
-        "time": 6,
-        "color": [
-          235,
-          245,
-          255
-        ]
-      },
-      "shake": {
-        "at": 3,
-        "time": 8,
-        "ampl": 4,
-        "freq": 60
-      },
-      "sounds": [
-        {
-          "at": 2,
-          "snd": [
-            200,
-            5
-          ]
-        }
-      ]
+      "invuln": [1,10],
+      "parry": {"window":[1,3]},
+      "hits": [{"at":3,"damage":66,"level":"heavy","knockback":[-7.5,-2]}],
+      "flash": {"at":2,"time":6,"color":[235,245,255]},
+      "shake": {"at":3,"time":8,"ampl":4,"freq":60},
+      "sounds": [{"at":2,"snd":[200,5]}]
     },
     {
       "id": "shunpo_senka",
@@ -4836,60 +1258,10 @@
       "input": "D, D, x",
       "kind": "special",
       "anim": "strong",
-      "teleport": {
-        "at": 2,
-        "mode": "behind",
-        "offset": [
-          34,
-          0
-        ],
-        "turn": true
-      },
-      "afterimage": {
-        "at": 1,
-        "time": 26,
-        "length": 7,
-        "framegap": 2,
-        "trans": "add",
-        "palAdd": [
-          85,
-          12,
-          48
-        ],
-        "palMul": [
-          1,
-          0.74,
-          0.9
-        ]
-      },
-      "hits": [
-        {
-          "at": 3,
-          "damage": 104,
-          "level": "heavy",
-          "hitstun": 16,
-          "knockback": [
-            -4.5,
-            -3.5
-          ]
-        }
-      ],
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            2
-          ]
-        },
-        {
-          "at": 3,
-          "snd": [
-            200,
-            0
-          ]
-        }
-      ]
+      "teleport": {"at":2,"mode":"behind","offset":[34,0],"turn":true},
+      "afterimage": {"at":1,"time":26,"length":7,"framegap":2,"trans":"add","palAdd":[85,12,48],"palMul":[1,0.74,0.9]},
+      "hits": [{"at":3,"damage":104,"level":"heavy","hitstun":16,"knockback":[-4.5,-3.5]}],
+      "sounds": [{"at":1,"snd":[200,2]},{"at":3,"snd":[200,0]}]
     },
     {
       "id": "air_scatter",
@@ -4898,33 +1270,8 @@
       "kind": "special",
       "when": "air",
       "anim": "akick",
-      "projectile": {
-        "at": 3,
-        "anim": "frostArcFx",
-        "hitAnim": "frostHit",
-        "speed": [
-          6,
-          2.2
-        ],
-        "offset": [
-          40,
-          -28
-        ],
-        "damage": 64,
-        "level": "heavy",
-        "element": "wind",
-        "hits": 2,
-        "removeTime": 110
-      },
-      "sounds": [
-        {
-          "at": 2,
-          "snd": [
-            200,
-            4
-          ]
-        }
-      ]
+      "projectile": {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6,2.2],"offset":[40,-28],"damage":64,"level":"heavy","element":"wind","hits":2,"removeTime":110},
+      "sounds": [{"at":2,"snd":[200,4]}]
     },
     {
       "id": "bankai_kageyoshi",
@@ -4933,155 +1280,19 @@
       "kind": "super",
       "cost": 1000,
       "anim": "frostArc",
-      "invuln": [
-        1,
-        8
-      ],
-      "superPause": {
-        "at": 1,
-        "time": 28,
-        "darken": true
-      },
-      "flash": {
-        "at": 2,
-        "time": 10,
-        "color": [
-          255,
-          178,
-          218
-        ]
-      },
-      "afterimage": {
-        "at": 1,
-        "time": 26,
-        "length": 7,
-        "framegap": 2,
-        "trans": "add",
-        "palAdd": [
-          85,
-          12,
-          48
-        ],
-        "palMul": [
-          1,
-          0.74,
-          0.9
-        ]
-      },
+      "invuln": [1,8],
+      "superPause": {"at":1,"time":28,"darken":true},
+      "flash": {"at":2,"time":10,"color":[255,178,218]},
+      "afterimage": {"at":1,"time":26,"length":7,"framegap":2,"trans":"add","palAdd":[85,12,48],"palMul":[1,0.74,0.9]},
       "projectile": [
-        {
-          "at": 3,
-          "anim": "frostArcFx",
-          "hitAnim": "frostHit",
-          "speed": [
-            6.2,
-            -1.6
-          ],
-          "offset": [
-            48,
-            -68
-          ],
-          "damage": 48,
-          "level": "heavy",
-          "element": "wind",
-          "hits": 2,
-          "removeTime": 150
-        },
-        {
-          "at": 4,
-          "anim": "frostArcFx",
-          "hitAnim": "frostHit",
-          "speed": [
-            6.6,
-            -0.6
-          ],
-          "offset": [
-            52,
-            -56
-          ],
-          "damage": 48,
-          "level": "heavy",
-          "element": "wind",
-          "hits": 2,
-          "removeTime": 150
-        },
-        {
-          "at": 5,
-          "anim": "frostArcFx",
-          "hitAnim": "frostHit",
-          "speed": [
-            7,
-            0
-          ],
-          "offset": [
-            54,
-            -46
-          ],
-          "damage": 52,
-          "level": "heavy",
-          "element": "wind",
-          "hits": 2,
-          "removeTime": 150
-        },
-        {
-          "at": 6,
-          "anim": "frostArcFx",
-          "hitAnim": "frostHit",
-          "speed": [
-            6.6,
-            0.7
-          ],
-          "offset": [
-            52,
-            -36
-          ],
-          "damage": 48,
-          "level": "heavy",
-          "element": "wind",
-          "hits": 2,
-          "removeTime": 150
-        },
-        {
-          "at": 7,
-          "anim": "frostArcFx",
-          "hitAnim": "frostHit",
-          "speed": [
-            6.2,
-            1.4
-          ],
-          "offset": [
-            48,
-            -26
-          ],
-          "damage": 48,
-          "level": "heavy",
-          "element": "wind",
-          "hits": 2,
-          "removeTime": 150
-        }
+        {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.2,-1.6],"offset":[48,-68],"damage":48,"level":"heavy","element":"wind","hits":2,"removeTime":150},
+        {"at":4,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.6,-0.6],"offset":[52,-56],"damage":48,"level":"heavy","element":"wind","hits":2,"removeTime":150},
+        {"at":5,"anim":"frostArcFx","hitAnim":"frostHit","speed":[7,0],"offset":[54,-46],"damage":52,"level":"heavy","element":"wind","hits":2,"removeTime":150},
+        {"at":6,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.6,0.7],"offset":[52,-36],"damage":48,"level":"heavy","element":"wind","hits":2,"removeTime":150},
+        {"at":7,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.2,1.4],"offset":[48,-26],"damage":48,"level":"heavy","element":"wind","hits":2,"removeTime":150}
       ],
-      "shake": {
-        "at": 3,
-        "time": 18,
-        "ampl": 7,
-        "freq": 75
-      },
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            5
-          ]
-        },
-        {
-          "at": 3,
-          "snd": [
-            200,
-            4
-          ]
-        }
-      ]
+      "shake": {"at":3,"time":18,"ampl":7,"freq":75},
+      "sounds": [{"at":1,"snd":[200,5]},{"at":3,"snd":[200,4]}]
     },
     {
       "id": "senkei_ouka_ranbu",
@@ -5090,168 +1301,23 @@
       "kind": "super",
       "cost": 1000,
       "anim": "thousand",
-      "invuln": [
-        1,
-        8
-      ],
-      "superPause": {
-        "at": 1,
-        "time": 26,
-        "darken": true
-      },
-      "afterimage": {
-        "at": 1,
-        "time": 26,
-        "length": 7,
-        "framegap": 2,
-        "trans": "add",
-        "palAdd": [
-          85,
-          12,
-          48
-        ],
-        "palMul": [
-          1,
-          0.74,
-          0.9
-        ]
-      },
-      "teleport": {
-        "at": 2,
-        "mode": "front",
-        "offset": [
-          36,
-          0
-        ],
-        "turn": true
-      },
-      "moves": [
-        {
-          "at": 2,
-          "vel": [
-            4.5,
-            0
-          ]
-        },
-        {
-          "at": 7,
-          "vel": [
-            1,
-            0
-          ]
-        }
-      ],
+      "invuln": [1,8],
+      "superPause": {"at":1,"time":26,"darken":true},
+      "afterimage": {"at":1,"time":26,"length":7,"framegap":2,"trans":"add","palAdd":[85,12,48],"palMul":[1,0.74,0.9]},
+      "teleport": {"at":2,"mode":"front","offset":[36,0],"turn":true},
+      "moves": [{"at":2,"vel":[4.5,0]},{"at":7,"vel":[1,0]}],
       "hits": [
-        {
-          "at": 2,
-          "damage": 46,
-          "level": "light",
-          "hitstun": 20,
-          "knockback": [
-            -1,
-            0
-          ]
-        },
-        {
-          "at": 3,
-          "damage": 46,
-          "level": "light",
-          "hitstun": 20,
-          "knockback": [
-            -1,
-            0
-          ]
-        },
-        {
-          "at": 4,
-          "damage": 46,
-          "level": "light",
-          "hitstun": 20,
-          "knockback": [
-            -1,
-            0
-          ]
-        },
-        {
-          "at": 5,
-          "damage": 46,
-          "level": "light",
-          "hitstun": 20,
-          "knockback": [
-            -1,
-            0
-          ]
-        },
-        {
-          "at": 6,
-          "damage": 46,
-          "level": "light",
-          "hitstun": 20,
-          "knockback": [
-            -1,
-            0
-          ]
-        },
-        {
-          "at": 7,
-          "damage": 46,
-          "level": "light",
-          "hitstun": 20,
-          "knockback": [
-            -1,
-            0
-          ]
-        },
-        {
-          "at": 8,
-          "damage": 46,
-          "level": "light",
-          "hitstun": 20,
-          "knockback": [
-            -1,
-            0
-          ]
-        },
-        {
-          "at": 9,
-          "damage": 165,
-          "level": "heavy",
-          "launch": true,
-          "knockback": [
-            -3.5,
-            -8.5
-          ]
-        }
+        {"at":2,"damage":46,"level":"light","hitstun":20,"knockback":[-1,0]},
+        {"at":3,"damage":46,"level":"light","hitstun":20,"knockback":[-1,0]},
+        {"at":4,"damage":46,"level":"light","hitstun":20,"knockback":[-1,0]},
+        {"at":5,"damage":46,"level":"light","hitstun":20,"knockback":[-1,0]},
+        {"at":6,"damage":46,"level":"light","hitstun":20,"knockback":[-1,0]},
+        {"at":7,"damage":46,"level":"light","hitstun":20,"knockback":[-1,0]},
+        {"at":8,"damage":46,"level":"light","hitstun":20,"knockback":[-1,0]},
+        {"at":9,"damage":165,"level":"heavy","launch":true,"knockback":[-3.5,-8.5]}
       ],
-      "shake": {
-        "at": 9,
-        "time": 16,
-        "ampl": 8,
-        "freq": 70
-      },
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            2
-          ]
-        },
-        {
-          "at": 2,
-          "snd": [
-            200,
-            0
-          ]
-        },
-        {
-          "at": 9,
-          "snd": [
-            200,
-            1
-          ]
-        }
-      ]
+      "shake": {"at":9,"time":16,"ampl":8,"freq":70},
+      "sounds": [{"at":1,"snd":[200,2]},{"at":2,"snd":[200,0]},{"at":9,"snd":[200,1]}]
     },
     {
       "id": "hishou_sakura",
@@ -5259,33 +1325,8 @@
       "input": "~D, DB, B, b",
       "kind": "special",
       "anim": "frostArc",
-      "projectile": {
-        "at": 3,
-        "anim": "frostArcFx",
-        "hitAnim": "frostHit",
-        "speed": [
-          7.2,
-          -0.8
-        ],
-        "offset": [
-          50,
-          -60
-        ],
-        "damage": 72,
-        "level": "heavy",
-        "element": "wind",
-        "hits": 2,
-        "removeTime": 120
-      },
-      "sounds": [
-        {
-          "at": 2,
-          "snd": [
-            200,
-            4
-          ]
-        }
-      ]
+      "projectile": {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[7.2,-0.8],"offset":[50,-60],"damage":72,"level":"heavy","element":"wind","hits":2,"removeTime":120},
+      "sounds": [{"at":2,"snd":[200,4]}]
     },
     {
       "id": "tenshi_hanafubuki",
@@ -5294,120 +1335,17 @@
       "kind": "super",
       "cost": 1000,
       "anim": "frostArc",
-      "invuln": [
-        1,
-        8
-      ],
-      "superPause": {
-        "at": 1,
-        "time": 26,
-        "darken": true
-      },
-      "flash": {
-        "at": 2,
-        "time": 10,
-        "color": [
-          255,
-          178,
-          218
-        ]
-      },
+      "invuln": [1,8],
+      "superPause": {"at":1,"time":26,"darken":true},
+      "flash": {"at":2,"time":10,"color":[255,178,218]},
       "projectile": [
-        {
-          "at": 3,
-          "anim": "frostArcFx",
-          "hitAnim": "frostHit",
-          "speed": [
-            6.4,
-            -1
-          ],
-          "offset": [
-            50,
-            -64
-          ],
-          "damage": 44,
-          "level": "heavy",
-          "element": "wind",
-          "hits": 2,
-          "removeTime": 150
-        },
-        {
-          "at": 4,
-          "anim": "frostArcFx",
-          "hitAnim": "frostHit",
-          "speed": [
-            6.4,
-            -0.3
-          ],
-          "offset": [
-            50,
-            -52
-          ],
-          "damage": 44,
-          "level": "heavy",
-          "element": "wind",
-          "hits": 2,
-          "removeTime": 150
-        },
-        {
-          "at": 5,
-          "anim": "frostArcFx",
-          "hitAnim": "frostHit",
-          "speed": [
-            6.4,
-            0.4
-          ],
-          "offset": [
-            50,
-            -42
-          ],
-          "damage": 48,
-          "level": "heavy",
-          "element": "wind",
-          "hits": 2,
-          "removeTime": 150
-        },
-        {
-          "at": 6,
-          "anim": "frostArcFx",
-          "hitAnim": "frostHit",
-          "speed": [
-            6.4,
-            1
-          ],
-          "offset": [
-            50,
-            -32
-          ],
-          "damage": 44,
-          "level": "heavy",
-          "element": "wind",
-          "hits": 2,
-          "removeTime": 150
-        }
+        {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.4,-1],"offset":[50,-64],"damage":44,"level":"heavy","element":"wind","hits":2,"removeTime":150},
+        {"at":4,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.4,-0.3],"offset":[50,-52],"damage":44,"level":"heavy","element":"wind","hits":2,"removeTime":150},
+        {"at":5,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.4,0.4],"offset":[50,-42],"damage":48,"level":"heavy","element":"wind","hits":2,"removeTime":150},
+        {"at":6,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.4,1],"offset":[50,-32],"damage":44,"level":"heavy","element":"wind","hits":2,"removeTime":150}
       ],
-      "shake": {
-        "at": 3,
-        "time": 16,
-        "ampl": 6,
-        "freq": 70
-      },
-      "sounds": [
-        {
-          "at": 1,
-          "snd": [
-            200,
-            5
-          ]
-        },
-        {
-          "at": 3,
-          "snd": [
-            200,
-            4
-          ]
-        }
-      ]
+      "shake": {"at":3,"time":16,"ampl":6,"freq":70},
+      "sounds": [{"at":1,"snd":[200,5]},{"at":3,"snd":[200,4]}]
     }
   ]
 }

@@ -1108,7 +1108,7 @@ pub fn render_effect(effect: &Value, with_images: bool, palette: Option<&Value>)
             [-s, -s * 1.4, s * 1.1, 0.0],
             [-s * 2.4, -s * 2.2, s * 1.8, s * 0.5],
         ),
-        "slash" | "water" | "wave" => (
+        "slash" | "getsuga" | "water" | "wave" => (
             [-s * 0.35, -s, s * 0.55, s],
             [-s * 1.6, -s * 1.4, s * 1.2, s * 1.4],
         ),
@@ -1195,6 +1195,20 @@ fn draw_effect(ctx: &mut Ctx, ty: &str, s: f64, ph: f64, col: Rgb, col2: Rgb, e:
     let w = WHITE;
     ctx.st.blend = BlendMode::Plus;
     match ty {
+        "getsuga" => {
+            ctx.st.blend = BlendMode::SourceOver;
+            let crescent = |c: &mut Ctx| {
+                c.move_to(-s * 0.2, -s);
+                c.quad_to(s * 1.10, -s * 0.22, -s * 0.2, s);
+                c.quad_to(s * (0.32 + ph.sin() * 0.05), s * 0.05, -s * 0.2, -s);
+                c.close();
+            };
+            glow_fill(ctx, rgba(col2, 0.9), 7.0, crescent);
+            ctx.begin();
+            crescent(ctx);
+            ctx.fill(&sol(col, 1.0));
+            ctx.stroke_w(&sol(col2, 0.95), 2.0);
+        }
         "slash" | "water" | "wave" => {
             let water = ty != "slash";
             let h = s;

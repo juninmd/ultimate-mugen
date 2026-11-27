@@ -92,7 +92,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
             let hit = entry.2.clone();
             frames.push(AnimFrame {
                 group: entry.0 .0, index: entry.0 .1, x: fr.offset.map(|o| o[0]).unwrap_or(0.0), y: fr.offset.map(|o| o[1]).unwrap_or(0.0), time: if fr.ticks > 0 && nc.speed.is_some_and(|k| k > 1.0 && (k > BOSS_SPEED || !PACE_LOCKED.contains(&no))) { ((fr.ticks as f32 / nc.speed.unwrap_or(1.0)).round() as i32).max(1) } else { fr.ticks },
-                flip_h: false, flip_v: false, blend: if fr.effect.as_ref().is_some_and(|effect| effect.get("type").and_then(Value::as_str) != Some("dragon")) { Blend::Add } else { Blend::None }, alpha: None, xscale: 1.0, yscale: 1.0, angle: 0.0,
+                flip_h: false, flip_v: false, blend: if fr.effect.as_ref().is_some_and(|effect| !matches!(effect.get("type").and_then(Value::as_str), Some("dragon" | "getsuga"))) { Blend::Add } else { Blend::None }, alpha: None, xscale: 1.0, yscale: 1.0, angle: 0.0,
                 clsn2: if fr.effect.is_some() { hit.clone() } else { hurt }, clsn1: hit,
             });
         }
@@ -124,7 +124,13 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     ];
     let ab = super::abilities::ability_code(nc.abilities.as_ref(), &anim_no);
     commands.extend(ab.commands);
-    let mut minus1 = String::from("[Statedef -1]\n\n[State -1, run]\ntype = ChangeState\nvalue = 100\ntriggerall = !IsHelper && command = \"FF\"\ntrigger1 = statetype = S && ctrl\n\n[State -1, hop]\ntype = ChangeState\nvalue = 105\ntriggerall = !IsHelper && command = \"BB\"\ntrigger1 = statetype = S && ctrl\n\n") + &ab.minus1;
+    let mut minus1 = String::from("[Statedef -1]\n\n") + &ab.minus1;
+    for (command, input, state) in [("FF", "F,F", 100), ("BB", "B,B", 105)] {
+        if nc.moves.iter().any(|m| m.kind == "movement" && m.input.replace(' ', "") == input) {
+            continue;
+        }
+        minus1 += &format!("[State -1, {command}]\ntype = ChangeState\nvalue = {state}\ntriggerall = !IsHelper && command = \"{command}\"\ntrigger1 = statetype = S && ctrl\n\n");
+    }
     let mut cns = String::new();
     let (mut movelist, move_states) = super::compile_moves::compile_moves(nc, &anim_no, 0, &mut commands, &mut minus1, &mut cns);
     cns += &ab.states; movelist.extend(ab.movelist);

@@ -2023,7 +2023,18 @@
           }
         },
         "02_attack1*6",
-        "02_attack1*-1"
+        "02_attack1*-1",
+        "jumpUp*2",
+        {
+          "pose": "ajab",
+          "ticks": 6,
+          "hit": {
+            "part": "weapon",
+            "radius": 12
+          }
+        },
+        "ajab*6",
+        "jumpUp*-1"
       ]
     },
     "akick": {

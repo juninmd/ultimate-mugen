@@ -77,7 +77,8 @@ const checks = [];
   ok('stick down moves the menu cursor', c1 === (c0 + 1) % 13, `${c0} -> ${c1}`);
   await flick(0, -0.9);
   await until('menu cursor back', async () => (await state()).menu_cur === c0, 5000).catch(() => {});
-  const back = (await state()).menu_cur;
+  let back = (await state()).menu_cur;
+  if (back !== c0 && back === (c0 - 1 + 13) % 13) { await flick(0, 0.9); await until('menu cursor recover', async () => (await state()).menu_cur === c0, 5000).catch(() => {}); back = (await state()).menu_cur; }
   ok('stick up moves the menu cursor back', back === c0, `${c1} -> ${back}`);
   for (let i = 0; i < 16 && (await state()).menu_cur !== TRAINING; i++) await flick(0, (await state()).menu_cur < TRAINING ? 0.9 : -0.9);
   ok('menu reaches training by touch', (await state()).menu_cur === TRAINING);

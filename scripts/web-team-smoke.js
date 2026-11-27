@@ -34,10 +34,9 @@ const PICKS = 7;
   await key('Enter', 1500);
   for (let i = 0; i < 3; i++) await key('ArrowDown'); await key('Enter', 1500);
   await snap('01-select-versus-cpu');
-  const MODE_NEXT = [1221, 20], SIZE_PLUS = [1221, 49];
-  for (let i = 0; i < 4; i++) await click(...MODE_NEXT);
+  for (let i = 0; i < 4; i++) await key('m', 500);
   await snap('02-mode-chip-team');
-  for (let i = 0; i < 4; i++) await click(...SIZE_PLUS, 500);
+  for (let i = 0; i < 4; i++) await key('e', 500);
   await snap('03-size-7v7');
   for (let i = 0; i < PICKS; i++) { await key('Enter', 700); await key('ArrowRight', 300); }
   await snap('04-squad-picked');

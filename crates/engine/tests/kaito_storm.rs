@@ -91,10 +91,11 @@ fn typhoon_barrage_spends_meter_and_connects() {
 fn awakened_native_sprites_recolor_only_the_hair_region() {
     let path = format!("{}/../../assets/chars/kaito.json", env!("CARGO_MANIFEST_DIR"));
     let character: NativeChar = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
-    let definition = ume_native::compile_native_with(&character, 1, true, Some(&[0, 20, 196, 1012]));
+    let rise = ume_native::anim_numbers(&character)["rise"];
+    let definition = ume_native::compile_native_with(&character, 1, true, Some(&[0, 20, 196, rise]));
     let metadata_path = format!("{}/../../assets/chars/sprites/kaito/meta.json", env!("CARGO_MANIFEST_DIR"));
     let metadata: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(metadata_path).unwrap()).unwrap();
-    for (animation, frame_index, pose) in [(0, 0, "idle0"), (20, 1, "walk1"), (196, 0, "powerup0"), (196, 1, "powerup01"), (196, 2, "powerup1"), (196, 3, "powerup12"), (1012, 0, "rise0"), (1012, 1, "inline_0172e9bbe547734f"), (1012, 2, "rise1"), (1012, 3, "rise2")] {
+    for (animation, frame_index, pose) in [(0, 0, "idle0"), (20, 1, "walk1"), (196, 0, "powerup0"), (196, 1, "powerup01"), (196, 2, "powerup1"), (196, 3, "powerup12"), (rise, 0, "rise0"), (rise, 1, "inline_0172e9bbe547734f"), (rise, 2, "rise1"), (rise, 3, "rise2")] {
         let frame = &definition.anims[&animation].frames[frame_index];
         let sprite = &definition.sprites[&(frame.group, frame.index)];
         let normal = sprite.image.as_ref().unwrap();

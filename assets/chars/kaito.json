@@ -433,6 +433,7 @@
     "jumpUp": {"frames":["jumpUp*4","jumpTuck*2","jumpTop*-1"]},
     "jumpFwd": {"frames":["jumpUp*4","flip0*4","flip1*4","flip2*4","flip3*4","jumpTop*-1"]},
     "jumpBack": {"frames":["jumpUp*3","jumpTuck*2","jumpTop*-1"]},
+    "flyForward": {"frames":["flyFwd0*5","flyFwd1*5"],"loop":0},
     "jumpDown": {"frames":["jumpDown*-1"]},
     "land": {"frames":["land*2","jumpStart*2","idle0*1"]},
     "run": {
@@ -1212,7 +1213,7 @@
     }
   },
   "abilities": {
-    "fly": {"speed":4,"cost":35,"input":"b+c"},
+    "fly": {"speed":4,"cost":35,"input":"b+c","fwdAnim":"flyForward"},
     "forms": [
       {
         "id": "kaito_awakened",

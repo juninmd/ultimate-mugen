@@ -1955,7 +1955,18 @@
           }
         },
         "02_attack1*6",
-        "02_attack1*2"
+        "02_attack1*2",
+        "crouch*3",
+        {
+          "pose": "cjab",
+          "ticks": 3,
+          "hit": {
+            "part": "weapon",
+            "radius": 10
+          }
+        },
+        "cjab*6",
+        "crouch*2"
       ]
     },
     "clk": {

@@ -101,7 +101,7 @@
    "frames": [
     {
      "effect": {
-      "type": "slash",
+      "type": "getsuga",
       "size": 40,
       "color": "#14000a",
       "color2": "#ff2440",
@@ -111,7 +111,7 @@
     },
     {
      "effect": {
-      "type": "slash",
+      "type": "getsuga",
       "size": 40,
       "color": "#14000a",
       "color2": "#ff2440",
@@ -121,7 +121,7 @@
     },
     {
      "effect": {
-      "type": "slash",
+      "type": "getsuga",
       "size": 40,
       "color": "#14000a",
       "color2": "#ff2440",
@@ -131,7 +131,7 @@
     },
     {
      "effect": {
-      "type": "slash",
+      "type": "getsuga",
       "size": 40,
       "color": "#14000a",
       "color2": "#ff2440",
@@ -145,7 +145,7 @@
    "frames": [
     {
      "effect": {
-      "type": "slash",
+      "type": "getsuga",
       "size": 76,
       "color": "#14000a",
       "color2": "#ff2440",
@@ -155,7 +155,7 @@
     },
     {
      "effect": {
-      "type": "slash",
+      "type": "getsuga",
       "size": 76,
       "color": "#14000a",
       "color2": "#ff2440",
@@ -165,7 +165,7 @@
     },
     {
      "effect": {
-      "type": "slash",
+      "type": "getsuga",
       "size": 76,
       "color": "#14000a",
       "color2": "#ff2440",
@@ -175,7 +175,7 @@
     },
     {
      "effect": {
-      "type": "slash",
+      "type": "getsuga",
       "size": 76,
       "color": "#14000a",
       "color2": "#ff2440",

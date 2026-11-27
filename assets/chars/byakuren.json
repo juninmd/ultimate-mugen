@@ -2027,7 +2027,18 @@
           }
         },
         "02_attack1*8",
-        "02_attack1*-1"
+        "02_attack1*-1",
+        "jumpUp*5",
+        {
+          "pose": "akick",
+          "ticks": 9,
+          "hit": {
+            "part": "weapon",
+            "radius": 10
+          }
+        },
+        "akick*8",
+        "akick*-1"
       ]
     },
     "frostArc": {

@@ -1826,7 +1826,9 @@
     "trip": {
       "frames": [
         "jumpUp*4",
-        "jumpUp*-1"
+        "jumpUp*-1",
+        "trip*4",
+        "trip*-1"
       ]
     },
     "airRecover": {

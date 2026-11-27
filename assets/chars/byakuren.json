@@ -584,7 +584,7 @@
       ]
     },
     "cjab": {"frames":["02_attack1*3",{"pose":"02_attack1","ticks":3,"hit":{"part":"weapon","radius":10}},"02_attack1*6","02_attack1*2"]},
-    "clk": {"frames":["02_attack1*3",{"pose":"02_attack1","ticks":4,"hit":{"part":"footF","radius":9}},"02_attack1*3","02_attack1*4"]},
+    "clk": {"frames":["crouch*3",{"pose":"clk","ticks":4,"hit":{"part":"footF","radius":9}},"clk*3","crouch*4"]},
     "sweep": {"frames":["03_attack2*7",{"pose":"03_attack2","ticks":5,"hit":{"part":"weapon","radius":9}},"03_attack2*6","03_attack2*9","03_attack2*4"]},
     "ajab": {"frames":["02_attack1*2",{"pose":"02_attack1","ticks":6,"hit":{"part":"weapon","radius":12}},"02_attack1*6","02_attack1*-1"]},
     "akick": {"frames":["02_attack1*5",{"pose":"02_attack1","ticks":9,"hit":{"part":"weapon","radius":10}},"02_attack1*8","02_attack1*-1"]},

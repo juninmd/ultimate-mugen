@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod spawn; mod elixir; pub use elixir::{Elixir, ELIXIR_LIFE_FACTOR}; mod swarm; pub use swarm::{arena_tiles, Swarm, SWARM_MAX_TOTAL}; mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_P1_SPAWN_X, ARENA_P2_SPAWN_X, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; pub(crate) use power_arena::tile_local; mod air_dash; mod armor; mod award; mod bounds; mod clash; mod forms; mod guard; mod knockdown; pub use knockdown::{KnockdownRule, KnockdownScope, DEFAULT_KNOCKDOWN_PRESET, KNOCKDOWN_PRESETS}; mod minus4; mod priority; mod telemetry; pub use telemetry::ComboTelemetry; mod types; mod unleash; mod walk;
+mod spawn; mod elixir; pub use elixir::{Elixir, ELIXIR_LIFE_FACTOR}; mod swarm; pub use swarm::{arena_tiles, Swarm, SWARM_MAX_TOTAL}; mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_P1_SPAWN_X, ARENA_P2_SPAWN_X, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; pub(crate) use power_arena::tile_local; mod air_dash; mod armor; mod award; mod bounds; mod clash; mod forms; mod guard; mod knockdown; pub use knockdown::{KnockdownRule, KnockdownScope, DEFAULT_KNOCKDOWN_PRESET, KNOCKDOWN_PRESETS}; mod minus4; mod priority; mod telemetry; pub use telemetry::ComboTelemetry; mod types; mod unleash; mod walk; mod round_camera;
 pub use types::*;
 
 #[derive(Clone)]
@@ -510,9 +510,7 @@ impl Match {
         for f in self.fighters.iter_mut() { f.received_damage = 0.0; f.received_hits = 0; f.combo_count = 0; f.combo_damage = 0.0; f.combo_target = None; f.combo_timer = 0; }
         self.explods.clear(); self.projectiles.clear(); self.pause = None;
         self.fighters.retain(|f| !f.is_helper || f.preserve);
-        self.camera = V2 { x: self.stage.start_x, y: self.stage.start_y };
-        self.camera_target_y = self.camera.y;
-        self.zoom_request = None;
+        self.reset_round_camera();
         if let Some(bg) = self.bg.as_mut() { bg.reset(); }
         let mut slot = [0usize; 2];
         let team_n = [self.fighters.iter().filter(|f| !f.is_helper && f.side == 0).count(), self.fighters.iter().filter(|f| !f.is_helper && f.side != 0).count()]; let spawns = self.random_spawns(team_n);
@@ -531,8 +529,8 @@ impl Match {
                 f.life = f.life_max; f.alive = true;
                 f.revert_form(); f.reset_passive_for_round(); f.reset_potential();
                 if first { f.power = 0.0; }
-                f.hit_pause = 0; f.hit_shake = 0; f.targets.clear(); f.bind = None; f.hitdef_active = false; f.ctrl = false;
-                f.st_def = f.def.clone(); f.ghv = GetHitVars::default(); f.sysvars = [0; 5];
+                f.hit_pause = 0; f.hit_shake = 0; f.targets.clear(); f.bind = None; f.hitdef_active = false; f.ctrl = false; f.pos_freeze = false; f.asserts = 0;
+                f.st_def = f.def.clone(); f.ghv = GetHitVars::default(); f.sysvars = [0; 5]; f.sysfvars = [0.0; 5];
             }
             crate::ikemen::life::reset_for_round(self, i);
             let d = self.fighters[i].def.clone();
@@ -540,6 +538,7 @@ impl Match {
             self.fighters[i].ctrl = false;
         }
         if self.team_tag { self.reset_tag_round(); }
+        self.frame_round_opening();
         let decider = self.rounds_to_win > 1 && self.wins[0] == self.rounds_to_win - 1 && self.wins[1] == self.rounds_to_win - 1;
         self.announce = Some(Announce { text: if decider { "FINAL ROUND".into() } else { format!("ROUND {}", self.round_no) }, time: 70, total: 70, kind: AnnounceKind::Round });
         self.events.push(Event::RoundStart(self.round_no));

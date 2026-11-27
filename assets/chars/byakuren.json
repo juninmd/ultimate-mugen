@@ -1600,7 +1600,8 @@
     "jumpStart": {
       "frames": [
         "jumpUp*2",
-        "jumpUp*2"
+        "jumpUp*2",
+        "jumpStart*2"
       ]
     },
     "jumpUp": {
@@ -2869,7 +2870,7 @@
       "upAnim": "jumpUp",
       "downAnim": "jumpDown",
       "fwdAnim": "jumpTop",
-      "backAnim": "jumpStart",
+      "backAnim": "jumpUp",
       "sound": [
         200,
         2

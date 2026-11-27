@@ -1770,7 +1770,9 @@
     "fall": {
       "frames": [
         "jumpUp*6",
-        "jumpUp*-1"
+        "jumpUp*-1",
+        "fall1*6",
+        "fall1*-1"
       ]
     },
     "bounce": {

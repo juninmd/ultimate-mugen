@@ -1,0 +1,291 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Rust engine UI references - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="rust-engine-ui-references"><a class="header" href="#rust-engine-ui-references">Rust engine UI references</a></h1>
+<p>Study of the eleven Rust engines listed in "Best Rust Game Engine for Game Development" (WeeTech Solution, 2026) and what is worth borrowing for menus, loading screens, HUD, settings and buttons. Nothing is copied into this repository. Only ideas and layout patterns are recorded here.</p>
+<p>Stack constraints that bind every recommendation: wgpu + winit renderer, tiny-skia, custom immediate-mode UI in <code>src/ui.rs</code> and <code>src/app/menu_view.rs</code>, layout tokens in <code>src/ui_tokens.rs</code>. No macroquad, no egui, no Lua.</p>
+<h2 id="method-and-limits"><a class="header" href="#method-and-limits">Method and limits</a></h2>
+<ul>
+<li>Source was read only for five repositories, shallow-cloned at the session's read access: <code>not-fl3/macroquad</code> (MIT OR Apache-2.0), <code>ggez/ggez</code> (MIT), <code>FyroxEngine/Fyrox</code> (MIT), <code>bevyengine/bevy</code> (MIT OR Apache-2.0), <code>AmbientRun/ambient</code> (MIT OR Apache-2.0). Licence text was confirmed from the repository files.</li>
+<li>The other six (Amethyst, Piston, Nannou, Blue Engine, Tetra, rend3) were not opened. Their notes below come from the article only and are marked as unverified.</li>
+<li>The article itself is marketing text. Its descriptions are generic and some claims (for example, which engines are actively maintained) were not checked.</li>
+</ul>
+<h2 id="engine-by-engine"><a class="header" href="#engine-by-engine">Engine by engine</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Engine</th><th>Licence</th><th>UI relevance</th><th>What we can use</th></tr></thead><tbody>
+<tr><td>Macroquad</td><td>MIT OR Apache-2.0</td><td>High. Immediate-mode UI in <code>src/ui/</code> (widgets, <code>style.rs</code>, <code>key_repeat.rs</code>, <code>combobox</code>, <code>clipboard.rs</code>, <code>input_handler.rs</code>)</td><td>Closest model to our UI. Key-repeat for held arrows in menus, a style/skin struct for button and panel colours, combobox behaviour for settings. Stack rule: we do not adopt the crate.</td></tr>
+<tr><td>Fyrox</td><td>MIT</td><td>High. <code>fyrox-ui</code> is a full retained-mode widget set: buttons, dropdown list, dropdown menu, tab control, scroll viewer, progress bar, message box, popup, file browser, navigation, style</td><td>Reference for the set of widgets a settings screen needs, focus <code>navigation.rs</code> for keyboard and gamepad, <code>progress_bar</code> for loading, <code>messagebox</code> for confirm dialogs, and a style module for themes. Retained-mode message passing does not fit our immediate-mode code, so ideas only.</td></tr>
+<tr><td>Bevy</td><td>MIT OR Apache-2.0</td><td>Medium. <code>bevy_ui</code> (flexbox), <code>bevy_ui_render</code>, <code>bevy_ui_widgets</code> (headless widgets, behaviour separated from styling)</td><td>The split between widget behaviour and visual style is worth copying conceptually. Flexbox is not needed; our 1280x720 virtual layout with tokens is enough. Bevy's state-based screen flow suggests how to structure loading and transitions.</td></tr>
+<tr><td>Ambient</td><td>MIT OR Apache-2.0</td><td>Low to medium. A UI element tree (<code>element</code>, <code>element_component</code>) built on its own runtime</td><td>Only the idea of composing small reusable elements (button, panel, label) with props. Its runtime is too large to borrow from.</td></tr>
+<tr><td>GGEZ</td><td>MIT</td><td>Low. No UI layer; has a graphics text/glyph path and timers</td><td>Reference for a minimal loop and text rendering with glyph caching. Nothing to copy for UI chrome.</td></tr>
+<tr><td>Tetra</td><td>not checked</td><td>Low (article only)</td><td>Nothing needed beyond what we have.</td></tr>
+<tr><td>Amethyst</td><td>not checked</td><td>Low (article only). Project status should be checked before any reference</td><td>Skip.</td></tr>
+<tr><td>Piston</td><td>not checked</td><td>Low (article only)</td><td>Skip.</td></tr>
+<tr><td>Nannou</td><td>not checked</td><td>Low (article only; creative coding, not a game UI)</td><td>Skip.</td></tr>
+<tr><td>Blue Engine</td><td>not checked</td><td>Low (article only)</td><td>Skip.</td></tr>
+<tr><td>rend3</td><td>not checked</td><td>Low (renderer only, no UI)</td><td>Skip. Its post-processing ideas are covered by our own <code>postfx</code>.</td></tr>
+</tbody></table>
+</div>
+<h2 id="prioritised-recommendations"><a class="header" href="#prioritised-recommendations">Prioritised recommendations</a></h2>
+<p>Ordered by player-visible impact and by how little they cost to build on the current UI code.</p>
+<ol>
+<li><strong>Loading screen with a progress bar and tips.</strong> Fyrox's <code>progress_bar</code> and Macroquad's simple panel style show the pattern. We already have <code>src/loading_tips.rs</code>; add a determinate bar driven by the real load stages (parallel load already exists, see <a href="Performance.html">Performance</a>). Expected result: loading no longer looks frozen.</li>
+<li><strong>Keyboard and gamepad focus navigation with key-repeat.</strong> Macroquad's <code>key_repeat.rs</code> and Fyrox's <code>navigation.rs</code>. Holding up/down in menus should step smoothly, and focus should be visible on every screen.</li>
+<li><strong>Settings widgets: dropdown, tabs, scroll viewer.</strong> Fyrox's <code>dropdown_list</code>, <code>tab_control</code>, <code>scroll_viewer</code> and Macroquad's combobox define the expected behaviour (open, close on outside click, keyboard selection). Put them in new files under <code>src/ui/</code> or <code>src/app/</code>, using <code>ui_tokens</code>.</li>
+<li><strong>Confirm dialogs and tooltips.</strong> Fyrox's <code>messagebox</code> and <code>popup</code> for "quit match?", "delete replay?" and similar prompts. Keeps destructive actions explicit.</li>
+<li><strong>Theme struct for colours and sizes.</strong> Macroquad's <code>style.rs</code> and Fyrox's <code>style</code> module. We already have 11 themes in <code>menu_art.rs</code>; moving their values into one <code>Theme</code> struct with tokens makes adding a theme a data change.</li>
+<li><strong>Screen transitions as a small state machine.</strong> Bevy's state pattern. Fade or slide between title, select, fight and results, with easing matching the existing menu entry animation (ease-out cubic, 0.28 s).</li>
+<li><strong>Headless widget behaviour.</strong> Bevy's <code>bevy_ui_widgets</code> idea: separate hit-testing and focus logic from drawing so the same button logic serves the menu, pause and settings screens.</li>
+</ol>
+<h2 id="status-against-the-current-code"><a class="header" href="#status-against-the-current-code">Status against the current code</a></h2>
+<p>The recommendations above were checked against the code on 2026-11-10. Most of the list already exists, so the work is to keep it and fill the real gaps.</p>
+<div class="table-wrapper"><table><thead><tr><th>Item</th><th>Status</th></tr></thead><tbody>
+<tr><td>Loading screen with progress bar and tips</td><td>Already there: <code>Ui::loading_screen</code>, <code>progress_bar</code>, <code>src/loading_tips.rs</code>, real step labels in <code>src/app/loading.rs</code>. Keep.</td></tr>
+<tr><td>Smooth menu focus</td><td>Already there: <code>src/app/menu_focus.rs</code> (frame-rate independent easing). Keep.</td></tr>
+<tr><td>Confirm dialogs</td><td>Present for replay deletion in <code>replay_browser.rs</code>; pause has its own skin. Other destructive actions could reuse the pattern.</td></tr>
+<tr><td>Screen transitions</td><td>Already there: diagonal wipe in <code>src/app.rs</code>. Keep.</td></tr>
+<tr><td>Key repeat when a direction is held</td><td>Was missing: the shell drops OS key repeats on purpose, so menus and sliders moved one step per tap. Added in <code>src/controls/nav_repeat.rs</code> (0.38 s delay, then every 75 ms, directions only).</td></tr>
+<tr><td>Dropdown, tabs, tooltips, theme struct</td><td>Not implemented. Candidates for later small PRs.</td></tr>
+</tbody></table>
+</div>
+<h2 id="what-we-will-not-do"><a class="header" href="#what-we-will-not-do">What we will not do</a></h2>
+<ul>
+<li>Adopt macroquad, egui or any engine's runtime. That breaks the stack decision in <a href="Engine.html">Engine</a>.</li>
+<li>Copy code from MIT or Apache-2.0 sources into the repo. Use them as design references only, so no licence notice is needed.</li>
+<li>Touch character sprites or stages. Those are handled elsewhere.</li>
+</ul>
+<h2 id="related"><a class="header" href="#related">Related</a></h2>
+<ul>
+<li><a href="Engine.html">Engine</a> for the render and UI stack.</li>
+<li><a href="Visual-Effects.html">Visual Effects</a> for the effects pipeline.</li>
+<li>Portuguese version: <a href="pt-BR/Referencias-UI-Engines-Rust.html">Referencias-UI-Engines-Rust</a>.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="Research-Story-Mode.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Authoring-Tool-Survey.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="Research-Story-Mode.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Authoring-Tool-Survey.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

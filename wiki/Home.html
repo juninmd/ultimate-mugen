@@ -1,0 +1,322 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Ultimate MUGEN Wiki - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="ultimate-mugen-wiki"><a class="header" href="#ultimate-mugen-wiki">Ultimate MUGEN Wiki</a></h1>
+<p><strong>English</strong> · <a href="pt-BR/Home.html">Português (BR)</a></p>
+<p>A guide for players and creators who want to customize the engine: install, configure, create fighters, stages and scripts.</p>
+<div class="table-wrapper"><table><thead><tr><th>Page</th><th>Audience</th><th>Covers</th></tr></thead><tbody>
+<tr><td><a href="Installation.html">Installation</a></td><td>Players</td><td>Download, build, run on desktop, browser and phone</td></tr>
+<tr><td><a href="Auto-Update.html">Automatic updates</a></td><td>Players</td><td>Self-update from GitHub releases, opt-outs and CLI flags</td></tr>
+<tr><td><a href="Configuration.html">Configuration and controls</a></td><td>Players</td><td><code>.cfg</code> file, command-line flags, environment variables, controls</td></tr>
+<tr><td><a href="MUGEN-Content.html">Adding M.U.G.E.N content</a></td><td>Players</td><td>Install <code>.def</code>/<code>.zip</code> characters and stages, and validate them</td></tr>
+<tr><td><a href="Marketplace.html">GitHub marketplace</a></td><td>Players</td><td>Install characters, stages and music from any GitHub repository</td></tr>
+<tr><td><a href="Model3D.html">3D fighters (prototype)</a></td><td>Contributors</td><td>Isolated glTF skeletal fighter drawn on the 2D fight plane</td></tr>
+<tr><td><a href="Story-Mode.html">Story mode</a></td><td>Players</td><td>Five scrolling stages, waves, bosses, cutscenes and health carry-over</td></tr>
+<tr><td><a href="Stage-Objects.html">Stage objects</a></td><td>Players, creators</td><td>Breakable crates, barrels and cars, food pickups, bonus rounds and their TOML data</td></tr>
+<tr><td><a href="Audio.html">Audio</a></td><td>Players &amp; Creators</td><td>Character sounds, music per stage, formats and panning</td></tr>
+<tr><td><a href="Character-Select.html">Character select</a></td><td>Players</td><td>Select screen, portraits, teams and shortcuts</td></tr>
+<tr><td><a href="Game-Modes.html">Game modes</a></td><td>Players</td><td>Arcade, teams (Sequence, Parallel, Tag) and their rules</td></tr>
+<tr><td><a href="Easter-Eggs.html">In-fight Easter Eggs</a></td><td>Players</td><td>Secret combat milestones, stage cameos, and lore matchup interactions</td></tr>
+<tr><td><a href="Lore.html">Universe and Lore</a></td><td>Players &amp; Creators</td><td>Cosmology, factions, energy systems and the Great Convergence</td></tr>
+<tr><td><a href="Characters.html">Character Dossiers</a></td><td>Players &amp; Creators</td><td>Roster bios, portraits, moves, rivalries and home stages</td></tr>
+<tr><td><a href="Compatibility-Decisions.html">Compatibility decisions</a></td><td>Creators</td><td>Features the engine rejects by design and why</td></tr>
+<tr><td><a href="Format-Coverage.html">Format coverage</a></td><td>Creators</td><td>Status of SFF, SND, AIR, ACT, DEF and screenpack support</td></tr>
+<tr><td><a href="Lua-Scripts.html">Lua scripts</a></td><td>Creators</td><td>What Lua in M.U.G.E.N packs does and the Lua-free alternatives</td></tr>
+<tr><td><a href="Route-Files.html">Route files</a></td><td>Creators</td><td>Arcade routes and unlock rules in TOML</td></tr>
+<tr><td><a href="Make-a-Character.html">Make a character (quick start)</a></td><td>Creators</td><td>A working fighter in ten lines, inherited from another one</td></tr>
+<tr><td><a href="UMF-Character.html">Creating a UMF character</a></td><td>Creators</td><td>Full reference: every field of a fighter in a single JSON</td></tr>
+<tr><td><a href="Passives.html">Passives</a></td><td>Creators</td><td>Rage, ability stacks and regeneration, data-driven</td></tr>
+<tr><td><a href="Unleashed-Potential.html">Unleashed Potential</a></td><td>Players</td><td>Generic transformation for imported characters: Potential, then Fury</td></tr>
+<tr><td><a href="Signature.html">Signature</a></td><td>Creators</td><td>Per-fighter signature meter with tiers, declared in JSON</td></tr>
+<tr><td><a href="Kit-Inputs.html">Kit Inputs</a></td><td>Players</td><td>Per-archetype charge and 360° inputs for native fighters</td></tr>
+<tr><td><a href="Rivalries.html">Rivalries</a></td><td>Creators</td><td>Per-matchup round-start lines and attack bonus, declared in JSON</td></tr>
+<tr><td><a href="Replay-Camera.html">Replay Camera</a></td><td>Players</td><td>Cinematic framing for replays: zooms on close fights, leans toward attacks</td></tr>
+<tr><td><a href="Photo-Mode.html">Photo Mode</a></td><td>Players</td><td>Free camera, filters and clean PNG capture on a paused fight or replay</td></tr>
+<tr><td><a href="Combo-Trials.html">Combo Trials</a></td><td>Players</td><td>Seven combo goals in training, saved per fighter</td></tr>
+<tr><td><a href="Mutators.html">Match Mutators</a></td><td>Creators</td><td>Per-match rule changes; gravity is the first mutator</td></tr>
+<tr><td><a href="Standing-Hits.html">Standing Hits</a></td><td>Players, Creators</td><td>Light hits push back without knocking down; threshold by life %</td></tr>
+<tr><td><a href="Rush-Cancel.html">Rush Cancel</a></td><td>Players &amp; Creators</td><td>Spend meter to cancel a connected move, Overdrive and the presentation</td></tr>
+<tr><td><a href="Combo-Tiers.html">Combo Tiers</a></td><td>Players &amp; Creators</td><td>Combo badges, energy notch, air dashes and bounces</td></tr>
+<tr><td><a href="Bleach-Inspired-Kits.html">Bleach-inspired kits</a></td><td>Players</td><td>Abilities inspired by Bleach in three native fighters</td></tr>
+<tr><td><a href="Effects.html">Effect frames</a></td><td>Creators</td><td>Projectile and spark effects</td></tr>
+<tr><td><a href="Cinematic-Cameras.html">Cinematic cameras</a></td><td>Creators</td><td>Intro and victory camera shots (TOML)</td></tr>
+<tr><td><a href="CNS-Scripts.html">CNS scripts</a></td><td>Creators</td><td>States, controllers, triggers and commands</td></tr>
+<tr><td><a href="AssertSpecial.html">AssertSpecial flags</a></td><td>Creators</td><td>All 77 Ikemen flags and what each one does</td></tr>
+<tr><td><a href="Life-Systems.html">Red life, dizzy and guard points</a></td><td>Creators</td><td>RedLife, DizzyPoints, GuardPoints, states 5300/5400 and HitDef defaults</td></tr>
+<tr><td><a href="Screenpacks.html">Screenpacks</a></td><td>Creators</td><td>Menu and HUD screenpack support</td></tr>
+<tr><td><a href="Screenpack-Study.html">Screenpack study</a></td><td>Creators</td><td>Screenpack differentials and what the engine adopted</td></tr>
+<tr><td><a href="Sprite-Atlas-Import.html">Sprite atlas import</a></td><td>Creators</td><td>Turn a sprite sheet into a fighter</td></tr>
+<tr><td><a href="Dev-Tools.html">Dev tools</a></td><td>Contributors</td><td>Rust build and audit tools (<code>ume-tools</code>)</td></tr>
+<tr><td><a href="Roster-Audit.html">Roster audit</a></td><td>Developers</td><td>Fight every character and stage and read a severity report</td></tr>
+<tr><td><a href="Sprite-Toolkit.html">Sprite toolkit</a></td><td>Creators</td><td>Slice sheets, palette variants, auto collision boxes</td></tr>
+<tr><td><a href="Move-Generator.html">Move generator</a></td><td>Creators</td><td>TOML to AIR, CNS, CMD and Statedef -1</td></tr>
+<tr><td><a href="Combo-Strings.html">Combo strings</a></td><td>Creators</td><td>Signature three-part strings per native fighter</td></tr>
+<tr><td><a href="ZSS.html">ZSS scripts</a></td><td>Creators</td><td>Ikemen ZSS state scripts</td></tr>
+<tr><td><a href="Ikemen-Extensions.html">Ikemen extensions</a></td><td>Creators</td><td>Ikemen GO controllers and triggers the engine accepts</td></tr>
+<tr><td><a href="Make-a-Stage.html">Make a stage (quick start)</a></td><td>Creators</td><td>A stage from a <code>.def</code> file, story arena data, and what still needs code</td></tr>
+<tr><td><a href="Stages.html">Creating stages</a></td><td>Creators</td><td>Full reference: M.U.G.E.N <code>.def</code> stages and native stages</td></tr>
+<tr><td><a href="Architecture.html">Architecture</a></td><td>Developers</td><td>Crate map, dependency direction, where new code goes</td></tr>
+<tr><td><a href="https://github.com/juninmd/ultimate-mugen/blob/master/CONTRIBUTING.md">Contributing</a></td><td>Contributors</td><td>Build, checks, rules and pull request flow</td></tr>
+<tr><td><a href="Extension-Points.html">Extension points</a></td><td>Creators, Contributors</td><td>Which file defines each kind of content and whether it needs Rust</td></tr>
+<tr><td><a href="adr/README.html">Architecture decisions</a></td><td>Contributors</td><td>ADRs: why the engine is built this way</td></tr>
+<tr><td><a href="Engine.html">Customizing the engine</a></td><td>Developers</td><td>Architecture, new controller, new trigger, tests</td></tr>
+<tr><td><a href="Web-Match-Smoke.html">Web match smoke</a></td><td>Developers</td><td>CI test that plays full matches in the browser and catches freezes</td></tr>
+<tr><td><a href="File-Layout.html">File layout</a></td><td>Developers</td><td>The 250-line rule, one responsibility per file, splitting a file, parallel PRs</td></tr>
+<tr><td><a href="Performance.html">Performance</a></td><td>Developers</td><td>Parallel loading, frame pacing, benchmarks</td></tr>
+<tr><td><a href="Ikemen-Web-Reverse-Engineering.html">Reverse engineering the browser port</a></td><td>Developers</td><td>How a 78-fighter M.U.G.E.N build runs in a browser, and what we took from it</td></tr>
+<tr><td><a href="Netplay-and-Replays.html#saved-replays-in-the-game-replays">Replays</a></td><td>Players</td><td>Saved fights, replay browser, playback speed</td></tr>
+<tr><td><a href="Research-Fighting-Games.html">Research: fighting games</a></td><td>Developers</td><td>Survey of other fighters and prioritized improvement list</td></tr>
+<tr><td><a href="MUGEN-Code-Study.html">M.U.G.E.N code study</a></td><td>Developers</td><td>Goku GT and four Mortal Kombat fighters read line by line</td></tr>
+<tr><td><a href="MUGEN-Dissection.html">Dissection of four fighters</a></td><td>Developers</td><td>Aizen, Gogeta, Goku SSJ and SSJ4: files, commands, normals, move patterns</td></tr>
+<tr><td><a href="Remaking-a-MUGEN-Fighter.html">Remaking a M.U.G.E.N fighter</a></td><td>Creators</td><td>Recipe and mapping to UMF, with the Captain Marlow Reyes rebuild</td></tr>
+<tr><td><a href="MUGEN-Conversion-Checklist.html">MUGEN conversion checklist</a></td><td>Creators</td><td>What the MUGEN to UMF converter migrates, what is partial and what is missing</td></tr>
+<tr><td><a href="Ability-Library.html">Ability library</a></td><td>Creators</td><td>Reusable blocks (<code>blink</code>, <code>vfx</code>, <code>quake</code>, <code>projectile.repeat</code>, kit <code>abilities</code>) and the MUGEN gap map</td></tr>
+<tr><td><a href="AI-Tactics.html">CPU tactics</a></td><td>Developers</td><td>Anti-air, whiff punish, hit confirm and meter rules of the CPU</td></tr>
+<tr><td><a href="Fighter-Study.html">Fighter study</a></td><td>Developers</td><td>50+ fighters surveyed and the moves they inspired</td></tr>
+<tr><td><a href="Smoke-Test.html">Smoke test (debug mode)</a></td><td>Developers</td><td>One command checks every main feature on desktop and web, with screenshots and a report</td></tr>
+<tr><td><a href="Web-QA.html">Web QA pipeline</a></td><td>Developers</td><td>Parallel CI shards that play the wasm build in Chromium, with prints and logs on every failure</td></tr>
+<tr><td><a href="Stress-and-Resilience.html">Stress and resilience</a></td><td>Developers</td><td>Fuzzing, spawner caps, hot path numbers</td></tr>
+<tr><td><a href="Native-Animation-Audit.html">Native animation audit</a></td><td>Developers</td><td>Pose coverage of the native roster</td></tr>
+<tr><td><a href="Authoring-Tool-Survey.html">Authoring tool survey</a></td><td>Developers</td><td>What Fighter Factory Studio checks and how to match it</td></tr>
+<tr><td><a href="Research-Story-Mode.html">Research: story mode</a></td><td>Developers</td><td>Survey behind the story mode design</td></tr>
+<tr><td><a href="Media-Capture.html">Media capture</a></td><td>Developers</td><td>Screenshots and GIFs from the web build in headless Chromium</td></tr>
+<tr><td><a href="Troubleshooting.html">Troubleshooting</a></td><td>Everyone</td><td>Common errors and diagnostic tools</td></tr>
+</tbody></table>
+</div>
+<h2 id="accepted-formats"><a class="header" href="#accepted-formats">Accepted formats</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Format</th><th>Use</th><th>Files</th></tr></thead><tbody>
+<tr><td>UMF</td><td>Native declarative fighter</td><td><code>assets/chars/&lt;id&gt;.json</code></td></tr>
+<tr><td>M.U.G.E.N</td><td>Classic fighters and stages</td><td><code>.def</code>, <code>.sff</code> v1/v2, <code>.air</code>, <code>.cmd</code>, <code>.cns</code>, <code>.snd</code>, <code>.act</code></td></tr>
+</tbody></table>
+</div>
+<p>UMF and M.U.G.E.N fighters run on the same state machine and can fight each other.</p>
+<h2 id="roadmap"><a class="header" href="#roadmap">Roadmap</a></h2>
+<p>Compatibility plans and architecture decisions are in <a href="../ROADMAP.html"><code>docs/ROADMAP.md</code></a>. Items marked <strong>planned</strong> in this wiki do not exist in the current version yet.</p>
+<h2 id="compatibility-status"><a class="header" href="#compatibility-status">Compatibility status</a></h2>
+<p>The progress toward Ikemen GO v1.0.0 parity is tracked in <a href="https://github.com/juninmd/ultimate-mugen/issues/135">issue #135</a>, with one issue per missing controller, trigger or feature. The lists of supported controllers, triggers and redirections in <a href="CNS-Scripts.html">CNS scripts</a> are checked against the engine by <code>cargo test -p ume-engine --test it wiki_sync::</code>: a listed name the engine does not handle, an implemented name that is not listed, or a mismatch between the English and Portuguese pages fails the test. Every character load also reports the controllers, triggers and parameters it uses that the engine ignores (see "Load diagnostics" in the same page).</p>
+<h2 id="acknowledgments"><a class="header" href="#acknowledgments">Acknowledgments</a></h2>
+<p>Thanks to the <a href="https://github.com/ikemen-engine/Ikemen-GO">Ikemen GO</a> team and to Elecbyte, creator of M.U.G.E.N, for the inspiration.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+                            <a rel="next prefetch" href="Installation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+                    <a rel="next prefetch" href="Installation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

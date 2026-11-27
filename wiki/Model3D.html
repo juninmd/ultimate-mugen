@@ -1,0 +1,275 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>3D fighters - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="3d-fighters"><a class="header" href="#3d-fighters">3D fighters</a></h1>
+<p>Status: shipped behind the Cargo feature <code>model3d</code>, on by default. Rollback: remove <code>model3d</code> from <code>default</code> in the root <code>Cargo.toml</code>; the game then draws the 2D donor sprites and hides the 3D category.</p>
+<h2 id="principle"><a class="header" href="#principle">Principle</a></h2>
+<p>The simulation stays 2D. Hitboxes, physics, state machine and rollback never read the model. A 3D fighter is a UMF fighter (<code>assets/chars3d/&lt;id&gt;.json</code>, usually <code>extends</code> a native kit) whose drawing is replaced by a GLB model, so a 3D fighter fights a 2D one with the same rules. Light mode (<code>lite::scale() &lt; 1</code>) falls back to the 2D sprites.</p>
+<h2 id="pipeline"><a class="header" href="#pipeline">Pipeline</a></h2>
+<ol>
+<li><code>Model::from_glb</code> parses a <code>.glb</code> (own parser over <code>serde_json</code>, PNG textures through <code>png</code>): nodes, skins, meshes, materials, animations.</li>
+<li><code>StateMap</code> (JSON) maps native anim names (<code>anims</code>) or MUGEN state ranges (<code>states</code>) to a clip, loop flag and speed.</li>
+<li>The pose is a pure function of <code>anim_no</code>/<code>anim_elapsed</code> (or <code>stateno</code>/<code>statetime</code>), skinned on the CPU, so it is rollback safe.</li>
+<li><code>Model::project</code> uses an orthographic camera on the fight plane, flat Lambert shading and back-to-front triangles, drawn through <code>ume_shell::quad::draw_mesh</code> batched by texture. No GPU pipeline change.</li>
+</ol>
+<h2 id="in-the-game"><a class="header" href="#in-the-game">In the game</a></h2>
+<ul>
+<li><code>src/model3d.rs</code> is the facade (<code>draw</code>, <code>draw_fit</code>, <code>is_3d</code>, <code>portrait</code>); <code>src/model3d/specs.rs</code> lists the models.</li>
+<li>Fight: one line in <code>render.rs</code>. Select, versus and results panels: <code>draw_fit</code> inside <code>draw_char_fit</code>. Tiles and loading use <code>portrait</code>.</li>
+<li>The select screen has a <code>3D</code> category.</li>
+<li>The awakened form swaps to the second model (Ichigo: Hollow Total).</li>
+<li><code>src/model3d/aura.rs</code> draws the 3D-only effects: the <code>AfterImage</code> trail as additive tinted copies of the current frame (crimson Shunpo, gold Sonido in Hollow form) and a reiatsu barrier in front of the fighter in guard states (120-155) that flashes on guard hit (150-155).</li>
+</ul>
+<h2 id="asset-tools"><a class="header" href="#asset-tools">Asset tools</a></h2>
+<p><code>tools/retarget</code> (Python, stdlib only):</p>
+<ul>
+<li><code>retarget.py &lt;clips dir&gt; &lt;source.glb&gt; &lt;out.glb&gt; &lt;rig&gt;</code> bakes the clips listed in <code>clips.json</code> onto a rig from <code>rigs.json</code>.</li>
+<li><code>autorig.py &lt;mesh.glb&gt; &lt;clips dir&gt; &lt;out.glb&gt;</code> fits a skeleton and skin weights to an unrigged mesh.</li>
+<li><code>keyposes.py &lt;in.glb&gt; &lt;out.glb&gt; &lt;rig&gt;</code> bakes the hand-keyed clips of <code>keyposes.json</code> (Bankai stance, three-hit sword string, Getsuga wind-up, charge and release, Juujishou cross, Shunpo, Cero, guard, pointing win pose). A pose sets hips offset, torso/chest/head yaw-pitch-roll and limb directions as <code>[azimuth, elevation]</code> in character space (0 = toward the rival, +90 = his left); <code>bladeR</code> is solved by <code>blade_solve.py</code> into the wrist rotation that aims Zangetsu, and <code>keys_&lt;rig&gt;</code> overrides a clip for one rig (the Hollow fires Cero from the horns). Feet stay on the floor automatically. Re-run on both GLBs after editing; the script is idempotent.</li>
+<li>Contact sheet of clips: <code>cargo run --release -p ume-model3d --example clip_sheet -- &lt;model.glb&gt; &lt;out.png&gt; Clip1,Clip2 &lt;frames&gt;</code>.</li>
+<li>Portrait: <code>cargo run -p ume-model3d --example portrait -- &lt;model.glb&gt; &lt;states.json&gt; &lt;out.png&gt;</code>.</li>
+<li>Voices: <code>tools/voices/generate.py &lt;id&gt;</code> adds the fighter to <code>voices.bank</code> and keeps the other banks.</li>
+</ul>
+<h2 id="3d-stage-airport"><a class="header" href="#3d-stage-airport">3D stage: Airport</a></h2>
+<p><code>airport3d</code> ("3D Airport — Sunset") is a live 3D backdrop behind the same <code>model3d</code> feature, so dropping the feature removes the stage with no other change.</p>
+<ul>
+<li><code>assets/model3d/airport.glb</code> (128 KB) is generated by <code>python3 tools/airport/build.py &lt;out.glb&gt;</code> (stdlib only): airliners, terminal with jet bridges, control tower, runway, hills, clouds and sun. No third party art; vertex colors per material, <code>emissiveFactor</code> marks unlit lights and the sun.</li>
+<li>Clip <code>ambient</code> (40 s loop): one jet lands on the far runway, one taxis across the apron, a baggage tug crosses the stand.</li>
+<li><code>Model::project_scene</code> (<code>crates/model3d/src/perspective.rs</code>) is the perspective projector: near-plane clip, flat Lambert, per-vertex distance fog, gradient sky. It feeds the same z-buffer <code>Raster</code> used by the fighters.</li>
+<li><code>src/model3d/airport.rs</code> renders 480x270 (320x180 in lite mode) at 30 Hz into one texture that fills the stage rect; the 2D parallax scroll of illustrated stages still applies. Lite "backdrop off" shows a still of the same scene.</li>
+<li>Measure: <code>cargo run --release -p ume-model3d --example airport -- assets/model3d/airport.glb out.png 480 270 1</code>.</li>
+</ul>
+<h2 id="ichigo-moves"><a class="header" href="#ichigo-moves">Ichigo moves</a></h2>
+<p>Jumps: <code>D, U</code> or <code>U, U</code> super jump (also in the air), two air jumps, three air dashes. Specials: Getsuga Tenshou (<code>~D, DF, F, x</code>), charged Getsuga (<code>~D, DB, B, y</code>, hold <code>y</code>; 45 ticks for the max wave), Shunpo (<code>~D, DB, B, b</code>, Sonido trail in Hollow form), Shunpo Rush, Hollow Cero (<code>~D, DB, B, a</code>, hold <code>a</code>; 40 ticks for the big beam), Getsuga Juujishou, Kuro Getsuga, Hollow Rampage; Hollow Total adds Cero Oscuras. Charges use the <code>holdRelease</code> move field (see <a href="UMF-Character.html">UMF character</a>).</p>
+<h2 id="credits"><a class="header" href="#credits">Credits</a></h2>
+<p>See <code>assets/model3d/ATTRIBUTION.md</code>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="MUGEN-Coverage.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Mutators.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="MUGEN-Coverage.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Mutators.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

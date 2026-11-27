@@ -1,0 +1,343 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Layout de arquivos - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="layout-de-arquivos"><a class="header" href="#layout-de-arquivos">Layout de arquivos</a></h1>
+<p><a href="../File-Layout.html">English</a> · <strong>Português (BR)</strong></p>
+<p>Uma feature precisa ser revisável e mesclável sem esperar as outras. Isso só funciona quando cada arquivo tem um único motivo para mudar: duas pessoas trabalhando em features diferentes mexem em arquivos diferentes, e um PR que adiciona um modo não reescreve o arquivo que outro PR está editando.</p>
+<h2 id="a-regra-de-250-linhas"><a class="header" href="#a-regra-de-250-linhas">A regra de 250 linhas</a></h2>
+<ul>
+<li>Nenhum arquivo de código passa de <strong>250 linhas físicas</strong> (<code>node scripts/file-size.mjs</code>).</li>
+<li>O limite não é meta. A maioria dos arquivos deve ficar entre 80 e 200 linhas: se um arquivo já tem dois motivos para mudar com 120 linhas, divida agora.</li>
+<li>A regra vale para Rust, JavaScript, TypeScript, CSS, HTML e WGSL - todo arquivo que um desenvolvedor lê como código.</li>
+<li>Não vale para conteúdo e documentação: JSON UMF, <code>.cns</code>, <code>.air</code>, <code>.def</code>, <code>.snd</code>, atlas de sprites, páginas <code>.md</code> e imagens geradas.</li>
+<li>Tabelas Rust geradas contam como código. Quando não couberem, coloque-as em um arquivo só de dados, em uma pasta com o nome da tabela (por exemplo <code>native/tables/</code>), para ninguém editar à mão.</li>
+</ul>
+<h2 id="arquivos-legados-catraca"><a class="header" href="#arquivos-legados-catraca">Arquivos legados (catraca)</a></h2>
+<p>A árvore já tem arquivos acima do limite. Eles estão em <a href="../../scripts/file-size-baseline.json"><code>scripts/file-size-baseline.json</code></a> com a contagem exata de linhas no dia em que a regra entrou.</p>
+<ul>
+<li>Um arquivo no baseline pode continuar grande, mas não pode crescer uma linha.</li>
+<li>Um arquivo fora do baseline nasce com menos de 250 linhas.</li>
+<li>Um arquivo que desce para menos de 250 linhas sai do baseline. Rode <code>node scripts/file-size.mjs --update</code> no mesmo PR que o dividiu.</li>
+<li>Nunca regenere o baseline para aumentar um número. <code>--update</code> só é válido junto com uma divisão.</li>
+</ul>
+<p>O CI roda <code>node scripts/file-size.mjs</code>; uma execução com falha lista cada caminho, a contagem e o limite.</p>
+<h2 id="uma-responsabilidade-por-arquivo"><a class="header" href="#uma-responsabilidade-por-arquivo">Uma responsabilidade por arquivo</a></h2>
+<p>Um arquivo tem uma responsabilidade quando todas as respostas abaixo são iguais:</p>
+<div class="table-wrapper"><table><thead><tr><th>Pergunta</th><th>Mesma responsabilidade</th><th>Responsabilidades diferentes</th></tr></thead><tbody>
+<tr><td>Por que ele mudaria?</td><td>duas funções mudam quando o formato muda</td><td>uma muda com o formato, a outra com a câmera</td></tr>
+<tr><td>Que dados ele possui?</td><td>uma struct e seus auxiliares</td><td>várias structs que conversam entre si</td></tr>
+<tr><td>Quem revisa?</td><td>o mesmo revisor com o mesmo contexto</td><td>um especialista diferente</td></tr>
+<tr><td>Dá para testar sozinho?</td><td>sim, pela API pública da crate</td><td>só pela tela inteira</td></tr>
+</tbody></table>
+</div>
+<p>O nome do arquivo declara a responsabilidade: <code>collision.rs</code>, <code>hitdef.rs</code>, <code>palette.rs</code>, <code>lifebars.rs</code>. Nomes que escondem a responsabilidade são recusados na revisão: <code>utils.rs</code>, <code>helpers.rs</code>, <code>misc.rs</code>, <code>common.rs</code>, <code>manager.rs</code>.</p>
+<h2 id="formato-de-pasta"><a class="header" href="#formato-de-pasta">Formato de pasta</a></h2>
+<p>Uma feature é uma pasta; o arquivo ao lado é a face pública dela.</p>
+<pre><code>crates/native/src/
+  mod.rs            fachada: declarações e reexports, só isso
+  compile.rs        JSON UMF -&gt; estados
+  pack.rs           empacotamento de atlas
+  effects.rs        efeitos de projétil e faíscas (única arte desenhada pelo motor)
+  effects/
+    dragon.rs       efeito do dragão de energia
+</code></pre>
+<ul>
+<li><code>feature.rs</code> guarda os tipos compartilhados por todas as partes e as funções que o resto da crate chama.</li>
+<li><code>feature/&lt;assunto&gt;.rs</code> guarda um assunto cada. O Rust permite uma pasta ao lado do arquivo de mesmo nome, então não é preciso <code>mod.rs</code> dentro dela.</li>
+<li><code>mod.rs</code> é fachada: declarações de módulo e <code>pub use</code>, nada mais. Mire em 60 linhas; <code>mod.rs</code> com lógica é arquivo que não foi dividido.</li>
+<li>Leve o tipo junto do código que o possui. Mantenha o caminho antigo funcionando com um reexport (<code>pub use collision::ResolvedHit;</code>) para a divisão não virar um rename na árvore inteira.</li>
+<li>A aplicação segue a mesma ideia: <code>src/app.rs</code> mantém o frame e o estado, <code>src/app/&lt;tela&gt;.rs</code> é dona de uma tela cada.</li>
+</ul>
+<h3 id="mapa-de-telas-em-srcapp"><a class="header" href="#mapa-de-telas-em-srcapp">Mapa de telas em <code>src/app/</code></a></h3>
+<p><code>src/app.rs</code> guarda o estado de <code>App</code>, o despachante por frame (<code>App::frame</code>) e as telas ainda não divididas (seleção de personagem, carregamento do VS). Cada outra tela é um arquivo, então mudar uma tela nunca toca em outra:</p>
+<div class="table-wrapper"><table><thead><tr><th>Arquivo</th><th>Responsável por</th></tr></thead><tbody>
+<tr><td><code>mode.rs</code>, <code>screen.rs</code>, <code>team.rs</code></td><td>Tipos <code>Mode</code>, <code>Screen</code> e <code>Team</code> (reexportados por <code>app</code>)</td></tr>
+<tr><td><code>title_screen.rs</code>, <code>menu_screen.rs</code>, <code>menu_focus.rs</code></td><td>Título, menu principal, foco suavizado do menu</td></tr>
+<tr><td><code>stage_select.rs</code></td><td>Grade de cenários</td></tr>
+<tr><td><code>load_plan.rs</code>, <code>vs_screen.rs</code></td><td>Quem carrega com qual paleta, tela de VS, <code>start_fight</code></td></tr>
+<tr><td><code>fight_screen.rs</code></td><td>Frame da luta e rotação de equipe</td></tr>
+<tr><td><code>results_screen.rs</code></td><td>Tela de resultados</td></tr>
+<tr><td><code>netplay_session.rs</code></td><td>Início do netplay, overlay e captura de replay</td></tr>
+<tr><td><code>fighter_draw.rs</code></td><td>Desenho do lutador compartilhado pelos menus</td></tr>
+<tr><td><code>pause/</code>, <code>arcade/</code>, <code>story/</code>, <code>cutscene/</code></td><td>Recursos que já tinham pasta</td></tr>
+</tbody></table>
+</div>
+<p>Um arquivo de tela é <code>use super::*;</code> mais um bloco <code>impl App</code>; o método de entrada é <code>pub(super)</code>. Para adicionar uma tela, crie o arquivo e ligue com uma linha <code>mod</code> e um braço do <code>match</code> em <code>App::frame</code>.</p>
+<h2 id="dividir-um-arquivo-existente"><a class="header" href="#dividir-um-arquivo-existente">Dividir um arquivo existente</a></h2>
+<ol>
+<li>Liste as responsabilidades do arquivo. Se a lista não é óbvia, leia os chamadores primeiro; o arquivo ainda não foi entendido.</li>
+<li>Crie <code>feature/</code> e mova uma responsabilidade por PR, um commit por extração.</li>
+<li>Não mude comportamento durante a extração. Os testes passam antes e depois, e o diff é quase todo movimento de código.</li>
+<li>Extraia primeiro a menor unidade coesa (a de menos chamadores). Reescrita total conflita com todo PR aberto.</li>
+<li>Atualize esta página se o novo layout for diferente do descrito aqui.</li>
+</ol>
+<h2 id="trabalhar-em-paralelo"><a class="header" href="#trabalhar-em-paralelo">Trabalhar em paralelo</a></h2>
+<ul>
+<li>Prefira arquivos novos. Uma feature adiciona <code>feat/&lt;coisa&gt;.rs</code> e uma linha de registro; não anexa um bloco a um arquivo quente.</li>
+<li>Pontos de registro são os únicos arquivos que duas features compartilham de forma legítima. Adicione uma linha, em ordem alfabética, e nunca reformate o arquivo: ramos de <code>controllers.rs</code> e <code>triggers.rs</code>, declarações em <code>mod.rs</code>, <code>assets/chars/index.json</code>, tabelas de rotas.</li>
+<li>Se a feature precisa mexer em um arquivo quente, coloque a lógica no próprio arquivo primeiro e rebaseie a linha de ligação por último, para o conflito ser de uma linha.</li>
+<li>Não renomeie nem reformate arquivo compartilhado dentro de um PR de feature. Faça isso sozinho, sem mudar comportamento.</li>
+<li>Uma página de wiki por feature, linkada na <a href="Home.html">Home</a>, para duas features não editarem o mesmo parágrafo.</li>
+</ul>
+<h2 id="arquivos-quentes-para-dividir-primeiro"><a class="header" href="#arquivos-quentes-para-dividir-primeiro">Arquivos quentes para dividir primeiro</a></h2>
+<p>Estes arquivos concentram as responsabilidades mais independentes e são a origem atual dos conflitos de merge. Dividir um deles remove a entrada do baseline.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arquivo</th><th>Linhas</th><th>Divisão sugerida</th></tr></thead><tbody>
+<tr><td><code>crates/native/src/effects.rs</code></td><td>1711</td><td><code>effects/canvas.rs</code>, <code>effects/raster.rs</code>, <code>effects/kinds.rs</code></td></tr>
+<tr><td><code>crates/engine/src/matchs.rs</code></td><td>1751</td><td><code>matchs/round.rs</code>, <code>matchs/collision.rs</code>, <code>matchs/camera.rs</code>, <code>matchs/tick.rs</code></td></tr>
+<tr><td><code>src/app.rs</code></td><td>2238</td><td>Nove telas já vivem em <code>src/app/</code>; as próximas são <code>select</code> (830 linhas, dividir em grade, painel lateral e entrada) e <code>load_step_inner</code></td></tr>
+<tr><td><code>src/stages.rs</code></td><td>1069</td><td><code>stages/load.rs</code>, <code>stages/layers.rs</code>, <code>stages/motion.rs</code></td></tr>
+<tr><td><code>src/stagefx.rs</code></td><td>704</td><td><code>stagefx/scenes.rs</code> já existe; extraia <code>stagefx/particles.rs</code>, <code>stagefx/weather.rs</code></td></tr>
+<tr><td><code>src/market.rs</code></td><td>700</td><td><code>market/install.rs</code>, <code>market/listing.rs</code>; a crate mantém a lógica</td></tr>
+<tr><td><code>crates/formats/src/screenpack.rs</code></td><td>610</td><td><code>screenpack/lifebars.rs</code>, <code>screenpack/motif.rs</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="checklist-de-revisão"><a class="header" href="#checklist-de-revisão">Checklist de revisão</a></h2>
+<ul>
+<li><input disabled="" type="checkbox"/>
+Nenhum arquivo novo acima de 250 linhas.</li>
+<li><input disabled="" type="checkbox"/>
+Nenhum arquivo do baseline cresceu.</li>
+<li><input disabled="" type="checkbox"/>
+Arquivo que cruzou para menos de 250 linhas saiu do baseline neste PR.</li>
+<li><input disabled="" type="checkbox"/>
+Lógica nova mora em arquivo com o nome dela, não em <code>utils.rs</code>.</li>
+<li><input disabled="" type="checkbox"/>
+Arquivos compartilhados mostram apenas linhas de registro, sem reformatação.</li>
+<li><input disabled="" type="checkbox"/>
+A página de wiki da feature foi atualizada em inglês e português.</li>
+</ul>
+<h2 id="páginas-relacionadas"><a class="header" href="#páginas-relacionadas">Páginas relacionadas</a></h2>
+<ul>
+<li><a href="Engine.html">Customizar a engine</a> - arquitetura, novo controller, novo trigger ou formato.</li>
+<li><a href="Desempenho.html">Desempenho</a> - onde ficam os caminhos quentes.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Kits-Inspirados-em-Bleach.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Lore.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Kits-Inspirados-em-Bleach.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Lore.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

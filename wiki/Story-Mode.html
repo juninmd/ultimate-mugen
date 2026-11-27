@@ -1,0 +1,272 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Story-Mode - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="scrolling-stages-and-wave-villains"><a class="header" href="#scrolling-stages-and-wave-villains">Scrolling stages and wave villains</a></h2>
+<p>Each arena has a wide strip in <code>assets/stages/story/&lt;arena&gt;.png</code>, one segment per fight (4 waves plus the boss). Wave villains have around 10 % of the protagonist's maximum life (<code>villain_life_ratio</code> in <code>src/story/stages.rs</code>: 9 % to 12 % depending on archetype). When a wave is defeated the screen is released: the protagonist keeps control and explores the segment freely, a GO arrow shows at the right edge, and the camera only scrolls to the next segment once the player walks to the exit; the next wave then waits frozen off screen (the screen clamp ignores it) and walks in from the right edge once the scroll lands and the screen locks again (<code>LaneRules::gate</code>, <code>Match::lane_scroll_step</code> in <code>crates/engine/src/lane.rs</code>, <code>App::story_advance_in_place</code> in <code>src/app/story/advance.rs</code>). Upon reaching the rightmost segment at the end of the stage, the stage boss awaits. Regenerate the strips with <code>python3 tools/story_segments.py</code>; the original stage art is never modified.</p>
+<h2 id="animated-backdrops"><a class="header" href="#animated-backdrops">Animated backdrops</a></h2>
+<p>The scrolling backdrop is alive in every segment. While a stage's eight ambient loop frames are loaded (see <a href="Stages.html">Stages</a>), the renderer rebuilds the strip from the current frame on each draw instead of showing the static PNG: the first segment is the arena itself, the three middle segments are mirror chains of a window of the arena, and the boss segment is the arena flipped. Colour grading follows the same ramp as the baked strip and the 70 px seams are cross-faded with mirrored slices, so the result lines up with the static strip (a unit test compares both pixel by pixel outside the seams). The loop advances every eight simulation ticks, in step with versus mode, and costs no extra texture memory because it samples the frames the stage already loaded.</p>
+<p>The layout lives in <code>src/stages/story_loop.rs</code> (<code>runs</code>, <code>pieces</code>, <code>grade_at</code>, <code>seam_mix</code>) and the drawing in <code>src/render/story_loop.rs</code> (<code>Gfx::draw_backdrop</code>). The static strip stays as the fallback when no loop frames exist and still defines the strip size. To capture the evidence set, run <code>UME_TOUR=storyloop target/release/ultimate-mugen --shots &lt;dir&gt;</code> (add <code>UME_TOUR_BURST=1</code> for GIF frames); results are in <code>screenshots/story-loop/</code>.</p>
+<p>Remaining health carries over between fights and recovers a little after each wave.</p>
+<h2 id="breakables-food-and-bonus-rounds"><a class="header" href="#breakables-food-and-bonus-rounds">Breakables, food and bonus rounds</a></h2>
+<p>Crates and barrels along each strip break when struck and can drop food, a gem or a battery; stages 1 and 3 end with a bonus round (wreck the car, break the stash). See <a href="Stage-Objects.html">Stage objects</a>.</p>
+<h2 id="final-boss-and-epilogues"><a class="header" href="#final-boss-and-epilogues">Final boss and epilogues</a></h2>
+<p>Before the final fight, after the spare-or-finish choice, the player may call a <strong>helper</strong>: left and right cycle the native roster (or <code>GO SOLO</code>), confirm accepts. The helper fights beside the hero as a CPU teammate in that fight only (<code>src/story/helper.rs</code>, <code>src/app/story/helper.rs</code>); if the hero falls, control passes to the helper. Web hook: <code>?e2e=1&amp;e2e_helper=1</code> jumps to this screen, smoke script <code>scripts/web-helper-smoke.js</code>.</p>
+<p>The last stage (Kingpin Rooftop) ends against <strong>Valdric Morn</strong>, commander of the Red Star Empire and the kingpin behind the street gang. A player who picked Valdric faces <strong>Kaito Arashi</strong> instead (<code>final_boss</code> in <code>src/story/epilogue.rs</code>, which reads the last entry of <code>STAGES</code>).</p>
+<p>Beating the final boss plays an epilogue before the <code>STORY COMPLETE</code> card. Every fighter of the roster has its own, in English, Portuguese and Spanish, made of five pages:</p>
+<div class="table-wrapper"><table><thead><tr><th>Page</th><th>Scene</th><th>Content</th></tr></thead><tbody>
+<tr><td>1</td><td>Rooftop at night, boss on the ground</td><td>the boss speaks to this fighter</td></tr>
+<tr><td>2</td><td>Rooftop, fighter in the victory pose</td><td>the fighter answers</td></tr>
+<tr><td>3</td><td>The fighter's home scenery at dawn</td><td>narration</td></tr>
+<tr><td>4</td><td>Home scenery in daylight, victory pose</td><td>narration</td></tr>
+<tr><td>5</td><td>Home scenery, dimmed</td><td><code>THE END</code> card with the fighter and the epilogue title</td></tr>
+</tbody></table>
+</div>
+<p>The scenery is the illustration of an existing stage with a slow pan, drifting light motes, letterbox bars, a fade when the scene changes and text typed letter by letter. <code>OK</code> reveals the line and then advances, <code>ESC</code> skips to the final card.</p>
+<p>The fighter on screen plays its own animations: the walk cycle (<code>20</code>) carries it into the home scene, the taunt (<code>195</code>) or win pose (<code>181</code>) plays while it answers, and the win pose closes the story. Animations a fighter does not have fall back to the next one in the chain and finally to idle (<code>src/story/epilogue_pose.rs</code>).</p>
+<p>Texts live in <code>assets/story/epilogues.json</code>, keyed by fighter id. A fighter with no entry (imported M.U.G.E.N characters or custom ones) gets an invented epilogue: one of the <code>*:tale1</code> to <code>*:tale6</code> templates, picked by a stable hash of the fighter id, with <code>{name}</code> replaced by the fighter's display name. <code>*</code> stays as the last resort when the name is empty:</p>
+<pre><code class="language-json">{
+  "mika": {
+    "scene": "neon",
+    "title": { "en": "Storm Season", "pt": "Temporada de Tempestade" },
+    "boss": { "en": "Line the final boss says to this fighter." },
+    "reply": { "en": "The fighter's answer." },
+    "pages": [{ "en": "First narration page." }, { "en": "Second narration page." }]
+  }
+}
+</code></pre>
+<p><code>scene</code> is any built-in stage id. A missing language falls back to English. To change or add epilogues without rebuilding, save a file with the same shape as <code>story-epilogues.json</code> next to the executable (or in browser storage): its entries replace the bundled ones fighter by fighter.</p>
+<p>Code: data and lookup in <code>src/story/epilogue.rs</code>, flow in <code>src/app/story/epilogue.rs</code>, drawing in <code>src/app/story/epilogue_draw.rs</code> and <code>epilogue_text.rs</code>. Evidence in <code>screenshots/story-epilogues/</code>, captured with <code>UME_TOUR=epilogue ultimate-mugen --shots &lt;dir&gt; --res 1280x720 --mute</code>; the browser check is <code>node scripts/web-epilogue-smoke.js web/dist</code>.</p>
+<p>The loading screen is no longer a hero-versus-villain card in the story. Wave fights show a stage card (stage number, title, wave and hero name; <code>src/app/story/stage_card.rs</code>) so no enemy is exposed; the classic versus screen is kept for boss fights only, with a BOSS tag and the stage title over it.</p>
+<p>Clearing a stage boss now pays a life bonus on top of the boss bonus: <code>StageTally</code> (<code>src/story/tally.rs</code>) gives <code>remaining life x 2000 x stage number</code>, and the Stage Clear screen lists both (<code>STAGE BONUS +n   LIFE +n</code>). The browser hook <code>?e2e_clear=1</code> opens that screen for smoke checks.</p>
+<p>Story juice (<code>src/vfx/story_juice.rs</code>, active only while lane rules are on): footstep dust while the hero walks, sparkles over pickups, a <code>K.O.!</code> pop-up with ring and sparks when a foe falls, a ring and sound when the screen is released, and an animated GO cue (pulse plus sliding chevrons). Everything is procedural, no sprite is touched.</p>
+<p>When the scroll lands and the screen locks again, <code>story_juice</code> adds a screen shake, a thud, rings on both screen edges and dust bursts under the waiting wave; while the hero is below 25 % life the vignette pulses.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="Marketplace.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Stage-Objects.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="Marketplace.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Stage-Objects.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

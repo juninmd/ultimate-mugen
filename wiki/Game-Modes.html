@@ -1,0 +1,371 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Game modes - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="game-modes"><a class="header" href="#game-modes">Game modes</a></h1>
+<p><strong>English</strong> · <a href="pt-BR/Modos-de-Jogo.html">Português (BR)</a></p>
+<p>The main menu offers single fights (Arcade, Versus CPU, 2 Players, Training, CPU vs CPU) and three team modes. The select screen has a mode chip (<code>&lt;</code> <code>&gt;</code> or <code>M</code>) that cycles Versus CPU, 2 Players, CPU vs CPU and the team modes; in a team mode a size chip (<code>-</code> <code>+</code> or <code>Q</code> / <code>E</code>) picks the squad. The web build allows up to 7 per side; native Android and iOS cap at 5 because their sprite atlas is 2048.</p>
+<div class="table-wrapper"><table><thead><tr><th>Mode</th><th>Fighters in play</th><th>Round ends when</th></tr></thead><tbody>
+<tr><td>Team · Sequence</td><td>1 per side, the next teammate enters after a KO; the winner keeps its life</td><td>one side runs out of fighters</td></tr>
+<tr><td>Team · Parallel</td><td>the whole team at once (2 to 7), each fighter spawning at a random spot of the stage (seeded, so replays match); <code>Tab</code> hands your controller to the next teammate</td><td>every member of a side is KO'd</td></tr>
+<tr><td>Team · Tag</td><td>1 active + the rest on standby (2 or 3 per side)</td><td>every member of a side is KO'd</td></tr>
+</tbody></table>
+</div>
+<h2 id="arcade--story-mode"><a class="header" href="#arcade--story-mode">Arcade / Story Mode</a></h2>
+<p><code>Arcade</code> in the main menu runs the Scarlet Eclipse Tournament story campaign with full cutscenes, dynamic villain progression, and secret fighter unlocks:</p>
+<ul>
+<li><strong>Prologue (<code>Cutscene kind: 0</code>).</strong> Each of the 15 native fighters has a unique opening narrative and personal vow before entering the tournament ladder.</li>
+<li><strong>Dynamic Boss Rotation.</strong> The 8-opponent ladder culminates in a dedicated final boss battle with tailored pre-boss dialogue cutscene and boss arena:
+<ul>
+<li><strong>Tier 0 (First Run):</strong> The supreme architect <strong>Mikazuki Oboro</strong> (<code>oboro</code>) at Gate of Spirits (<code>spirit</code>).</li>
+<li><strong>Tier 1 (After Beating Oboro):</strong> <strong>Garan the Ashen Oni</strong> (<code>garan</code>) becomes the new main villain at the Volcanic Crater (<code>volcano</code>).</li>
+<li><strong>Tier 2 (After Beating Garan):</strong> <strong>Valdric Morn</strong> (<code>valdric</code>) ascends as the imperial tyrant final boss at Neo-Metropolis (<code>neon</code>).</li>
+<li><strong>Subsequent Clears:</strong> Rotates cyclically among the 3 main villains. If the player selects the active villain, the engine shifts to an alternate boss to prevent mirror fights.</li>
+</ul>
+</li>
+<li><strong>Boss Empowerment &amp; Oboro Phases.</strong> When fighting as the arcade final boss, villains receive true boss status (<code>boss = true</code>, 2000 HP, 125% attack multiplier, boss AI level, power gauge auto-generation, aura VFX, and a dedicated <code>CHEFE FINAL</code> banner). When facing Oboro:
+<ul>
+<li><strong>Phase 1:</strong> Oboro fights with flight, shadow teleportation, super speed, and his first awakening (<strong>Véu Desperto</strong>, <code>form = 1</code>). If Oboro loses a round during the match, he automatically breaks his seal at the start of the next round (<code>Match::awaken_defeated_boss</code>).</li>
+<li><strong>Phase 2 (Awakening: Absolute Eclipse - <code>Cutscene kind: 3</code>):</strong> Defeating Oboro the first time triggers the <strong>Awakening: Absolute Eclipse</strong> cutscene (<code>kind: 3</code>), launching Phase 2 (<code>Match::awaken_boss_phase(2)</code>) where Oboro starts in <strong>Eclipse Absoluto</strong> (<code>form = 2</code>) with boosted max life (<code>1.15x</code>), dark regeneration, accelerated meter gain, level-8 AI, and Phase 2 moves (<em>Corte do Eclipse Carmesim</em>, <em>Chama do Eclipse Eterno</em>, <em>Julgamento do Eclipse Absoluto</em>).</li>
+<li><strong>Phase 3 (Climax Battle Cutscene - <code>Cutscene kind: 4</code> &amp; Supreme Awakening):</strong> Defeating Oboro in Phase 2 triggers an animated supersonic combat clash cutscene (<code>src/app/cutscene/battle.rs</code>) with striking animations, weapon sparks, and speedlines where Oboro ascends into his ultimate celestial form: <strong>Eclipse Primordial</strong> (<code>form = 3</code>). Phase 3 features supreme stats (1.62x attack, 1.48x defense, 1.30x life), supernova cyan aesthetic, enhanced AI, and exclusive moves (<em>Colapso Primordial</em>, <em>Supernova do Eclipse Primordial</em>).</li>
+<li><strong>Finishing Strike Cutscene (<code>Cutscene kind: 5</code>) &amp; Shattered Eclipse:</strong> Defeating Oboro's supreme form triggers a climactic finishing blow cutscene where the hero delivers a supersonic decisive strike, an anime impact frame, shatters Oboro's cursed blade, and breaks the eclipsed moon into radiant golden dawn rays.</li>
+</ul>
+</li>
+<li><strong>Character Ending Cutscenes (<code>Cutscene kind: 2</code>) &amp; Oboro Unlock.</strong> Following the defeat cutscene, the player's character-specific ending cutscene plays (<code>src/app/cutscene/endings.rs</code>) with personalized victory epilogue narrative. Completing the ladder unlocks <strong>Mikazuki Oboro</strong> on the character select screen, advances the villain rotation, and returns directly to the Main Menu (<code>Screen::Menu</code>).</li>
+</ul>
+<h2 id="story-brawler-stages"><a class="header" href="#story-brawler-stages">Story (brawler stages)</a></h2>
+<p><code>Story</code> in the main menu is a Final Fight / Sengoku style run: five stages, each a few <strong>waves of street thugs fought all at once</strong> (1 versus 2 to 4, using the simultaneous-team rules) closed by a <strong>stage boss</strong>.</p>
+<ul>
+<li><strong>Stage checkpoints.</strong> Clearing a stage saves the next stage, fighter, palette, life, score and credits in one local checkpoint. Open Story again and select <strong>Resume</strong> to start that stage, or <strong>New campaign</strong> to choose a fighter. A new campaign replaces that checkpoint when it clears a stage. Finishing the campaign clears the checkpoint. Saves are stored in <code>story-checkpoint.json</code> beside the executable or in browser storage.</li>
+<li><strong>Structure &amp; right-scrolling progression.</strong> Stage = 4 waves + 1 boss along a wide stage strip (<code>assets/stages/story/&lt;arena&gt;.png</code>). As each wave of street thugs is defeated, the protagonist advances to the right while the camera scrolls smoothly into the next stage segment (<code>Match::lane_scroll_step</code>, <code>App::story_advance_in_place</code>), culminating in the <strong>stage boss</strong> at the far right end of the stage. Backdrops: Back Alleys (Brazil square), Subway (Neo-Metropolis), Bamboo Grove, Industrial Area (Volcanic Crater) and the Kingpin Rooftop (Dojo). Bosses: Bruno, Marlow, Lian, Garan, Valdric. Picking a boss as your fighter swaps in the alternate (Daichi, Kaname, Shion, Haruki, Kaito).</li>
+<li><strong>Wave villain &amp; boss tuning.</strong> Wave villains have around 10 % of the protagonist's maximum life (<code>9 %</code>–<code>12 %</code> via <code>villain_life_ratio</code> in <code>src/story/stages.rs</code>) so waves play like brisk beat-'em-up encounters; stage bosses at the end of the stage get 150 % life and 110 % attack.</li>
+<li><strong>Life carries over.</strong> The bar you end a wave with is the bar you start the next with, plus 20 % after a wave and 60 % after a stage (the "food pickups" of the arcade originals).</li>
+<li><strong>Breakables, food and bonus rounds.</strong> Every fight has crates or barrels that break when struck and may drop food (apple +12 %, pizza +25 %, roast +50 % life), a gem (score) or a battery (power). After the bosses of stages 1 and 3 a bonus round starts in place: wreck the car or break the whole stash before the clock runs out. Rules, data file and art: <a href="Stage-Objects.html">Stage objects</a>.</li>
+<li><strong>Credits.</strong> You start with 3 credits; a KO offers <em>Continue</em> (resumes the same fight with 60 % life) until they run out.</li>
+<li><strong>Score.</strong> The engine's <code>ScoreTotal</code> of the fight plus a wave bonus (500 x stage, boss x4).</li>
+<li><strong>Difficulty.</strong> CPU level rises with the stage and +2 on bosses (cap 8).</li>
+<li><strong>Rebinding conflicts.</strong> In Controls, binding a key that another action of the same player uses swaps the two keys and says so; binding a key the other player already uses is allowed but shows a warning (<code>KeyMap::conflicts</code>, <code>src/keybinds/conflict.rs</code>; <code>UME_SHOTS_ONLY=keys</code> captures it).</li>
+<li><strong>Depth lanes (Final Fight style).</strong> Story fights have a floor band: two extra buttons walk the fighter toward the back or the front of the scene (P1 <code>Z</code> / <code>X</code>, P2 <code>Num -</code> / <code>Num +</code>, rebindable under Controls; the engine bits are <code>LANE_UP</code> / <code>LANE_DOWN</code>). Walking works only while grounded and in control, and each stage limits the band to its real floor (<code>lane_far</code> / <code>lane_near</code> in <code>src/story/stages.rs</code>). A strike connects, and bodies push each other, only when both fighters are within 14 units of depth (<code>Match::lanes</code>, <code>crates/engine/src/lane.rs</code>); the CPU thugs line up with the hero by themselves. Sprites, shadows, reflections and effects follow the lane and nearer fighters draw in front. Other modes never enable lanes.</li>
+<li><strong>Final boss and epilogues.</strong> The final boss is <strong>Valdric Morn</strong> on the Kingpin Rooftop (a player using Valdric faces <strong>Kaito Arashi</strong>). Beating him plays a five-page cutscene epilogue written for each fighter, in English, Portuguese and Spanish, before the <code>STORY COMPLETE</code> card. Texts live in <code>assets/story/epilogues.json</code> and can be replaced with a <code>story-epilogues.json</code> file next to the executable. Details: <a href="Story-Mode.html#final-boss-and-epilogues">Story Mode</a>.</li>
+<li><strong>Guard button.</strong> Story has a dedicated guard button (P1 <code>C</code>, P2 <code>Num *</code>, rebindable). While held, a grounded fighter with control blocks like holding back, but without walking away (hold Down with it to guard crouching). It is ignored outside Story.</li>
+<li><strong>Story HUD.</strong> Thugs get no life bar or roster tile. The hero keeps the left panel, a bottom strip shows stage, wave, score and credits, and the boss fight adds a wide <strong>Stage Villain</strong> bar (name and life) on the right.</li>
+<li><strong>Street thugs (<code>assets/chars/npc_*.json</code>, generated by <code>ume-tools gen-story-npcs</code>).</strong> Fighters with dedicated sprite packs under <code>assets/chars/sprites/npc_*/</code>, hidden from select (<code>"npc": true</code>), scaled in Story Mode to ~10 % of the protagonist's life, each with its own trait:</li>
+</ul>
+<p>Their move sets retain a playable fighter as a mechanical base. Their art is PNG sprites only; replace the files under <code>assets/chars/sprites/npc_*/</code> and rebuild the web packs with <code>ume-tools pack-sprites</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>NPC</th><th>Move set base</th><th>Story Life</th><th>Trait</th></tr></thead><tbody>
+<tr><td>Brute</td><td>Bruno</td><td>11 % of hero</td><td><code>strong</code> and <code>hkick</code> carry armor</td></tr>
+<tr><td>Razor</td><td>Suzume</td><td>9 % of hero</td><td>35 % faster, kicks lunge forward</td></tr>
+<tr><td>Spitfire</td><td>Akio</td><td>10 % of hero</td><td><code>jab</code> throws a small orb (ranged pressure)</td></tr>
+<tr><td>Colossus</td><td>Daichi</td><td>12 % of hero</td><td>Slower, armor on every basic strike</td></tr>
+<tr><td>Phantom</td><td>Jin</td><td>9 % of hero</td><td>Faster, invulnerable while he kicks</td></tr>
+</tbody></table>
+</div>
+<p>Evidence capture: <code>UME_TOUR=storymode ultimate-mugen --shots &lt;dir&gt; --res 1280x720 --mute</code> plays the whole run with a CPU-driven hero and saves every intro, wave, boss and result screen.</p>
+<h2 id="survival"><a class="header" href="#survival">Survival</a></h2>
+<p><code>Sobrevivência</code> in the main menu is an endless run against the whole roster:</p>
+<ul>
+<li><strong>Opponents.</strong> After you pick your fighter, the game picks the opponent each round (never the hidden boss, never a broken pack). The stage rotates every round.</li>
+<li><strong>Escalation.</strong> The CPU level climbs every two fights, starting from your difficulty setting and capped at 8.</li>
+<li><strong>Life carries over.</strong> The bar you end a fight with is the bar you start the next one with, plus the recovery configured under Gameplay › <em>Life recovered (Survival)</em> (0 / 20 / 35 / 50 / 100 %). A KO ends the run.</li>
+<li><strong>Score.</strong> Each win banks the engine's own <code>Score</code>/<code>ScoreTotal</code> for your side plus a <code>1000 × round</code> clear bonus, so the number is deterministic and comes from the simulation itself.</li>
+<li><strong>Game over.</strong> The end screen shows the score, how many fights you won and the local best; the best is persisted in <code>ultimate-mugen.cfg</code> (<code>survival_best</code>) and a new record is highlighted.</li>
+<li><strong>Replays.</strong> The last fight is archived like any other and can be watched from the game-over screen (R button) or the Replays browser; the replay keeps the starting life so the re-simulation matches exactly.</li>
+</ul>
+<p>Engine score stats used: <code>Fighter::score</code> and <code>Fighter::score_total</code>, filled by <code>HitDef.score</code> and the <code>ScoreAdd</code>/<code>TargetScoreAdd</code> controllers and read by the <code>Score</code>/<code>ScoreTotal</code> triggers.</p>
+<h2 id="two-player-co-op-arcade-and-survival"><a class="header" href="#two-player-co-op-arcade-and-survival">Two-player co-op (Arcade and Survival)</a></h2>
+<p>Press <code>V</code> on the character select screen (or click the <strong>CO-OP 2P</strong> button) to start Arcade or Survival with two
+human players <strong>on the same side</strong>:</p>
+<ul>
+<li>P1 and P2 pick one fighter each; both are on the field together (2 versus 1) using the engine's simultaneous-team
+support, so the normal pushboxes, targeting and camera work apply.</li>
+<li>The side only loses the round/run when <strong>both</strong> fighters are KO'd (<code>team_simul</code> KO rule).</li>
+<li>Inputs are independent: P1 uses the player-1 keys/pad, P2 the player-2 ones (<code>Tab</code> is not needed). The HUD tags
+each fighter <code>P1</code> / <code>P2</code> by its pilot slot instead of by side.</li>
+<li>Arcade keeps both fighters across the ladder and swaps the opponent each round; Survival does the same each wave.</li>
+<li>Replays record both slots, so a co-op fight replays exactly.</li>
+</ul>
+<p>Engine switches: <code>Match::team_simul</code>. Slots are added interleaved (<code>P1</code>, opponent, <code>P2</code>), so <code>roots()[0]</code> and
+<code>roots()[2]</code> are the human pair.</p>
+<h2 id="tag-team"><a class="header" href="#tag-team">Tag team</a></h2>
+<p>Each side lists 2 or 3 fighters. Only the first one is in play at the start of every round; the others wait on standby.</p>
+<ul>
+<li><strong>Swap.</strong> Press the Tag button (<code>F</code> for P1, Num Enter for P2; rebindable under Controls, action "Troca (Tag)"). On gamepads and touch the awakening button (R3 / SELECT) swaps instead, because awakening is disabled in this mode. The CPU swaps by itself when its fighter is below 30 % life and the partner is clearly healthier.</li>
+<li><strong>Cooldown.</strong> After every swap the side waits <code>tag_cooldown_max</code> ticks (default 180, three seconds) before it can swap again. The HUD shows a bar and a <code>TAG</code> mark under each teammate's portrait.</li>
+<li><strong>Tag cancel window.</strong> A swap is accepted only when the active fighter has control, or during the first <code>tag_cancel_window</code> ticks (default 30) after one of its attacks touched the opponent (hit or block). So you can cancel the recovery of a connected move into the partner, but not in the middle of a whiff or while being hit.</li>
+<li><strong>Standby fighters.</strong> They are invisible, cannot be hit, pushed or targeted (<code>enemy</code>, <code>P2</code>, <code>EnemyNear</code> skip them), receive no input and keep their life. They follow the active fighter's position so they enter exactly where the swap happened, in state 0 with control.</li>
+<li><strong>KO.</strong> When the active fighter dies, the next living teammate enters automatically after 50 ticks (cooldown ignored). The round ends only when every member of a side has no life left; the round timer decides by the summed life of the whole team.</li>
+<li><strong>Life and variables</strong> of a swapped-out fighter are untouched; everybody starts the next round with full life.</li>
+<li><strong>Scripts.</strong> <code>TeamMode</code> returns <code>3</code> in this mode. <code>TagOut</code> / <code>TagIn</code> swap the fighters for real (see <a href="Ikemen-Extensions.html">Ikemen extensions</a>); <code>Standby</code> is <code>1</code> for the waiting fighters and <code>NumPartner</code> counts the teammates.</li>
+<li><strong>Replays</strong> record the Tag button like any other input, so a Tag fight replays exactly.</li>
+</ul>
+<p>Engine switches (<code>Match</code>): <code>team_tag</code>, <code>tag_cooldown_max</code>, <code>tag_cancel_window</code>. Events: <code>Event::Tag { side, fighter }</code>.</p>
+<h2 id="training-dummy"><a class="header" href="#training-dummy">Training dummy</a></h2>
+<p>In Training the pause menu (Game tab) has a <strong>Dummy behaviour</strong> row. Confirming it cycles the plan, which applies at once and is kept across restarts of the fight:</p>
+<div class="table-wrapper"><table><thead><tr><th>Plan</th><th>What the dummy holds</th></tr></thead><tbody>
+<tr><td>Stand</td><td>Nothing</td></tr>
+<tr><td>Crouch</td><td>Down</td></tr>
+<tr><td>Jump</td><td>Up on every landing</td></tr>
+<tr><td>Guard</td><td>Back, only while the rival attacks or a projectile is alive (it does not walk away)</td></tr>
+<tr><td>Low guard</td><td>Down, plus back while threatened</td></tr>
+<tr><td>Record my inputs</td><td>Nothing; every input you press is recorded (up to 10 s)</td></tr>
+<tr><td>Play recording</td><td>Your recorded inputs on a loop, mirrored to the dummy's facing</td></tr>
+<tr><td>AI learns you</td><td>Counts how you switch actions (walk, crouch, jump, attack) and answers your likeliest next one: back guard before an attack; attack when you jump, walk or crouch. Keeps learning across plan changes</td></tr>
+</tbody></table>
+</div>
+<p>The plan lives in <code>Pilot::Dummy(DummyPlan)</code> (<code>src/session/dummy.rs</code>); the dummy presses real input bits, so guard rules, pushback and chip damage are the engine's own. The recording lives in <code>src/session/dummy_tape.rs</code>; a right-side panel shows the best combo and the tape length (<code>src/hud/training_panel.rs</code>). Screenshots: <code>UME_SHOTS_ONLY=pause</code> writes <code>training-dummy-*.png</code> and <code>pause-training-dummy.png</code>; <code>UME_SHOTS_ONLY=training</code> writes <code>training-tape-playback.png</code>.</p>
+<h2 id="power-arena"><a class="header" href="#power-arena">Power Arena</a></h2>
+<p>Choose <strong>Power Arena</strong> in the main menu, set up the match and pick your fighters to start against the CPU. Climb 40 floating platforms across eight tiers. Jump through them from below and land on them while descending. Fighters can recover while they are above the base. Once they fall past its edge, they tumble into the void, and the round ends when the fighter falls out. The camera follows changes in elevation and zooms out as fighters separate horizontally or vertically.</p>
+<p>The two fighters start on the floor under an inner platform of the first tier, so a walk and a jump reach it. Until the rival lands on a platform, or until a hit connects, the CPU climbs toward its own platform and does not attack. After that first landing the CPU fights with its usual pressure, and a ring-out still ends the round.</p>
+<p>Open a match directly on the web with <code>?modo=arena&amp;p1=kaito&amp;p2=shion&amp;luta=1</code>.</p>
+<h3 id="squad-vs-swarm-1-to-5-against-up-to-100"><a class="header" href="#squad-vs-swarm-1-to-5-against-up-to-100">Squad vs. swarm (1 to 5 against up to 100)</a></h3>
+<p>The menu entry opens a setup screen before the fighter select: <strong>your squad</strong> (1 to 5 fighters), <strong>enemies</strong> (1, 5, 10, 25, 50 or 100) and the enemy <strong>type</strong> (random fighters, or pick one fighter who is repeated). Mouse, touch, keyboard and gamepad all work on it.</p>
+<ul>
+<li>
+<p>Only a capped number of enemies is on the field at once (16 on desktop, 12 in the browser, 8 on Android/iOS). When one falls, a fresh one enters after a short delay at a random spot of the stage (floor or platform) away from your squad, until the chosen total is spent. The round ends when the last enemy is down or your whole squad is.</p>
+</li>
+<li>
+<p>Random enemies come from at most 8 distinct fighters (6 in the browser, 3 on mobile) that share their sprites, so the sprite atlas and memory stay flat no matter how many enemies you choose.</p>
+</li>
+<li>
+<p>The map grows with the crowd: it is built from an odd number of tiles of the original 1,108 px arena (1, 3, 5 or 7), with the platform layout repeated. Ring-out edges follow the wider map.</p>
+</li>
+<li>
+<p>The camera follows your squad only, so far-away enemies do not stretch the zoom. Fighters outside the view are not drawn.</p>
+</li>
+<li>
+<p>A <strong>minimap</strong> appears under the top HUD whenever the map is wider than the view: green and cyan dots are your squad, red dots the enemies, and the yellow frame is the camera. The HUD shows enemies left over the chosen total.</p>
+</li>
+<li>
+<p><strong>Power elixir:</strong> a glowing flask floats on the highest platform (marked in gold on the minimap). Whoever reaches it first, your fighter or any enemy, doubles their maximum life and refills it completely. It exists once per round and is given back when the next round starts. Code: <code>crates/engine/src/matchs/elixir.rs</code>, drawing in <code>src/power_arena_elixir.rs</code>.</p>
+</li>
+</ul>
+<p>Code: simulation in <code>crates/engine/src/matchs/swarm.rs</code> (<code>Match::enable_swarm</code>, <code>swarm_step</code>) and <code>crates/engine/src/matchs/power_arena.rs</code>, opening climb in <code>crates/engine/src/ai/arena.rs</code>, setup screen in <code>src/app/arena_setup.rs</code> and <code>arena_pick.rs</code>, minimap and tiled platforms in <code>src/power_arena.rs</code>. Evidence capture: <code>UME_SHOTS_ONLY=arena ultimate-mugen --shots &lt;dir&gt; --res 1280x720 --mute</code> also prints step and draw times, atlas fill and upload size (<code>UME_ARENA_SLOTS</code>, <code>UME_ARENA_POOL</code> and <code>UME_ARENA_TOTAL</code> override the profile).</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="Character-Select.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Easter-Eggs.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="Character-Select.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Easter-Eggs.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

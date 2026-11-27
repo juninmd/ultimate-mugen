@@ -1,0 +1,359 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Easter Eggs Durante as Lutas - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="easter-eggs-durante-as-lutas"><a class="header" href="#easter-eggs-durante-as-lutas">Easter Eggs Durante as Lutas</a></h1>
+<p>O Ultimate MUGEN inclui um sistema de Easter Eggs puramente de apresentação (<code>src/easter.rs</code> e <code>src/easter/</code>) que reage a momentos clássicos de jogos de luta, eventos de cenário e lore dos lutadores sem tocar na simulação determinística (<code>crates/engine</code>).</p>
+<h2 id="arquitetura"><a class="header" href="#arquitetura">Arquitetura</a></h2>
+<ul>
+<li><strong>Seguro para determinismo</strong>: lê <code>&amp;Match</code> apenas na camada de apresentação (<code>src/app/fight_screen.rs</code>), mantendo rollback e replays intactos.</li>
+<li><strong>Localizado</strong>: todos os banners, falas e cameos possuem suporte a Português, Inglês e Espanhol via <code>crate::i18n::tr3</code>.</li>
+<li><strong>Sprites animados em Pixel Art</strong>: folhas multi-frame em <code>assets/easter/</code> renderizadas com <code>FilterMode::Nearest</code>.</li>
+<li><strong>Ritmo limpo</strong>: controle por bitsets (por round e por partida), cooldown global e limite de 3 elementos simultâneos na tela.</li>
+</ul>
+<h2 id="easter-eggs-de-combate-e-arcade-20"><a class="header" href="#easter-eggs-de-combate-e-arcade-20">Easter Eggs de Combate e Arcade (20)</a></h2>
+<ol>
+<li><strong>QUENTINHO!</strong> — Cameo clássico do árbitro no canto inferior direito em lançamentos pesados (<code>dano &gt;= 115</code>).</li>
+<li><strong>EMPATE ÉPICO!</strong> — Nocaute duplo simultâneo.</li>
+<li><strong>PIXEL MÁGICO!</strong> — Vencer um round ou lançar um Super com menos de 5–6% de vida.</li>
+<li><strong>INTOCÁVEL!</strong> — Vitória perfeita com 100% de vida e coroa dourada.</li>
+<li><strong>CHOQUE DE TITÃS!</strong> — Troca simultânea de golpes em até 3 ticks.</li>
+<li><strong>PROVOCOU, LEVOU!</strong> — Levar golpe até 90 ticks após provocar.</li>
+<li><strong>RESPEITO MÚTUO!</strong> — Ambos os lutadores provocam em até 120 ticks.</li>
+<li><strong>NO MESMO RITMO!</strong> — Ambos pulam juntos duas vezes no mesmo round.</li>
+<li><strong>AGACHAMENTO TÁTICO!</strong> — Sequência rápida de 4+ agachamentos à distância.</li>
+<li><strong>SPEEDRUN K.O.!</strong> — Vencer um round em menos de 10 segundos.</li>
+<li><strong>NO ESTOURAR DO RELÓGIO!</strong> — Round decidido nos últimos 3 segundos.</li>
+<li><strong>SEM GRAVIDADE!</strong> — Combo aéreo de 5+ acertos.</li>
+<li><strong>MURALHA DE FERRO!</strong> — Defender 6+ golpes seguidos sem quebrar a guarda.</li>
+<li><strong>DEFESA EM PEDAÇOS!</strong> — Quebra de guarda (<code>state_no == 5300</code>).</li>
+<li><strong>COLISÃO DE SUPERS!</strong> — Ambos os lados disparam um Super em até 90 ticks.</li>
+<li><strong>DESPERTAR DUPLO!</strong> — Ambos os lutadores despertam/transformam na mesma partida.</li>
+<li><strong>CHEGA, JÁ DEU!</strong> — Combo monstruoso de 15+ acertos com cameo do árbitro.</li>
+<li><strong>FUGA DE MESTRE!</strong> — Virar o jogo com golpe pesado após ficar preso no canto.</li>
+<li><strong>DUELO DE OLHARES...</strong> — Ambos parados se encarando por 3 segundos fazem um arbusto seco rolar pela arena.</li>
+<li><strong>FICHA MÁXIMA — 1UP!</strong> — Encher a super barra no máximo dispara uma ficha dourada girando pela tela.</li>
+</ol>
+<h2 id="easter-eggs-de-cenário-e-cameos-ambientais-20"><a class="header" href="#easter-eggs-de-cenário-e-cameos-ambientais-20">Easter Eggs de Cenário e Cameos Ambientais (20)</a></h2>
+<ol start="21">
+<li><strong>Dojo — Grou de Origami</strong>: Um grou de papel animado cruza o pôr do sol sobre o telhado.</li>
+<li><strong>Dojo — Telhas Trêmulas</strong>: Impactos pesados fazem o velho telhado do dojo tremer.</li>
+<li><strong>Neo-Metrópole 2099 — OVNI em Neo-Metrópole</strong>: Um disco voador neon piscante cruza o horizonte cibernético.</li>
+<li><strong>Neo-Metrópole 2099 — Sobrecarga // 2099</strong>: Disparar um Super sobrecarrega a rede neon.</li>
+<li><strong>Bambuzal ao Luar — Espíritos do Bambuzal</strong>: Máscaras espirituais surgem entre os bambus em combos.</li>
+<li><strong>Planalto Rochoso — El Viento Salado</strong>: O galeão voador de Marlow cruza as nuvens ao fundo.</li>
+<li><strong>Portão dos Espíritos — Aparição Kitsune</strong>: Uma máscara kitsune brilhante flutua sobre o torii em Supers ou Despertares.</li>
+<li><strong>Cratera Vulcânica — Erupção Sísmica</strong>: Golpes pesados provocam um rugido sísmico da caldeira.</li>
+<li><strong>Praça do Interior (Brasil) — Capivara de Boa</strong>: Uma capivara em pixel art com uma tangerina na cabeça passeia tranquilamente pela praça.</li>
+<li><strong>Praça do Interior (Brasil) — Caramelo na Área</strong>: O guardião oficial da praça dá as caras no Round 2+.</li>
+<li><strong>Cristo Redentor (Corcovado) — Tucano no Corcovado</strong>: Um tucano colorido cruza os céus do Rio de Janeiro.</li>
+<li><strong>Grande Muralha da China — Dragão de Papel</strong>: Uma pipa sobrevoa as montanhas da Grande Muralha.</li>
+<li><strong>Petra (Al-Khazneh) — Escaravelho de Petra</strong>: Um escaravelho dourado brilha no cânion em golpes pesados.</li>
+<li><strong>Texas — Meio-Dia no Texas</strong>: Um arbusto seco rola pela rua principal ao meio-dia.</li>
+<li><strong>Chichén Itzá — Sombra de Kukulcán</strong>: O brilho esmeralda da serpente emplumada surge em Supers.</li>
+<li><strong>Coliseu de Roma — Ave Gladiator!</strong>: O Imperador aplaude combos de 6+ acertos com louros dourados.</li>
+<li><strong>Taj Mahal — Pombas de Agra</strong>: Pombas brancas levantam voo sobre o mármore no Round 2+.</li>
+<li><strong>Pirâmides de Gizé — Olho de Hórus</strong>: Encher a super barra desperta o escaravelho dourado de Gizé.</li>
+<li><strong>Jardins Suspensos da Babilônia — Plumas da Babilônia</strong>: Voo colorido sobre os jardins durante combos aéreos.</li>
+<li><strong>Bênção das Maravilhas Antigas</strong> (Estátua de Zeus, Farol de Alexandria, Templo de Ártemis, Colosso de Rodes, Mausoléu de Halicarnasso): Fenômeno mítico exclusivo para cada maravilha clássica.</li>
+</ol>
+<h2 id="easter-eggs-de-lore-rivalidades-e-lutadores-20"><a class="header" href="#easter-eggs-de-lore-rivalidades-e-lutadores-20">Easter Eggs de Lore, Rivalidades e Lutadores (20)</a></h2>
+<ol start="41">
+<li><strong>Espelho (Mirror Match)</strong>: Qualquer lutador enfrentando a si mesmo solta uma fala de "impostor".</li>
+<li><strong>Suzume vs Oboro</strong>: Banner de vingança do clã Kagerou com emblema do Eclipse Escarlate.</li>
+<li><strong>Sylene vs Garan</strong>: Gelo ártico de Borealia contra as chamas violetas do Submundo.</li>
+<li><strong>Kaito vs Oboro</strong>: Tempestade de Izu contra o arquiteto do Eclipse Escarlate.</li>
+<li><strong>Bruno no Brasil / Corcovado</strong>: A torcida da casa vibra pelo tricampeão de Minas Gerais.</li>
+<li><strong>Volta em Neo-Metrópole 2099</strong>: Fala de livre-arbítrio ao retornar à cidade onde foi construído.</li>
+<li><strong>Akio Empolgado (&lt;30% de vida)</strong>: Otimismo do Dojo Queda Estelar com ícone de ramen fumegante.</li>
+<li><strong>Desculpas do Haruki</strong>: O arquivista gentil pede desculpas no meio da luta após um combo de 5+ acertos.</li>
+<li><strong>Marlow vs Valdric</strong>: O pirata dos céus provoca o príncipe sobre sua coroa imperial.</li>
+<li><strong>Kaito vs Jin</strong>: Corrida contra o vento entre os Penhascos de Izu e as Montanhas Azuis.</li>
+<li><strong>Shion vs Kaname</strong>: Lâmina de meteorito contra a katana espiritual (<code>crossed_blades</code>).</li>
+<li><strong>Lian na Grande Muralha</strong>: A grã-mestra da Lanterna de Jade defende a Grande Muralha.</li>
+<li><strong>Bruno vs Daichi</strong>: Choque de gigantes entre o Ringue de Ferro e o Lobo de Altai.</li>
+<li><strong>Garan na Cratera Vulcânica</strong>: O Portão de Cinzas se abre onde os 99 monges o selaram.</li>
+<li><strong>Valdric vs Oboro</strong>: Duas coroas, um trono — Império Rubro contra Eclipse Escarlate.</li>
+<li><strong>Suzume vs Jin</strong>: Duelo de velocidade entre Huế e o Vale do Vento.</li>
+<li><strong>Volta vs Haruki</strong>: O androide pergunta ao arquivista o que torna um coração corajoso.</li>
+<li><strong>Akio vs Kaito</strong>: Rivalidade clássica — "Quem perder paga o ramen!"</li>
+<li><strong>Papagaio do Marlow</strong>: O imediato do <em>El Viento Salado</em> cruza a tela em Supers ou combos de 6+ acertos.</li>
+<li><strong>Reclamação dos Capangas (<code>npc_*</code>)</strong>: Os capangas do modo história reclamam do salário ao levar um combo de 4+ acertos.</li>
+</ol>
+<h2 id="efeitos-sonoros-sintetizados-srcaudioeaster_sfxrs"><a class="header" href="#efeitos-sonoros-sintetizados-srcaudioeaster_sfxrs">Efeitos Sonoros Sintetizados (<code>src/audio/easter_sfx.rs</code>)</a></h2>
+<p>Todos os 60 Easter Eggs disparam um dos 12 efeitos sonoros retrô sintetizados em 32 kHz e pré-carregados junto ao banco nativo (desktop, web/WASM, Android e iOS):</p>
+<ul>
+<li><code>easter_toasty</code> — Stinger ascendente de arcade com eco rápido (<em>QUENTINHO!</em>, <em>Provocou, Levou!</em>, <em>Overkill</em>, <em>No Estourar do Relógio</em>).</li>
+<li><code>easter_coin</code> — Clássico sino dourado de ficha / 1UP em duas notas (<em>Ficha Máxima</em>, <em>Sync Jump</em>, <em>Sem Gravidade</em>, <em>Speedrun K.O.</em>).</li>
+<li><code>easter_crown</code> — Fanfarra real em arpejo brilhante (<em>Intocável</em>, <em>Pixel Mágico</em>, <em>Empate Épico</em>, <em>Despertar Duplo</em>, <em>Coliseu</em>).</li>
+<li><code>easter_clash</code> — Choque metálico de lâminas e energia (<em>Choque de Titãs</em>, <em>Muralha de Ferro</em>, <em>Colisão de Supers</em>, <em>Shion vs Kaname</em>, <em>Suzume vs Oboro</em>).</li>
+<li><code>easter_tumbleweed</code> — Assobio clássico de faroeste com rajada de vento seco (<em>Duelo de Olhares</em>, <em>Texas</em>).</li>
+<li><code>easter_ufo</code> — Oscilação sci-fi de disco voador estilo theremin (<em>OVNI em Neo-Metrópole</em>, <em>Sobrecarga 2099</em>, <em>Volta</em>).</li>
+<li><code>easter_kitsune</code> — Sino místico de santuário japonês com estalo de madeira (<em>Aparição Kitsune</em>, <em>Grou de Origami</em>, <em>Bambuzal</em>, <em>Grande Muralha</em>, <em>Lian</em>).</li>
+<li><code>easter_capybara</code> — Melodia tropical leve estilo marimba (<em>Capivara de Boa</em>, <em>Caramelo</em>, <em>Torcida do Bruno</em>, <em>Agachamento Tático</em>).</li>
+<li><code>easter_bird</code> — Trinado alegre de pássaro tropical (<em>Tucano no Corcovado</em>, <em>Pombas de Agra</em>, <em>Plumas da Babilônia</em>, <em>Kaito vs Jin</em>).</li>
+<li><code>easter_parrot</code> — Grasnar duplo de papagaio pirata (<em>Papagaio do Marlow</em>, <em>El Viento Salado</em>).</li>
+<li><code>easter_wonder</code> — Harpa pentatônica mítica com gongo grave de bronze (<em>Pirâmides</em>, <em>Petra</em>, <em>Chichén Itzá</em>, <em>Vulcão</em>, <em>Maravilhas Antigas</em>, <em>Garan</em>).</li>
+<li><code>easter_banter</code> — Estalo de balão de fala cômico (<em>Mirror Match</em>, <em>Desculpas do Haruki</em>, <em>Marlow vs Valdric</em>, <em>Akio vs Kaito</em>, <em>Capangas</em>).</li>
+</ul>
+<h2 id="customização-via-toml-assetsinteractionstoml"><a class="header" href="#customização-via-toml-assetsinteractionstoml">Customização via TOML (<code>assets/interactions.toml</code>)</a></h2>
+<p>Provocações de início de round, rivalidades entre personagens, interações de cenário e reações durante a luta são 100% parametrizadas em <code>assets/interactions.toml</code>. Jogadores e criadores podem colocar um arquivo <code>interactions.toml</code> na pasta de dados do usuário para sobrescrever provocações ou adicionar novas interações tanto para lutadores nativos UMF quanto para personagens M.U.G.E.N importados, sem recompilar o jogo:</p>
+<pre><code class="language-toml">[[matchup]]
+id = "rivalidade_custom"
+fighters = ["ryu", "ken"]
+speaker_id = "ken"
+speaker = "KEN"
+style = "speech"
+sfx = "easter_banter"
+color = [1.0, 0.45, 0.2]
+title_pt = "Vamos nessa, Ryu! Sem segurar!"
+title_en = "Come on, Ryu! Don't hold back!"
+title_es = "¡Vamos, Ryu! ¡Sin contenerse!"
+</code></pre>
+<p>Seções suportadas:</p>
+<ul>
+<li><code>[taunts]</code>: listas <code>opening_pt/en/es</code> e <code>answer_pt/en/es</code> das provocações de abertura e resposta.</li>
+<li><code>[[matchup]]</code>: <code>fighters = [a, b]</code> ou <code>mirror = true</code>, <code>style</code>, <code>sprite</code>, <code>sfx</code>, <code>color</code>, <code>title_*</code> e <code>sub_*</code>.</li>
+<li><code>[[stage_interaction]]</code>: <code>fighter</code> + <code>stage_contains = [...]</code>.</li>
+<li><code>[[fighter_trigger]]</code>: <code>fighter</code> ou <code>fighter_prefix</code>, <code>trigger</code> (<code>"low_hp"</code>, <code>"combo"</code>, <code>"opp_combo"</code>, <code>"super"</code>, <code>"super_or_combo"</code>, <code>"taunt"</code>), <code>threshold</code>, <code>per_round</code>.</li>
+</ul>
+<h2 id="diálogos-em-duas-partes-exchange-e-provocações-de-todo-o-elenco"><a class="header" href="#diálogos-em-duas-partes-exchange-e-provocações-de-todo-o-elenco">Diálogos em Duas Partes (<code>[[exchange]]</code>) e Provocações de Todo o Elenco</a></h2>
+<p><code>assets/interactions.toml</code> também suporta diálogos de ida e volta <code>[[exchange]]</code> (o lutador A fala e o lutador B responde automaticamente após <code>delay_ticks</code>), além dos gatilhos <code>first_attack</code>, <code>transform</code> e <code>round_win</code> e falas dedicadas de provocação (<code>taunt</code>) para todos os 16 lutadores jogáveis.</p>
+<h2 id="referências-a-bleach-assetsinteractionstoml"><a class="header" href="#referências-a-bleach-assetsinteractionstoml">Referências a Bleach (<code>assets/interactions.toml</code>)</a></h2>
+<p>Conectadas diretamente aos lutadores nativos com kits inspirados em Bleach (<a href="Kits-Inspirados-em-Bleach.html">Kits inspirados em Bleach</a>), além do Oboro e de personagens de Bleach importados do M.U.G.E.N, com 3 sprites pixel-art inéditos (<code>sakura_petals.png</code>, <code>hollow_mask.png</code>, <code>reiatsu_badge.png</code>) e 2 SFX sintetizados (<code>easter_bankai</code>, <code>easter_shunpo</code>):</p>
+<ul>
+<li><strong>Kaname (estilo Byakuya)</strong>: <em>Disperse-se! Mil Pétalas!</em> (<code>super</code>), <em>Liberação Final — Bankai!</em> (<code>transform</code>), ressonância no <em>Portão dos Espíritos</em> e diálogo de <em>Shunpo</em> contra Suzume.</li>
+<li><strong>Shion (estilo Zaraki)</strong>: <em>"Agora vou usar as duas mãos!"</em> (<code>low_hp &lt;= 45%</code>), <em>Pressão Espiritual no Máximo!</em> (<code>super</code>) e diálogo <em>Reiatsu vs Ilusão</em> contra Oboro.</li>
+<li><strong>Suzume (estilo Yoruichi)</strong>: <em>Shunpo!</em> (<code>first_attack</code>) e <em>Shunko — Relâmpago Veloz!</em> (<code>transform</code>).</li>
+<li><strong>Oboro (estilo Aizen)</strong>: <em>Tudo conforme o plano — Desde quando achou que não era uma ilusão?</em> (<code>super</code>).</li>
+<li><strong>Personagens de Bleach importados do M.U.G.E.N</strong>: reações automáticas para <code>ichigo*</code> (<em>Bankai — Getsuga Tensho!</em>) e <code>aizen*</code> (<em>Kyoka Suigetsu!</em>).</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Dissecacao-MUGEN.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Efeitos.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Dissecacao-MUGEN.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Efeitos.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Recriar um lutador M.U.G.E.N como UMF - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="recriar-um-lutador-mugen-como-umf"><a class="header" href="#recriar-um-lutador-mugen-como-umf">Recriar um lutador M.U.G.E.N como UMF</a></h1>
+<p>Receita usada na reconstrução do Captain Marlow Reyes, baseada na <a href="Dissecacao-MUGEN.html">dissecação de quatro lutadores</a>. Transforma o que um pacote <code>.cmd</code>/<code>.cns</code>/<code>.air</code> faz em dados de um único <code>assets/chars/&lt;id&gt;.json</code>. A arte continua só PNG: a reconstrução reaproveita os frames de pixel art do lutador e nunca desenha um frame por código.</p>
+<h2 id="passos"><a class="header" href="#passos">Passos</a></h2>
+<ol>
+<li>Dissecar o pacote: <code>cargo run --release -p mugen2umf -- inspect &lt;pasta-ou-zip&gt;</code> para arquivos, comandos, estados e controllers, e <code>... hitdefs &lt;pasta-ou-zip&gt;</code> para todas as HitDefs.</li>
+<li>Listar as features, não o código: normais e cadeias, um projétil por botão, anti-aéreo, agarrão, contra-ataque, teleporte, helper ou clone, forma, supers.</li>
+<li>Escolher os frames: só poses com PNG em <code>assets/chars/sprites/&lt;id&gt;/</code>. Um frame dado como pose de juntas inline é arte procedural e não é permitido nas anims.</li>
+<li>Escrever as anims como <code>{pose, ticks, hit?}</code> com os ticks da tabela da dissecação e depois os golpes. <code>at</code> é o frame (base 1) que carrega o acerto, projétil ou velocidade.</li>
+<li>Manter o primeiro especial como quarto de círculo mais <code>x</code> e entradas de carga só em golpes de chão: o smoke test do elenco e a auditoria de entradas dependem disso.</li>
+<li>Rodar as auditorias de <a href="Dev-Tools.html">Dev tools</a>, capturar o showcase de golpes e o smoke test no navegador.</li>
+</ol>
+<h2 id="mapeamento-mugen-para-umf"><a class="header" href="#mapeamento-mugen-para-umf">Mapeamento M.U.G.E.N para UMF</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Padrão M.U.G.E.N</th><th>Dado UMF</th></tr></thead><tbody>
+<tr><td><code>Statedef 200..610</code> com <code>HitDef</code></td><td><code>moves[]</code> com <code>kind: normal</code>, <code>when</code>, <code>hits[].pausetime</code>, <code>hits[].hitstun</code></td></tr>
+<tr><td>cancels por <code>movehit</code> e <code>numhelper</code></td><td><code>cancels</code>, <code>rekka {after, window, contact}</code></td></tr>
+<tr><td><code>Projectile</code> com <code>projhits</code> e <code>projpriority</code></td><td><code>projectile {at, speed, hits, priority, removeTime}</code></td></tr>
+<tr><td>Statedef de bola no ar</td><td>Automático: todo especial de chão ganha versão aérea</td></tr>
+<tr><td>Carga <code>~60$B,F,a</code></td><td><code>"input": "~40$B, F, x"</code> em golpe só de chão</td></tr>
+<tr><td><code>PosAdd p2dist x + 40</code> com <code>Turn</code> (Shunpo)</td><td><code>teleport: &lt;frame&gt;</code>, <code>cost</code>, <code>invuln</code></td></tr>
+<tr><td>Contra-ataque <code>ReversalDef</code> / <code>HitOverride</code></td><td><code>parry {window}</code></td></tr>
+<tr><td>Agarrão <code>TargetBind</code></td><td><code>throw {damage, bind, launch}</code> ou <code>throw.steps</code></td></tr>
+<tr><td>Clone helper (Aizen)</td><td><code>helpers.clones</code></td></tr>
+<tr><td>Modo de poder <code>var(11)</code> (Kaio Ken)</td><td><code>abilities.forms</code></td></tr>
+<tr><td><code>SuperPause</code>, <code>AfterImage</code>, <code>EnvShake</code></td><td><code>kind: super</code>, <code>fx</code>, <code>shake</code></td></tr>
+<tr><td>Constantes <code>[Data]</code>/<code>[Velocity]</code></td><td><code>stats</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="captain-marlow-reyes-reconstruído"><a class="header" href="#captain-marlow-reyes-reconstruído">Captain Marlow Reyes reconstruído</a></h2>
+<p>Tudo em <code>assets/chars/marlow.json</code>, só dados:</p>
+<div class="table-wrapper"><table><thead><tr><th>Mudança</th><th>Origem da ideia</th></tr></thead><tbody>
+<tr><td>Todas as poses de juntas inline removidas das anims; 13 frames agora usam poses PNG</td><td>Regra só sprites</td></tr>
+<tr><td>Normais leves com pausa 6/7 e 12 ticks de stun, fortes com pausa 11/12 e 15</td><td>Tabela de normais dos quatro pacotes</td></tr>
+<tr><td><code>tide_step</code> (<code>~D, DF, F, c</code>, 200 de power): teleporta atrás do oponente no frame 3, cancela em <code>riptide</code> ou <code>spout</code></td><td>Shunpo do Aizen; no botão livre <code>c</code> (o Aizen usa Z para o Shunpo) porque <code>D, D, a</code> perde para os golpes agachados e uma meia-lua contém os quartos de círculo dos outros especiais</td></tr>
+<tr><td><code>flurry</code> (<code>~D, DF, F, a</code>): cinco golpes leves e finalização que lança, avançando</td><td>Rush 1050 do Goku SSJ</td></tr>
+<tr><td><code>broadside</code> (<code>~B, F, x</code>): projétil de três acertos e prioridade 2, em movimento rápido trás-frente e não em carga, porque todo especial ganha versão aérea e a auditoria de entradas reais não alcança a versão aérea de uma carga de 40 ticks</td><td>Bolas carregadas do Goku SSJ</td></tr>
+<tr><td><code>helpers.clones</code> <code>Phantom Crew</code> (<code>F, B, F</code>, 500 de power): cópia autônoma que persegue e ataca; entrada só de direções porque o bloco de invocação é compilado depois de todos os golpes, então qualquer entrada com botão é tomada antes por um normal, e ela só começa em pé</td><td>Clone do Aizen (estado 700)</td></tr>
+<tr><td><code>stats.airDashes = 1</code></td><td>Mobilidade aérea de Aizen e Gogeta</td></tr>
+</tbody></table>
+</div>
+<p>Status da arte: nenhuma arte nova foi criada. O conjunto de frames do Marlow não tem poses dedicadas para o rush e o teleporte (poses reaproveitadas e retemporizadas); um conjunto de frames próprio para <code>flurry</code> e <code>tide_step</code> é a pendência de arte de quem recria os sprites.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/QA-Web.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Referencias-UI-Engines-Rust.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/QA-Web.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Referencias-UI-Engines-Rust.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Customizing the engine - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="customizing-the-engine"><a class="header" href="#customizing-the-engine">Customizing the engine</a></h1>
+<h2 id="architecture"><a class="header" href="#architecture">Architecture</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Path</th><th>Responsibility</th></tr></thead><tbody>
+<tr><td><code>crates/formats</code></td><td>M.U.G.E.N file readers: INI, SFF, AIR, SND, ACT, PCX, PNG, stages, virtual file system (folders and zips). No platform dependencies</td></tr>
+<tr><td><code>crates/engine</code></td><td>State machine: expressions (<code>expr.rs</code>), triggers (<code>triggers.rs</code>), controllers (<code>controllers.rs</code>), HitDef (<code>hitdef.rs</code>), fight (<code>matchs.rs</code>), commands and input, UMF compiler (<code>native/</code>)</td></tr>
+<tr><td><code>src/</code></td><td>Application: window, render, HUD, audio, menus, native stages, visual effects, controls and gamepad</td></tr>
+<tr><td><code>web/</code></td><td>Page, service worker and the browser JS bridge</td></tr>
+<tr><td><code>assets/chars</code></td><td>Bundled UMF fighters</td></tr>
+</tbody></table>
+</div>
+<p>Tick flow: inputs → <code>Match::tick</code> → for each fighter, <code>[Statedef -3/-2/-1]</code> and the current state → controllers whose triggers are true → physics → collision and <code>apply_hit</code> → camera. Simulation runs at 60 ticks per second, is deterministic and independent from rendering.</p>
+<h2 id="add-a-state-controller"><a class="header" href="#add-a-state-controller">Add a state controller</a></h2>
+<ol>
+<li>In <code>crates/engine/src/controllers.rs</code>, inside <code>run</code>, add a branch with the lowercase name:</li>
+</ol>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>"victoryquote" =&gt; { let v = n(m, "value", -1.0) as i32; m.fighters[i].victory_quote = v; }
+<span class="boring">}</span></code></pre></pre>
+<p><code>victory_quote</code> is a new field you add to <code>Fighter</code>.</p>
+<ol start="2">
+<li><code>n(m, "param", default)</code> reads a numeric parameter; <code>n2(m, "param", default, index)</code> reads the Nth value; <code>sc.has("param", 0)</code> tests presence; <code>sc.raw("param")</code> returns the text.</li>
+<li>Add the field in <code>fighter.rs</code> if you need new state.</li>
+<li>Write a test in <code>crates/engine/tests/combat_logic.rs</code> calling <code>ume_engine::controllers::run</code>.</li>
+<li>List the name in <code>CNS-Scripts.md</code> and <code>pt-BR/Scripts-CNS.md</code>. <code>cargo test -p ume-engine --test it wiki_sync::</code> fails for an implemented controller that is not listed and for a listed one that is not implemented. Return <code>true</code> from the module's <code>run</code> (or fall through to the last branch) so the load diagnostics do not report it as unsupported.</li>
+</ol>
+<h2 id="add-a-trigger"><a class="header" href="#add-a-trigger">Add a trigger</a></h2>
+<p>In <code>crates/engine/src/triggers.rs</code>, add a branch to the name <code>match</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>"winko" =&gt; b(m.match_over &amp;&amp; m.winner_side == f.side as i32 &amp;&amp; m.won_by_ko),
+<span class="boring">}</span></code></pre></pre>
+<p><code>f</code> is the evaluated fighter and <code>m</code> the match. <code>won_by_ko</code> would be a new field on <code>Match</code>. <code>b(bool)</code> converts to 0/1. Triggers returning floats must appear in <code>is_float</code> in <code>expr.rs</code>. List the new name in <code>CNS-Scripts.md</code> and <code>pt-BR/Scripts-CNS.md</code>; <code>wiki_sync</code> checks both directions.</p>
+<h2 id="add-a-file-format"><a class="header" href="#add-a-file-format">Add a file format</a></h2>
+<p>Put the decoder in <code>crates/formats/src/&lt;format&gt;.rs</code>, export it in <code>lib.rs</code> and test it with real files in <code>crates/formats/tests/real_files.rs</code>. The crate must keep compiling for <code>wasm32-unknown-unknown</code>.</p>
+<h2 id="tests"><a class="header" href="#tests">Tests</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>Covers</th></tr></thead><tbody>
+<tr><td><code>cargo test --workspace --release</code></td><td>Everything</td></tr>
+<tr><td><code>cargo test -p ume-engine --test kfm</code></td><td>Reference Kung Fu Man</td></tr>
+<tr><td><code>cargo test -p ume-engine --test it combat_logic::</code></td><td>Combat rules</td></tr>
+<tr><td><code>cargo test -p ume-formats</code></td><td>Decoders</td></tr>
+<tr><td><code>cargo clippy --workspace -- -D warnings</code></td><td>Lint</td></tr>
+<tr><td><code>node scripts/web-smoke.js web/dist</code></td><td>Web build in Chromium</td></tr>
+<tr><td><code>node scripts/web-match-smoke.js web/dist</code></td><td>Full match in Chromium: inputs, rounds, no freeze, results</td></tr>
+</tbody></table>
+</div>
+<h2 id="code-rules"><a class="header" href="#code-rules">Code rules</a></h2>
+<ul>
+<li>No code comments: names of functions, types and variables must explain intent. Explanations live in this wiki.</li>
+<li>Code, commits, issues and documentation are written in English. Portuguese translations live in <code>*.pt-BR.md</code> files and <code>docs/wiki/pt-BR/</code>.</li>
+<li>The simulation (<code>crates/engine</code>) uses no clock, threads or randomness outside <code>Match::random</code>, to keep replays and rollback working.</li>
+<li>No allocation inside <code>Match::tick</code> in new code.</li>
+<li>Files stay under 250 lines with one responsibility each, split by axis of change: see <a href="File-Layout.html">File layout</a> and <code>node scripts/file-size.mjs</code>.</li>
+<li>Conventional Commits (<code>feat:</code>, <code>fix:</code>), validated by <code>scripts/commit-lint.mjs</code>.</li>
+</ul>
+<h2 id="architecture-decisions"><a class="header" href="#architecture-decisions">Architecture decisions</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Topic</th><th>Choice</th></tr></thead><tbody>
+<tr><td>Render</td><td><code>wgpu</code> (Vulkan, Metal, DX12, WebGPU, WebGL2), palette in the shader</td></tr>
+<tr><td>Scripts</td><td>CNS and ZSS for fighters, UMF JSON for the native format; no Lua</td></tr>
+<tr><td>Expressions</td><td>Stack bytecode</td></tr>
+<tr><td>Audio</td><td><code>kira</code> + <code>symphonia</code></td></tr>
+<tr><td>Network</td><td><code>ggrs</code> (rollback) + <code>matchbox</code> (WebRTC)</td></tr>
+</tbody></table>
+</div>
+<p>The migration is described in <a href="../ROADMAP.html"><code>docs/ROADMAP.md</code></a>.</p>
+<h2 id="state-ownership-and-control"><a class="header" href="#state-ownership-and-control">State ownership and control</a></h2>
+<p>A fighter runs a state from the definition that gave it: its own <code>.cns</code>, the shared <code>common1.cns</code>, or another character's definition (<code>TargetState</code>, <code>p2stateno</code>, a throw). Three rules keep control flowing:</p>
+<ul>
+<li>A state number the character defines always runs from the character's own definition, so returning from an engine state (face-off, awakening) or from a <code>common1</code> state hands control back instead of leaving the fighter owned by the shared file.</li>
+<li>States from <code>common1.cns</code> are the player's own: the character's <code>-1</code> states and the engine's walk/jump/crouch transitions keep running during a get-hit, lie-down or any other shared state — M.U.G.E.N. characters cancel hits from <code>-1</code> that way.</li>
+<li>Only a custom state given by the opponent pauses them, because the giver's script owns the fighter until it hands control back.</li>
+</ul>
+<p>A fighter whose state owner is not itself and not <code>common1</code> is "in a custom state"; the helpers that answer this are the guard for every input-driven transition, so losing it makes the character stand still while still reading as alive (<code>ctrl</code>, state 0).</p>
+<h2 id="hud-glass-and-impact-effects"><a class="header" href="#hud-glass-and-impact-effects">HUD glass and impact effects</a></h2>
+<ul>
+<li>The in-fight HUD panels are "glass": <code>ume_shell::quad::glass_panel</code> registers up to 16 rounded rectangles per frame, and the post-processing composite pass replaces those pixels with a blurred copy of the scene (quarter resolution, separable blur, no per-frame allocations), plus tint, drop shadow and a rim highlight. With post-processing off (<code>fx</code> level 0) the HUD falls back to translucent polygons.</li>
+<li>Impact feedback is deliberately small: guard and counter share the same small label and ring, super arts only get a light ring burst and a compact label, and the number of simultaneous floats, rings, lights and particles is capped in <code>src/vfx.rs</code>.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="Extension-Points.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="File-Layout.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="Extension-Points.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="File-Layout.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

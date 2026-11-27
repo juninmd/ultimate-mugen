@@ -1,0 +1,260 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Container de Sprites (LZ4) - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="container-de-sprites-lz4"><a class="header" href="#container-de-sprites-lz4">Container de Sprites (LZ4)</a></h1>
+<p>Todo bloco de pixels que o engine guarda para usar depois é comprimido com LZ4, com uma regra só para os dois tipos de lutador. Os decoders são Rust puro (<code>lz4_flex</code>, modo seguro, compila para <code>wasm32</code>), o formato não perde nada e o PNG continua como formato de criação.</p>
+<h2 id="formatos"><a class="header" href="#formatos">Formatos</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Magic</th><th>Contém</th><th>Gerado por</th><th>Lido por</th></tr></thead><tbody>
+<tr><td><code>UML1</code></td><td>um sprite: indexado (8 bits + paleta) ou RGBA</td><td><code>ume-tools pack-sprites</code> (packs web dos lutadores)</td><td><code>ume_formats::lz4_sprite</code>, carregador de sprites de <code>ume_native</code></td></tr>
+<tr><td><code>UMSF</code></td><td>um <code>.sff</code> inteiro: paletas, tabela de sprites, um bloco <code>UML1</code> por buffer de pixels distinto</td><td><code>ume-tools cook-sff</code></td><td><code>ume_formats::sff::decode_sff</code> e <code>decode_sff_only</code></td></tr>
+</tbody></table>
+</div>
+<p>Os leitores reconhecem o magic, então PNG, <code>.sff</code> clássico e arquivo cozido são intercambiáveis sob o mesmo nome. Um arquivo cozido pode substituir o <code>.sff</code> original na pasta ou no zip do personagem.</p>
+<h2 id="layout-uml1-little-endian"><a class="header" href="#layout-uml1-little-endian">Layout <code>UML1</code> (little endian)</a></h2>
+<pre><code class="language-text">"UML1"  tipo u8 (0 RGBA, 1 indexado)  cores u16  largura u16  altura u16
+recorte x u16  y u16  largura u16  altura u16
+paleta: cores * 4 bytes (RGBA), só no indexado
+bloco LZ4 dos pixels recortados (ausente quando o recorte é vazio)
+</code></pre>
+<p>O recorte remove só a borda exatamente zero (índice 0, ou RGBA <code>0,0,0,0</code>), então a decodificação devolve todos os bytes. Cor escondida sob alfa zero no resto da imagem é mantida.</p>
+<h2 id="layout-umsf"><a class="header" href="#layout-umsf">Layout <code>UMSF</code></a></h2>
+<p>Cabeçalho <code>"UMSF"</code>, versão u8 (1), versão do sff u8, 2 bytes zero; depois paletas únicas, tabela de paletas (grupo, índice, referência), blocos (<code>UML1</code> sem paleta) e a tabela de sprites (grupo, índice, eixos, largura, altura, <code>palette_index</code>, referência de paleta e de bloco; <code>u32::MAX</code> = nenhum). Sprites que compartilhavam um buffer no <code>.sff</code> decodificado (links) compartilham um bloco e voltam como um <code>Arc</code> só. Os blocos decodificam em paralelo por <code>ume_formats::par::map</code> (uma thread no <code>wasm32</code>) e <code>decode_sff_only</code> pula os blocos dos sprites não pedidos.</p>
+<h2 id="limites"><a class="header" href="#limites">Limites</a></h2>
+<p>Um sprite tem no máximo 8192 px por lado e 16 Mpx, e um arquivo <code>UMSF</code> pode declarar no máximo 512 Mpx de sprites pedidos. Contagens e tamanhos são checados contra o tamanho do arquivo; arquivo truncado ou corrompido devolve erro e nunca dá panic.</p>
+<h2 id="comandos"><a class="header" href="#comandos">Comandos</a></h2>
+<pre><code class="language-bash">cargo run --release -p ume-devtools --bin ume-tools -- cook-sff in.sff out.sff
+cargo run --release -p ume-devtools --bin ume-tools -- pack-sprites web/dist
+</code></pre>
+<p><code>cook-sff</code> decodifica o original, cozinha, decodifica o resultado e falha se alguma paleta ou sprite (pixels, eixos, paleta, links) for diferente.</p>
+<h2 id="medições"><a class="header" href="#medições">Medições</a></h2>
+<p>62 personagens M.U.G.E.N. reais do <code>mugen-assets</code> (54.382 sprites), uma thread, blocos por sprite: LZ4 decodifica ~1,5 GB/s de pixels indexados, 28 µs por sprite contra 61 µs do decode RLE8/LZ5 original. Totais, <code>.sff</code> original contra <code>UMSF</code>: 853,6 MB contra 624,1 MB, decode de 2,30 s contra 1,42 s com o número padrão de workers. A comparação com zstd, PNG8, QOI e deflate está no <a href="../adr/0009-lz4-sprite-container.html">ADR 0009</a>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Configuracao.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Conteudo-MUGEN.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Configuracao.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Conteudo-MUGEN.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

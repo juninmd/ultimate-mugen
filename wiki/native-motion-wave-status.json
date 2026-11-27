@@ -1,0 +1,20 @@
+{
+  "status": "complete",
+  "portraits": { "fighters": 16, "dedicated": 16 },
+  "poseArt": { "fighters": 16, "filesRendered": 801, "exactFrameResolutions": 2023 },
+  "coverage": [
+    "idle", "turn", "crouch", "guards (standing, crouch, air, hit)", "jump (start, up, down, flip)",
+    "land", "hop", "run", "walk", "damage (high, low, crouch, air)", "recovery", "getUp", "lie", "dead",
+    "trip", "attacks", "victory", "intro", "taunt", "powerUp", "df* defeat sequences",
+    "inline pose objects (inline_<hash> frames)"
+  ],
+  "verification": [
+    "cargo run --release -p ume-engine --example native_sprite_audit -- <out.json> --require-complete passes for all 16 fighters (0 uncovered requirements)",
+    "cargo run --release -p ume-engine --example native_sprite_audit -- <out.json> --require-complete reports 0 gaps",
+    "cargo run --release -p ume-devtools --bin ume-tools -- audit-sprites --out <report.json> reports 0 geometry issues"
+  ],
+  "remainingManual": [
+    "natural gameplay transitions, palette-wide visual review and hitbox fit must still be validated in Training",
+    "AI art upgrades for the rig-rendered poses flow through the sprite-gen candidate import described in Sprite-Atlas-Import.md"
+  ]
+}

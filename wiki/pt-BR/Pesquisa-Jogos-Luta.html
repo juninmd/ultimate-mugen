@@ -1,0 +1,328 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Pesquisa de jogos de luta: oportunidades - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="pesquisa-de-jogos-de-luta-oportunidades"><a class="header" href="#pesquisa-de-jogos-de-luta-oportunidades">Pesquisa de jogos de luta: oportunidades</a></h1>
+<p><a href="../Research-Fighting-Games.html">English</a> · <strong>Português (BR)</strong></p>
+<p>Esta página compara recursos publicamente conhecidos de lutadores 2D e 2.5D modernos com o estado atual do Ultimate MUGEN e ordena oportunidades concretas. É um documento de planejamento: <strong>nenhum recurso listado aqui está implementado ainda</strong>. Só recursos públicos são citados e nenhum asset de terceiros é copiado.</p>
+<p>Escala de esforço: <strong>P</strong> menos de 2 dias, <strong>M</strong> cerca de 1 semana, <strong>G</strong> 2 a 4 semanas, <strong>GG</strong> mais de 1 mês.</p>
+<h2 id="jogos-pesquisados"><a class="header" href="#jogos-pesquisados">Jogos pesquisados</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Jogo</th><th>Conhecido por</th></tr></thead><tbody>
+<tr><td>Dragon Ball FighterZ</td><td>Fidelidade ao anime, 3v3 com assists, auto-combo para iniciantes, lobbies ranqueados</td></tr>
+<tr><td>Sparking! Zero</td><td>Elenco grande, destruição de cenário, tutorial longo, regras de batalha personalizáveis</td></tr>
+<tr><td>Melty Blood: Type Lumina</td><td>Estilos Moon, auto-combo, rollback, lobbies</td></tr>
+<tr><td>Guilty Gear -Strive-</td><td>Rollback com lobby de avatares, tutorial e missões, treino com dados de frame</td></tr>
+<tr><td>BlazBlue Cross Tag Battle</td><td>Layout simples de 2 botões, assists, rollback</td></tr>
+<tr><td>Street Fighter 6</td><td>Controles modernos, HUD do Drive, medidor de frames, replays compartilháveis, Battle Hub, tutorial</td></tr>
+<tr><td>Mortal Kombat 1</td><td>Kameos, torres, treino com tutorial por personagem</td></tr>
+<tr><td>Tekken 8</td><td>Modo prática, ghost battle, replays e dicas, guias por personagem</td></tr>
+<tr><td>Them's Fighterz, Skullgirls</td><td>Rollback, treino muito completo, opções para daltônicos, tutorial</td></tr>
+<tr><td>Persona 4 Arena Ultimax</td><td>Hit-stop e supers cinematográficos, apresentação de história</td></tr>
+<tr><td>The King of Fighters XV</td><td>Seleção de time com ordem, 3v3 em sequência, rollback, prática</td></tr>
+<tr><td>Under Night In-Birth II</td><td>Layout compacto de 6 botões, HUD do GRD, rollback, treino profundo</td></tr>
+<tr><td>Ikemen GO e comunidade M.U.G.E.N</td><td>Screenpacks abertos, <code>fight.def</code>/<code>system.def</code>, netplay com rollback, Lua, opções comuns de treino</td></tr>
+</tbody></table>
+</div>
+<h2 id="estado-atual-do-ultimate-mugen"><a class="header" href="#estado-atual-do-ultimate-mugen">Estado atual do Ultimate MUGEN</a></h2>
+<p>Verificado no repositório em 2026-11-04.</p>
+<div class="table-wrapper"><table><thead><tr><th>Área</th><th>Hoje</th></tr></thead><tbody>
+<tr><td>Modos</td><td>Arcade, Versus CPU, 2 jogadores, Treino, CPU vs CPU, Equipe sequência, Equipe paralelo (<code>Mode</code> em <code>src/app.rs</code>)</td></tr>
+<tr><td>Treino</td><td>Boneco (<code>Pilot::Dummy</code>), barra infinita, hitboxes no menu de pausa</td></tr>
+<tr><td>Menu de pausa</td><td>Continuar, Hitboxes, Reiniciar, Trocar personagens, Configurações, Menu principal</td></tr>
+<tr><td>HUD</td><td>Painéis de vidro, retratos grandes, combo, pulso de vida baixa, medidor MAX, timer urgente (PR #156)</td></tr>
+<tr><td>Feedback de impacto</td><td>Partículas, tremor, hit-stop, câmera lenta no KO, corte de super, aberração cromática, intensidade configurável</td></tr>
+<tr><td>Configurações</td><td>Abas Vídeo, Áudio, Controles, Jogabilidade, Idioma, Sobre</td></tr>
+<tr><td>Netplay</td><td>Rollback GGRS via UDP só por flags (<code>--netplay</code>, <code>--peer</code>); replays <code>.umr</code>; sem lobby no jogo, sem transporte para web e celular</td></tr>
+<tr><td>Replays</td><td>Re-simulação da última luta a partir dos controles gravados; formato de arquivo existe</td></tr>
+<tr><td>Conteúdo</td><td>Mercado via GitHub, importação <code>.def</code>/<code>.zip</code>, lutadores UMF</td></tr>
+<tr><td>Tutorial e desafios</td><td>Nenhum. Combo trials, sobrevivência e boss rush estão no roadmap (seção 5)</td></tr>
+</tbody></table>
+</div>
+<h2 id="oportunidades-priorizadas"><a class="header" href="#oportunidades-priorizadas">Oportunidades priorizadas</a></h2>
+<p>Prioridade: <strong>P0</strong> primeiro, <strong>P1</strong> depois, <strong>P2</strong> mais tarde, <strong>P3</strong> desejável.</p>
+<h3 id="p0-maiores-lacunas"><a class="header" href="#p0-maiores-lacunas">P0: maiores lacunas</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>#</th><th>Oportunidade</th><th>Motivo</th><th>Esforço</th><th>Toca em</th></tr></thead><tbody>
+<tr><td>1</td><td><strong>Treino v2</strong>: comportamentos do boneco (em pé, agachado, pulo, bloquear tudo, bloquear após o 1º golpe), gravar e repetir o boneco, tecla de reset com posições salvas, modos de recarga de vida e barra</td><td>SF6, Tekken 8, Strive e Skullgirls têm gravação do boneco e resets. Sem isso o treino é só ver hitbox</td><td>M</td><td><code>Pilot::Dummy</code> em <code>src/session.rs</code>, pausa em <code>src/app.rs</code>, overlay em <code>src/hud.rs</code></td></tr>
+<tr><td>2</td><td><strong>Histórico de comandos e dados de frame</strong>: entradas rolando com contagem de frames, e startup, ativo, recuperação, vantagem e dano do último golpe</td><td>SF6 e Strive mostram isso no treino; é como o jogador aprende matchups. A simulação já é determinística a 60 Hz</td><td>M</td><td><code>src/hud.rs</code>, <code>crates/engine</code> (hooks só leitura), <code>src/session.rs</code></td></tr>
+<tr><td>3</td><td><strong>Tela online no jogo</strong>: criar ou entrar por código, IP direto, atraso e ping antes da luta, revanche</td><td>O rollback só existe via flags. Todo lutador de console tem lobby e revanche. Começar com salas por código usando o <code>matchbox</code> já decidido</td><td>G</td><td><code>src/netlink.rs</code>, <code>crates/netplay</code>, novo <code>Screen::Online</code></td></tr>
+<tr><td>4</td><td><strong>UI de qualidade de conexão</strong>: gráfico de ping, jitter e frames revertidos, aviso de conexão ruim</td><td>Strive e SF6 mostram qualidade da conexão; consta na seção 1 do ROADMAP</td><td>P</td><td><code>src/hud.rs</code>, <code>crates/netplay</code></td></tr>
+<tr><td>5</td><td><strong>Tutorial guiado</strong>: básico (mover, bloquear, especial, super), depois lista de golpes por personagem com entrada ao vivo</td><td>SF6, Tekken 8, Strive e Skullgirls têm tutorial; motores estilo MUGEN normalmente não, então o iniciante fica sem apoio</td><td>G</td><td>Novo <code>Screen::Tutorial</code>, reuso de <code>src/app/cutscene.rs</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="p1-alto-valor-custo-moderado"><a class="header" href="#p1-alto-valor-custo-moderado">P1: alto valor, custo moderado</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>#</th><th>Oportunidade</th><th>Motivo</th><th>Esforço</th><th>Toca em</th></tr></thead><tbody>
+<tr><td>6</td><td><strong>Combo trials</strong> a partir de lista JSON por personagem, com próximo comando na tela</td><td>Guilty Gear, SF6, DBFZ e Melty Blood têm; já está no ROADMAP. Criadores UMF podem entregar trials junto do lutador</td><td>M</td><td>Runner sobre <code>Session</code>, esquema em <code>docs/CHARACTER_FORMAT.md</code></td></tr>
+<tr><td>7</td><td><strong>Controle simples (moderno)</strong>: especiais com um botão e auto-combo opcionais por jogador</td><td>SF6 Modern, DBFZ, Melty Blood e BlazBlue CTB têm; muito importante para toque</td><td>M</td><td><code>src/controls.rs</code>, <code>src/keybinds.rs</code>, camada de comandos em <code>crates/engine</code></td></tr>
+<tr><td>8</td><td><strong>Passe de acessibilidade</strong>: paletas para daltônicos, reduzir flash e tremor separadamente, texto maior, cores de hitbox com alto contraste, alternar em vez de segurar</td><td>Vários jogos têm modo daltônico e flash reduzido. Hoje há só um controle de intensidade</td><td>M</td><td><code>src/settings.rs</code>, <code>src/app/settings_screen.rs</code>, <code>src/vfx.rs</code>, <code>src/hud.rs</code></td></tr>
+<tr><td>9</td><td><strong>Visualizador de replays</strong>: lista, velocidade, pausa, frame a frame, câmera, assumir um personagem, salvar e compartilhar <code>.umr</code></td><td>SF6, Tekken 8 e Strive permitem navegar e compartilhar replays; formato e re-simulação já são determinísticos</td><td>M</td><td><code>src/app.rs</code> (<code>Replay</code>), <code>crates/netplay</code>, novo <code>Screen::Replays</code></td></tr>
+<tr><td>10</td><td><strong>Ranked e fila de partidas</strong> (precisa de servidor): rating, fila anônima, revanche, sequência de vitórias</td><td>Padrão em lutadores de console. Exige serviço pequeno; vem depois dos lobbies</td><td>GG</td><td>Novo serviço e <code>Screen::Online</code></td></tr>
+<tr><td>11</td><td><strong>Seleção de personagem</strong>: ficha com golpes e dificuldade, prévia de stage e de paleta, animação de aleatório, favoritos, filtros por tag e origem</td><td>KOF XV e DBFZ mostram paletas e ordem do time; screenpacks do Ikemen GO têm slots e random. Parte pronta em <code>crates/formats/src/screenpack.rs</code></td><td>M</td><td><code>src/app.rs</code>, <code>src/menu_art.rs</code></td></tr>
+<tr><td>12</td><td><strong>Pausa e resultados</strong>: lista de golpes e comandos, resumo de teclas, revanche, estatísticas (hits, dano, combo máximo, uso de barra)</td><td>Lista de golpes na pausa é norma em Tekken, SF6 e MK. A tela de resultados já existe</td><td>P</td><td><code>src/app.rs</code> pausa e <code>Screen::Results</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="p2-profundidade-e-acabamento"><a class="header" href="#p2-profundidade-e-acabamento">P2: profundidade e acabamento</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>#</th><th>Oportunidade</th><th>Motivo</th><th>Esforço</th><th>Toca em</th></tr></thead><tbody>
+<tr><td>13</td><td><strong>Página de opções do treino</strong>: vida infinita ou regenerativa, modos de barra, dano, hit-stun, escala de combo</td><td>Existe em praticamente todo modo treino</td><td>P</td><td>Pausa, <code>src/hud.rs</code></td></tr>
+<tr><td>14</td><td><strong>Sobrevivência, boss rush e torres</strong> com recompensas</td><td>MK1 (torres), Sparking! Zero e Tekken; seção 5 do ROADMAP</td><td>M</td><td>Novos <code>Mode</code>, reuso de <code>Team</code></td></tr>
+<tr><td>15</td><td><strong>Arcade com rival, introduções e finais por personagem</strong> via storyboard</td><td>Padrão em Tekken, MK e KOF; <code>Cutscene</code> já suporta cenas</td><td>M</td><td><code>src/app/cutscene.rs</code></td></tr>
+<tr><td>16</td><td><strong>Modo espectador</strong> de partidas com rollback</td><td>Muito usado em torneios no Strive e SF6</td><td>G</td><td><code>crates/netplay</code>, <code>Screen::Online</code></td></tr>
+<tr><td>17</td><td><strong>Regras por partida</strong>: rounds, tempo, escala de dano, gravidade, handicap</td><td>Regras do Sparking! Zero, modificadores do MK, configs da comunidade MUGEN</td><td>P</td><td><code>Rules</code> (já existe em <code>Replay</code>)</td></tr>
+<tr><td>18</td><td><strong>Medidor de frames e legenda de hitboxes</strong> em tempo real</td><td>Medidor do SF6 e modos de hitbox do Skullgirls</td><td>M</td><td><code>src/render.rs</code></td></tr>
+<tr><td>19</td><td><strong>UX de controle</strong>: teste de latência, teste de botões, perfis por dispositivo, zona morta e SOCD</td><td>Necessário para fliperama e controle; teste de latência é comum</td><td>P</td><td><code>src/controls.rs</code>, <code>src/gamepad.rs</code></td></tr>
+<tr><td>20</td><td><strong>Sensação do menu</strong>: som e animação em cada cursor, repetição ao segurar, paridade mouse e toque, botão voltar no celular</td><td>Acabamento visto em todos os jogos</td><td>P</td><td><code>src/ui.rs</code>, <code>src/app.rs</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="p3-ecossistema-e-longo-prazo"><a class="header" href="#p3-ecossistema-e-longo-prazo">P3: ecossistema e longo prazo</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>#</th><th>Oportunidade</th><th>Motivo</th><th>Esforço</th><th>Toca em</th></tr></thead><tbody>
+<tr><td>21</td><td><strong>Suporte a screenpacks</strong> (<code>fight.def</code>, <code>system.def</code>) desenhados em wgpu</td><td>Maior reaproveitamento do trabalho da comunidade; loaders existem e a migração para wgpu já terminou</td><td>GG</td><td><code>crates/formats/src/screenpack.rs</code>, <code>src/hud.rs</code>, <code>src/menu_art.rs</code></td></tr>
+<tr><td>22</td><td><strong>Descoberta no mercado</strong>: notas, tags, capturas, aviso de atualização</td><td>Jogos com mods dependem de descoberta; o mercado já existe</td><td>M</td><td><code>crates/market</code>, <code>src/app/market.rs</code></td></tr>
+<tr><td>23</td><td><strong>Dicas e guias por personagem</strong> escritos pelo criador no UMF</td><td>Mesma ideia dos guias do SF6 e Tekken 8</td><td>P</td><td>Esquema UMF, tutorial</td></tr>
+<tr><td>24</td><td><strong>Ferramentas de torneio</strong>: chaveamento a partir de <code>.umr</code>, gravador, overlay para streamers</td><td>Seção 2 do ROADMAP</td><td>G</td><td>Novo crate</td></tr>
+<tr><td>25</td><td><strong>Mais idiomas</strong> (espanhol, japonês) e rótulos para leitores de tela</td><td>Seção 5 do ROADMAP</td><td>M</td><td><code>src/i18n.rs</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="sequência-sugerida"><a class="header" href="#sequência-sugerida">Sequência sugerida</a></h2>
+<ol>
+<li>Treino (1, 2, 13), pois facilita validar o resto.</li>
+<li>UI de rede e tela online (4, 3), depois replays (9).</li>
+<li>Tutorial e trials (5, 6), depois acessibilidade e controle moderno (8, 7).</li>
+<li>Seleção e resultados (11, 12), depois modos (14, 15).</li>
+<li>Ranked e espectador (10, 16) com lobbies estáveis.</li>
+<li>Screenpacks (21) em trilha separada.</li>
+</ol>
+<h2 id="observações"><a class="header" href="#observações">Observações</a></h2>
+<ul>
+<li>O Ikemen GO é citado apenas como inspiração, como na página inicial.</li>
+<li>As listas refletem informações públicas na data da pesquisa e podem mudar com patches. São referências, não requisitos.</li>
+<li>Ferramentas de histórico e dados de frame (2) só podem ler o estado da luta, para manter o determinismo do rollback.</li>
+<li>Todo campo novo em <code>Match</code> deve entrar em <code>ume_netplay::checksum</code>.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Pesquisa-Ferramenta-Autoria.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Pontos-de-Extensao.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Pesquisa-Ferramenta-Autoria.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Pontos-de-Extensao.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Homologação - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="homologação"><a class="header" href="#homologação">Homologação</a></h1>
+<p>O <code>ume-tools roster-audit</code> carrega todos os personagens e cenários de uma coleção M.U.G.E.N instalada, joga lutas reais
+de CPU contra CPU entre eles e grava um relatório legível por máquina de tudo que está quebrado: carregamento,
+visual (sprites ausentes ou invisíveis), som (chamadas sem amostra), mecânica (estados travados, lutador abaixo do
+chão, ataques sem fim, resgates do watchdog), as checagens específicas da importação no navegador e a memória que
+cada lutador precisa.</p>
+<p>É o substituto reproduzível do "abrir o jogo e testar alguns personagens na mão".</p>
+<h2 id="como-rodar"><a class="header" href="#como-rodar">Como rodar</a></h2>
+<pre><code class="language-bash">cargo build --release -p ume-devtools
+target/release/ume-tools roster-audit                     # mugen/chars + mugen/stages -&gt; docs/evidence/homologation
+target/release/ume-tools roster-audit --only "goku"        # uma família de personagens (os cenários continuam todos)
+target/release/ume-tools roster-audit --limit 20 --no-fights   # passada estática rápida
+target/release/ume-tools roster-audit --opponent "vegeta"  # força todas as lutas contra um oponente
+target/release/ume-tools roster-audit --fail-over critical # sai com 2 em qualquer achado crítico (gate de CI)
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>Flag</th><th>Significado</th></tr></thead><tbody>
+<tr><td><code>--chars &lt;dir&gt;</code> / <code>--stages &lt;dir&gt;</code></td><td>raízes varridas (padrão <code>mugen/chars</code>, <code>mugen/stages</code>)</td></tr>
+<tr><td><code>--out &lt;dir&gt;</code></td><td>onde <code>report.json</code>, <code>report.md</code> e <code>issues.csv</code> são escritos</td></tr>
+<tr><td><code>--limit N</code> / <code>--stage-limit N</code></td><td>audita só os N primeiros personagens / cenários</td></tr>
+<tr><td><code>--fights N</code></td><td>lutas por personagem (cada uma contra outro oponente e cenário, padrão 2)</td></tr>
+<tr><td><code>--stage-fights N</code></td><td>passo de rotação de oponentes quando o cenário é o alvo</td></tr>
+<tr><td><code>--only</code>, <code>--only-stage</code>, <code>--opponent</code></td><td>filtros por substring para personagens, cenários e oponente forçado</td></tr>
+<tr><td><code>--no-fights</code>, <code>--quiet</code></td><td>só a passada estática, e sem progresso por item no stderr</td></tr>
+<tr><td><code>--fail-over &lt;severidade&gt;</code></td><td>código de saída 2 quando existe achado naquela severidade ou pior</td></tr>
+</tbody></table>
+</div>
+<p>A execução é paralela (um carregamento por personagem por worker, nunca a coleção inteira na memória) e cada luta
+roda dentro de <code>catch_unwind</code>, então um pacote quebrado não aborta a auditoria.</p>
+<h2 id="o-que-cada-luta-verifica"><a class="header" href="#o-que-cada-luta-verifica">O que cada luta verifica</a></h2>
+<p>Cada luta roda 30 segundos de CPU contra CPU em um cenário real, com o fundo do cenário ativo, e só julga controle e
+animação durante o round (<code>roundstate = 2</code>), para não confundir intro ou vitória com travamento:</p>
+<div class="table-wrapper"><table><thead><tr><th>Código</th><th>Severidade</th><th>Significado</th></tr></thead><tbody>
+<tr><td><code>fight-panic</code></td><td>crítica</td><td>a partida entrou em pânico durante o tick (a mensagem fica no relatório)</td></tr>
+<tr><td><code>fight-non-finite</code></td><td>crítica</td><td>posição, velocidade, vida ou poder virou NaN/inf</td></tr>
+<tr><td><code>fight-life-range</code>, <code>fight-power-range</code></td><td>maior</td><td>vida ou poder saiu dos próprios limites</td></tr>
+<tr><td><code>fight-below-floor-p1/p2</code></td><td>maior</td><td>o lutador ficou mais de 12 px abaixo do chão por mais de 20 ticks</td></tr>
+<tr><td><code>fight-stuck-p1/p2</code></td><td>maior</td><td>420 ticks sem controle fora dos estados deitados</td></tr>
+<tr><td><code>fight-endless-attack-p1/p2</code></td><td>maior</td><td>240 ticks preso dentro de um mesmo estado de ataque</td></tr>
+<tr><td><code>fight-no-contact</code></td><td>maior</td><td>o par não acertou nenhum golpe em 30 segundos</td></tr>
+<tr><td><code>fight-off-camera-p1/p2</code></td><td>maior</td><td>o lutador ficou fora da câmera por mais de 3 ticks</td></tr>
+<tr><td><code>fight-watchdog-rescue</code></td><td>menor</td><td>a rede de segurança do motor interveio (o script não devolve o controle)</td></tr>
+<tr><td><code>fight-camera-nan</code></td><td>crítica</td><td>posição ou zoom da câmera virou não-finito</td></tr>
+<tr><td><code>fight-engine-warning</code></td><td>menor</td><td>aviso que o motor levantou durante a luta (anim ou estado ausente)</td></tr>
+</tbody></table>
+</div>
+<h2 id="o-que-a-passada-estática-verifica"><a class="header" href="#o-que-a-passada-estática-verifica">O que a passada estática verifica</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Código</th><th>Severidade</th><th>Significado</th></tr></thead><tbody>
+<tr><td><code>char-load-fail</code>, <code>char-load-panic</code></td><td>crítica</td><td>o pacote não carrega de jeito nenhum</td></tr>
+<tr><td><code>char-no-anims</code>, <code>char-no-states</code>, <code>char-no-commands</code></td><td>crítica</td><td><code>.air</code>/<code>.cns</code>/<code>.cmd</code> não produziu nada</td></tr>
+<tr><td><code>char-web-quarantine</code></td><td>crítica</td><td>a importação do navegador recusa o pacote (<code>ume_formats::health</code>), então ele nunca aparece na web</td></tr>
+<tr><td><code>char-unsupported-controller</code>, <code>char-unknown-trigger</code></td><td>maior</td><td>controller ou trigger que o motor não executa</td></tr>
+<tr><td><code>char-sprite-missing</code></td><td>maior</td><td>um quadro de animação aponta para um sprite inexistente no <code>.sff</code></td></tr>
+<tr><td><code>char-sprite-transparent</code></td><td>menor</td><td>o quadro existe mas todos os pixels são transparentes</td></tr>
+<tr><td><code>char-sound-missing</code></td><td>maior</td><td><code>PlaySnd</code> pede uma amostra que o <code>.snd</code> não tem</td></tr>
+<tr><td><code>char-unknown-parameter</code></td><td>menor</td><td>parâmetro de controller que o motor nunca lê</td></tr>
+<tr><td><code>char-wasm-atlas-overflow</code>, <code>char-wasm-atlas-pressure</code></td><td>maior/menor</td><td>os pixels de sprite não cabem no atlas 2048 do navegador (4,2 M pixels), então ele precisa expulsar e reenviar</td></tr>
+<tr><td><code>char-load-slow</code></td><td>menor</td><td>carregamento acima de 2,5 s</td></tr>
+</tbody></table>
+</div>
+<p>Códigos de cenário: <code>stage-load-fail</code>, <code>stage-load-panic</code>, <code>stage-no-layers</code>, <code>stage-no-sprites</code>,
+<code>stage-layer-sprite-missing</code>, <code>stage-layer-anim-missing</code>, <code>stage-bounds-inverted</code>, <code>stage-bounds-tight</code>,
+<code>stage-spawn-overlap</code>, <code>stage-music-outside-vfs</code>, <code>stage-no-shadow</code>.</p>
+<h2 id="lendo-o-relatório"><a class="header" href="#lendo-o-relatório">Lendo o relatório</a></h2>
+<ul>
+<li><code>report.md</code> ranqueia os personagens e cenários com os piores achados, e lista os pacotes mais lentos para carregar e
+os ticks de simulação mais caros.</li>
+<li><code>report.json</code> traz o resumo, todos os achados e todas as lutas (golpes, dano, estados distintos, custo por tick).</li>
+<li><code>summary.json</code> é a forma compacta (contagem por código e os primeiros exemplos), pequena o bastante para versionar.</li>
+<li><code>issues.csv</code> é a mesma lista achatada para planilha ou diff entre duas execuções.</li>
+</ul>
+<p>Um achado é evidência para reproduzir, não veredito: <code>--only &lt;nome&gt; --opponent &lt;nome&gt;</code> replica o par exato e
+<code>--no-fights</code> isola os problemas estáticos de um pacote.</p>
+<h2 id="validação-na-web"><a class="header" href="#validação-na-web">Validação na web</a></h2>
+<p>O navegador é o alvo mais crítico: ele recusa pacotes que o carregador do desktop tolera e tem um orçamento de
+textura muito menor. Os achados de atlas saem da soma dos pixels de todos os sprites do pacote (indexados e RGBA)
+comparada com o atlas 2048 usado pelo build wasm (4,2 M pixels). Para reproduzir uma importação de verdade:</p>
+<pre><code class="language-bash">node scripts/web-mugen-smoke.js web/dist mugen/incoming/meu-char.zip
+</code></pre>
+<p>Ele importa o pacote pelo input de arquivo real, entra direto numa luta com o personagem importado e falha com
+pânico, relógio congelado, renderizador travado ou heap acima do limite. Com um pacote que já está no elenco (o
+<code>elecbyte.zip</code> embutido), defina <code>MUGEN_SMOKE_CHAR</code> para o personagem e o teste valida a deduplicação por chave de
+conteúdo em vez de exigir uma entrada nova.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Auditoria-Animacoes-Nativas.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Biblioteca-de-Habilidades.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Auditoria-Animacoes-Nativas.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Biblioteca-de-Habilidades.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

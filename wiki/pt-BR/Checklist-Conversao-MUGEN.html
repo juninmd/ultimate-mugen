@@ -1,0 +1,257 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Checklist de conversão MUGEN para UMF - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="checklist-de-conversão-mugen-para-umf"><a class="header" href="#checklist-de-conversão-mugen-para-umf">Checklist de conversão MUGEN para UMF</a></h1>
+<p><code>tools/mugen2umf</code> (crate Rust, skill <code>mugen-to-ume-migrator</code>) migra um lutador M.U.G.E.N para um pacote UMF com comportamento idêntico. Ele não reescreve mais os estados como golpes UMF nativos: o pacote leva os dados originais e o motor carrega pelo mesmo código de um personagem M.U.G.E.N (<code>ume_engine::loader::assemble_mugen_char</code>). O formato está em <a href="Personagem-UMF.html#paridade-com-mugen-migra%C3%A7%C3%A3o-exata">Personagem UMF</a>.</p>
+<h2 id="o-que-vai-junto"><a class="header" href="#o-que-vai-junto">O que vai junto</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Área</th><th>No pacote</th></tr></thead><tbody>
+<tr><td>Estados e controllers</td><td><code>mugen.cns</code>, <code>mugen.st</code>, <code>mugen.stcommon</code> sem alteração (CNS e ZSS), incluindo helpers, <code>Statedef -2/-3</code>, IA e agarrões próprios</td></tr>
+<tr><td>Comandos</td><td><code>mugen.cmd</code> sem alteração: <code>[Defaults]</code>, todos os <code>[Command]</code> e as rotas do <code>Statedef -1</code></td></tr>
+<tr><td>Constantes</td><td>lidas de <code>[Data]</code>, <code>[Size]</code>, <code>[Velocity]</code>, <code>[Movement]</code> originais, com a mesma escala de <code>localcoord</code></td></tr>
+<tr><td>Animações</td><td><code>mugen.anims</code>: cada action com offset, ticks, flip, blend e alpha, escala, ângulo, todas as caixas Clsn1/Clsn2, loopstart</td></tr>
+<tr><td>Sprites</td><td>um PNG indexado por sprite do SFF (mesmos índices e paleta), true color como RGBA, ordem e duplicados do SFF mantidos para a escolha de paleta</td></tr>
+<tr><td>Paletas</td><td>paletas do SFF (<code>sffpal_&lt;k&gt;.png</code>) e <code>pal1.act</code>..<code>pal12.act</code>: troca de paleta e <code>RemapPal</code>/<code>PalFX</code> veem as mesmas cores</td></tr>
+<tr><td>Sons</td><td>cada entrada do <code>.snd</code> como <code>snd_g_i.wav</code></td></tr>
+<tr><td>Campos só do UMF</td><td><code>profile</code> (país, nacionalidade, origem, bio, título, estilo de luta, afiliação em en/pt/es), <code>series</code>, falas, <code>rivals</code>: <code>profile_facts</code> junta os fatos, a skill escreve, <code>set_profile</code> valida</td></tr>
+<tr><td>Melhorias</td><td><code>--extra</code>: nomes dos golpes (<code>mugen.names</code>), <code>mugenRoutes</code> para estados que o <code>.cmd</code> deixou sem comando, golpes novos em <code>scripts</code> (CNS/ZSS) ou como <code>moves</code> UMF nativos com <code>anim</code> igual ao número de uma action M.U.G.E.N</td></tr>
+</tbody></table>
+</div>
+<h2 id="prova"><a class="header" href="#prova">Prova</a></h2>
+<p><code>mugen2umf parity &lt;original&gt; &lt;pacote&gt;</code> (também rodado pelo <code>convert</code>) compara:</p>
+<ul>
+<li>dados: estados, comandos, constantes, animações, sprites (pixels e eixos), sprites indexados e paletas, sons, tamanhos;</li>
+<li>comportamento: cada comando do <code>Statedef -1</code> é jogado pelo input real no original e no pacote, 150 ticks na mesma luta, e cada tick de cada lutador (estado, animação, quadro, posição, velocidade, controle, vida, poder, helpers, sons) precisa bater.</li>
+</ul>
+<p>O veredito é <code>IDENTICAL</code> ou o primeiro tick em que eles se separam. <code>cargo test --release -p mugen2umf</code> converte o Kung Fu Man de <code>assets/mugen/elecbyte.zip</code> e exige <code>IDENTICAL</code>.</p>
+<h2 id="limites"><a class="header" href="#limites">Limites</a></h2>
+<p>O que o motor não suporta do M.U.G.E.N aparece no <code>report.md</code> do pacote (diagnóstico do motor). Vale igual para o original e para o pacote: corrija no motor, não no conversor.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Character-Select.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Cobertura-MUGEN.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Character-Select.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Cobertura-MUGEN.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Matriz de cobertura de formatos - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="matriz-de-cobertura-de-formatos"><a class="header" href="#matriz-de-cobertura-de-formatos">Matriz de cobertura de formatos</a></h1>
+<blockquote>
+<p>🇬🇧 English version: <a href="../Format-Coverage.html">Format coverage matrix</a>.</p>
+</blockquote>
+<p>Status por formato de arquivo, conferido com os decodificadores em <code>crates/formats</code> (leitura do código, ainda não testado com uma coleção grande de packs).</p>
+<ul>
+<li><strong>Implementado</strong>: decodificado e usado pelo motor.</li>
+<li><strong>Parcial</strong>: decodificado, com um limite conhecido listado nas notas.</li>
+<li><strong>Ausente</strong>: não decodificado; o arquivo é ignorado ou gera um aviso.</li>
+</ul>
+<h2 id="sff-sprites"><a class="header" href="#sff-sprites">SFF (sprites)</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Recurso</th><th>Status</th><th>Notas</th></tr></thead><tbody>
+<tr><td>SFF v1.01, sprites PCX RLE</td><td>Implementado</td><td><code>sff.rs</code>, <code>pcx.rs</code></td></tr>
+<tr><td>SFF v1, linhas PCX sem compressão</td><td>Implementado</td><td><code>bytes_per_line</code> respeitado</td></tr>
+<tr><td>SFF v1, PCX de 8 bits (paleta de 256 cores no fim do arquivo)</td><td>Implementado</td><td></td></tr>
+<tr><td>SFF v1, PCX de 1/4 bits ou 24 bits</td><td>Ausente</td><td>A profundidade do cabeçalho é ignorada; esses arquivos saem errados. Raro em packs reais</td></tr>
+<tr><td>SFF v1, paleta compartilhada (flag <code>same pal</code>)</td><td>Implementado</td><td>Herda a paleta do sprite anterior</td></tr>
+<tr><td>SFF v1, sprites ligados (<code>length = 0</code>)</td><td>Implementado</td><td></td></tr>
+<tr><td>SFF v2.00 / 2.01, 8 bits sem compressão</td><td>Implementado</td><td></td></tr>
+<tr><td>SFF v2, 24 e 32 bits sem compressão</td><td>Implementado</td><td>Convertidos para RGBA</td></tr>
+<tr><td>SFF v2, RLE8 / RLE5 / LZ5</td><td>Implementado</td><td><code>sff/codecs.rs</code></td></tr>
+<tr><td>SFF v2, PNG 8 / 24 / 32</td><td>Implementado</td><td>PNG quebrado vira sprite vazio e transparente</td></tr>
+<tr><td>SFF v2, paletas (RGB e RGBA, paletas ligadas)</td><td>Implementado</td><td></td></tr>
+<tr><td>SFF v2, escolha de paleta por sprite</td><td>Implementado</td><td></td></tr>
+</tbody></table>
+</div>
+<h2 id="snd-sons"><a class="header" href="#snd-sons">SND (sons)</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Recurso</th><th>Status</th><th>Notas</th></tr></thead><tbody>
+<tr><td>Contêiner <code>ElecbyteSnd</code>, chaves grupo/índice</td><td>Implementado</td><td>Vence a primeira chave repetida, como no M.U.G.E.N</td></tr>
+<tr><td>Cadeia de subarquivos com proteção contra links corrompidos</td><td>Implementado</td><td></td></tr>
+<tr><td>WAV PCM 8 / 16 bits (o caso normal)</td><td>Implementado</td><td>Decodificado pelo <code>symphonia</code> na camada de áudio</td></tr>
+<tr><td>WAV ADPCM, 24 bits e outros codecs WAV</td><td>Parcial</td><td>Depende do que o <code>symphonia</code> aceita; não verificado por codec</td></tr>
+</tbody></table>
+</div>
+<h2 id="air-animações"><a class="header" href="#air-animações">AIR (animações)</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Recurso</th><th>Status</th><th>Notas</th></tr></thead><tbody>
+<tr><td><code>[Begin Action N]</code>, quadros, <code>time</code></td><td>Implementado</td><td>Ações repetidas: vence a primeira</td></tr>
+<tr><td>Espelhamento <code>H</code> / <code>V</code></td><td>Implementado</td><td></td></tr>
+<tr><td>Blending <code>A</code>, <code>A1</code>, <code>AS&lt;n&gt;D&lt;n&gt;</code>, <code>S</code></td><td>Implementado</td><td></td></tr>
+<tr><td><code>Clsn1</code> / <code>Clsn2</code> e <code>Clsn1Default</code> / <code>Clsn2Default</code></td><td>Implementado</td><td></td></tr>
+<tr><td><code>xscale</code>, <code>yscale</code>, <code>angle</code> por quadro</td><td>Implementado</td><td></td></tr>
+<tr><td><code>Loopstart</code></td><td>Implementado</td><td></td></tr>
+<tr><td><code>Interpolate</code></td><td>Ausente</td><td>A linha é aceita e ignorada (<code>air.rs</code>); sem interpolação entre quadros</td></tr>
+</tbody></table>
+</div>
+<h2 id="act-paletas"><a class="header" href="#act-paletas">ACT (paletas)</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Recurso</th><th>Status</th><th>Notas</th></tr></thead><tbody>
+<tr><td>Paleta RGB de 768 bytes</td><td>Implementado</td><td>Índice 0 transparente, ordem invertida como no MUGEN</td></tr>
+<tr><td>Arquivos curtos (menos de 256 cores)</td><td>Implementado</td><td>Entradas faltando ficam pretas</td></tr>
+</tbody></table>
+</div>
+<h2 id="def-e-cns-personagens-e-stages"><a class="header" href="#def-e-cns-personagens-e-stages">DEF e CNS (personagens e stages)</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Recurso</th><th>Status</th><th>Notas</th></tr></thead><tbody>
+<tr><td><code>.def</code> de personagem (<code>[Info]</code>, <code>[Files]</code>, <code>localcoord</code>)</td><td>Implementado</td><td></td></tr>
+<tr><td><code>localcoord</code> 320x240, 640x480 e 1280x720</td><td>Implementado</td><td>Posições e distâncias convertidas por jogador</td></tr>
+<tr><td><code>.def</code> de stage (<code>[Info]</code>, <code>[StageInfo]</code>, <code>[Camera]</code>, <code>[Player]</code>, <code>[Bound]</code>)</td><td>Implementado</td><td></td></tr>
+<tr><td>Camadas <code>[BG]</code>: <code>normal</code>, <code>anim</code>, <code>parallax</code>, <code>trans</code>, <code>mask</code>, <code>maskwindow</code></td><td>Implementado</td><td></td></tr>
+<tr><td><code>[BGCtrlDef]</code> / <code>[BGCtrl]</code>: <code>null</code>, <code>visible</code>, <code>enable</code>, <code>velset</code>, <code>veladd</code>, <code>posset</code>, <code>posadd</code>, <code>anim</code>, <code>sinx</code>, <code>siny</code></td><td>Implementado</td><td></td></tr>
+<tr><td>Stage <code>zoffset</code>, <code>autoturn</code></td><td>Implementado</td><td>Usados pelo motor (<code>stagevar.rs</code>, <code>matchs.rs</code>)</td></tr>
+<tr><td>Stage <code>resetbg</code></td><td>Ausente</td><td>Não é lido em nenhum lugar do workspace</td></tr>
+</tbody></table>
+</div>
+<h2 id="screenpacks"><a class="header" href="#screenpacks">Screenpacks</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Recurso</th><th>Status</th><th>Notas</th></tr></thead><tbody>
+<tr><td><code>system.def</code> <code>[Info] localcoord</code> (packs 4:3 e 16:9)</td><td>Implementado</td><td>Convertido para o espaço do HUD</td></tr>
+<tr><td><code>system.def</code> <code>[Files]</code>, <code>[Music]</code>, <code>[Title Info]</code>, <code>[Select Info]</code></td><td>Implementado</td><td></td></tr>
+<tr><td><code>system.def</code> <code>[&lt;nome&gt;BGdef]</code> / <code>[&lt;nome&gt; N]</code> (fundos)</td><td>Implementado</td><td></td></tr>
+<tr><td><code>select.def</code> <code>[Characters]</code>, <code>[ExtraStages]</code>, <code>[Options]</code></td><td>Implementado</td><td></td></tr>
+<tr><td><code>fight.def</code> <code>[Files]</code>, barras <code>pN.*</code>, prefixos de elementos</td><td>Implementado</td><td></td></tr>
+<tr><td>Storyboards (<code>[SceneDef]</code>, <code>[Scene N]</code>, fades, camadas, <code>bgm</code>)</td><td>Implementado</td><td></td></tr>
+<tr><td><code>.fnt</code> v1 (PCX embutido, <code>[Def]</code>, <code>[Map]</code>)</td><td>Implementado</td><td></td></tr>
+<tr><td><code>.fnt</code> v2 (bitmap e truetype)</td><td>Parcial</td><td>Lido em <code>fnt.rs</code>; renderização truetype não verificada</td></tr>
+<tr><td><code>[Versus Screen]</code>, <code>[Victory Screen]</code>, <code>[Round Info]</code></td><td>Parcial</td><td>Lidos pelos prefixos genéricos; nem toda chave tem renderizador próprio; não verificado em packs</td></tr>
+<tr><td>Particularidades de WinMUGEN e MUGEN 1.0 / 1.1</td><td>Parcial</td><td>Chaves desconhecidas são ignoradas, não rejeitadas; sem seletor por versão</td></tr>
+</tbody></table>
+</div>
+<h2 id="lacunas-conhecidas-próximos-prs"><a class="header" href="#lacunas-conhecidas-próximos-prs">Lacunas conhecidas (próximos PRs)</a></h2>
+<p>Pequenos PRs, nesta ordem:</p>
+<ol>
+<li>AIR <code>Interpolate</code> (palavra-chave hoje ignorada).</li>
+<li>Stage <code>resetbg</code>.</li>
+<li>SFF v1 com profundidade baixa (PCX de 1 e 4 bits). Precisa de um caminho de paleta do cabeçalho; <code>sff.rs</code> está na linha de base do tamanho de arquivo, então o código v1 deve ir antes para um módulo próprio.</li>
+<li>Verificar codecs WAV além de PCM 8/16 bits com packs reais.</li>
+<li>Chaves de screenpack sem renderizador próprio (telas de versus e de vitória).</li>
+</ol>
+<p>Esta lista é o que a auditoria encontrou; ainda não está provado que seja completa numa coleção grande de packs.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Lore.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Medidor-de-Assinatura.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Lore.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Medidor-de-Assinatura.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Dissection of four M.U.G.E.N fighters - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="dissection-of-four-mugen-fighters"><a class="header" href="#dissection-of-four-mugen-fighters">Dissection of four M.U.G.E.N fighters</a></h1>
+<p>Read-only study of four public packs, taken apart file by file with <code>tools/mugen2umf</code>: Aizen TYBW (Fighter Factory Ultimate, SFF v2), Gogeta SSJ4 (Pocket_Danyell and Sarevok), Goku SSJ GT (Yamcha Z) and Goku SSJ4 (_Vision). The packs are third-party files: nothing from them is committed, only what we learned. Companion studies: <a href="MUGEN-Code-Study.html">M.U.G.E.N code study</a> and <a href="Fighter-Study.html">Fighter study</a>.</p>
+<h2 id="size-of-each-pack"><a class="header" href="#size-of-each-pack">Size of each pack</a></h2>
+<div class="table-wrapper"><table><thead><tr><th></th><th>Aizen TYBW</th><th>Gogeta SSJ4</th><th>Goku SSJ GT</th><th>Goku SSJ4</th></tr></thead><tbody>
+<tr><td>Sprite format</td><td>SFF v2.01, 1380 sprites, 696 palettes, 29 MB</td><td>SFF v1, 523 images</td><td>SFF v1, 116 images</td><td>SFF v1, 198 images</td></tr>
+<tr><td>Sounds</td><td>272 (19 groups, up to 4 MB each)</td><td>33</td><td>5</td><td>19</td></tr>
+<tr><td>AIR actions</td><td>262</td><td>232</td><td>84</td><td>171</td></tr>
+<tr><td>Clsn1 / Clsn2 boxes</td><td>83 / 1538</td><td>301 / 1202</td><td>115 / 477</td><td>309 / 1469</td></tr>
+<tr><td>CMD commands</td><td>67</td><td>65</td><td>62</td><td>65</td></tr>
+<tr><td>Statedefs (own, no common)</td><td>85 + 68 + 19 + 2</td><td>101 + 2</td><td>29</td><td>109 + 5 + 2</td></tr>
+<tr><td>Controllers (own)</td><td>650 + 676 + 173 + 57</td><td>789 + 117</td><td>223</td><td>761 + 30 + 25</td></tr>
+<tr><td>Life / attack / defence</td><td>2250 / 115 / 125</td><td>2600 / 110 / 140</td><td>2100 / 120 / 110</td><td>2400 / 130 / 130</td></tr>
+</tbody></table>
+</div>
+<p>Take-aways: Clsn2 outnumbers Clsn1 about 5 to 1 everywhere, because the body is split into 4 to 6 small boxes per frame (head, torso, arms, legs) and the attack is one to three boxes. This is the same rule as the native hit box audit.</p>
+<h2 id="file-layout"><a class="header" href="#file-layout">File layout</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>File</th><th>Role</th><th>Seen in</th></tr></thead><tbody>
+<tr><td><code>.def</code></td><td><code>[Info]</code> name and author, <code>[Files]</code> list, <code>pal1..pal12</code>, <code>pal.defaults</code></td><td>all</td></tr>
+<tr><td><code>.cmd</code></td><td><code>[Remap]</code>, <code>[Defaults]</code> (<code>command.time</code>, <code>command.buffer.time</code>), <code>[Command]</code> list, <code>[Statedef -1]</code> input to state routing</td><td>all</td></tr>
+<tr><td><code>.cns</code></td><td><code>[Data]</code>, <code>[Size]</code>, <code>[Velocity]</code>, <code>[Movement]</code> constants then states</td><td>all</td></tr>
+<tr><td><code>st1..st3</code> extra state files</td><td><code>IA.cns</code> (<code>-2</code>/<code>-3</code> AI), <code>Especials.cns</code>, <code>Supers.cns</code>, <code>-final</code>, <code>-story-intros</code></td><td>Aizen, Goku SSJ4</td></tr>
+<tr><td><code>common1.cns</code></td><td>Copy of the shared states, overridden by redeclaring a state number</td><td>all</td></tr>
+<tr><td><code>.air</code></td><td>Actions: frames <code>group,image,x,y,ticks[,flip,trans]</code>, <code>Clsn1</code> (attack) <code>Clsn2</code> (hurt), <code>Clsn2Default</code>, <code>Loopstart</code></td><td>all</td></tr>
+<tr><td><code>.sff</code> / <code>.snd</code></td><td>Sprites and sound banks, referenced by <code>group,image</code> and <code>group,index</code></td><td>all</td></tr>
+<tr><td><code>.act</code></td><td>256-colour palettes, one per colour option</td><td>Gogeta, Goku SSJ4</td></tr>
+</tbody></table>
+</div>
+<h2 id="constants-worth-copying"><a class="header" href="#constants-worth-copying">Constants worth copying</a></h2>
+<ul>
+<li>Walk 2.3 to 2.4 forward, run 4.6, jump <code>-8.1</code> to <code>-10.1</code>, <code>yaccel</code> .43 to .44, <code>airjuggle</code> 15, ground width 15 (10 for the thin Aizen), height 60, <code>attack.dist</code> 160. The native roster already uses the same scale.</li>
+<li><code>fall.defence_up</code> 50, <code>liedown.time</code> 60, <code>sparkno</code> -1 when the pack draws its own sparks.</li>
+<li>Aizen sets <code>airjump.num = 6</code> and a walk of 7: a fast "floaty" movement type, built from constants only.</li>
+</ul>
+<h2 id="command-layer"><a class="header" href="#command-layer">Command layer</a></h2>
+<ul>
+<li>Quarter circles <code>~D, DF, F, a</code>, half circles <code>~B, DB, D, DF, F, a</code>, charge <code>~60$D,U,a</code> and <code>~60$B,F,a</code> (Goku SSJ), double taps <code>FF</code>, <code>BB</code>, <code>~D,U</code> for super jump, 3-button combos <code>a+b</code>.</li>
+<li>Button routing: <code>/$B,x</code>, <code>/$D,y</code> style commands hold a direction while pressing, giving command normals.</li>
+<li>Buffers: <code>command.time = 10</code> and <code>buffer.time</code> 1 in most packs, 15 to 30 for the packs that favour easy inputs.</li>
+<li>Specials keyed off one motion, one button each: Aizen <code>D,DF,F</code> with a, b or c is Silent Slash, Dark Waves or Kurohitsugi. UMF does the same with one move per button.</li>
+<li>Gogeta and Goku SSJ4 keep <code>ai..ai13</code> commands (button strings) that only set an AI flag in <code>-2</code>; the engine has its own AI, so they are not migrated.</li>
+<li>Cancels are written as extra triggers on the target move: <code>trigger2 = numhelper(700) &gt; 0</code> (Aizen cancels into specials while his clone lives), <code>movehit</code> and <code>movecontact</code> (165 uses in Aizen, 22 in Gogeta, 14 in Goku SSJ4). UMF names the same idea <code>cancels</code> and <code>rekka</code>.</li>
+</ul>
+<h2 id="normal-attack-numbers"><a class="header" href="#normal-attack-numbers">Normal attack numbers</a></h2>
+<p>Standing light (200), standing heavy (210), crouching light (400), crouching heavy (410), jumping light (600), jumping heavy (610). Values are <code>damage</code> of the hit, <code>pausetime</code> of attacker and defender, <code>ground.hittime</code>, <code>juggle</code> points and <code>poweradd</code>:</p>
+<div class="table-wrapper"><table><thead><tr><th>State</th><th>Gogeta</th><th>Goku SSJ</th><th>Goku SSJ4</th><th>Aizen</th></tr></thead><tbody>
+<tr><td>200 stand light</td><td>20, pause 4,5, hit 11, juggle 4, power 22</td><td>23, pause 7,8, hit 11, juggle 1, power 20</td><td>23, pause 5,8, hit 7, juggle 1, power 20</td><td>20, pause 9,9, hit 15, juggle 2, power 40</td></tr>
+<tr><td>210 stand heavy</td><td>55, pause 4,5, hit 11</td><td>55, pause 11,11, hit 15, juggle 4, power 60</td><td>63, pause 12,12, hit 15, juggle 5, power 65</td><td>30, pause 9,9, hit 15</td></tr>
+<tr><td>400 crouch light</td><td>23, pause 10,11, <code>guardflag = L</code></td><td>23, pause 10,12, <code>L</code></td><td>23, pause 5,8</td><td>20, pause 0,15</td></tr>
+<tr><td>410 crouch heavy</td><td>37, pause 12,12, <code>M</code></td><td>62, trip, <code>fall = 1</code>, juggle 7</td><td>37, pause 12,12, <code>M</code></td><td>30, pause 0,60</td></tr>
+<tr><td>600 jump light</td><td>20, pause 7,8, <code>HA</code></td><td>12, pause 7,8, <code>HA</code></td><td>12, pause 7,8</td><td>30, pause 10,10</td></tr>
+<tr><td>610 jump heavy</td><td>72, pause 12,12, hit 17</td><td>70, pause 9,10</td><td>same values as 600</td><td>no direct HitDef</td></tr>
+</tbody></table>
+</div>
+<p>Rules the packs follow: light normals pause 4 to 8 ticks and give 15 to 25 power, heavy normals pause 11 to 12 and give 55 to 70, ground <code>hittime</code> 11 to 15, crouching lows use <code>guardflag = L</code> and <code>ground.type = Low</code>, jump normals use <code>HA</code>, and the heavy crouch is the sweep (<code>Trip</code> plus <code>fall = 1</code>, Goku SSJ).</p>
+<h2 id="move-types-and-how-they-are-built"><a class="header" href="#move-types-and-how-they-are-built">Move types and how they are built</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Type</th><th>Example</th><th>How it is built</th></tr></thead><tbody>
+<tr><td>Fireball</td><td>Goku SSJ 1000</td><td>Statedef <code>movetype = A</code>, <code>Projectile</code> at <code>Time = 14</code> with <code>ProjAnim</code>, <code>ProjHitAnim</code>, <code>velocity = 5.5,0</code>, <code>projpriority</code>, own <code>HitDef</code> params, <code>AnimTime = 0</code> back to 0</td></tr>
+<tr><td>Air fireball</td><td>Goku SSJ 1005</td><td>Same, <code>type = A</code>, <code>physics = N</code> until the throw, <code>ProjHeightBound</code> to remove it on the floor</td></tr>
+<tr><td>Beam super</td><td>Goku SSJ 1800</td><td><code>poweradd = -2000</code>, <code>SuperPause</code> on <code>AnimElem = 1</code>, <code>AfterImage</code> for the whole move, three <code>Projectile</code> controllers on the same frame: a visual with <code>projremovetime</code>, a long one with <code>projhits = 30</code>, <code>projmisstime = 5</code>, <code>damage = 19,4</code></td></tr>
+<tr><td>Multi-hit rush</td><td>Goku SSJ 1050</td><td>One long action, <code>VelAdd</code> pairs on alternating <code>AnimElem</code> (+4 then -4), <code>EnvShake</code> on the last element</td></tr>
+<tr><td>Throw</td><td>Goku SSJ4 1601</td><td><code>TargetBind</code> every element, <code>TargetLifeAdd</code> at <code>AnimTime = 0</code>, <code>TargetState</code> to a wake-up state</td></tr>
+<tr><td>Clone</td><td>Aizen 700</td><td>A <code>Helper</code> with <code>anim = 9999</code>, <code>DestroySelf</code> at <code>time = 15</code> or when the root is gone, and <code>numhelper(700)</code> used as a cancel trigger by every attack</td></tr>
+<tr><td>Hit spark</td><td>Aizen 995</td><td><code>Helper</code> on <code>movehit = 1 &amp;&amp; numhelper(995) = 0</code>, <code>postype = p2</code>, scaled by <code>Helper(999999)</code> variables</td></tr>
+<tr><td>Counter</td><td>Aizen Kyouka Suigetsu</td><td><code>ReversalDef</code> or <code>HitOverride</code> window, then a state that teleports with <code>PosSet</code></td></tr>
+<tr><td>Teleport</td><td>Aizen Shunpo</td><td><code>PosAdd</code> by <code>p2dist x + 40</code> then <code>Turn</code> (the exact code UMF emits for <code>teleport</code>)</td></tr>
+<tr><td>Form</td><td>Gogeta Kaio Ken</td><td><code>var(11)</code> flag, <code>-2</code> adds power each tick, <code>AttackMulSet 1.2</code>, <code>DefenceMulSet 1.2</code>, <code>Explod</code> aura every 10 ticks</td></tr>
+<tr><td>Power up</td><td>Goku SSJ 730, 735, 740, 741</td><td>Override of the common power-up states, <code>PalFX</code> plus <code>EnvColor</code> and sound</td></tr>
+</tbody></table>
+</div>
+<p>Aizen is the only pack that builds almost everything from helpers: 98 <code>Helper</code> controllers, 140 <code>Explod</code>, 128 <code>AssertSpecial</code> (<code>NoShadow</code>, <code>Invisible</code>), 48 <code>AngleDraw</code>. Goku SSJ is the opposite: no helper, no explod, 12 <code>Projectile</code>. Gogeta sits between them with 32 <code>Projectile</code> and 109 <code>Explod</code>.</p>
+<h2 id="controller-frequency"><a class="header" href="#controller-frequency">Controller frequency</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Pack</th><th>Top controllers</th></tr></thead><tbody>
+<tr><td>Aizen</td><td>PlaySnd 142 + 122, ChangeState 68 + 46, Explod 57 + 57, Helper 37 + 41, DestroySelf 37 + 27, HitDef 30 + 28</td></tr>
+<tr><td>Gogeta</td><td>ChangeState 145, Explod 109, PlaySnd 95, HitDef 38, VelAdd 37, Projectile 32, EnvColor 21, SuperPause 18</td></tr>
+<tr><td>Goku SSJ</td><td>VelAdd 38, HitDef 37, ChangeState 34, Projectile 12</td></tr>
+<tr><td>Goku SSJ4</td><td>PlaySnd 137, ChangeState 135, HitDef 71, VelSet 63, AfterImage 29, AfterImageTime 24, Explod 24</td></tr>
+</tbody></table>
+</div>
+<h2 id="sound-and-sprite-organisation"><a class="header" href="#sound-and-sprite-organisation">Sound and sprite organisation</a></h2>
+<ul>
+<li>Sprites: group 0 idle, 20 walk, 40 jump, 100 and 105 turn and crouch start, 200 to 240 stand attacks, 400 crouch, 600 jump, 5000 to 5120 get-hit, 9000 portrait, 9000,1 small portrait. Specials use free groups from 1000 up. Goku SSJ4 keeps 121 groups for 198 images, Gogeta has 523 images in 109 groups (63 linked, sharing pixels).</li>
+<li>Sounds: group 0 attack whooshes and voices, 5 hits, 6 guard, 11 KO, 20 and above for specials. Aizen has 104 sounds in group 0 alone.</li>
+<li>Palettes: <code>pal1..pal12</code> in the <code>.def</code>; Goku SSJ4 ships 5 <code>.act</code>, Gogeta 5, Aizen embeds its palettes in the SFF v2.</li>
+<li>Timing: a normal is 8 to 17 ticks in total (Goku SSJ4 stand light 4 + 11 + 2, Aizen 2 + 2 + 4 + 4, Gogeta stand heavy 2 + 4 + 2); the hit frame is the middle one.</li>
+</ul>
+<h2 id="what-the-dissection-changed-in-ume"><a class="header" href="#what-the-dissection-changed-in-ume">What the dissection changed in UME</a></h2>
+<ol>
+<li>Native fighters must read like these packs: chain normals, rekka follow ups, command normals, air versions, one projectile per button, teleport, counter and a form.</li>
+<li>Hit and hurt boxes follow the limb: 3 hurt boxes minimum, attack boxes only where the frame has pixels (see the native hit box audit).</li>
+<li>Frame data targets the table above: light 4 to 8 tick pause, heavy 11 to 12, ground hit time 11 to 15.</li>
+<li>The Captain Marlow rebuild (see <a href="Characters.html">Characters</a>) is the first fighter made with this method, see <a href="Remaking-a-MUGEN-Fighter.html">Remaking a M.U.G.E.N fighter as UMF</a>.</li>
+</ol>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="MUGEN-Code-Study.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Fighter-Study.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="MUGEN-Code-Study.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Fighter-Study.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

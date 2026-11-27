@@ -1,0 +1,319 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Format coverage matrix - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="format-coverage-matrix"><a class="header" href="#format-coverage-matrix">Format coverage matrix</a></h1>
+<blockquote>
+<p>🇧🇷 Versão em português: <a href="pt-BR/Matriz-Formatos.html">Matriz de cobertura de formatos</a>.</p>
+</blockquote>
+<p>Status by file format, checked against the decoders in <code>crates/formats</code> (reading of the code, not yet fuzzed against a large pack collection).</p>
+<ul>
+<li><strong>Implemented</strong>: decoded and used by the engine.</li>
+<li><strong>Partial</strong>: decoded, with a known limit listed in the notes.</li>
+<li><strong>Missing</strong>: not decoded; the file is skipped or reported as a warning.</li>
+</ul>
+<h2 id="sff-sprites"><a class="header" href="#sff-sprites">SFF (sprites)</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Status</th><th>Notes</th></tr></thead><tbody>
+<tr><td>SFF v1.01, PCX RLE sprites</td><td>Implemented</td><td><code>sff.rs</code>, <code>pcx.rs</code></td></tr>
+<tr><td>SFF v1, PCX uncompressed rows</td><td>Implemented</td><td><code>bytes_per_line</code> honored</td></tr>
+<tr><td>SFF v1, 8-bit PCX (256-colour trailer palette)</td><td>Implemented</td><td></td></tr>
+<tr><td>SFF v1, 1/4-bit or 24-bit PCX</td><td>Missing</td><td>Header bit depth is ignored; such files decode as garbage. Rare in real packs</td></tr>
+<tr><td>SFF v1, shared palette (<code>same pal</code> flag)</td><td>Implemented</td><td>Inherits the previous sprite's palette</td></tr>
+<tr><td>SFF v1, linked sprites (<code>length = 0</code>)</td><td>Implemented</td><td></td></tr>
+<tr><td>SFF v2.00 / 2.01, raw 8-bit</td><td>Implemented</td><td></td></tr>
+<tr><td>SFF v2, raw 24-bit and 32-bit</td><td>Implemented</td><td>Converted to RGBA</td></tr>
+<tr><td>SFF v2, RLE8 / RLE5 / LZ5</td><td>Implemented</td><td><code>sff/codecs.rs</code></td></tr>
+<tr><td>SFF v2, PNG 8 / 24 / 32</td><td>Implemented</td><td>Broken PNG gives an empty, transparent sprite</td></tr>
+<tr><td>SFF v2, palettes (RGB and RGBA, linked palettes)</td><td>Implemented</td><td></td></tr>
+<tr><td>SFF v2, palette-per-sprite selection</td><td>Implemented</td><td></td></tr>
+</tbody></table>
+</div>
+<h2 id="snd-sounds"><a class="header" href="#snd-sounds">SND (sounds)</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Status</th><th>Notes</th></tr></thead><tbody>
+<tr><td><code>ElecbyteSnd</code> container, group/index keys</td><td>Implemented</td><td>First duplicate key wins, as in M.U.G.E.N</td></tr>
+<tr><td>Subfile chain with corrupt-link guard</td><td>Implemented</td><td></td></tr>
+<tr><td>WAV PCM 8 / 16-bit (the normal case)</td><td>Implemented</td><td>Decoded by <code>symphonia</code> in the audio layer</td></tr>
+<tr><td>WAV ADPCM, 24-bit and other WAV codecs</td><td>Partial</td><td>Depends on what <code>symphonia</code> accepts; not verified per codec</td></tr>
+</tbody></table>
+</div>
+<h2 id="air-animations"><a class="header" href="#air-animations">AIR (animations)</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Status</th><th>Notes</th></tr></thead><tbody>
+<tr><td><code>[Begin Action N]</code>, frames, <code>time</code></td><td>Implemented</td><td>Duplicate actions: first wins</td></tr>
+<tr><td>Frame flips <code>H</code> / <code>V</code></td><td>Implemented</td><td></td></tr>
+<tr><td>Blending <code>A</code>, <code>A1</code>, <code>AS&lt;n&gt;D&lt;n&gt;</code>, <code>S</code></td><td>Implemented</td><td></td></tr>
+<tr><td><code>Clsn1</code> / <code>Clsn2</code> and <code>Clsn1Default</code> / <code>Clsn2Default</code></td><td>Implemented</td><td></td></tr>
+<tr><td><code>xscale</code>, <code>yscale</code>, <code>angle</code> per frame</td><td>Implemented</td><td></td></tr>
+<tr><td><code>Loopstart</code></td><td>Implemented</td><td></td></tr>
+<tr><td><code>Interpolate</code> (blend, offset, angle, scale)</td><td>Missing</td><td>Line accepted and ignored (<code>air.rs</code>); no interpolation between frames</td></tr>
+</tbody></table>
+</div>
+<h2 id="act-palettes"><a class="header" href="#act-palettes">ACT (palettes)</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Status</th><th>Notes</th></tr></thead><tbody>
+<tr><td>768-byte RGB palette</td><td>Implemented</td><td>Index 0 transparent, order reversed as in MUGEN</td></tr>
+<tr><td>Short files (fewer than 256 colours)</td><td>Implemented</td><td>Missing entries stay black</td></tr>
+</tbody></table>
+</div>
+<h2 id="def-and-cns-characters-and-stages"><a class="header" href="#def-and-cns-characters-and-stages">DEF and CNS (characters and stages)</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Status</th><th>Notes</th></tr></thead><tbody>
+<tr><td>Character <code>.def</code> (<code>[Info]</code>, <code>[Files]</code>, <code>localcoord</code>)</td><td>Implemented</td><td></td></tr>
+<tr><td><code>localcoord</code> 320x240 and 640x480 and 1280x720</td><td>Implemented</td><td>Positions and distances are converted per player</td></tr>
+<tr><td>Stage <code>.def</code> (<code>[Info]</code>, <code>[StageInfo]</code>, <code>[Camera]</code>, <code>[Player]</code>, <code>[Bound]</code>)</td><td>Implemented</td><td></td></tr>
+<tr><td>Stage <code>[BG]</code> layers: <code>normal</code>, <code>anim</code>, <code>parallax</code>, <code>trans</code>, <code>mask</code>, <code>maskwindow</code></td><td>Implemented</td><td></td></tr>
+<tr><td><code>[BGCtrlDef]</code> / <code>[BGCtrl]</code>: <code>null</code>, <code>visible</code>, <code>enable</code>, <code>velset</code>, <code>veladd</code>, <code>posset</code>, <code>posadd</code>, <code>anim</code>, <code>sinx</code>, <code>siny</code></td><td>Implemented</td><td></td></tr>
+<tr><td>Stage <code>zoffset</code>, <code>autoturn</code></td><td>Implemented</td><td>Used by the engine (<code>stagevar.rs</code>, <code>matchs.rs</code>)</td></tr>
+<tr><td>Stage <code>resetbg</code></td><td>Missing</td><td>Not read anywhere in the workspace</td></tr>
+</tbody></table>
+</div>
+<h2 id="screenpacks"><a class="header" href="#screenpacks">Screenpacks</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Status</th><th>Notes</th></tr></thead><tbody>
+<tr><td><code>system.def</code> <code>[Info] localcoord</code> (4:3 and 16:9 packs)</td><td>Implemented</td><td>Converted to the HUD space</td></tr>
+<tr><td><code>system.def</code> <code>[Files]</code>, <code>[Music]</code>, <code>[Title Info]</code>, <code>[Select Info]</code></td><td>Implemented</td><td></td></tr>
+<tr><td><code>system.def</code> <code>[&lt;name&gt;BGdef]</code> / <code>[&lt;name&gt; N]</code> backgrounds</td><td>Implemented</td><td></td></tr>
+<tr><td><code>select.def</code> <code>[Characters]</code>, <code>[ExtraStages]</code>, <code>[Options]</code></td><td>Implemented</td><td></td></tr>
+<tr><td><code>fight.def</code> <code>[Files]</code>, <code>pN.*</code> bars, element prefixes</td><td>Implemented</td><td></td></tr>
+<tr><td>Storyboards (<code>[SceneDef]</code>, <code>[Scene N]</code>, fades, layers, <code>bgm</code>)</td><td>Implemented</td><td></td></tr>
+<tr><td><code>.fnt</code> v1 (embedded PCX, <code>[Def]</code>, <code>[Map]</code>)</td><td>Implemented</td><td></td></tr>
+<tr><td><code>.fnt</code> v2 (bitmap and truetype)</td><td>Partial</td><td>Parsed in <code>fnt.rs</code>; truetype rendering not verified</td></tr>
+<tr><td><code>[Versus Screen]</code>, <code>[Victory Screen]</code>, <code>[Round Info]</code></td><td>Partial</td><td>Read through the generic element prefixes; not every key has a dedicated renderer; not verified on packs</td></tr>
+<tr><td>WinMUGEN and MUGEN 1.0 / 1.1 quirks</td><td>Partial</td><td>Unknown keys are ignored, not rejected; no per-version switch</td></tr>
+</tbody></table>
+</div>
+<h2 id="known-gaps-next-prs"><a class="header" href="#known-gaps-next-prs">Known gaps (next PRs)</a></h2>
+<p>Small PRs, in order:</p>
+<ol>
+<li>AIR <code>Interpolate</code> (keyword currently ignored).</li>
+<li>Stage <code>resetbg</code>.</li>
+<li>SFF v1 low bit depth (1 and 4-bit PCX). Needs a header palette path in <code>sff/</code>; <code>sff.rs</code> is on the file-size baseline, so move the v1 code into its own module first.</li>
+<li>Verify WAV codecs beyond PCM 8/16-bit with real packs.</li>
+<li>Screenpack keys without a dedicated renderer (victory and versus screens).</li>
+</ol>
+<p>This list is what the audit found; it is not yet proven complete against a large pack collection.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="Combo-Trials.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Kit-Inputs.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="Combo-Trials.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Kit-Inputs.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

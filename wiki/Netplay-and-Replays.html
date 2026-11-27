@@ -1,0 +1,334 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Netplay and Replays - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="netplay-and-replays"><a class="header" href="#netplay-and-replays">Netplay and Replays</a></h1>
+<p><strong>English</strong> · <a href="pt-BR/Replays-Rede.html">Português (BR)</a></p>
+<blockquote>
+<p>🇧🇷 O netplay usa rollback (GGRS): cada jogador roda a luta localmente, prevê o controle do adversário e corrige quando o controle real chega. Replays guardam só os controles de cada frame.</p>
+</blockquote>
+<h2 id="playing-online-desktop"><a class="header" href="#playing-online-desktop">Playing online (desktop)</a></h2>
+<p>Both players use the same build and the same characters and stage files. Each one opens UDP port 7000 (player 1) or 7001 (player 2), or the port given with <code>--port</code>.</p>
+<pre><code>ultimate-mugen --netplay 1 --peer &lt;friend-ip&gt;:7001 --chars kfm,kfm --stage dojo
+ultimate-mugen --netplay 2 --peer &lt;friend-ip&gt;:7000 --chars kfm,kfm --stage dojo
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>Flag</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>`--netplay 1</td><td>2`</td></tr>
+<tr><td><code>--peer ip:port</code></td><td>the other player's address</td></tr>
+<tr><td><code>--port n</code></td><td>local UDP port (default 7000 / 7001)</td></tr>
+<tr><td><code>--chars a,b</code></td><td>character ids or names for P1 and P2 (same on both sides)</td></tr>
+<tr><td><code>--stage id</code></td><td>stage id or name</td></tr>
+<tr><td><code>--delay n</code></td><td>input delay in frames (default 2)</td></tr>
+</tbody></table>
+</div>
+<p>The bottom of the screen shows the connection state and ping. Pause is disabled online. Browser and mobile netplay arrive with the WebRTC transport after the wgpu/winit migration.</p>
+<h2 id="how-rollback-works-here"><a class="header" href="#how-rollback-works-here">How rollback works here</a></h2>
+<ul>
+<li>The whole fight state is <code>Match</code>. Saving a frame is <code>match.clone()</code>; character data (<code>CharDef</code>) is shared through <code>Arc</code>, so a snapshot only copies the moving parts.</li>
+<li><code>ume_netplay::Rollback</code> answers the GGRS requests: save, load and advance. Only the newest frame returns presentation events (sounds, hit sparks), so rolled-back frames never replay a sound twice.</li>
+<li><code>ume_netplay::checksum</code> hashes positions, states, life, power, variables, explods and projectiles. GGRS compares it between peers to detect desyncs.</li>
+<li>Inputs are one <code>u32</code> per player per frame (the same bits as local play).</li>
+</ul>
+<h2 id="spectators-and-netplay-data-in-replays"><a class="header" href="#spectators-and-netplay-data-in-replays">Spectators and netplay data in replays</a></h2>
+<p>A third connection type observes without contributing input:</p>
+<pre><code>ultimate-mugen --spectate --peer &lt;host-ip&gt;:7000 [--port 7002] [--chars a,b --stage id]
+</code></pre>
+<p>It builds a GGRS <code>SpectatorSession</code> (<code>PlayerType::Spectator</code>), renders the confirmed inputs from the host and never
+sends local input; the overlay shows <code>SPECTATOR · ping · frames behind</code>.</p>
+<p>Replays recorded online store the session configuration (<code>netplay</code>: side, peer, port, delay, rollback window, player
+count, spectator flag) next to the inputs, so a desync can be reproduced with the same settings. When GGRS reports a
+desync, the game writes <code>replays/desync-&lt;unix&gt;.json</code> with that config, the frame, <code>Match::checksum()</code> and the last 120
+input frames. A desync report is a diagnostic, not a replay: the Replays menu never lists it (neither as a fight nor as
+an unreadable file), so it does not look like a corrupted replay after a desync.</p>
+<h2 id="rules-for-deterministic-content"><a class="header" href="#rules-for-deterministic-content">Rules for deterministic content</a></h2>
+<ul>
+<li>Never read real time (<code>Instant</code>, <code>now</code>) or random numbers from the operating system (<code>rand::random</code>, <code>rand::thread_rng</code>) during a tick; use the match's seeded PRNG.</li>
+<li>Floating-point calculations must run in deterministic mode (all target platforms use IEEE 754 with standard rounding).</li>
+<li>All collections whose iteration affects the simulation must have deterministic ordering (use <code>Vec</code> or sorted keys, never direct iteration over a raw <code>HashSet</code>/<code>HashMap</code>).</li>
+</ul>
+<h2 id="binary-format-ume_netplayreplay"><a class="header" href="#binary-format-ume_netplayreplay">Binary format (<code>ume_netplay::Replay</code>)</a></h2>
+<p>A raw stream of recorded inputs:</p>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+<tr><td>magic</td><td><code>UMRP</code></td></tr>
+<tr><td>version</td><td><code>u32</code> (1)</td></tr>
+<tr><td>players</td><td><code>u32</code></td></tr>
+<tr><td>metadata count, then key/value strings</td><td><code>u32</code> length + UTF-8</td></tr>
+<tr><td>frame count</td><td><code>u32</code></td></tr>
+<tr><td>runs</td><td><code>u32</code> repeat count + one <code>u32</code> input per player</td></tr>
+</tbody></table>
+</div>
+<p>Equal consecutive frames are stored once, so held buttons cost almost nothing.</p>
+<p>The reader rejects incomplete or overlong frame runs, trailing bytes, files larger than 129 MiB, decoded input streams larger than 64 MiB and more than 16,384 metadata entries. The writer returns an error when player counts, frame data or metadata exceed these limits. The encoded size allows a worst-case run per frame while decoded frames remain capped at 64 MiB.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut rec = Replay::new(2);
+rec.meta.push(("p1".into(), "kfm".into()));
+rec.push(&amp;[p1_bits, p2_bits]);
+std::fs::write("fight.umr", rec.to_bytes().expect("valid replay size"))?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="saved-replays-in-the-game-replays"><a class="header" href="#saved-replays-in-the-game-replays">Saved replays in the game (<code>replays/</code>)</a></h2>
+<p>Every finished fight is archived automatically to <code>replays/</code> beside the executable as a small JSON file
+(<code>&lt;label&gt;-&lt;unix-time&gt;.umr.json</code>). The menu entry <strong>Replays</strong> lists them newest first.</p>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>format</code> / <code>version</code></td><td><code>ultimate-mugen-replay</code> / <code>1</code>; a different version is refused with a clear message</td></tr>
+<tr><td><code>label</code>, <code>saved_at</code></td><td>name shown in the browser and the Unix timestamp (sorted by it)</td></tr>
+<tr><td><code>mode</code></td><td><code>Arcade</code>, <code>Cpu</code>, <code>Versus</code>, <code>Training</code>, <code>Watch</code>, <code>TeamSeq</code>, <code>TeamSimul</code>, <code>TeamTag</code></td></tr>
+<tr><td><code>chars</code>, <code>stage</code>, <code>palettes</code></td><td>fighter ids, stage id and the palette of each side</td></tr>
+<tr><td><code>seed</code></td><td>initial RNG seed of the match (replays restore it before the first tick)</td></tr>
+<tr><td><code>teams</code>, <code>simul</code>, <code>tag</code></td><td>team line-ups by fighter id (team modes)</td></tr>
+<tr><td><code>rules</code></td><td>rounds, round time, life %, single round, pushbox, shared team life, game speed</td></tr>
+<tr><td><code>inputs</code></td><td>run-length encoded input stream: <code>slots</code>, then <code>count</code> + one input per slot per run</td></tr>
+</tbody></table>
+</div>
+<p>Replay decoding bounds files to 16 MiB, 500,000 runs and 2,000,000 total frames to keep malformed or corrupt streams from allocating unbounded memory. Desync reports (<code>desync-*.json</code>) in <code>replays/</code> are preserved without being listed as corrupt replays.</p>
+<p>Replaying feeds the recorded inputs through <code>Pilot::Replay</code>; the simulation is deterministic, so the fight is
+rebuilt exactly. A round-trip test records 1200 ticks, reloads the file and compares the final state checksum
+(<code>cargo test -p ume-engine --test it replay_roundtrip::</code>).</p>
+<p>Browser keys:</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Action</th></tr></thead><tbody>
+<tr><td>↑ / ↓, Enter</td><td>pick and play</td></tr>
+<tr><td>R</td><td>rename (Enter confirms, Esc cancels)</td></tr>
+<tr><td>Delete (twice)</td><td>delete the selected file</td></tr>
+<tr><td>S</td><td>toggle sorting between date and name</td></tr>
+<tr><td>Esc</td><td>back to the menu</td></tr>
+</tbody></table>
+</div>
+<p>Playback keys:</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Action</th></tr></thead><tbody>
+<tr><td>Space / Start</td><td>pause and resume</td></tr>
+<tr><td>1 / 2 / 4</td><td>playback speed 1x, 2x, 4x</td></tr>
+<tr><td><code>.</code> or → while paused</td><td>advance one frame</td></tr>
+<tr><td>Esc</td><td>leave the replay and return to the browser</td></tr>
+</tbody></table>
+</div>
+<p>The folder keeps the newest 64 files; older ones are pruned when a new replay is saved. Files that cannot be read
+(for example, recorded by another build) are listed with the reason instead of failing silently.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="Easter-Eggs.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Lore.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="Easter-Eggs.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Lore.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

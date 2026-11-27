@@ -1,0 +1,270 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Pipeline de QA web - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="pipeline-de-qa-web"><a class="header" href="#pipeline-de-qa-web">Pipeline de QA web</a></h1>
+<p>Todo pull request joga o build wasm de verdade no Chromium headless, em shards paralelos, e falha em qualquer erro de WebAssembly. Uma falha deixa prints e logs como artefatos do CI.</p>
+<h2 id="o-que-roda"><a class="header" href="#o-que-roda">O que roda</a></h2>
+<p><code>scripts/web-qa.json</code> lista os cenários; <code>scripts/web-qa.js</code> roda um shard deles. Job <code>web-qa</code> do CI (matriz, <code>fail-fast: false</code>):</p>
+<div class="table-wrapper"><table><thead><tr><th>Shard</th><th>Cenários</th></tr></thead><tbody>
+<tr><td><code>ui</code></td><td>fluxo título até a luta, clique em Arcade, intro da história, epílogo</td></tr>
+<tr><td><code>mobile</code></td><td>menu por toque, controles de toque na luta, smoke da engine em viewport Pixel 7</td></tr>
+<tr><td><code>engine</code></td><td>smoke da engine (<code>?smoke=1</code>): boot, menus, seleção, treino, 5v5, história; mais o autoteste do guard</td></tr>
+<tr><td><code>loading</code></td><td>import M.U.G.E.N (kfm), lutadores nativos com despertares, arena de poder, desbloqueio de áudio, tela de erro fatal (<code>unreachable</code>)</td></tr>
+<tr><td><code>match-1</code>, <code>match-2</code></td><td>partidas completas em duas metades (<a href="Smoke-Partida-Web.html">Smoke da partida web</a>)</td></tr>
+</tbody></table>
+</div>
+<h2 id="o-guard"><a class="header" href="#o-guard">O guard</a></h2>
+<p>Todo cenário roda com <code>scripts/web-guard.js</code> pré-carregado. Ele observa cada página e falha a execução, mesmo que o script esqueça, quando houver:</p>
+<ul>
+<li><code>panicked</code>, <code>PanicHookInfo</code>, <code>unreachable executed</code> ou <code>renderbufferStorageMultisample</code> no console;</li>
+<li><code>gpu error:</code> (handler de erros do wgpu em <code>ume-shell</code>);</li>
+<li><code>pageerror</code> não tratado ou crash do Chromium.</li>
+</ul>
+<p>Nos primeiros problemas salva <code>problem-N.png</code> na hora, e um <code>final-N.png</code> antes de fechar o navegador. Também grava <code>console.log</code> (cada linha do console com tempo e página) e <code>network.log</code> (requisições que falharam e HTTP 400+). O <code>fatal-trap</code> usa <code>expectFatal</code> porque provoca um trap de propósito; ali o guard só registra.</p>
+<h2 id="artefatos"><a class="header" href="#artefatos">Artefatos</a></h2>
+<p>Cada shard envia <code>web-qa-&lt;shard&gt;</code> (sempre, guardado 7 dias): <code>summary.md</code>, <code>summary.json</code> e uma pasta por cenário com <code>output.log</code>, <code>console.log</code>, <code>network.log</code>, <code>guard.json</code>, <code>shots/</code> e os <code>.png</code>. O resumo também vai para a página do job, com os problemas e as últimas linhas de saída.</p>
+<h2 id="rodar-localmente"><a class="header" href="#rodar-localmente">Rodar localmente</a></h2>
+<pre><code>./scripts/build-web.sh
+npm install --no-save playwright@1.56.1 &amp;&amp; npx playwright install chromium
+node scripts/web-qa.js --dist web/dist --out web-qa-report --shard ui
+node scripts/web-qa.js --only fatal-trap,engine-smoke --jobs 2
+</code></pre>
+<p>GL por software é lento: mantenha <code>--jobs</code> em 1 ou 2 localmente. Para uma página avulsa use <code>?debug=1</code> e leia o console.</p>
+<h2 id="adicionar-um-cenário"><a class="header" href="#adicionar-um-cenário">Adicionar um cenário</a></h2>
+<ol>
+<li>Crie <code>scripts/web-&lt;nome&gt;-smoke.js</code> que receba a pasta dist como primeiro argumento e saia com código diferente de zero em falha.</li>
+<li>Inclua em <code>scripts/web-qa.json</code> com um shard, ou liste em <code>excluded</code> com o motivo (rede, ferramenta manual).</li>
+</ol>
+<p><code>scripts/web-qa.test.mjs</code> falha quando um <code>web-*-smoke.js</code> não está coberto nem excluído, ou quando os shards do manifesto e do <code>ci.yml</code> divergem.</p>
+<h2 id="tour-visual"><a class="header" href="#tour-visual">Tour visual</a></h2>
+<p><code>node scripts/web-tour.js web/dist &lt;saida&gt;</code> percorre título, menu, todas as telas utilitárias, seleção, cenários, VS, luta e pausa com teclas reais e salva um print numerado por passo (<code>TOUR_MOBILE=1</code> usa um celular na horizontal, <code>TOUR_LANG=pt-BR</code> define o idioma do navegador). Falha em panic, erro de navegação ou do navegador, ou se a luta não começar; os prints servem para revisão e evidência de PR.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Problemas.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Recriar-um-Lutador-MUGEN.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Problemas.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Recriar-um-Lutador-MUGEN.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

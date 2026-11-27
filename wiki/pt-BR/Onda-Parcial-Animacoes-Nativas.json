@@ -1,0 +1,7 @@
+{
+  "status": "partial",
+  "portraits": {"fighters": 16, "dedicated": 16},
+  "motionFramesAdded": 156,
+  "coverage": ["idle", "walk", "run", "crouch", "jump", "guard", "damage", "recovery", "attacks"],
+  "incomplete": ["a cobertura varia entre lutadores", "sequencias completas de transformacao, locomocao e combate ainda faltam", "a sonda de quadros nao comprova transicoes naturais", "falta revisar visualmente todos os retratos e ciclos de animacao"]
+}

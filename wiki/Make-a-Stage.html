@@ -1,0 +1,312 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Make a stage (quick start) - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="make-a-stage-quick-start"><a class="header" href="#make-a-stage-quick-start">Make a stage (quick start)</a></h1>
+<p><strong>English</strong> · <a href="pt-BR/Criar-um-Cenario.html">Português (BR)</a></p>
+<p>There are three kinds of stage work. Pick the one you need:</p>
+<div class="table-wrapper"><table><thead><tr><th>You want</th><th>Needs code?</th><th>Go to</th></tr></thead><tbody>
+<tr><td>A new background from your own art, with the M.U.G.E.N format</td><td>No</td><td><a href="#1-a-mugen-stage">M.U.G.E.N stage</a></td></tr>
+<tr><td>More content for one of the five story arenas (objects, music, animated sky)</td><td>No</td><td><a href="#2-story-arenas">Story arenas</a></td></tr>
+<tr><td>A new arena in the story mode or a new built-in arena</td><td>Yes, Rust</td><td><a href="#3-what-needs-code">What needs code</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="1-a-mugen-stage"><a class="header" href="#1-a-mugen-stage">1. A M.U.G.E.N stage</a></h2>
+<ol>
+<li>Put two files in <code>mugen/stages/</code>: <code>my-stage.def</code> and <code>my-stage.sff</code> (the art).</li>
+<li>Start from <a href="../examples/stage/my-stage.def"><code>docs/examples/stage/my-stage.def</code></a>.</li>
+</ol>
+<p>The <code>.def</code> file is plain text with sections:</p>
+<div class="table-wrapper"><table><thead><tr><th>Section</th><th>What to set</th></tr></thead><tbody>
+<tr><td><code>[Info]</code></td><td><code>name</code>, <code>displayname</code>, <code>author</code></td></tr>
+<tr><td><code>[Camera]</code></td><td><code>startx</code>, <code>boundleft</code>, <code>boundright</code> (how far the camera can go), <code>boundhigh</code>, <code>boundlow</code>, <code>verticalfollow</code>, <code>tension</code></td></tr>
+<tr><td><code>[PlayerInfo]</code></td><td><code>p1startx</code>, <code>p2startx</code> (where each fighter starts)</td></tr>
+<tr><td><code>[StageInfo]</code></td><td><code>zoffset</code> (height of the floor line on screen), <code>localcoord</code> (the drawing size, for example <code>320, 240</code>)</td></tr>
+<tr><td><code>[BGdef]</code></td><td><code>spr</code>: the <code>.sff</code> file</td></tr>
+<tr><td><code>[BG name]</code></td><td>One section per layer (see below)</td></tr>
+</tbody></table>
+</div>
+<p>Each background layer:</p>
+<pre><code class="language-ini">[BG Sky]
+type = normal          ; normal (one sprite) or anim (an action from the .air file)
+spriteno = 0, 0        ; group, image of the .sff
+layerno = 0            ; 0 = behind the fighters, 1 = in front
+start = 0, 0          ; position in local units
+delta = .2, .2         ; parallax: 1, 1 moves with the floor, smaller moves slower
+tile = 1, 0            ; repeat on x, on y (0 = no repeat)
+</code></pre>
+<p>Every key of the stage format, including scale, rotation and clipping windows, is in the <a href="Stages.html#mugen-stage">stage reference</a>.</p>
+<p>Text after <code>;</code> is a comment. Key names are the M.U.G.E.N ones, so a stage copied from a M.U.G.E.N pack is a good starting point.</p>
+<p>Limits of this path: the animated loop, story strips, breakables and per-stage music from the next sections do not apply to M.U.G.E.N stages.</p>
+<h2 id="2-story-arenas"><a class="header" href="#2-story-arenas">2. Story arenas</a></h2>
+<p>The story mode has five arenas: <code>brazil</code>, <code>neon</code>, <code>bamboo</code>, <code>volcano</code> and <code>dojo</code>. Each one can be extended with data:</p>
+<div class="table-wrapper"><table><thead><tr><th>What</th><th>Where</th><th>Notes</th></tr></thead><tbody>
+<tr><td>Backdrop strip</td><td><code>assets/stages/story/&lt;arena&gt;.png</code></td><td>One segment per fight (four waves and the boss). Regenerate with <code>python3 tools/story_segments.py</code></td></tr>
+<tr><td>Animated background</td><td><code>assets/stages/animation/&lt;arena&gt;/</code></td><td>Eight opaque 1672×941 keyframes (<code>00.png</code> through <code>07.png</code>) and eight interleaved <code>-mid.png</code> frames. Playback advances every four ticks and wraps after 64 ticks. Keep the camera and fighting floor registered throughout the loop.</td></tr>
+<tr><td>Breakables, food, bonus round</td><td><code>assets/story/objects.toml</code>, table <code>[stages.&lt;arena&gt;]</code></td><td>Full format in <a href="Stage-Objects.html">Stage objects</a></td></tr>
+<tr><td>Fight music</td><td><code>tweaks.toml</code>, section <code>[music]</code>, key <code>&lt;arena id&gt;</code></td><td>Path to <code>.ogg</code>, <code>.mp3</code>, <code>.wav</code> or <code>.flac</code>, relative to <code>tweaks.toml</code>. Desktop only. See <a href="Configuration.html">Configuration</a></td></tr>
+</tbody></table>
+</div>
+<p>Example <code>tweaks.toml</code>:</p>
+<pre><code class="language-toml">[music]
+fight = "music/my-fight.ogg"   ; every fight without its own track
+dojo = "music/dojo.ogg"        ; wins over fight, only in the dojo
+</code></pre>
+<p>Example <code>objects.toml</code> entry:</p>
+<pre><code class="language-toml">[stages.dojo]
+objects = [
+  { fight = 0, kind = "crate", x = -78.0, lane = -22.0, drop = "apple" },
+]
+</code></pre>
+<p>Verify with the <a href="Stage-Objects.html#data-assetsstoryobjectstoml">Stage objects</a> evidence tour: <code>UME_TOUR=storyobjects</code> and <code>UME_TOUR=storyloop</code>.</p>
+<h3 id="built-in-arena-loops-size-and-interactivity"><a class="header" href="#built-in-arena-loops-size-and-interactivity">Built-in arena loops, size and interactivity</a></h3>
+<ul>
+<li><strong>True 60 FPS seamless loop:</strong> built-in animated stages (<code>assets/stages/animation/&lt;id&gt;/00.png..07-mid.png</code>) decode in parallel (<code>ume_formats::par::map</code>) and cross-fade smoothly between consecutive frames across a closed 96-tick cycle (<code>loop_sample</code>), eliminating wrap jumps from the last frame back to frame <code>0</code>.</li>
+<li><strong>Expanded arena dimensions:</strong> built-in arenas span <code>bound_left = -680</code> to <code>bound_right = 680</code> (<code>bound_high = -140</code>, <code>zoom_out = 0.62</code>, <code>zoom_in = 1.05</code>) with <code>0.21</code> panoramic parallax in <code>illustration_layout</code>.</li>
+<li><strong>Reactive floors &amp; interactive arena props:</strong> all 21 illustrated stages (including <code>brazil</code> and the 14 World Wonders via <code>StageKind::Arena</code>) render <code>StageReact</code> ground cracks, scorch marks, ripples and impact debris. In Versus/Arcade fights, <code>src/stages/interactive.rs</code> places destructible crates and explosive hazard barrels (<code>ObjectEvent::Blast</code>) on the outer wings (<code>|x| &gt;= 220</code>, keeping the center fighting lane clear); knocked-back fighters slamming into props shatter them, and both sides can collect dropped pickups (<code>any_collector = true</code>). Set <code>UME_STAGE_PROPS=0</code> to disable arena props.</li>
+</ul>
+<h2 id="3-what-needs-code"><a class="header" href="#3-what-needs-code">3. What needs code</a></h2>
+<p>These things cannot be done with files today. Each one is a feature gap, not a bug in your files:</p>
+<ul>
+<li><strong>A new built-in arena.</strong> Native stages are Rust functions in <code>src/stages.rs</code> (<code>builtin()</code>). A new one needs code, an embedded PNG and a thumbnail. See <a href="Stages.html#native-stage">Creating stages</a>.</li>
+<li><strong>A new story arena.</strong> The list of arenas is fixed in <code>src/stages/story_strip.rs</code> (<code>STORY_ARENAS</code>) and the story mode data in <code>src/story/stages.rs</code>.</li>
+<li><strong>An animated sky for a M.U.G.E.N stage.</strong> Loop frames are only read for built-in arena ids.</li>
+<li><strong>A <code>[Music]</code> section in a <code>.def</code>.</strong> Music per stage comes from <code>tweaks.toml</code> only.</li>
+<li><strong>A <code>type = parallax</code> layer.</strong> Planned, not in the format.</li>
+</ul>
+<h2 id="test"><a class="header" href="#test">Test</a></h2>
+<pre><code class="language-bash">cargo test --release -p ume-engine --test it wiki_examples::
+UME_SHOTS_ONLY=stages cargo run --release -- --shots out/   # screenshots of every stage
+</code></pre>
+<p>The first command checks the sections of the example <code>.def</code>. The second saves screenshots of the stages to <code>out/</code>.</p>
+<h2 id="next"><a class="header" href="#next">Next</a></h2>
+<p><a href="Stages.html">Stage reference</a> · <a href="Stage-Objects.html">Stage objects</a> · <a href="Story-Mode.html">Story mode</a> · <a href="Make-a-Character.html">Make a character</a> · <a href="Home.html">Wiki home</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="Move-Generator.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Stages.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="Move-Generator.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Stages.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Rush Cancel - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="rush-cancel"><a class="header" href="#rush-cancel">Rush Cancel</a></h1>
+<p>Todo lutador (nativo UMF e M.U.G.E.N) pode <strong>cancelar um golpe conectado para o estado neutro</strong> gastando meia barra de energia. É o prolongador de combos universal da engine: nenhum dado de personagem é necessário.</p>
+<h2 id="como-usar"><a class="header" href="#como-usar">Como usar</a></h2>
+<p>Aperte a tecla de energia (<strong>R</strong>, a entrada <code>s</code> / Start) enquanto o golpe em andamento acabou de acertar ou ser defendido.</p>
+<div class="table-wrapper"><table><thead><tr><th>Regra</th><th>Valor</th></tr></thead><tbody>
+<tr><td>Custo</td><td>500 de energia</td></tr>
+<tr><td>Janela</td><td>1 a 45 ticks depois do contato (<code>CONTACT_WINDOW</code>)</td></tr>
+<tr><td>Buffer de entrada</td><td>O toque é lembrado por 6 ticks, então apertar um pouco antes ainda funciona</td></tr>
+<tr><td>Recarga</td><td>40 ticks entre cancelamentos</td></tr>
+<tr><td>Condição</td><td><code>movetype = A</code>, o golpe acertou ou foi defendido, o lutador está vivo e o round corre</td></tr>
+<tr><td>Não vale</td><td>Golpe no vazio, helpers, lutador deitado, pausa de super</td></tr>
+</tbody></table>
+</div>
+<p>A mesma tecla continua carregando energia parado: um lutador com controle e sem ataque em andamento carrega como antes. Depois de um cancelamento a tecla fica mascarada até ser solta uma vez, então segurá-la nunca vira carga.</p>
+<h2 id="o-que-acontece"><a class="header" href="#o-que-acontece">O que acontece</a></h2>
+<ol>
+<li>500 de energia são gastos e o lutador vai para o estado neutro da sua postura (<code>0</code> em pé, <code>11</code> agachado, <code>50</code> no ar) com controle.</li>
+<li>A pausa e o tremor de golpe do atacante são zerados e o contador de air dash é reabastecido, então o próximo golpe ou dash começa na hora.</li>
+<li>Todo rival em estado de dano ou defesa ganha 8 ticks extras de stun (<code>VICTIM_STUN_BONUS</code>), o que permite a continuação conectar.</li>
+<li>A partida entra em câmera lenta por 15 ticks, o lutador pisca em azul e deixa um rastro de afterimage.</li>
+<li>O <strong>Overdrive</strong> começa: por 150 ticks o lutador causa 20 % a mais de dano (<code>effective_attack</code>, aplicado sobre os passivos e abaixo dos tetos deles).</li>
+</ol>
+<h2 id="whiff-cancel"><a class="header" href="#whiff-cancel">Whiff cancel</a></h2>
+<p>Apertar Start durante um golpe que não tocou em nada também cancela, por um preço maior. Custa 1000 de barra (o Rush Cancel custa 500), vale de 10 a 60 ticks depois do início do golpe e divide a recarga do Rush Cancel. Devolve o controle como o Rush Cancel, mas sem Overdrive, sem câmera lenta e sem contar como Rush Cancel. Golpe que conectou ou foi bloqueado continua usando o Rush Cancel mais barato. Constantes em <code>crates/engine/src/rush/whiff.rs</code>.</p>
+<h2 id="dash-cancel"><a class="header" href="#dash-cancel">Dash cancel</a></h2>
+<p>Um golpe normal que conectou (fraco a forte, em pé ou agachado) pode ser cancelado em dash para frente ou para trás tocando duas vezes a direção em até 20 ticks do contato, por 250 de barra. É mais barato que o Rush Cancel, não ativa Overdrive e não usa o cooldown. Exige contato (acerto ou defesa) e barra suficiente, então um normal que errou não pode ser cancelado. Código: <code>crates/engine/src/rush/dash.rs</code>.</p>
+<h2 id="defesa-perfeita"><a class="header" href="#defesa-perfeita">Defesa perfeita</a></h2>
+<p>Apertar para trás até 6 ticks antes do golpe acertar, sem já estar segurando a guarda, torna o bloqueio perfeito: sem dano de chip e com o atordoamento da guarda um terço menor. Segurar cedo é guarda normal, e soltar trava a janela por 12 ticks, então martelar o botão não funciona. Vale só para nativos no chão e não dá barra (barra por guarda sustentava o voo da Shion sem fim). Código: <code>crates/engine/src/rush/perfect.rs</code>.</p>
+<h2 id="chase"><a class="header" href="#chase">Chase</a></h2>
+<p>Durante um ataque que conectou (normal ou especial, não super), toque duas vezes para cima em até 30 ticks do acerto para teleportar ao lado de um inimigo lançado, por 500 de barra. Você aparece no ar com controle, a 38 pixels dele e virado para ele, então os combos aéreos continuam depois de um lançador. Exige o inimigo no ar e em hitstun, então nunca funciona em quem está em pé ou defendendo. Código: <code>crates/engine/src/rush/chase.rs</code>.</p>
+<h2 id="mapa-da-engine"><a class="header" href="#mapa-da-engine">Mapa da engine</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Peça</th><th>Arquivo</th></tr></thead><tbody>
+<tr><td>Estado, buffer, constantes</td><td><code>crates/engine/src/rush.rs</code></td></tr>
+<tr><td>O cancelamento (<code>Match::rush_step</code>, <code>rush_ready</code>)</td><td><code>crates/engine/src/rush/cancel.rs</code></td></tr>
+<tr><td>Consulta da janela para o HUD (<code>Match::rush_window</code>: <code>None</code> sem cancelamento possível, senão a fração da janela que resta)</td><td><code>crates/engine/src/rush/cancel.rs</code></td></tr>
+<tr><td>Marcador "RUSH CANCEL" com barra de janela decrescente sob a barra de vida</td><td><code>src/hud/rush_marker.rs</code> (<code>UME_SHOTS_ONLY=rush</code> captura)</td></tr>
+<tr><td>Evento para a apresentação</td><td><code>Event::Rush { fighter, side, guarded }</code> em <code>crates/engine/src/matchs/types.rs</code></td></tr>
+<tr><td>Efeitos (anéis, brilho, faíscas, rótulo, brasas do Overdrive)</td><td><code>src/vfx/rush.rs</code></td></tr>
+<tr><td>Checksum de rollback</td><td><code>overdrive</code>, <code>cooldown</code> e <code>cancels</code> em <code>crates/netplay/src/checksum.rs</code></td></tr>
+<tr><td>Testes</td><td><code>cargo test --release -p ume-engine --test it rush_cancel::</code></td></tr>
+</tbody></table>
+</div>
+<p><code>rush_step</code> roda uma vez por tick de simulação depois da fase de entrada e não aloca (o rastro de afterimage só cresce quando há um cancelamento). Tudo é dado simples em <code>Fighter::rush</code>, então <code>Match</code> continua <code>Clone</code> e replays e rollback não mudam.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Roteiro-Historia.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Screenpacks.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Roteiro-Historia.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Screenpacks.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

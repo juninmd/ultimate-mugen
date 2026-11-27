@@ -1,0 +1,319 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Ikemen extensions / Extensões do Ikemen - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="ikemen-extensions--extensões-do-ikemen"><a class="header" href="#ikemen-extensions--extensões-do-ikemen">Ikemen extensions / Extensões do Ikemen</a></h1>
+<p>State controllers and triggers from Ikemen GO that characters can use in CNS or ZSS.</p>
+<p>Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.</p>
+<div class="table-wrapper"><table><thead><tr><th>Controller</th><th>Parameters</th><th>Effect</th></tr></thead><tbody>
+<tr><td><code>MapSet</code></td><td><code>map</code>, <code>value</code>, <code>type</code> (1 = add)</td><td>Sets a named value on the player</td></tr>
+<tr><td><code>MapAdd</code></td><td><code>map</code>, <code>value</code></td><td>Adds to a named value</td></tr>
+<tr><td><code>MapReset</code></td><td><code>map</code> (omit for all keys)</td><td>Removes one key, or every key, from the player's map</td></tr>
+<tr><td><code>TeamMapSet</code> / <code>TeamMapAdd</code> / <code>TeamMapReset</code></td><td>same as <code>MapSet</code> / <code>MapAdd</code> / <code>MapReset</code></td><td>Same operations on the map shared by every player and helper on the same side</td></tr>
+<tr><td><code>RootMapSet</code> / <code>RootMapAdd</code> / <code>RootMapReset</code></td><td>same as <code>MapSet</code> / <code>MapAdd</code> / <code>MapReset</code></td><td>Same operations on the root player's map</td></tr>
+<tr><td><code>ParentMapSet</code> / <code>ParentMapAdd</code> / <code>ParentMapReset</code></td><td>same as <code>MapSet</code> / <code>MapAdd</code> / <code>MapReset</code></td><td>Same operations on the parent's map; does nothing without a parent</td></tr>
+<tr><td><code>RootVarSet</code> / <code>RootVarAdd</code></td><td><code>var(n)</code>, <code>fvar(n)</code>, <code>sysvar(n)</code>, <code>sysfvar(n)</code> or <code>v</code> / <code>fv</code> + <code>value</code></td><td>Writes variables on the root player, like <code>ParentVarSet</code> does on the parent</td></tr>
+<tr><td><code>RedLifeSet</code> / <code>RedLifeAdd</code></td><td><code>value</code>, <code>absolute</code></td><td>Recoverable (red) life, kept between <code>life</code> and <code>lifemax</code></td></tr>
+<tr><td><code>DizzyPointsSet</code> / <code>DizzyPointsAdd</code></td><td><code>value</code></td><td>Stun points, <code>0..data.dizzypoints</code></td></tr>
+<tr><td><code>DizzySet</code></td><td><code>value</code></td><td>Dizzy flag</td></tr>
+<tr><td><code>GuardPointsSet</code> / <code>GuardPointsAdd</code></td><td><code>value</code></td><td>Guard points, <code>0..data.guardpoints</code></td></tr>
+<tr><td><code>GuardBreakSet</code></td><td><code>value</code></td><td>Guard break flag</td></tr>
+<tr><td><code>Text</code></td><td><code>text</code>, <code>params</code>, <code>pos</code>, <code>velocity</code>, <code>scale</code>, <code>color</code>, <code>align</code>, <code>removetime</code>, <code>id</code></td><td>Draws text on the fight screen; <code>%d</code>, <code>%f</code>, <code>%s</code> and <code>\n</code> in <code>text</code> take values from <code>params</code> (<code>%s</code> prints the mode name for a bare <code>TeamMode</code>, otherwise the integer)</td></tr>
+<tr><td><code>RemoveText</code></td><td><code>id</code> (omit for all)</td><td>Removes the player's texts</td></tr>
+<tr><td><code>TagOut</code> / <code>TagIn</code></td><td><code>self</code>, <code>stateno</code>, <code>ctrl</code>, <code>partnerstateno</code>, <code>partnerctrl</code></td><td>Moves the player to or from standby (hidden, cannot be hit or pushed); <code>partnerstateno</code> swaps with the first teammate. In <a href="Game-Modes.html#tag-team">Tag mode</a> they perform a real swap (cooldown ignored): <code>TagOut</code> brings the next living teammate in, <code>TagIn</code> on a standby fighter brings it in</td></tr>
+<tr><td><code>ModifyProjectile</code></td><td><code>id</code>, <code>velocity</code>, <code>accel</code>, <code>velmul</code>, <code>removetime</code>, <code>projhits</code>, <code>projpriority</code>, <code>projscale</code></td><td>Changes the player's live projectiles</td></tr>
+<tr><td><code>ModifySnd</code></td><td><code>channel</code>, <code>pan</code>, <code>abspan</code>, <code>volumescale</code></td><td>Changes sounds already playing on a channel</td></tr>
+<tr><td><code>PlayBGM</code></td><td><code>bgm</code>, <code>volume</code>, <code>loop</code>, <code>loopstart</code>, <code>loopend</code>, <code>freqmul</code></td><td>Starts a music track (<code>volume</code> in percent); an empty <code>bgm</code> stops the music. The engine only emits an event; the app resolves the file: <code>"stage"</code> is the stage's own track, <code>"builtin:N"</code> a built-in track, other names must have been registered by the app</td></tr>
+<tr><td><code>StopBGM</code></td><td></td><td>Stops the music</td></tr>
+<tr><td><code>ModifyBGM</code></td><td><code>volume</code>, <code>loop</code>, <code>loopstart</code>, <code>loopend</code>, <code>freqmul</code></td><td><code>volume</code> applies to the playing track at once; <code>loop</code> is used by the next <code>PlayBGM</code>; <code>loopstart</code>, <code>loopend</code> and <code>freqmul</code> are emitted as events but changing them while a track plays is not applied yet</td></tr>
+<tr><td><code>ModifyStageVar</code></td><td><code>camera.boundleft</code>, <code>camera.boundright</code>, <code>camera.boundhigh</code>, <code>camera.boundlow</code>, <code>camera.verticalfollow</code>, <code>camera.tension</code>, <code>camera.startx</code>, <code>camera.starty</code>, <code>camera.zoomout</code>, <code>stageinfo.zoffset</code>, <code>playerinfo.p1startx</code>, <code>playerinfo.p2startx</code></td><td>Changes the running stage; the part before the dot is optional. Values are in character units; camera position is clamped to the new bounds at once and <code>zoffset</code> is re-applied through the zoom. <code>startx</code> / <code>starty</code> apply on the next round</td></tr>
+<tr><td><code>ModifyStageBG</code></td><td><code>id</code> (omit or -1 for all layers), <code>visible</code>, <code>enabled</code>, <code>velocity</code>, <code>pos</code>, <code>offset</code>, <code>sinx</code>, <code>siny</code>, <code>anim</code></td><td>Changes background layers of the running stage; <code>pos</code> is absolute, <code>offset</code> is added</td></tr>
+<tr><td><code>ModifyBGCtrl</code></td><td><code>id</code> (target layer id), <code>time</code> (start, end, loop), <code>looptime</code>, <code>value</code>, <code>x</code>, <code>y</code></td><td>Edits the stage's <code>BGCtrl</code> entries that target <code>id</code> (all when omitted); the edits last until the round restarts</td></tr>
+<tr><td><code>ModifyPlayer</code></td><td><code>id</code> (omit for self), <code>life</code>, <code>lifemax</code>, <code>power</code>, <code>powermax</code>, <code>ctrl</code>, <code>ailevel</code>, <code>redlife</code>, <code>dizzypoints</code>, <code>guardpoints</code></td><td>Whitelisted fields only, always clamped (<code>ailevel</code> 0..8, <code>power</code> lives on the root)</td></tr>
+<tr><td><code>PrintToConsole</code></td><td><code>text</code>, <code>params</code></td><td>Appends a line to the match's compatibility log (<code>Match::console</code>); <code>%d</code>, <code>%f</code> and <code>\n</code> as in <code>Text</code>. At most 20 lines per second per match, 200 lines kept, 240 characters per line</td></tr>
+<tr><td><code>RunState</code></td><td><code>value</code></td><td>Runs the controllers of state <code>value</code> (from the state owner) once, in the current tick, without changing <code>stateno</code> or <code>Time</code>; variables are shared, <code>persistent</code> and <code>ignorehitpause</code> of the inner controllers are respected, nesting stops after 8 levels</td></tr>
+<tr><td><code>Height</code></td><td><code>value = top[, bottom]</code></td><td>Sets the body height for the current tick (default <code>size.height</code>, bottom 0); used by player push and as the hurtbox of frames that have none</td></tr>
+<tr><td><code>GetHitVarSet</code></td><td><code>hittype</code>, <code>animtype</code>, <code>airtype</code>, <code>groundtype</code>, <code>damage</code>, <code>hitcount</code>, <code>guardcount</code>, <code>hitshaketime</code>, <code>hittime</code>, <code>slidetime</code>, <code>ctrltime</code>, <code>xvel</code>, <code>yvel</code>, <code>yaccel</code>, <code>chainid</code>, <code>guarded</code>, <code>fall</code>, <code>fall.damage</code>, <code>fall.xvel</code>, <code>fall.yvel</code>, <code>fall.recover</code>, <code>fall.time</code>, <code>fall.recovertime</code>, <code>fall.kill</code>, <code>kill</code>, <code>id</code>, <code>playerno</code></td><td>Writes the listed <code>GetHitVar</code> fields (<code>type</code> is spelled <code>hittype</code> because <code>type</code> names the controller); <code>GetHitVar(attr)</code> is not available yet</td></tr>
+<tr><td><code>ModifyHitDef</code></td><td>any <code>HitDef</code> parameter</td><td>Overwrites only the listed fields of the HitDef that is active; nothing happens without one</td></tr>
+<tr><td><code>ModifyReversalDef</code></td><td>any <code>ReversalDef</code> parameter, <code>reversal.attr</code></td><td>Same for the pending <code>ReversalDef</code></td></tr>
+<tr><td><code>OverrideClsn</code></td><td><code>clsn</code> (1 attack, 2 hurt, default 2), <code>index</code> (-1 replaces the whole list), <code>value = x1, y1, x2, y2</code>, <code>time</code> (default 1, -1 = until replaced)</td><td>Replaces a collision box in animation units</td></tr>
+<tr><td><code>ResizeClsn</code></td><td><code>clsn</code>, <code>index</code> (-1 = all boxes), <code>value = dx1, dy1, dx2, dy2</code>, <code>time</code></td><td>Moves each edge of the box by the given deltas</td></tr>
+<tr><td><code>TransformClsn</code></td><td><code>clsn</code>, <code>scale = sx[, sy]</code>, <code>offset = x, y</code>, <code>time</code></td><td>Scales then shifts every box of that type</td></tr>
+<tr><td><code>AssertCommand</code></td><td><code>value</code> (or <code>name</code>), <code>time</code> (default 1)</td><td>Makes that command active for <code>time</code> ticks; <code>Command</code> and the built-in walk, guard and jump states see it even outside the input window</td></tr>
+<tr><td><code>AssertInput</code></td><td><code>value</code> (input bits), <code>time</code> (default 1)</td><td>ORs the bits into the player's input for <code>time</code> ticks, so <code>Command</code> matches the injected press</td></tr>
+<tr><td><code>ShiftInput</code></td><td><code>value</code></td><td>Positive pushes <code>value</code> extra history ticks (the input arrives later), negative drops that many ticks</td></tr>
+</tbody></table>
+</div>
+<p>Collision modifiers apply in the order they were added, are replaced when the same kind of change is issued again for the same box type (and <code>index</code>), count down once per tick, and are reflected by the F2 box view. <code>time = -1</code> keeps a modifier until another one replaces it.</p>
+<p>PT-BR: <code>RunState</code> executa os controllers de outro state sem trocar de state; <code>Height</code> ajusta a altura do corpo no tick; <code>GetHitVarSet</code> grava campos do <code>GetHitVar</code> (<code>hittype</code> no lugar de <code>type</code>); <code>ModifyHitDef</code> e <code>ModifyReversalDef</code> alteram só os campos listados; <code>OverrideClsn</code>, <code>ResizeClsn</code> e <code>TransformClsn</code> (<code>clsn</code> = 1 ataque, 2 corpo) mudam as caixas de colisão e aparecem no F2.</p>
+<p>PT-BR: <code>AssertCommand</code> mantém um comando ativo por <code>time</code> ticks; <code>AssertInput</code> injeta bits no input do jogador pelos próximos <code>time</code> ticks; <code>ShiftInput</code> empurra (positivo) ou descarta (negativo) ticks do histórico de inputs.</p>
+<div class="table-wrapper"><table><thead><tr><th>Trigger</th><th>Returns</th></tr></thead><tbody>
+<tr><td><code>Map(name)</code></td><td>Named value, 0 when unset (use <code>Root, Map(name)</code> or <code>Parent, Map(name)</code> to read another scope)</td></tr>
+<tr><td><code>TeamMap(name)</code></td><td>Value in the team map of the player's side, 0 when unset</td></tr>
+<tr><td><code>RedLife</code></td><td>Red life</td></tr>
+<tr><td><code>Dizzy</code>, <code>DizzyPoints</code>, <code>DizzyPointsMax</code></td><td>Dizzy flag and points</td></tr>
+<tr><td><code>GuardBreak</code>, <code>GuardPoints</code>, <code>GuardPointsMax</code></td><td>Guard break flag and points</td></tr>
+<tr><td><code>StandBy</code></td><td>1 while tagged out</td></tr>
+<tr><td><code>NumText</code></td><td>Texts the player has on screen</td></tr>
+<tr><td><code>ClsnOverlap(clsn1, id, clsn2)</code></td><td>1 when the player's box type overlaps the box type of the player with that <code>id</code></td></tr>
+<tr><td><code>NumPartner</code></td><td>Teammates on the same side</td></tr>
+<tr><td><code>IsAsserted(flag)</code></td><td>1 while the <a href="AssertSpecial.html">AssertSpecial</a> flag is on (character or global flag)</td></tr>
+<tr><td><code>TeamMode</code></td><td>0 single, 1 simul (Parallel), 2 turns (Sequence), 3 tag (reserved, no tag mode yet). Also accepts <code>TeamMode = Simul</code>, <code>TeamMode = turns</code>, <code>TeamMode = 1</code> (names are case-insensitive)</td></tr>
+<tr><td><code>TeamSize</code></td><td>Members of the player's team (the whole roster in Sequence mode, the fielded players otherwise)</td></tr>
+<tr><td><code>TeamLeader</code></td><td><code>PlayerNo</code> of the player's team leader</td></tr>
+<tr><td><code>NumPlayer</code></td><td>Players in the match (both rosters; 6 for a 3v3 Sequence, 10 for a 5v5 Parallel)</td></tr>
+<tr><td><code>PlayerNo</code></td><td>1-based slot of the player: P1, P2, P3... interleaved by side (a helper reports its root's slot); in Sequence mode <code>member * 2 + side + 1</code></td></tr>
+<tr><td><code>MemberNo</code></td><td>1-based position of the player in its team (a helper reports its root's position)</td></tr>
+<tr><td><code>PlayerIndexExist(n)</code></td><td>1 when the 0-based index <code>n</code> exists in the match player list (helpers included)</td></tr>
+<tr><td><code>LastPlayerID</code></td><td>ID of the most recently created player or helper</td></tr>
+<tr><td><code>IntroState</code></td><td>1 before the intro starts, 2 while the intro plays, 0 afterwards</td></tr>
+<tr><td><code>OutroState</code></td><td>1 while the round is decided (KO / time over), 2 during the win poses, 0 otherwise</td></tr>
+</tbody></table>
+</div>
+<p>Map keys are case-insensitive. Each map holds at most 256 keys of at most 64 characters; writes that would exceed either limit are ignored.</p>
+<p>Chaves de map não diferenciam maiúsculas. Cada map guarda no máximo 256 chaves de até 64 caracteres; escritas acima desses limites são ignoradas.</p>
+<p><code>data.dizzypoints</code> and <code>data.guardpoints</code> in the <code>[Data]</code> section default to <code>data.life</code>. How hits spend these values is described in <a href="Life-Systems.html">Red life, dizzy and guard points</a>.</p>
+<p><code>data.dizzypoints</code> e <code>data.guardpoints</code> na seção <code>[Data]</code> usam <code>data.life</code> como padrão.</p>
+<p><code>Helper</code> accepts <code>helpertype = projectile</code>: the helper's <code>HitDef</code> contacts count as projectile hits (<code>ProjHit</code>, <code>ProjContact</code>, <code>ProjGuarded</code> and their <code>*Time</code> forms fire on the helper and on its root, keyed by the helper <code>id</code>), the attacker is not put in hit pause and the helper has no hurtbox. <code>ownprojectile = 1</code> keeps the projectiles the helper fires on the helper: <code>NumProj</code> and <code>NumProjID</code> of the helper count them and the root does not. <code>size.*</code> parameters (for example <code>size.xscale</code>, <code>size.yscale</code>, <code>size.height</code>, <code>size.ground.back</code>) override the character constants for that helper only, including <code>Const(size.*)</code> and the size of its hurtboxes. A helper spawned by another helper inherits the parent's <code>size.*</code> overrides unless it is spawned with <code>ownclsnscale = 1</code>, which starts from the character's own constants.</p>
+<p><code>Helper</code> aceita <code>helpertype = projectile</code>: os contatos do <code>HitDef</code> do helper contam como acertos de projétil (<code>ProjHit</code>, <code>ProjContact</code>, <code>ProjGuarded</code> e as formas <code>*Time</code> valem no helper e no root, indexados pelo <code>id</code> do helper), o atacante não entra em hit pause e o helper não tem hurtbox. <code>ownprojectile = 1</code> mantém no helper os projéteis que ele dispara: <code>NumProj</code> e <code>NumProjID</code> do helper os contam e o root não. Os parâmetros <code>size.*</code> (por exemplo <code>size.xscale</code>, <code>size.yscale</code>, <code>size.height</code>, <code>size.ground.back</code>) substituem as constantes do personagem só para aquele helper, inclusive <code>Const(size.*)</code> e o tamanho das hurtboxes. Um helper criado por outro helper herda os <code>size.*</code> do pai, a menos que seja criado com <code>ownclsnscale = 1</code>, que parte das constantes do próprio personagem.</p>
+<h2 id="module-controllers--controllers-de-módulo"><a class="header" href="#module-controllers--controllers-de-módulo">Module controllers / Controllers de módulo</a></h2>
+<p>Ikemen GO modules and motifs use these controllers. They are always parsed (a character that contains them still loads and runs); the table says what each one does here. A controller that is not supported does nothing and writes one warning line to the match's compatibility log (<code>Match::console</code>) the first time it runs. The list lives in <code>ume_engine::sctrl::module::MODULE_CONTROLLERS</code> so tools can query it with <code>module_status(name)</code> / <code>rejected_by_design()</code>.</p>
+<p>Controllers de módulo do Ikemen GO são sempre interpretados (o personagem carrega e roda); os não suportados não fazem nada e registram um aviso único no log de compatibilidade.</p>
+<div class="table-wrapper"><table><thead><tr><th>Controller</th><th>Status</th><th>Notes</th></tr></thead><tbody>
+<tr><td><code>MatchRestart</code></td><td>supported</td><td>Resets wins and the round counter and restarts at the start of the next tick</td></tr>
+<tr><td><code>LoadFile</code>, <code>SaveFile</code></td><td>rejected by design</td><td>Characters never get file access; content runs in a sandbox</td></tr>
+<tr><td><code>ShaderSet</code></td><td>rejected by design</td><td>The renderer has a fixed pipeline; user shader code is not loaded</td></tr>
+<tr><td><code>Storyboard</code>, <code>RemoveStoryboard</code>, <code>Dialogue</code></td><td>planned</td><td><code>[SceneDef]</code> files are parsed but there is no storyboard runtime yet</td></tr>
+<tr><td><code>SaveState</code>, <code>LoadState</code></td><td>planned</td><td>Needs the rollback snapshot of the match (see the roadmap)</td></tr>
+<tr><td><code>LifebarAction</code></td><td>planned</td><td>The HUD has no scripting hooks yet</td></tr>
+<tr><td><code>ChangeMovelist</code></td><td>planned</td><td>The movelist is fixed at load time</td></tr>
+</tbody></table>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ZSS.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Screenpacks.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ZSS.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Screenpacks.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

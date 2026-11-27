@@ -19,10 +19,14 @@ const server = staticServer(dist, types);
   await page.goto(`http://127.0.0.1:${server.address().port}/index.html?e2e=1&e2e_arcade_storyboard=1`);
   await page.locator('#boot').waitFor({ state: 'detached', timeout: 45000 }).catch(() => {});
   await page.waitForTimeout(5000);
-  await page.locator('#glcanvas').focus();
+  const frames = count => page.evaluate(count => new Promise(resolve => {
+    const step = remaining => remaining ? requestAnimationFrame(() => step(remaining - 1)) : resolve();
+    step(count);
+  }), count);
   await page.keyboard.down('Enter');
-  await page.waitForTimeout(100);
+  await frames(2);
   await page.keyboard.up('Enter');
+  await frames(5);
   await page.waitForFunction(() => {
     const state = JSON.parse(window.__ume_state || 'null');
     return state?.arcade?.storyboard === true && state.arcade.scene === 0;

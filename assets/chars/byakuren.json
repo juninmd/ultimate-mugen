@@ -1670,7 +1670,8 @@
     },
     "airGuardStart": {
       "frames": [
-        "jumpUp*2"
+        "jumpUp*2",
+        "airGuard*2"
       ]
     },
     "guard": {
@@ -1685,7 +1686,8 @@
     },
     "airGuard": {
       "frames": [
-        "jumpUp*-1"
+        "jumpUp*-1",
+        "airGuard*-1"
       ]
     },
     "guardEnd": {
@@ -1708,7 +1710,9 @@
     "airGuardHit": {
       "frames": [
         "jumpUp*3",
-        "jumpUp*-1"
+        "jumpUp*-1",
+        "airGuard*3",
+        "airGuard*-1"
       ]
     },
     "hitLight": {

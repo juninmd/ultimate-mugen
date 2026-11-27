@@ -1852,7 +1852,9 @@
     "win": {
       "frames": [
         "06_victory*14",
-        "06_victory*14"
+        "06_victory*14",
+        "win0*14",
+        "win1*14"
       ]
     },
     "lose": {
@@ -2871,8 +2873,8 @@
       "input": "b+c",
       "upAnim": "jumpUp",
       "downAnim": "jumpDown",
-      "fwdAnim": "jumpTop",
-      "backAnim": "jumpBack",
+      "fwdAnim": "jumpFwd",
+      "backAnim": "jumpStart",
       "sound": [
         200,
         2

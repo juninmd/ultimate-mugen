@@ -1837,7 +1837,9 @@
         "jumpUp*3",
         "jumpUp*3",
         "jumpUp*3",
-        "jumpUp*-1"
+        "jumpUp*-1",
+        "airRecover*3",
+        "airRecover*-1"
       ]
     },
     "win": {

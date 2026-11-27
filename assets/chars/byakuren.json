@@ -1660,7 +1660,8 @@
     },
     "guardStart": {
       "frames": [
-        "15_power0*2"
+        "15_power0*2",
+        "guard*2"
       ]
     },
     "crouchGuardStart": {
@@ -1676,7 +1677,8 @@
     },
     "guard": {
       "frames": [
-        "15_power0*-1"
+        "15_power0*-1",
+        "guard*-1"
       ]
     },
     "crouchGuard": {
@@ -1698,7 +1700,9 @@
     "guardHit": {
       "frames": [
         "15_power0*3",
-        "15_power0*-1"
+        "15_power0*-1",
+        "guard*3",
+        "guard*-1"
       ]
     },
     "crouchGuardHit": {

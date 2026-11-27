@@ -19,7 +19,7 @@ mod ko;
 mod rush;
 mod shock;
 mod sheet;
-mod speed_lines; mod spark; mod stage_objects; mod story_juice; mod cinema; mod cutin; mod banner_stack;
+mod speed_lines; mod spark; mod stage_objects; mod story_juice; mod cinema; mod cutin; mod banner_stack; mod round_reset;
 pub mod quality;
 pub use speed_lines::speed_lines;
 
@@ -597,13 +597,7 @@ impl Vfx {
                 self.trauma = (self.trauma + 0.1).min(1.0);
                 self.radial = 0.3;
             }
-            Event::RoundStart(_) => {
-                self.sheets.clear();
-                self.slow_t = 0.0;
-                self.ko_t = 0.0;
-                self.first_hit = false;
-                self.cinema.reset();
-            }
+            Event::RoundStart(_) => self.reset_round_presentation(),
             _ => {}
         }
     }

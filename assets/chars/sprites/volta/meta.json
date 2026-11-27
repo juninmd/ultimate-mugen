@@ -53,62 +53,72 @@
     "01_idle": {
       "axisX": 193.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "02_attack1": {
       "axisX": 193.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "03_attack2": {
       "axisX": 161.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "04_special": {
       "axisX": 196.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "05_projectile": {
       "axisX": 162.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
+    },
+    "win0": {
+      "axisX": 200.0,
+      "axisY": 400.0,
+      "refHeight": 364.1
+    },
+    "win1": {
+      "axisX": 208.0,
+      "axisY": 400.0,
+      "refHeight": 364.2
     },
     "06_victory": {
       "axisX": 204.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.3
     },
     "07_idle1": {
       "axisX": 193.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "08_idle2": {
       "axisX": 193.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "09_hit1": {
       "axisX": 190.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "10_hit2": {
       "axisX": 196.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "11_hit3": {
       "axisX": 195.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "12_fall1": {
       "axisX": 194.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "13_fall2": {
       "axisX": 181.188,
@@ -123,22 +133,22 @@
     "15_power0": {
       "axisX": 207.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "powerup01": {
       "axisX": 205.5,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "16_power1": {
       "axisX": 204.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "17_power2": {
       "axisX": 194.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "ab0": {
       "axisX": 200.0,
@@ -168,7 +178,7 @@
     "airLowKick": {
       "axisX": 161.0,
       "axisY": 400.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "ajab": {
       "axisX": 200.0,
@@ -443,7 +453,7 @@
     "lowKick": {
       "axisX": 200.0,
       "axisY": 392.0,
-      "refHeight": 364.0
+      "refHeight": 364.1
     },
     "od0": {
       "axisX": 200.0,

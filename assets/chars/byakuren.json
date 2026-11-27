@@ -2807,6 +2807,13 @@
         "02_attack1*3",
         "02_attack1*-1"
       ]
+    },
+    "flyForward": {
+      "frames": [
+        "flyFwd0*5",
+        "flyFwd1*5"
+      ],
+      "loop": 0
     }
   },
   "palettes": [
@@ -2873,7 +2880,7 @@
       "input": "b+c",
       "upAnim": "jumpUp",
       "downAnim": "jumpDown",
-      "fwdAnim": "jumpFwd",
+      "fwdAnim": "flyForward",
       "backAnim": "jumpStart",
       "sound": [
         200,

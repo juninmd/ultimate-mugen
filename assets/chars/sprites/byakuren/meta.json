@@ -1,5 +1,7 @@
 {
   "frames": {
+    "flyFwd0": {"axisX":200.0,"axisY":392.0,"refHeight":320.0},
+    "flyFwd1": {"axisX":200.0,"axisY":392.0,"refHeight":320.0},
     "01_idle": {
       "axisX": 200,
       "axisY": 398,

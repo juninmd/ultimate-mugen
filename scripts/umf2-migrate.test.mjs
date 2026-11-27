@@ -10,7 +10,7 @@ const fighters = readdirSync(dir).filter((name) => name.endsWith(".json") && nam
 test("every shipped fighter is canonical umf/2", () => {
   assert.ok(fighters.length >= 21);
   for (const name of fighters) {
-    const text = readFileSync(join(dir, name), "utf8");
+    const text = readFileSync(join(dir, name), "utf8").replace(/\r\n/g, "\n");
     assert.equal(JSON.parse(text).format, "umf/2", name);
     assert.equal(migrate(text), text, `${name} is not in the canonical layout, run node scripts/umf2-migrate.mjs`);
   }

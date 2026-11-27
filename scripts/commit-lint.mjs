@@ -7,6 +7,8 @@ import { parseCommit } from './release-plan.mjs';
 
 export const TYPES = ['feat', 'fix', 'perf', 'refactor', 'docs', 'test', 'build', 'ci', 'chore', 'style', 'revert'];
 
+export const TOPIC_TITLE = /^[^:\n]*\s[^:\n]+:\s+\S/;
+
 export const isConventional = (msg) => { const p = parseCommit(msg); return p !== null && TYPES.includes(p.type); };
 
 /** Returns `{ ok, reason }`. Squash merges use the title; merge commits keep the PR's own commits. */

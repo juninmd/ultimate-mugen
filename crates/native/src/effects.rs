@@ -1,6 +1,7 @@
 //! Projectile and super-move effects: a small tiny-skia canvas emulation that draws the `effect` frames of a fighter.
 //! Fighters themselves are never drawn here; they come from pixel-art PNG sprites (see `pixel.rs`).
 #[path = "effects/dragon.rs"] mod dragon;
+mod getsuga;
 use super::types::Box4;
 type B4 = [f64; 4];
 use ume_engine::chardef::ImageData;
@@ -1108,7 +1109,7 @@ pub fn render_effect(effect: &Value, with_images: bool, palette: Option<&Value>)
             [-s, -s * 1.4, s * 1.1, 0.0],
             [-s * 2.4, -s * 2.2, s * 1.8, s * 0.5],
         ),
-        "slash" | "water" | "wave" => (
+        "slash" | "getsuga" | "water" | "wave" => (
             [-s * 0.35, -s, s * 0.55, s],
             [-s * 1.6, -s * 1.4, s * 1.2, s * 1.4],
         ),
@@ -1189,12 +1190,12 @@ fn glow_fill(ctx: &mut Ctx, col: Color, blur: f64, f: impl FnOnce(&mut Ctx)) {
     ctx.fill(&Fill::Solid(col));
     ctx.restore();
 }
-
 #[allow(clippy::too_many_arguments)]
 fn draw_effect(ctx: &mut Ctx, ty: &str, s: f64, ph: f64, col: Rgb, col2: Rgb, e: &Value) {
     let w = WHITE;
     ctx.st.blend = BlendMode::Plus;
     match ty {
+        "getsuga" => getsuga::draw(ctx, s, ph, col, col2),
         "slash" | "water" | "wave" => {
             let water = ty != "slash";
             let h = s;
@@ -1204,7 +1205,6 @@ fn draw_effect(ctx: &mut Ctx, ty: &str, s: f64, ph: f64, col: Rgb, col2: Rgb, e:
                 ctx.quad_to(h * 0.35 * sc, 0.0, 0.0, -h * sc);
                 ctx.close();
             };
-            // after images
             for i in (1..=3).rev() {
                 let fi = i as f64;
                 ctx.save();

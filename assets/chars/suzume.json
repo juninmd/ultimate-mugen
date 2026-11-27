@@ -440,6 +440,7 @@
     "jumpUp": {"frames":["jumpUp*6","jumpTop*-1"]},
     "jumpFwd": {"frames":["jumpUp*4","flip0*4","flip1*4","flip2*4","flip3*4","jumpTop*-1"]},
     "jumpBack": {"frames":["jumpUp*5","jumpTop*-1"]},
+    "flyForward": {"frames":["flyFwd0*5","flyFwd1*5"],"loop":0},
     "jumpDown": {"frames":["jumpDown*-1"]},
     "land": {"frames":["land*2","jumpStart*2","idle0*1"]},
     "run": {
@@ -1298,7 +1299,7 @@
   "country": "Vietnã",
   "stage": "bamboo",
   "abilities": {
-    "fly": {"speed":4.5,"cost":50,"input":"a+b","anim":"jumpTop"},
+    "fly": {"speed":4.5,"cost":50,"input":"a+b","anim":"jumpTop","fwdAnim":"flyForward"},
     "teleport": {"cost":250,"input":"b+c","anim":"shadow"},
     "superSpeed": {"mul":2.2,"cost":100,"input":"a+c"},
     "forms": [

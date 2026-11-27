@@ -45,8 +45,9 @@ pub(super) fn compile_moves(nc: &NativeChar, anim_no: &HashMap<String, i32>, blo
         let st = match when { "air" | "fly" => 'A', "crouch" => 'C', _ => 'S' };
         let jumps = m.moves.iter().any(|v| v.vel[1].is_some_and(|y| y != 0.0));
         let ph = match when { "air" => 'A', "fly" => 'N', "crouch" => 'C', _ => if jumps || m.flight == Some(true) { 'N' } else { 'S' } };
-        let pa = if cost > 0.0 { -cost } else if m.kind == "special" { 30.0 } else { 15.0 };
-        cns += &format!("[Statedef {sid}]\ntype = {st}\nmovetype = A\nphysics = {ph}\nanim = {anim}\nctrl = 0\n{}poweradd = {pa}\nsprpriority = 2\n\n", if when == "air" { "" } else { "velset = 0, 0\n" }); cns += &super::armor::armor_state(nc, m, sid); cns += &extras::voice_and_traits_state(m, sid); let (throw_cns, throw_def) = super::throw::throw_states(m, sid, &anim_no); cns += &throw_cns; throw_defs += &throw_def; cns += &super::requires::finisher_done(m, sid);
+        let pa = if m.kind == "movement" { 0.0 } else if cost > 0.0 { -cost } else if m.kind == "special" { 30.0 } else { 15.0 };
+        let move_type = if m.kind == "movement" { "I" } else { "A" };
+        cns += &format!("[Statedef {sid}]\ntype = {st}\nmovetype = {move_type}\nphysics = {ph}\nanim = {anim}\nctrl = 0\n{}poweradd = {pa}\nsprpriority = 2\n\n", if when == "air" { "" } else { "velset = 0, 0\n" }); cns += &super::armor::armor_state(nc, m, sid); cns += &extras::voice_and_traits_state(m, sid); let (throw_cns, throw_def) = super::throw::throw_states(m, sid, &anim_no); cns += &throw_cns; throw_defs += &throw_def; cns += &super::requires::finisher_done(m, sid);
         let freeze = if super::ultimate::is(&m.id) { super::ultimate::FREEZE } else { 55 };
         cns += &super::move_fx::super_pause_cns(m, sid, freeze);
         cns += &super::move_fx::move_fx_cns(m, sid, &anim_no);

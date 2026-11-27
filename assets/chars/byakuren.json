@@ -1666,7 +1666,8 @@
     },
     "crouchGuardStart": {
       "frames": [
-        "crouch*2"
+        "crouch*2",
+        "crouchGuard*2"
       ]
     },
     "airGuardStart": {
@@ -1683,7 +1684,8 @@
     },
     "crouchGuard": {
       "frames": [
-        "crouch*-1"
+        "crouch*-1",
+        "crouchGuard*-1"
       ]
     },
     "airGuard": {
@@ -1708,7 +1710,9 @@
     "crouchGuardHit": {
       "frames": [
         "crouch*3",
-        "crouch*-1"
+        "crouch*-1",
+        "crouchGuard*3",
+        "crouchGuard*-1"
       ]
     },
     "airGuardHit": {

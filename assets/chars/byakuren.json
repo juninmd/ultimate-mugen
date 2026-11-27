@@ -1792,13 +1792,17 @@
     "bounce": {
       "frames": [
         "jumpUp*3",
-        "jumpUp*-1"
+        "jumpUp*-1",
+        "bounce*3",
+        "bounce*-1"
       ]
     },
     "bounceAir": {
       "frames": [
         "jumpUp*3",
-        "jumpUp*-1"
+        "jumpUp*-1",
+        "bounce*3",
+        "bounce*-1"
       ]
     },
     "lieDown": {

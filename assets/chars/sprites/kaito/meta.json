@@ -1,5 +1,17 @@
 {
   "frames": {
+    "flyFwd0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [164, 66, 286, 154]
+    },
+    "flyFwd1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [164, 66, 286, 154]
+    },
     "kangarooKickImpact": {
       "axisX": 200.0,
       "axisY": 392.0,

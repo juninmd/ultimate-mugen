@@ -42,10 +42,20 @@
       "axisY": 398.0,
       "refHeight": 362.0
     },
+    "lose": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
     "intro0": {
       "axisX": 200,
       "axisY": 398,
       "refHeight": 362
+    },
+    "intro1": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
     },
     "15_power0": {
       "axisX": 200,

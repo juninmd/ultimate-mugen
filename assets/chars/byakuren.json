@@ -1873,7 +1873,9 @@
         "intro0*50",
         "01_idle*10",
         "06_victory*40",
-        "06_victory*10"
+        "06_victory*10",
+        "intro0*40",
+        "intro1*10"
       ]
     },
     "jab": {
@@ -2880,7 +2882,7 @@
       "input": "b+c",
       "upAnim": "jumpUp",
       "downAnim": "jumpDown",
-      "fwdAnim": "flyForward",
+      "fwdAnim": "jumpFwd",
       "backAnim": "jumpStart",
       "sound": [
         200,

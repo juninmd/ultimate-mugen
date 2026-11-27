@@ -14,6 +14,8 @@ cp assets/ui/arcade-*.png web/dist/assets/ui/
 mkdir -p web/dist/assets/stages
 cp assets/stages/*.png web/dist/assets/stages/
 cp -R assets/stages/animation web/dist/assets/stages/
+mkdir -p web/dist/assets/stages/thumbs
+cp assets/stages/thumbs/*.png web/dist/assets/stages/thumbs/
 mkdir -p web/dist/assets/stages/story
 cp assets/stages/story/*.png web/dist/assets/stages/story/
 cargo run --release -p ume-devtools --bin ume-tools -- pack-sprites web/dist

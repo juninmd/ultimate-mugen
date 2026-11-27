@@ -70,6 +70,16 @@
       "axisY": 398.0,
       "refHeight": 362.0
     },
+    "run1": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
+    "run2": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
     "crouch": {
       "axisX": 200.0,
       "axisY": 398.0,

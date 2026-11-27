@@ -537,7 +537,7 @@
     "jumpBack": {"frames":["jumpUp*5","jumpUp*-1"]},
     "jumpDown": {"frames":["jumpUp*-1"]},
     "land": {"frames":["01_idle*2","jumpUp*2","01_idle*1"]},
-    "run": {"frames":["run0*4","run0*3","run0*3","run0*3","run0*3"]},
+    "run": {"frames":["run0*4","run1*3","run2*3","run1*3"]},
     "hop": {"frames":["run0*2","run0*4","run0*2","run0*-1"]},
     "guardStart": {"frames":["15_power0*2"]},
     "crouchGuardStart": {"frames":["crouch*2"]},

@@ -124,7 +124,13 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     ];
     let ab = super::abilities::ability_code(nc.abilities.as_ref(), &anim_no);
     commands.extend(ab.commands);
-    let mut minus1 = String::from("[Statedef -1]\n\n[State -1, run]\ntype = ChangeState\nvalue = 100\ntriggerall = !IsHelper && command = \"FF\"\ntrigger1 = statetype = S && ctrl\n\n[State -1, hop]\ntype = ChangeState\nvalue = 105\ntriggerall = !IsHelper && command = \"BB\"\ntrigger1 = statetype = S && ctrl\n\n") + &ab.minus1;
+    let mut minus1 = String::from("[Statedef -1]\n\n") + &ab.minus1;
+    for (command, input, state) in [("FF", "F,F", 100), ("BB", "B,B", 105)] {
+        if nc.moves.iter().any(|m| m.kind == "movement" && m.input.replace(' ', "") == input) {
+            continue;
+        }
+        minus1 += &format!("[State -1, {command}]\ntype = ChangeState\nvalue = {state}\ntriggerall = !IsHelper && command = \"{command}\"\ntrigger1 = statetype = S && ctrl\n\n");
+    }
     let mut cns = String::new();
     let (mut movelist, move_states) = super::compile_moves::compile_moves(nc, &anim_no, 0, &mut commands, &mut minus1, &mut cns);
     cns += &ab.states; movelist.extend(ab.movelist);

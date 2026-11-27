@@ -390,6 +390,11 @@
    "loop": false,
    "speed": 1.0
   },
+  "shunpoStep": {
+   "clip": "ShunpoDash",
+   "loop": false,
+   "speed": 2.5
+  },
   "tide": {
    "clip": "ShunpoStrike",
    "loop": false,

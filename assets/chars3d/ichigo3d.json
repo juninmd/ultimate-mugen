@@ -541,6 +541,7 @@
     }
    ]
   },
+  "shunpoStep": {"frames": [{"pose": "run0", "ticks": 2}, {"pose": "run1", "ticks": 3}, {"pose": "idle0", "ticks": 7}]},
   "shunpoFx": {
    "frames": [
     {
@@ -587,6 +588,86 @@
   }
  },
  "moves": [
+  {
+   "id": "shunpo_forward",
+   "name": "Shunpo",
+   "input": "F, F",
+   "kind": "movement",
+   "anim": "shunpoStep",
+   "blink": {
+    "at": 2,
+    "to": "back",
+    "gap": -96
+   },
+   "afterimage": {
+    "at": 1,
+    "time": 18,
+    "length": 6,
+    "framegap": 2,
+    "trans": "add",
+    "palAdd": [
+     60,
+     0,
+     10
+    ],
+    "palMul": [
+     0.6,
+     0.1,
+     0.15
+    ]
+   },
+   "vfx": [
+    {
+     "at": 1,
+     "anim": "shunpoFx",
+     "offset": [
+      0,
+      -6
+     ],
+     "time": 8
+    }
+   ]
+  },
+  {
+   "id": "shunpo_back",
+   "name": "Shunpo",
+   "input": "B, B",
+   "kind": "movement",
+   "anim": "shunpoStep",
+   "blink": {
+    "at": 2,
+    "to": "back",
+    "gap": 96
+   },
+   "afterimage": {
+    "at": 1,
+    "time": 18,
+    "length": 6,
+    "framegap": 2,
+    "trans": "add",
+    "palAdd": [
+     60,
+     0,
+     10
+    ],
+    "palMul": [
+     0.6,
+     0.1,
+     0.15
+    ]
+   },
+   "vfx": [
+    {
+     "at": 1,
+     "anim": "shunpoFx",
+     "offset": [
+      0,
+      -6
+     ],
+     "time": 8
+    }
+   ]
+  },
   {
    "id": "jab",
    "name": "Zangetsu Flick",

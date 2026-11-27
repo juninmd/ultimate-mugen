@@ -116,6 +116,7 @@ mod replay_roundtrip;
 mod rivals;
 mod roster;
 mod roster_mobility_data;
+mod round_spawn_reset;
 mod rush_cancel;
 mod rush_chase;
 mod scene_triggers;

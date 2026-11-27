@@ -1,6 +1,10 @@
-use ume_engine::chardef::ImageData;
-use super::{decode_illustration, illustrated, StageEntry, StageKind};
+#[cfg(not(target_arch = "wasm32"))]
+use super::decode_illustration;
+use super::{illustrated, StageEntry, StageKind};
+#[cfg(not(target_arch = "wasm32"))]
 use std::sync::{Arc, OnceLock};
+#[cfg(not(target_arch = "wasm32"))]
+use ume_engine::chardef::ImageData;
 
 pub const WONDER_IDS: [&str; 14] = [
     "great_wall",
@@ -19,6 +23,7 @@ pub const WONDER_IDS: [&str; 14] = [
     "lighthouse_alexandria",
 ];
 
+#[cfg(not(target_arch = "wasm32"))]
 const THUMB_BYTES: [&[u8]; 14] = [
     include_bytes!("../../assets/stages/thumbs/great_wall.png"),
     include_bytes!("../../assets/stages/thumbs/petra.png"),
@@ -54,6 +59,7 @@ const STAGE_BYTES: [&[u8]; 14] = [
     include_bytes!("../../assets/stages/lighthouse_alexandria.png"),
 ];
 
+#[cfg(not(target_arch = "wasm32"))]
 pub fn illustration_preview(id: &str) -> Option<Arc<ImageData>> {
     static IMAGES: [OnceLock<Arc<ImageData>>; 14] = [const { OnceLock::new() }; 14];
     let index = WONDER_IDS.iter().position(|name| *name == id)?;

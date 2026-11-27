@@ -1625,7 +1625,9 @@
     "jumpBack": {
       "frames": [
         "jumpUp*5",
-        "jumpUp*-1"
+        "jumpUp*-1",
+        "jumpBack*5",
+        "jumpBack*-1"
       ]
     },
     "jumpDown": {
@@ -2870,7 +2872,7 @@
       "upAnim": "jumpUp",
       "downAnim": "jumpDown",
       "fwdAnim": "jumpTop",
-      "backAnim": "jumpUp",
+      "backAnim": "jumpBack",
       "sound": [
         200,
         2

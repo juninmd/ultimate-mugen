@@ -105,6 +105,11 @@
       "axisY": 398.0,
       "refHeight": 362.0
     },
+    "jumpDown": {
+      "axisX": 200.0,
+      "axisY": 398.0,
+      "refHeight": 362.0
+    },
     "jumpUp": {
       "axisX": 200,
       "axisY": 398,

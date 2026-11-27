@@ -561,7 +561,7 @@
     "bounce": {"frames":["jumpUp*3","jumpUp*-1"]},
     "bounceAir": {"frames":["jumpUp*3","jumpUp*-1"]},
     "lieDown": {"frames":["crouch*-1"]},
-    "getUp": {"frames":["crouch*6","crouch*8","crouch*7","crouch*5","01_idle*3"]},
+    "getUp": {"frames":["getUp1*6","crouch*8","crouch*7","crouch*5","01_idle*3"]},
     "dead": {"frames":["crouch*-1"]},
     "trip": {"frames":["jumpUp*4","jumpUp*-1"]},
     "airRecover": {"frames":["jumpUp*3","jumpUp*3","jumpUp*3","jumpUp*3","jumpUp*-1"]},

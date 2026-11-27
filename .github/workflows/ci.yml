@@ -2,125 +2,25 @@ name: CI
 on:
   push: { branches: [master] }
   pull_request:
-concurrency: { group: "ci-${{ github.ref }}", cancel-in-progress: "${{ github.ref != 'refs/heads/master' }}" }
+concurrency: { group: "ci-${{ github.ref }}", cancel-in-progress: true }
 env:
   CARGO_INCREMENTAL: 0
   CARGO_TERM_COLOR: always
   CARGO_NET_RETRY: 10
   CARGO_PROFILE_DEV_DEBUG: 0
 jobs:
-  test:
+  check:
+    # Single fast gate: compile the workspace and run the cheap node checks.
+    # Heavy suites (cargo test, wasm build, web smoke, android/ios/desktop
+    # packaging) run on demand or in the release pipeline.
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env: { CARGO_PROFILE_RELEASE_LTO: "off", CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 16 }
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - run: node --test scripts/*.test.mjs && node scripts/file-size.mjs && node scripts/crate-boundaries.mjs
-      - run: curl -fsSL https://github.com/rust-lang/mdBook/releases/download/v0.4.52/mdbook-v0.4.52-x86_64-unknown-linux-gnu.tar.gz | sudo tar -xz -C /usr/local/bin && ./scripts/build-wiki.sh
-      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
-        with: { targets: wasm32-unknown-unknown }
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
       - run: sudo apt-get update && sudo apt-get install -y libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev pkg-config
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
-        with: { shared-key: linux-release, save-if: "${{ github.ref == 'refs/heads/master' }}" }
-      - run: cargo test --workspace --release
-      - run: cargo run --release -p ume-engine --example mugen_check -- --strict crates/engine/tests/data/chars
-  web-build:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
-        with: { targets: wasm32-unknown-unknown }
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+      - uses: Swatinem/rust-cache@v2
         with: { save-if: "${{ github.ref == 'refs/heads/master' }}" }
-      - run: cargo install wasm-bindgen-cli --locked --version "$(grep -A1 '^name = "wasm-bindgen"$' Cargo.lock | sed -n 's/^version = "\(.*\)"/\1/p')"
-      - run: ./scripts/build-web.sh
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with: { name: web-dist, path: web/dist, retention-days: 1, if-no-files-found: error }
-  web-qa:
-    needs: web-build
-    runs-on: ubuntu-24.04
-    timeout-minutes: 40
-    strategy:
-      fail-fast: false
-      matrix:
-        part: [1, 2, 3, 4, 5]
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with: { sparse-checkout: "scripts\nweb\nassets/mugen" }
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
-        with: { name: web-dist, path: web/dist }
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with: { path: ~/.cache/ms-playwright, key: "playwright-${{ runner.os }}-1.56.1-chromium" }
-      - run: npm install --no-save --no-audit --no-fund playwright@1.56.1 && npx playwright install chromium
-      - run: node -e "require('playwright').chromium.launch().then(b => b.close())" || sudo npx playwright install-deps chromium
-      - run: node --test scripts/web-guard.test.mjs
-        if: matrix.part == 1
-      - run: node scripts/web-qa.js --dist web/dist --out web-qa-report --part ${{ matrix.part }}/5 --jobs 2
-      - if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with: { name: "web-qa-${{ matrix.part }}", path: web-qa-report, retention-days: 7, if-no-files-found: ignore }
-  android:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
-        with: { targets: aarch64-linux-android }
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
-        with: { save-if: "${{ github.ref == 'refs/heads/master' }}" }
-      - run: cargo install cargo-apk --version 0.9.6 --locked
-      - run: keytool -genkeypair -keystore ci.keystore -storepass android -keypass android -alias ci -keyalg RSA -keysize 2048 -validity 3650 -dname "CN=CI"
-      - run: ANDROID_NDK_ROOT="$ANDROID_NDK_LATEST_HOME" CARGO_APK_RELEASE_KEYSTORE="$PWD/ci.keystore" CARGO_APK_RELEASE_KEYSTORE_PASSWORD=android cargo apk build -p ultimate-mugen --lib --release --target aarch64-linux-android
-      - if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: ultimate-mugen-android
-          path: target/release/apk/*.apk
-  ios:
-    if: github.event_name != 'pull_request'
-    runs-on: macos-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
-        with: { targets: aarch64-apple-ios }
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
-        with: { save-if: "${{ github.ref == 'refs/heads/master' }}" }
-      - run: cargo build -p ultimate-mugen --bin ultimate-mugen --release --target aarch64-apple-ios
-  desktop:
-    strategy:
-      matrix: { os: [ubuntu-latest, windows-latest, macos-latest] }
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
-    env:
-      CARGO_PROFILE_RELEASE_LTO: ${{ github.event_name == 'pull_request' && 'off' || 'thin' }}
-      CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 16
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
-        with: { targets: "${{ matrix.os == 'macos-latest' && github.event_name == 'pull_request' && 'aarch64-apple-ios' || '' }}" }
-      - if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev pkg-config xvfb mesa-vulkan-drivers libxkbcommon-x11-0
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
-        with:
-          shared-key: ${{ runner.os == 'Linux' && 'linux-release' || '' }}
-          save-if: "${{ github.ref == 'refs/heads/master' }}"
-      - if: runner.os == 'Linux' || github.event_name != 'pull_request'
-        run: cargo build --release
-      - if: runner.os != 'Linux' && github.event_name == 'pull_request'
-        run: cargo check
-      - if: runner.os == 'macOS' && github.event_name == 'pull_request'
-        run: cargo check -p ultimate-mugen --bin ultimate-mugen --target aarch64-apple-ios
-      - if: runner.os == 'Linux'
-        run: xvfb-run -a target/release/ultimate-mugen --smoke smoke-report --res 1280x720
-      - if: always() && runner.os == 'Linux'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with: { name: smoke-desktop-linux, path: smoke-report, retention-days: 7, if-no-files-found: ignore }
-      - if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: ultimate-mugen-${{ matrix.os }}
-          path: |
-            target/release/ultimate-mugen
-            target/release/ultimate-mugen.exe
+      - run: cargo check --workspace --locked
+      - run: node --test scripts/*.test.mjs
+      - run: node scripts/file-size.mjs

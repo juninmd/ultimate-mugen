@@ -1637,7 +1637,8 @@
       "frames": [
         "01_idle*2",
         "jumpUp*2",
-        "01_idle*1"
+        "01_idle*1",
+        "land*4"
       ]
     },
     "run": {

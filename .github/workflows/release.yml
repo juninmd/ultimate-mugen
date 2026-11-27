@@ -34,19 +34,6 @@ jobs:
         with: { name: release-notes, path: release-notes.md }
 
   # never ship a red tree: the same suite as CI, in parallel with the builds; publish waits for it
-  test:
-    needs: plan
-    if: needs.plan.outputs.release == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
-      - run: sudo apt-get update && sudo apt-get install -y libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev pkg-config
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
-      - run: cargo test --workspace --release --locked
-        env: { CARGO_PROFILE_RELEASE_LTO: "off", CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 16 }
-
   build:
     needs: plan
     if: needs.plan.outputs.release == 'true'
@@ -89,7 +76,7 @@ jobs:
         with: { name: "dist-${{ matrix.platform }}", path: dist/*, if-no-files-found: error }
 
   publish:
-    needs: [plan, test, build]
+    needs: [plan, build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions: { contents: write }

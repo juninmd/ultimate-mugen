@@ -1799,7 +1799,8 @@
         "crouch*8",
         "crouch*7",
         "crouch*5",
-        "01_idle*3"
+        "01_idle*3",
+        "getUp1*6"
       ]
     },
     "dead": {

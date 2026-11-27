@@ -555,7 +555,7 @@
     "hitLowLight": {"frames":["crouch*3","crouch*6","01_idle*3"]},
     "hitLowMedium": {"frames":["crouch*3","crouch*8","01_idle*3"]},
     "hitLowHeavy": {"frames":["crouch*3","crouch*10","crouch*4"]},
-    "hitCrouch": {"frames":["crouch*3","crouch*8","crouch*3"]},
+    "hitCrouch": {"frames":["hitCrouch*11","crouch*3"]},
     "hitAir": {"frames":["jumpUp*4","jumpUp*-1"]},
     "fall": {"frames":["jumpUp*6","jumpUp*-1"]},
     "bounce": {"frames":["jumpUp*3","jumpUp*-1"]},

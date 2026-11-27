@@ -75,6 +75,16 @@
       "axisY": 399.682,
       "refHeight": 360.199
     },
+    "win0": {
+      "axisX": 201.0,
+      "axisY": 400.0,
+      "refHeight": 362.0
+    },
+    "win1": {
+      "axisX": 201.0,
+      "axisY": 400.0,
+      "refHeight": 362.0
+    },
     "06_victory": {
       "axisX": 201.0,
       "axisY": 400.0,
